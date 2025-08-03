@@ -444,6 +444,93 @@ def delete_knowledge(item_id):
     return redirect(url_for('admin_dashboard'))
 
 
+@app.route('/admin/ai-chat', methods=['POST'])
+def ai_chat():
+    """AI对话测试接口"""
+    try:
+        data = request.get_json()
+        message = data.get('message', '').strip()
+        model = data.get('model', 'gpt-4o')
+        use_knowledge = data.get('use_knowledge', True)
+        chat_history = data.get('chat_history', [])
+        
+        if not message:
+            return jsonify({'success': False, 'error': '消息不能为空'})
+        
+        # 导入OpenAI
+        from openai import OpenAI
+        
+        # 初始化OpenAI客户端
+        client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+        
+        # 构建消息列表
+        messages = []
+        
+        # 如果启用知识库，添加系统提示和知识库内容
+        if use_knowledge:
+            # 获取活跃的知识库内容
+            active_items = KnowledgeItem.query.filter_by(status='active').all()
+            knowledge_content = ""
+            
+            for item in active_items[:10]:  # 限制使用前10个文件，避免上下文过长
+                try:
+                    if item.file_type == 'text':
+                        # 对于文本类型，直接使用content_summary
+                        knowledge_content += f"\n\n=== {item.original_filename} ===\n{item.content_summary}"
+                    else:
+                        # 对于其他文件类型，尝试读取文件内容
+                        if os.path.exists(item.file_path):
+                            with open(item.file_path, 'r', encoding='utf-8') as f:
+                                file_content = f.read()[:2000]  # 限制每个文件2000字符
+                                knowledge_content += f"\n\n=== {item.original_filename} ===\n{file_content}"
+                except Exception as e:
+                    print(f"读取文件 {item.filename} 时出错: {e}")
+                    continue
+            
+            # 系统提示
+            system_prompt = f"""你是Angela AI助手，专门帮助用户基于知识库内容回答问题。
+
+知识库内容：
+{knowledge_content}
+
+请基于以上知识库内容回答用户问题。如果知识库中没有相关信息，请诚实说明，并提供一般性的建议。回答要准确、有用，并尽量引用具体的知识库内容。"""
+            
+            messages.append({"role": "system", "content": system_prompt})
+        else:
+            # 不使用知识库的系统提示
+            messages.append({"role": "system", "content": "你是Angela AI助手，请友好地回答用户的问题。"})
+        
+        # 添加对话历史（最近5轮对话）
+        recent_history = chat_history[-10:] if len(chat_history) > 10 else chat_history
+        messages.extend(recent_history)
+        
+        # 添加当前用户消息
+        messages.append({"role": "user", "content": message})
+        
+        # 调用OpenAI API
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=1000,
+            temperature=0.7
+        )
+        
+        ai_response = response.choices[0].message.content
+        
+        return jsonify({
+            'success': True, 
+            'response': ai_response,
+            'model_used': model,
+            'knowledge_used': use_knowledge
+        })
+        
+    except Exception as e:
+        print(f"AI对话错误: {e}")
+        return jsonify({
+            'success': False, 
+            'error': f'AI服务暂时不可用: {str(e)}'
+        })
+
 
 @app.route('/result')
 def result():

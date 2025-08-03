@@ -9,9 +9,14 @@
         <p class="text-muted">管理AI知识库中的所有文件，控制使用状态</p>
     </div>
     <div class="col-md-4 text-end">
-        <button type="button" class="btn btn-admin-primary" data-bs-toggle="modal" data-bs-target="#addKnowledgeModal">
-            <i class="fas fa-plus me-1"></i>新增知识条目
-        </button>
+        <div class="btn-group me-3" role="group">
+            <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#aiChatModal">
+                <i class="fas fa-robot me-1"></i>AI对话测试
+            </button>
+            <button type="button" class="btn btn-admin-primary" data-bs-toggle="modal" data-bs-target="#addKnowledgeModal">
+                <i class="fas fa-plus me-1"></i>新增知识条目
+            </button>
+        </div>
     </div>
 </div>
 
@@ -145,9 +150,14 @@
     {% else %}
     <p class="text-muted mb-4">还没有上传任何文件</p>
     {% endif %}
-    <button type="button" class="btn btn-admin-primary" data-bs-toggle="modal" data-bs-target="#addKnowledgeModal">
-        <i class="fas fa-plus me-1"></i>新增知识条目
-    </button>
+    <div class="text-center">
+        <button type="button" class="btn btn-outline-info me-3" data-bs-toggle="modal" data-bs-target="#aiChatModal">
+            <i class="fas fa-robot me-1"></i>AI对话测试
+        </button>
+        <button type="button" class="btn btn-admin-primary" data-bs-toggle="modal" data-bs-target="#addKnowledgeModal">
+            <i class="fas fa-plus me-1"></i>新增知识条目
+        </button>
+    </div>
 </div>
 {% endif %}
 
@@ -272,6 +282,76 @@
                 <button type="button" class="btn btn-admin-primary" onclick="submitEditText()">
                     <i class="fas fa-save me-1"></i>保存修改
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI对话测试弹窗 -->
+<div class="modal fade" id="aiChatModal" tabindex="-1" aria-labelledby="aiChatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="aiChatModalLabel">
+                    <i class="fas fa-robot me-2"></i>AI对话测试 - 知识库验证
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- 模型选择和设置 -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label for="modelSelect" class="form-label">选择模型</label>
+                        <select class="form-select" id="modelSelect">
+                            <option value="gpt-4o">GPT-4o (推荐)</option>
+                            <option value="gpt-4o-mini">GPT-4o Mini</option>
+                            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="useKnowledge" class="form-label">知识库设置</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="useKnowledge" checked>
+                            <label class="form-check-label" for="useKnowledge">
+                                使用知识库上下文
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">当前知识库状态</label>
+                        <div id="knowledgeStatus" class="small text-muted">
+                            活跃文件: {{ knowledge_items.filter_by(status='active').count() }} 个
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 对话区域 -->
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>测试说明：</strong>您可以向AI提问来测试知识库是否生效。启用知识库后，AI会基于您上传的文件内容回答问题。
+                        </div>
+                    </div>
+                    
+                    <!-- 输入区域 -->
+                    <div class="chat-input-area mt-3">
+                        <div class="input-group">
+                            <textarea class="form-control" id="messageInput" rows="2" 
+                                      placeholder="输入您的问题，测试知识库效果..."></textarea>
+                            <button class="btn btn-admin-primary" type="button" id="sendMessage" onclick="sendChatMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" onclick="clearChat()">
+                    <i class="fas fa-trash me-1"></i>清空对话
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">关闭</button>
             </div>
         </div>
     </div>
@@ -422,5 +502,111 @@ function editTextKnowledge(id, title, content) {
 function submitEditText() {
     document.getElementById('editTextForm').submit();
 }
+
+// AI对话功能
+let chatHistory = [];
+
+function sendChatMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    
+    if (!message) return;
+    
+    // 添加用户消息到界面
+    addMessageToChat('user', message);
+    messageInput.value = '';
+    
+    // 显示AI思考状态
+    const thinkingId = addMessageToChat('assistant', '思考中...', true);
+    
+    // 获取设置
+    const model = document.getElementById('modelSelect').value;
+    const useKnowledge = document.getElementById('useKnowledge').checked;
+    
+    // 发送请求到后端
+    fetch('/admin/ai-chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            message: message,
+            model: model,
+            use_knowledge: useKnowledge,
+            chat_history: chatHistory
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // 移除思考状态
+        document.getElementById(thinkingId).remove();
+        
+        if (data.success) {
+            // 添加AI回复
+            addMessageToChat('assistant', data.response);
+            // 更新对话历史
+            chatHistory.push({role: 'user', content: message});
+            chatHistory.push({role: 'assistant', content: data.response});
+        } else {
+            addMessageToChat('assistant', '抱歉，发生了错误: ' + data.error, false, 'error');
+        }
+    })
+    .catch(error => {
+        // 移除思考状态
+        document.getElementById(thinkingId).remove();
+        addMessageToChat('assistant', '网络错误，请重试', false, 'error');
+        console.error('Error:', error);
+    });
+}
+
+function addMessageToChat(role, content, isTemporary = false, type = 'normal') {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.id = messageId;
+    messageDiv.className = `message ${role} mb-3`;
+    
+    let bgClass = role === 'user' ? 'bg-primary text-white' : 'bg-light';
+    if (type === 'error') bgClass = 'bg-danger text-white';
+    
+    messageDiv.innerHTML = `
+        <div class="d-flex ${role === 'user' ? 'justify-content-end' : 'justify-content-start'}">
+            <div class="message-bubble ${bgClass} p-3 rounded-3" style="max-width: 80%;">
+                ${role === 'user' ? '<i class="fas fa-user me-2"></i>' : '<i class="fas fa-robot me-2"></i>'}
+                <span class="message-content">${content}</span>
+            </div>
+        </div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    return messageId;
+}
+
+function clearChat() {
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML = `
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>测试说明：</strong>您可以向AI提问来测试知识库是否生效。启用知识库后，AI会基于您上传的文件内容回答问题。
+        </div>
+    `;
+    chatHistory = [];
+}
+
+// Enter键发送消息
+document.addEventListener('DOMContentLoaded', function() {
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput) {
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+    }
+});
 </script>
 {% endblock %}

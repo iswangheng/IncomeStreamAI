@@ -6,16 +6,22 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- **Communication Style**: 使用中文交流，简单易懂的日常用语
+- **UI Design Style**: 暖色调、卡片式布局，视觉风格简洁清新，带有轻微渐变的背景。页面主色调为米黄色和橙色，搭配圆角白色卡片。表单设计整洁，每个输入框有圆角和浅灰色边框，主按钮为橙色，整体风格给人以温暖、友好、可信赖的感觉。
 
 ## System Architecture
 
 ### Frontend Architecture
 - **Template Engine**: Jinja2 templating with Flask for server-side rendering
-- **UI Framework**: Bootstrap 5 with dark theme for responsive design
+- **UI Framework**: Bootstrap 5 with custom warm theme for responsive design
+- **Design System**: 
+  - Color Palette: 米黄色 (#FFF8E7), 暖橙色 (#FF8C42), 浅橙色 (#FFB380)
+  - Layout: 卡片式布局，圆角设计，渐变背景
+  - Typography: Segoe UI font family for clean readability
+  - Animations: Smooth transitions, hover effects, fade-in animations
 - **JavaScript**: Vanilla JavaScript for dynamic form interactions (adding/removing person cards)
-- **Styling**: Custom CSS combined with Bootstrap and Font Awesome icons
-- **Language**: Chinese (zh-CN) interface with bilingual support considerations
+- **Styling**: Custom CSS with warm color theme, Bootstrap integration, Font Awesome icons
+- **Language**: Chinese (zh-CN) interface with warm, friendly tone
 
 ### Backend Architecture
 - **Web Framework**: Flask with minimal configuration for rapid development

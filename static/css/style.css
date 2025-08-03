@@ -123,18 +123,107 @@ body {
 .btn-outline-secondary {
     border: 2px solid var(--warm-orange);
     color: var(--text-dark);
-    background: var(--warm-white);
-    border-radius: 20px;
+    border-radius: 12px;
     transition: all 0.3s ease;
-    font-weight: 500;
 }
 
 .btn-outline-secondary:hover {
     background: var(--warm-orange);
     border-color: var(--warm-orange);
     color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px var(--shadow-soft);
+}
+
+/* 文件上传区域样式 */
+.upload-area {
+    border: 2px dashed var(--border-light);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    background: var(--warm-white);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area:hover,
+.upload-area.border-primary {
+    border-color: var(--warm-orange);
+    background: var(--warm-beige);
+}
+
+.upload-content {
+    pointer-events: none;
+}
+
+.file-upload-input {
+    display: none;
+}
+
+/* 管理后台样式 */
+.admin-nav {
+    margin-bottom: 2rem;
+}
+
+.admin-nav .nav-link {
+    color: var(--text-dark);
+    border: 2px solid var(--border-light);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.admin-nav .nav-link.active,
+.admin-nav .nav-link:hover {
+    background: var(--warm-orange);
+    border-color: var(--warm-orange);
+    color: white;
+}
+
+.btn-admin-primary {
+    background: linear-gradient(135deg, var(--warm-orange), var(--light-orange));
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-admin-primary:hover {
+    background: linear-gradient(135deg, var(--dark-orange), var(--warm-orange));
+    transform: translateY(-2px);
+}
+
+/* 表格样式 */
+.table {
+    background: var(--warm-white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.table th {
+    background: var(--soft-gray);
+    border: none;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.table td {
+    border-color: var(--border-light);
+    vertical-align: middle;
+}
+
+/* 状态徽章 */
+.badge {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #27AE60, #2ECC71) !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #F39C12, #E67E22) !important;
 }
 
 .display-4, .display-5 {

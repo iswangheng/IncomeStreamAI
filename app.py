@@ -267,60 +267,142 @@ def admin_dashboard():
 
 
 
-@app.route('/admin/knowledge/upload', methods=['GET', 'POST'])
+@app.route('/admin/knowledge/upload', methods=['POST'])
 def upload_knowledge():
     """上传知识库文件"""
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('没有选择文件', 'error')
-            return redirect(request.url)
-        
-        file = request.files['file']
-        if file.filename == '':
-            flash('没有选择文件', 'error')
-            return redirect(request.url)
-        
-        if file and file.filename and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            # 添加时间戳避免文件名冲突
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
-            filename = timestamp + filename
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            
-            try:
-                # 获取文件大小
-                file_size = get_file_size(file)
-                file.save(file_path)
-                
-                # 获取文件扩展名
-                file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'unknown'
-                
-                # 保存到数据库
-                knowledge_item = KnowledgeItem(
-                    filename=filename,
-                    original_filename=file.filename,
-                    file_path=file_path,
-                    file_type=file_extension,
-                    file_size=file_size,
-                    content_summary=request.form.get('summary', ''),
-                    status='active'
-                )
-                
-                db.session.add(knowledge_item)
-                db.session.commit()
-                
-                flash(f'文件 "{file.filename}" 上传成功', 'success')
-                return redirect(url_for('admin_dashboard'))
-                
-            except Exception as e:
-                flash(f'上传失败: {str(e)}', 'error')
-                # 删除已保存的文件
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-        else:
-            flash('不支持的文件类型。支持的格式: txt, pdf, doc, docx, xlsx, csv, md, json', 'error')
+    if 'file' not in request.files:
+        flash('没有选择文件', 'error')
+        return redirect(url_for('admin_dashboard'))
     
-    return render_template('admin/upload_knowledge.html')
+    file = request.files['file']
+    if file.filename == '':
+        flash('没有选择文件', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    if file and file.filename and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        # 添加时间戳避免文件名冲突
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+        filename = timestamp + filename
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        try:
+            # 获取文件大小
+            file_size = get_file_size(file)
+            file.save(file_path)
+            
+            # 获取文件扩展名
+            file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'unknown'
+            
+            # 保存到数据库
+            knowledge_item = KnowledgeItem(
+                filename=filename,
+                original_filename=file.filename,
+                file_path=file_path,
+                file_type=file_extension,
+                file_size=file_size,
+                content_summary=request.form.get('summary', ''),
+                status='active'
+            )
+            
+            db.session.add(knowledge_item)
+            db.session.commit()
+            
+            flash(f'文件 "{file.filename}" 上传成功', 'success')
+            
+        except Exception as e:
+            flash(f'上传失败: {str(e)}', 'error')
+            # 删除已保存的文件
+            if os.path.exists(file_path):
+                os.remove(file_path)
+    else:
+        flash('不支持的文件类型。支持的格式: txt, pdf, doc, docx, xlsx, csv, md, json', 'error')
+    
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/knowledge/create-text', methods=['POST'])
+def create_text_knowledge():
+    """创建文本知识条目"""
+    title = request.form.get('title', '').strip()
+    content = request.form.get('content', '').strip()
+    
+    if not title or not content:
+        flash('标题和内容不能为空', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    try:
+        # 创建文本文件
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+        filename = f"{timestamp}_{secure_filename(title)}.txt"
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # 保存文本内容到文件
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        
+        # 计算文件大小
+        file_size = len(content.encode('utf-8'))
+        
+        # 保存到数据库
+        knowledge_item = KnowledgeItem(
+            filename=filename,
+            original_filename=f"{title}.txt",
+            file_path=file_path,
+            file_type='text',
+            file_size=file_size,
+            content_summary=content,  # 对于文本类型，直接存储内容
+            status='active'
+        )
+        
+        db.session.add(knowledge_item)
+        db.session.commit()
+        
+        flash(f'文本知识条目 "{title}" 创建成功', 'success')
+        
+    except Exception as e:
+        flash(f'创建失败: {str(e)}', 'error')
+        # 删除已保存的文件
+        if 'file_path' in locals() and os.path.exists(file_path):
+            os.remove(file_path)
+    
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/knowledge/<int:item_id>/edit', methods=['POST'])
+def edit_text_knowledge(item_id):
+    """编辑文本知识条目"""
+    item = KnowledgeItem.query.get_or_404(item_id)
+    
+    # 只允许编辑文本类型的条目
+    if item.file_type != 'text':
+        flash('只能编辑文本类型的知识条目', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    title = request.form.get('title', '').strip()
+    content = request.form.get('content', '').strip()
+    
+    if not title or not content:
+        flash('标题和内容不能为空', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    try:
+        # 更新文件内容
+        with open(item.file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        
+        # 更新数据库记录
+        item.original_filename = f"{title}.txt"
+        item.file_size = len(content.encode('utf-8'))
+        item.content_summary = content
+        item.last_modified = datetime.utcnow()
+        
+        db.session.commit()
+        
+        flash(f'文本知识条目 "{title}" 更新成功', 'success')
+        
+    except Exception as e:
+        flash(f'更新失败: {str(e)}', 'error')
+    
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/knowledge/<int:item_id>/toggle-status', methods=['POST'])
 def toggle_knowledge_status(item_id):

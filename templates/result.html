@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>非劳务收入路径草案 - Angela</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container my-5">
+        <!-- Header Section -->
+        <div class="text-center mb-5">
+            <h1 class="display-5 mb-3">
+                <i class="fas fa-lightbulb me-3 text-warning"></i>非劳务收入路径草案
+            </h1>
+            <p class="lead">基于您提供的信息，Angela 为您推荐以下方案</p>
+        </div>
+
+        <!-- Project Summary -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-project-diagram me-2"></i>项目概览
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>{{ form_data.project_name }}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-flag me-1"></i>
+                            {{ form_data.project_stage or '未指定阶段' }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-0">
+                            <strong>关键人物：</strong>
+                            {% if form_data.key_persons %}
+                                {% for person in form_data.key_persons %}
+                                    <span class="badge bg-secondary me-1">{{ person.name }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">无</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <strong>项目背景：</strong>
+                    <p class="mb-0">{{ form_data.project_description }}</p>
+                </div>
+                {% if form_data.external_resources %}
+                <div class="mt-3">
+                    <strong>外围资源：</strong>
+                    {% for resource in form_data.external_resources %}
+                        <span class="badge bg-info me-1">{{ resource }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI Suggestions -->
+        <div class="row">
+            {% for suggestion in suggestions %}
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">{{ suggestion.title }}</h5>
+                        <span class="badge bg-success">方案 {{ loop.index }}</span>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <p class="card-text">{{ suggestion.description }}</p>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-info">
+                                <i class="fas fa-list-ul me-1"></i>实施要点：
+                            </h6>
+                            <ul class="list-unstyled">
+                                {% for detail in suggestion.details %}
+                                <li class="mb-1">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ detail }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <div class="mt-auto">
+                            <div class="row g-2 text-center">
+                                <div class="col-6">
+                                    <div class="bg-dark p-2 rounded">
+                                        <small class="text-muted d-block">收益潜力</small>
+                                        <strong>{{ suggestion.revenue_potential }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-dark p-2 rounded">
+                                        <small class="text-muted d-block">实施难度</small>
+                                        <strong>{{ suggestion.implementation_difficulty }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if suggestion.key_roles %}
+                            <div class="mt-2">
+                                <small class="text-muted">涉及角色：</small>
+                                {% for role in suggestion.key_roles %}
+                                    <span class="badge bg-outline-secondary ms-1">{{ role }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center mt-5">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-info me-3">
+                <i class="fas fa-arrow-left me-2"></i>重新设计
+            </a>
+            <button class="btn btn-success" onclick="window.print()">
+                <i class="fas fa-download me-2"></i>导出方案
+            </button>
+        </div>
+
+        <!-- Detailed Analysis (Collapsible) -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#detailedAnalysis" aria-expanded="false">
+                        <i class="fas fa-chart-line me-2"></i>详细分析数据
+                        <i class="fas fa-chevron-down ms-2"></i>
+                    </button>
+                </h5>
+            </div>
+            <div id="detailedAnalysis" class="collapse">
+                <div class="card-body">
+                    <h6>基于输入数据的分析：</h6>
+                    <pre class="bg-dark p-3 rounded">{{ form_data | tojson(indent=2) }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

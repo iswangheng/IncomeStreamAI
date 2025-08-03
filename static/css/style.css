@@ -1,0 +1,98 @@
+/* Custom styles for Angela AI Tool */
+
+.person-card {
+    background: var(--bs-dark);
+    border: 1px solid var(--bs-gray-600) !important;
+    transition: all 0.3s ease;
+}
+
+.person-card:hover {
+    border-color: var(--bs-info) !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 202, 240, 0.25);
+}
+
+.btn-check:checked + .btn-outline-secondary {
+    background-color: var(--bs-info);
+    border-color: var(--bs-info);
+    color: white;
+}
+
+.card-header {
+    border-bottom: 1px solid var(--bs-gray-600);
+}
+
+.display-4, .display-5 {
+    font-weight: 300;
+}
+
+.text-info {
+    color: var(--bs-info) !important;
+}
+
+/* Loading animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.person-card {
+    animation: fadeInUp 0.3s ease;
+}
+
+/* Print styles */
+@media print {
+    .btn, .card-header button {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        break-inside: avoid;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .display-4, .display-5 {
+        font-size: 2rem;
+    }
+    
+    .person-card .position-absolute {
+        position: relative !important;
+        margin: 0 0 10px 0 !important;
+    }
+}
+
+/* Custom form controls */
+.form-control:focus, .form-select:focus {
+    border-color: var(--bs-info);
+    box-shadow: 0 0 0 0.2rem rgba(13, 202, 240, 0.25);
+}
+
+/* Badge styles */
+.badge {
+    font-size: 0.8em;
+}
+
+/* Result page enhancements */
+.bg-outline-secondary {
+    background-color: transparent !important;
+    border: 1px solid var(--bs-secondary);
+    color: var(--bs-secondary);
+}
+
+/* Template hiding */
+template {
+    display: none !important;
+}

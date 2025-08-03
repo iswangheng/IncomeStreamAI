@@ -129,4 +129,21 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         addPersonCard(false);
     }, 100);
+
+    // 处理其他资源输入框的显示隐藏
+    const otherResourceCheckbox = document.getElementById('resource8');
+    const otherResourceInput = document.getElementById('otherResourceInput');
+    const otherResourceText = document.getElementById('other_resource_text');
+
+    if (otherResourceCheckbox && otherResourceInput) {
+        otherResourceCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                otherResourceInput.style.display = 'block';
+                otherResourceText.focus();
+            } else {
+                otherResourceInput.style.display = 'none';
+                otherResourceText.value = '';
+            }
+        });
+    }
 });

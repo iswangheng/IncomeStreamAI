@@ -47,6 +47,13 @@ def generate():
         # Process external resources
         external_resources = request.form.getlist('external_resources')
         
+        # Handle other resource input
+        other_resource_text = request.form.get('other_resource_text', '').strip()
+        if other_resource_text and request.form.get('other_resource_checkbox'):
+            external_resources.append(other_resource_text)
+        
+        external_resources = request.form.getlist('external_resources')
+        
         # Create JSON structure as per PRD
         form_data = {
             "project_name": project_name,

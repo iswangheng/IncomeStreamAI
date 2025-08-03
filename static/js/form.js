@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         addPersonCard();
     });
 
-    function addPersonCard() {
+    function addPersonCard(shouldFocus = true) {
         // Hide the "no persons" message
         noPersonsMsg.style.display = 'none';
         
@@ -32,7 +32,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add the card to the container
         personsContainer.appendChild(personCard);
         
-        // 移除自动聚焦逻辑 - 按用户要求不自动聚焦输入框
+        // 有条件的聚焦逻辑 - 用户点击添加时聚焦，自动添加时不聚焦
+        if (shouldFocus) {
+            const firstInput = personCard.querySelector('input[name="person_name[]"]');
+            if (firstInput) {
+                firstInput.focus();
+            }
+        }
         
         // Add animation
         personCard.style.opacity = '0';
@@ -119,5 +125,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 移除自动添加人物卡片逻辑 - 按用户要求不自动滚动页面和聚焦
+    // 默认添加一个人物卡片但不聚焦 - 改善用户体验
+    setTimeout(() => {
+        addPersonCard(false);
+    }, 100);
 });

@@ -321,7 +321,7 @@
                     <div class="col-md-4">
                         <label class="form-label">当前知识库状态</label>
                         <div id="knowledgeStatus" class="small text-muted">
-                            活跃文件: {{ knowledge_items.filter_by(status='active').count() }} 个
+                            活跃文件: {{ knowledge_items|selectattr('status', 'equalto', 'active')|list|length }} 个
                         </div>
                     </div>
                 </div>

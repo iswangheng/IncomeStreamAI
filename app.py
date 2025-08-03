@@ -295,15 +295,14 @@ def upload_knowledge():
             file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'unknown'
             
             # 保存到数据库
-            knowledge_item = KnowledgeItem(
-                filename=filename,
-                original_filename=file.filename,
-                file_path=file_path,
-                file_type=file_extension,
-                file_size=file_size,
-                content_summary=request.form.get('summary', ''),
-                status='active'
-            )
+            knowledge_item = KnowledgeItem()
+            knowledge_item.filename = filename
+            knowledge_item.original_filename = file.filename
+            knowledge_item.file_path = file_path
+            knowledge_item.file_type = file_extension
+            knowledge_item.file_size = file_size
+            knowledge_item.content_summary = request.form.get('summary', '')
+            knowledge_item.status = 'active'
             
             db.session.add(knowledge_item)
             db.session.commit()
@@ -344,15 +343,14 @@ def create_text_knowledge():
         file_size = len(content.encode('utf-8'))
         
         # 保存到数据库
-        knowledge_item = KnowledgeItem(
-            filename=filename,
-            original_filename=f"{title}.txt",
-            file_path=file_path,
-            file_type='text',
-            file_size=file_size,
-            content_summary=content,  # 对于文本类型，直接存储内容
-            status='active'
-        )
+        knowledge_item = KnowledgeItem()
+        knowledge_item.filename = filename
+        knowledge_item.original_filename = f"{title}.txt"
+        knowledge_item.file_path = file_path
+        knowledge_item.file_type = 'text'
+        knowledge_item.file_size = file_size
+        knowledge_item.content_summary = content  # 对于文本类型，直接存储内容
+        knowledge_item.status = 'active'
         
         db.session.add(knowledge_item)
         db.session.commit()
@@ -362,8 +360,11 @@ def create_text_knowledge():
     except Exception as e:
         flash(f'创建失败: {str(e)}', 'error')
         # 删除已保存的文件
-        if 'file_path' in locals() and os.path.exists(file_path):
-            os.remove(file_path)
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except:
+            pass
     
     return redirect(url_for('admin_dashboard'))
 

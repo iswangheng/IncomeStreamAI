@@ -1,12 +1,7 @@
 from datetime import datetime
+from app import db
 
-# 使用延迟导入避免循环导入
-def get_db():
-    from app import db
-    return db
-
-# 定义模型时使用字符串表名，避免直接继承
-class KnowledgeItem:
+class KnowledgeItem(db.Model):
     """AI知识库条目模型"""
     __tablename__ = 'knowledge_items'
     

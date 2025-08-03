@@ -106,11 +106,19 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 - **Database Model**: KnowledgeItem with file metadata, status tracking, and usage statistics
 
 ### AI Integration Points
+- **OpenAI API Integration**: 实时AI对话测试功能，支持GPT-4o等多种模型
+- **Knowledge Base Context**: 自动注入知识库内容到AI系统提示
 - **Form Data Structure**: Prepared JSON format for income pathway generation
 - **Knowledge Base**: File-based knowledge management for AI context
 - **Result Processing**: Template structure for AI-generated content display
+- **Real-time Testing**: 对话测试模块验证知识库效果，支持开关知识库上下文
 
 ## Recent Changes (2025-08-03)
+- ✅ 完成AI对话测试模块集成，支持OpenAI多模型选择
+- ✅ 新增知识库上下文切换功能，可测试知识库效果
+- ✅ 实现对话历史管理、清空对话、Enter键发送等功能
+- ✅ 修复模型构造问题，确保KnowledgeItem正确继承SQLAlchemy Base类
+- ✅ AI对话API成功连接OpenAI服务，支持实时知识库验证
 - 简化后台管理界面，移除复杂统计页面，只保留核心的文件管理和上传功能
 - 整合管理仪表板，直接显示文件列表而不是单独的统计页面
 - 精简导航结构，只保留"知识库管理"和"上传文件"两个主要功能

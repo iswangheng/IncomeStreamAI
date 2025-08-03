@@ -32,11 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add the card to the container
         personsContainer.appendChild(personCard);
         
-        // Focus on the first input
-        const firstInput = personCard.querySelector('input[name="person_name[]"]');
-        if (firstInput) {
-            firstInput.focus();
-        }
+        // 移除自动聚焦逻辑 - 按用户要求不自动聚焦输入框
         
         // Add animation
         personCard.style.opacity = '0';
@@ -123,8 +119,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Add initial person card for better UX
-    setTimeout(() => {
-        addPersonCard();
-    }, 500);
+    // 移除自动添加人物卡片逻辑 - 按用户要求不自动滚动页面和聚焦
 });

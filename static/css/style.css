@@ -208,6 +208,65 @@ body {
     animation: pulse 0.2s ease;
 }
 
+/* 需求多选样式 */
+.needs-selection-container {
+    background: #FAFAFA;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.tag-group {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 3px solid var(--warm-orange);
+}
+
+.tag-group h6 {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.tag-group .badge {
+    font-size: 0.7rem;
+    vertical-align: middle;
+}
+
+.tag-group .btn-outline-secondary {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    margin: 2px;
+    border-radius: 15px;
+    border: 1px solid #E0E0E0;
+    transition: all 0.2s ease;
+}
+
+.tag-group .btn-check:checked + .btn-outline-secondary {
+    background: var(--warm-orange);
+    border-color: var(--warm-orange);
+    color: white;
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(255, 140, 66, 0.3);
+}
+
+.tag-group .btn-outline-secondary:hover {
+    border-color: var(--warm-orange);
+    color: var(--warm-orange);
+    transform: translateY(-1px);
+}
+
+.tag-group textarea {
+    border-radius: 8px;
+    border: 1px solid #E0E0E0;
+    transition: all 0.2s ease;
+}
+
+.tag-group textarea:focus {
+    border-color: var(--warm-orange);
+    box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
+}
+
 /* Print styles */
 @media print {
     body {

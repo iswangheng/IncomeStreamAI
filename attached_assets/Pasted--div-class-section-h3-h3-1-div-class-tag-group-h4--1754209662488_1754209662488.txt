@@ -1,0 +1,63 @@
+<div class="section">
+  <h3>如何让此人高兴（可多选）</h3>
+
+  <!-- 1. 结果回报 -->
+  <div class="tag-group">
+    <h4>🔵 想看到回报 / 实际效果</h4>
+    <label><input type="checkbox" name="make_happy" value="拿到分成"> 拿到分成</label>
+    <label><input type="checkbox" name="make_happy" value="带来客户"> 带来客户</label>
+    <label><input type="checkbox" name="make_happy" value="尽快落地"> 项目尽快落地</label>
+    <label><input type="checkbox" name="make_happy" value="持续收益"> 能长期持续赚钱</label>
+  </div>
+
+  <!-- 2. 曝光影响 -->
+  <div class="tag-group">
+    <h4>🟢 想被看见 / 被宣传</h4>
+    <label><input type="checkbox" name="make_happy" value="品牌曝光"> 有品牌曝光</label>
+    <label><input type="checkbox" name="make_happy" value="打造人设"> 打造人设 / 专家身份</label>
+    <label><input type="checkbox" name="make_happy" value="圈层精准"> 曝光圈子精准</label>
+    <label><input type="checkbox" name="make_happy" value="成为发起人"> 项目以他为主导</label>
+  </div>
+
+  <!-- 3. 主导控制 -->
+  <div class="tag-group">
+    <h4>🟡 想主导项目 / 有话语权</h4>
+    <label><input type="checkbox" name="make_happy" value="自己决定节奏"> 自己决定节奏</label>
+    <label><input type="checkbox" name="make_happy" value="不想被工具化"> 不想只是资源人</label>
+    <label><input type="checkbox" name="make_happy" value="决定合作人"> 想决定和谁合作</label>
+    <label><input type="checkbox" name="make_happy" value="想策划包装"> 想参与内容策划</label>
+  </div>
+
+  <!-- 4. 风险规避 -->
+  <div class="tag-group">
+    <h4>🟠 不想冒风险</h4>
+    <label><input type="checkbox" name="make_happy" value="不担责"> 不出钱不担责</label>
+    <label><input type="checkbox" name="make_happy" value="不公开露脸"> 不公开露脸</label>
+    <label><input type="checkbox" name="make_happy" value="避开冲突"> 不影响已有合作方</label>
+    <label><input type="checkbox" name="make_happy" value="信息保密"> 希望信息保密</label>
+  </div>
+
+  <!-- 5. 被尊重 -->
+  <div class="tag-group">
+    <h4>🔴 想被尊重 / 有地位</h4>
+    <label><input type="checkbox" name="make_happy" value="成为顾问"> 成为顾问/专家</label>
+    <label><input type="checkbox" name="make_happy" value="体现价值"> 体现出他很重要</label>
+    <label><input type="checkbox" name="make_happy" value="圈子有地位"> 提升圈子里的地位</label>
+    <label><input type="checkbox" name="make_happy" value="自己组的局"> 像是他发起的局</label>
+  </div>
+
+  <!-- 6. 人脉情绪 -->
+  <div class="tag-group">
+    <h4>🟣 在乎人脉 / 感受</h4>
+    <label><input type="checkbox" name="make_happy" value="拓展人脉"> 拓展人脉</label>
+    <label><input type="checkbox" name="make_happy" value="有参与感"> 有参与感 / 成就感</label>
+    <label><input type="checkbox" name="make_happy" value="能当谈资"> 项目能当谈资</label>
+    <label><input type="checkbox" name="make_happy" value="被邀请的感觉"> 有被邀请的感觉</label>
+  </div>
+
+  <!-- 补充说明 -->
+  <div class="tag-group">
+    <h4>✍️ 其他（可补充描述）</h4>
+    <textarea name="make_happy_extra" placeholder="还有什么特别的点会让他愿意参与？比如：老板刚批预算，或者最近想冲数据..."></textarea>
+  </div>
+</div>

@@ -21,7 +21,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add unique identifier
         personCounter++;
-        personCard.setAttribute('data-person-id', personCounter);
+        const personId = personCounter;
+        personCard.setAttribute('data-person-id', personId);
+        
+        // 替换模板中的 ${personId} 占位符，为每个复选框创建唯一ID
+        const needsContainer = personCard.querySelector('.needs-selection-container');
+        if (needsContainer) {
+            needsContainer.innerHTML = needsContainer.innerHTML.replace(/\$\{personId\}/g, personId);
+        }
         
         // Add remove functionality
         const removeBtn = personCard.querySelector('.remove-person-btn');

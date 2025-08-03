@@ -1,13 +1,105 @@
 import os
 import json
 import logging
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from datetime import datetime
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
+class Base(DeclarativeBase):
+    pass
+
+db = SQLAlchemy(model_class=Base)
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key_change_in_production")
+
+# Database configuration
+database_url = os.environ.get("DATABASE_URL")
+if not database_url:
+    # 开发环境回退配置
+    database_url = "sqlite:///angela.db"
+    
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
+
+# File upload configuration
+UPLOAD_FOLDER = 'uploads/knowledge'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'doc', 'docx', 'xlsx', 'csv', 'md', 'json'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Initialize database
+db.init_app(app)
+
+# Create upload folder if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# 定义模型直接在这里避免循环导入
+class KnowledgeItem(db.Model):
+    """AI知识库条目模型"""
+    __tablename__ = 'knowledge_items'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(255), nullable=False, comment='文件名')
+    original_filename = db.Column(db.String(255), nullable=False, comment='原始文件名')
+    file_path = db.Column(db.String(500), nullable=False, comment='文件存储路径')
+    file_type = db.Column(db.String(50), nullable=False, comment='文件类型')
+    file_size = db.Column(db.Integer, nullable=False, comment='文件大小(字节)')
+    content_summary = db.Column(db.Text, comment='文件内容摘要')
+    status = db.Column(db.String(20), nullable=False, default='active', comment='状态: active/paused/deleted')
+    upload_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, comment='上传时间')
+    last_modified = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow, comment='最后修改时间')
+    usage_count = db.Column(db.Integer, default=0, comment='使用次数')
+    
+    def __repr__(self):
+        return f'<KnowledgeItem {self.original_filename}>'
+    
+    def to_dict(self):
+        """转换为字典格式"""
+        return {
+            'id': self.id,
+            'filename': self.filename,
+            'original_filename': self.original_filename,
+            'file_type': self.file_type,
+            'file_size': self.file_size,
+            'content_summary': self.content_summary,
+            'status': self.status,
+            'upload_time': self.upload_time.isoformat() if self.upload_time else None,
+            'last_modified': self.last_modified.isoformat() if self.last_modified else None,
+            'usage_count': self.usage_count
+        }
+    
+    @property
+    def status_display(self):
+        """状态显示文本"""
+        status_map = {
+            'active': '使用中',
+            'paused': '已暂停',
+            'deleted': '已删除'
+        }
+        return status_map.get(self.status, self.status)
+    
+    @property
+    def file_size_display(self):
+        """文件大小显示"""
+        if self.file_size < 1024:
+            return f"{self.file_size} B"
+        elif self.file_size < 1024 * 1024:
+            return f"{self.file_size / 1024:.1f} KB"
+        else:
+            return f"{self.file_size / (1024 * 1024):.1f} MB"
+
+with app.app_context():
+    db.create_all()
 
 @app.route('/')
 def index():
@@ -133,6 +225,176 @@ def generate_ai_suggestions(form_data):
     suggestions = [suggestion1, suggestion2, suggestion3]
     
     return suggestions
+
+# Helper functions
+def allowed_file(filename):
+    """检查文件扩展名是否允许"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def get_file_size(file_obj):
+    """获取文件大小"""
+    if hasattr(file_obj, 'seek') and hasattr(file_obj, 'tell'):
+        file_obj.seek(0, 2)  # 移到文件末尾
+        size = file_obj.tell()
+        file_obj.seek(0)  # 回到文件开头
+        return size
+    return 0
+
+# Knowledge Base Management Routes
+@app.route('/admin')
+def admin_dashboard():
+    """后台管理主页"""
+    # 获取统计数据
+    total_items = KnowledgeItem.query.count()
+    active_items = KnowledgeItem.query.filter_by(status='active').count()
+    paused_items = KnowledgeItem.query.filter_by(status='paused').count()
+    
+    stats = {
+        'total': total_items,
+        'active': active_items,
+        'paused': paused_items,
+        'deleted': total_items - active_items - paused_items
+    }
+    
+    return render_template('admin/dashboard.html', stats=stats)
+
+@app.route('/admin/knowledge')
+def knowledge_list():
+    """知识库列表页面"""
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    
+    # 查询条件
+    status_filter = request.args.get('status', '')
+    search_query = request.args.get('search', '')
+    
+    query = KnowledgeItem.query
+    
+    if status_filter:
+        query = query.filter_by(status=status_filter)
+    
+    if search_query:
+        query = query.filter(KnowledgeItem.original_filename.contains(search_query))
+    
+    # 按上传时间倒序排列
+    query = query.order_by(KnowledgeItem.upload_time.desc())
+    
+    knowledge_items = query.paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    return render_template('admin/knowledge_list.html', 
+                         knowledge_items=knowledge_items,
+                         status_filter=status_filter,
+                         search_query=search_query)
+
+@app.route('/admin/knowledge/upload', methods=['GET', 'POST'])
+def upload_knowledge():
+    """上传知识库文件"""
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('没有选择文件', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('没有选择文件', 'error')
+            return redirect(request.url)
+        
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            # 添加时间戳避免文件名冲突
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+            filename = timestamp + filename
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            
+            try:
+                # 获取文件大小
+                file_size = get_file_size(file)
+                file.save(file_path)
+                
+                # 获取文件扩展名
+                file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'unknown'
+                
+                # 保存到数据库
+                knowledge_item = KnowledgeItem(
+                    filename=filename,
+                    original_filename=file.filename,
+                    file_path=file_path,
+                    file_type=file_extension,
+                    file_size=file_size,
+                    content_summary=request.form.get('summary', ''),
+                    status='active'
+                )
+                
+                db.session.add(knowledge_item)
+                db.session.commit()
+                
+                flash(f'文件 "{file.filename}" 上传成功', 'success')
+                return redirect(url_for('knowledge_list'))
+                
+            except Exception as e:
+                flash(f'上传失败: {str(e)}', 'error')
+                # 删除已保存的文件
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+        else:
+            flash('不支持的文件类型。支持的格式: txt, pdf, doc, docx, xlsx, csv, md, json', 'error')
+    
+    return render_template('admin/upload_knowledge.html')
+
+@app.route('/admin/knowledge/<int:item_id>/toggle-status', methods=['POST'])
+def toggle_knowledge_status(item_id):
+    """切换知识库条目状态"""
+    item = KnowledgeItem.query.get_or_404(item_id)
+    
+    if item.status == 'active':
+        item.status = 'paused'
+        message = '已暂停使用'
+    elif item.status == 'paused':
+        item.status = 'active'
+        message = '已启用使用'
+    else:
+        flash('无法切换已删除项目的状态', 'error')
+        return redirect(url_for('knowledge_list'))
+    
+    db.session.commit()
+    flash(f'"{item.original_filename}" {message}', 'success')
+    return redirect(url_for('knowledge_list'))
+
+@app.route('/admin/knowledge/<int:item_id>/delete', methods=['POST'])
+def delete_knowledge(item_id):
+    """删除知识库条目"""
+    item = KnowledgeItem.query.get_or_404(item_id)
+    
+    try:
+        # 删除文件
+        if os.path.exists(item.file_path):
+            os.remove(item.file_path)
+        
+        # 从数据库删除
+        db.session.delete(item)
+        db.session.commit()
+        
+        flash(f'"{item.original_filename}" 已删除', 'success')
+    except Exception as e:
+        flash(f'删除失败: {str(e)}', 'error')
+    
+    return redirect(url_for('knowledge_list'))
+
+@app.route('/admin/knowledge/<int:item_id>/edit', methods=['GET', 'POST'])
+def edit_knowledge(item_id):
+    """编辑知识库条目"""
+    item = KnowledgeItem.query.get_or_404(item_id)
+    
+    if request.method == 'POST':
+        item.content_summary = request.form.get('summary', '')
+        db.session.commit()
+        flash(f'"{item.original_filename}" 信息已更新', 'success')
+        return redirect(url_for('knowledge_list'))
+    
+    return render_template('admin/edit_knowledge.html', item=item)
 
 @app.route('/result')
 def result():

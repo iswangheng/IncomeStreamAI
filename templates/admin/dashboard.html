@@ -1,0 +1,142 @@
+{% extends "admin/base.html" %}
+
+{% block title %}概览统计 - Angela AI 知识库管理{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="fas fa-chart-bar me-2"></i>知识库概览</h2>
+        <p class="text-muted">查看知识库的整体统计信息和状态分布</p>
+    </div>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number">{{ stats.total }}</div>
+                    <div class="stat-label">总文件数</div>
+                </div>
+                <div class="text-primary">
+                    <i class="fas fa-files fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number text-success">{{ stats.active }}</div>
+                    <div class="stat-label">使用中</div>
+                </div>
+                <div class="text-success">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number text-warning">{{ stats.paused }}</div>
+                    <div class="stat-label">已暂停</div>
+                </div>
+                <div class="text-warning">
+                    <i class="fas fa-pause-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="flex-grow-1">
+                    <div class="stat-number text-danger">{{ stats.deleted }}</div>
+                    <div class="stat-label">已删除</div>
+                </div>
+                <div class="text-danger">
+                    <i class="fas fa-trash fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 快速操作 -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-rocket me-2"></i>快速操作
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('upload_knowledge') }}" class="btn btn-admin-primary">
+                        <i class="fas fa-upload me-2"></i>上传新文件
+                    </a>
+                    <a href="{{ url_for('knowledge_list') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-2"></i>查看所有文件
+                    </a>
+                    <a href="{{ url_for('knowledge_list', status='active') }}" class="btn btn-outline-success">
+                        <i class="fas fa-check me-2"></i>查看使用中的文件
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>使用说明
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        支持的文件类型：txt, pdf, doc, docx, xlsx, csv, md, json
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        最大文件大小：16MB
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        可以随时启用/暂停知识条目的使用
+                    </li>
+                    <li class="mb-0">
+                        <i class="fas fa-check text-success me-2"></i>
+                        删除操作会同时移除文件和数据库记录
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if stats.total == 0 %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-database fa-4x text-muted mb-3"></i>
+            <h4>知识库为空</h4>
+            <p class="text-muted mb-4">还没有上传任何知识文件，开始上传您的第一个文件吧！</p>
+            <a href="{{ url_for('upload_knowledge') }}" class="btn btn-admin-primary btn-lg">
+                <i class="fas fa-upload me-2"></i>立即上传
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

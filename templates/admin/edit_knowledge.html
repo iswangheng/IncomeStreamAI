@@ -1,0 +1,129 @@
+{% extends "admin/base.html" %}
+
+{% block title %}编辑文件 - Angela AI 知识库管理{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="fas fa-edit me-2"></i>编辑知识库文件</h2>
+        <p class="text-muted">修改文件的描述信息和元数据</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-alt me-1"></i>{{ item.original_filename }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- 文件信息概览 -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6>文件信息</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>文件名：</strong>{{ item.original_filename }}</li>
+                            <li><strong>文件类型：</strong><span class="badge bg-secondary ms-1">{{ item.file_type.upper() }}</span></li>
+                            <li><strong>文件大小：</strong>{{ item.file_size_display }}</li>
+                            <li><strong>上传时间：</strong>{{ item.upload_time.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>使用状态</h6>
+                        <div class="mb-2">
+                            <span class="status-badge status-{{ item.status }}">
+                                {% if item.status == 'active' %}
+                                    <i class="fas fa-check-circle me-1"></i>使用中
+                                {% elif item.status == 'paused' %}
+                                    <i class="fas fa-pause-circle me-1"></i>已暂停
+                                {% else %}
+                                    <i class="fas fa-trash me-1"></i>已删除
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="small text-muted">
+                            <i class="fas fa-chart-bar me-1"></i>使用次数：<span class="badge bg-info">{{ item.usage_count }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- 编辑表单 -->
+                <form method="POST">
+                    <div class="mb-4">
+                        <label for="summary" class="form-label">
+                            <i class="fas fa-align-left me-1"></i>内容摘要
+                        </label>
+                        <textarea class="form-control" id="summary" name="summary" rows="5" 
+                                  placeholder="描述这个文件的主要内容、适用场景等信息...">{{ item.content_summary or '' }}</textarea>
+                        <div class="form-text">
+                            详细的摘要信息有助于更好地管理和使用知识库文件
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                        <div>
+                            <a href="{{ url_for('knowledge_list') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>返回列表
+                            </a>
+                        </div>
+                        <div>
+                            {% if item.status != 'deleted' %}
+                            <!-- 状态切换按钮 -->
+                            <form method="POST" action="{{ url_for('toggle_knowledge_status', item_id=item.id) }}" class="d-inline me-2">
+                                {% if item.status == 'active' %}
+                                <button type="submit" class="btn btn-outline-warning">
+                                    <i class="fas fa-pause me-1"></i>暂停使用
+                                </button>
+                                {% else %}
+                                <button type="submit" class="btn btn-outline-success">
+                                    <i class="fas fa-play me-1"></i>启用使用
+                                </button>
+                                {% endif %}
+                            </form>
+                            {% endif %}
+
+                            <!-- 保存按钮 -->
+                            <button type="submit" class="btn btn-admin-primary">
+                                <i class="fas fa-save me-1"></i>保存修改
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 危险操作区域 -->
+        <div class="card mt-4 border-danger">
+            <div class="card-header bg-danger text-white">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-1"></i>危险操作
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    删除文件将永久移除该文件及其所有相关数据，此操作无法撤销。
+                </p>
+                <form method="POST" action="{{ url_for('delete_knowledge', item_id=item.id) }}" 
+                      onsubmit="return confirmDelete()">
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-1"></i>永久删除此文件
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmDelete() {
+    return confirm('确定要永久删除文件 "{{ item.original_filename }}" 吗？\n\n此操作将：\n- 删除服务器上的文件\n- 移除数据库中的所有记录\n- 无法恢复\n\n请确认您真的要执行此操作。');
+}
+</script>
+{% endblock %}

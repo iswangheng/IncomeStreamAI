@@ -157,10 +157,6 @@
             <nav class="nav nav-pills nav-fill">
                 <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}" 
                    href="{{ url_for('admin_dashboard') }}">
-                    <i class="fas fa-tachometer-alt me-1"></i>概览统计
-                </a>
-                <a class="nav-link {% if request.endpoint == 'knowledge_list' %}active{% endif %}" 
-                   href="{{ url_for('knowledge_list') }}">
                     <i class="fas fa-database me-1"></i>知识库管理
                 </a>
                 <a class="nav-link {% if request.endpoint == 'upload_knowledge' %}active{% endif %}" 

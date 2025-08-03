@@ -61,10 +61,12 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 
 ### Backend Architecture
 - **Web Framework**: Flask with minimal configuration for rapid development
+- **Database**: PostgreSQL with SQLAlchemy ORM for knowledge base management
 - **Routing Structure**: Simple route-based architecture with form processing endpoints
 - **Data Processing**: Form data collection and JSON structuring for AI processing
 - **Session Management**: Flask sessions with configurable secret keys
 - **Error Handling**: Flash messaging system for user feedback
+- **File Management**: Knowledge base file upload with support for multiple formats
 
 ### Form Processing System
 - **Dynamic Forms**: JavaScript-powered dynamic addition/removal of person cards
@@ -86,6 +88,9 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 
 ### Backend Dependencies
 - **Flask**: Core web framework
+- **Flask-SQLAlchemy**: Database ORM integration
+- **PostgreSQL**: Production database with psycopg2-binary driver
+- **Werkzeug**: File upload security utilities
 - **Python Standard Library**: JSON, logging, and OS modules for basic functionality
 
 ### Development Environment
@@ -93,6 +98,21 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 - **Environment Variables**: Session secret key management
 - **Logging**: Built-in Python logging for debugging and monitoring
 
-### Potential AI Integration Points
-- **Form Data Structure**: Prepared JSON format suggests integration with AI services for income pathway generation
-- **Result Processing**: Template structure indicates AI-generated content display capabilities
+### Knowledge Base Management System
+- **Admin Interface**: Simplified backend management at `/admin` endpoint
+- **File Upload**: Support for txt, pdf, doc, docx, xlsx, csv, md, json formats (max 16MB)
+- **Status Management**: Enable/disable knowledge files for AI processing
+- **Search & Filter**: Quick file management with status filtering
+- **Database Model**: KnowledgeItem with file metadata, status tracking, and usage statistics
+
+### AI Integration Points
+- **Form Data Structure**: Prepared JSON format for income pathway generation
+- **Knowledge Base**: File-based knowledge management for AI context
+- **Result Processing**: Template structure for AI-generated content display
+
+## Recent Changes (2025-08-03)
+- 简化后台管理界面，移除复杂统计页面，只保留核心的文件管理和上传功能
+- 整合管理仪表板，直接显示文件列表而不是单独的统计页面
+- 精简导航结构，只保留"知识库管理"和"上传文件"两个主要功能
+- 在文件列表底部添加简洁的使用说明
+- 优化界面布局，减少不必要的复杂性，提升用户体验

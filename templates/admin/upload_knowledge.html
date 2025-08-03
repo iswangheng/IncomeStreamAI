@@ -51,15 +51,14 @@
                         <label for="summary" class="form-label">
                             <i class="fas fa-align-left me-1"></i>内容摘要 (可选)
                         </label>
-                        <textarea class="form-control" id="summary" name="summary" rows="3" 
-                                  placeholder="简要描述这个文件的内容，便于管理和查找..."></textarea>
-                        <div class="form-text">建议描述文件的主要内容、适用场景等信息</div>
+                        <textarea class="form-control" id="summary" name="summary" rows="2" 
+                                  placeholder="简要描述文件内容..."></textarea>
                     </div>
 
                     <!-- 提交按钮 -->
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a href="{{ url_for('knowledge_list') }}" class="btn btn-outline-secondary me-md-2">
-                            <i class="fas fa-arrow-left me-1"></i>返回列表
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-1"></i>返回管理
                         </a>
                         <button type="submit" class="btn btn-admin-primary" id="submitBtn" disabled>
                             <i class="fas fa-upload me-1"></i>上传文件

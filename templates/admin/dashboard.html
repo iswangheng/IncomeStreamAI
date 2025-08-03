@@ -1,142 +1,169 @@
 {% extends "admin/base.html" %}
 
-{% block title %}概览统计 - Angela AI 知识库管理{% endblock %}
+{% block title %}知识库管理 - Angela AI 知识库管理{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col-12">
-        <h2><i class="fas fa-chart-bar me-2"></i>知识库概览</h2>
-        <p class="text-muted">查看知识库的整体统计信息和状态分布</p>
+    <div class="col-md-8">
+        <h2><i class="fas fa-database me-2"></i>知识库文件管理</h2>
+        <p class="text-muted">管理AI知识库中的所有文件，控制使用状态</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('upload_knowledge') }}" class="btn btn-admin-primary">
+            <i class="fas fa-plus me-1"></i>上传新文件
+        </a>
     </div>
 </div>
 
-<!-- 统计卡片 -->
-<div class="row g-4 mb-5">
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="stat-number">{{ stats.total }}</div>
-                    <div class="stat-label">总文件数</div>
-                </div>
-                <div class="text-primary">
-                    <i class="fas fa-files fa-2x"></i>
-                </div>
+<!-- 搜索和筛选 -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-6">
+                <label for="search" class="form-label">搜索文件名</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ search_query }}" placeholder="输入文件名关键词">
             </div>
-        </div>
+            <div class="col-md-4">
+                <label for="status" class="form-label">状态筛选</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">全部状态</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>使用中</option>
+                    <option value="paused" {% if status_filter == 'paused' %}selected{% endif %}>已暂停</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-search me-1"></i>搜索
+                </button>
+            </div>
+        </form>
     </div>
-    
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="stat-number text-success">{{ stats.active }}</div>
-                    <div class="stat-label">使用中</div>
-                </div>
-                <div class="text-success">
-                    <i class="fas fa-check-circle fa-2x"></i>
-                </div>
-            </div>
-        </div>
+</div>
+
+{% if knowledge_items %}
+<!-- 文件列表 -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            文件列表 (共 {{ knowledge_items|length }} 个文件)
+        </h5>
     </div>
-    
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="stat-number text-warning">{{ stats.paused }}</div>
-                    <div class="stat-label">已暂停</div>
-                </div>
-                <div class="text-warning">
-                    <i class="fas fa-pause-circle fa-2x"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <div class="stat-number text-danger">{{ stats.deleted }}</div>
-                    <div class="stat-label">已删除</div>
-                </div>
-                <div class="text-danger">
-                    <i class="fas fa-trash fa-2x"></i>
-                </div>
-            </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>文件名</th>
+                        <th>类型</th>
+                        <th>大小</th>
+                        <th>状态</th>
+                        <th>上传时间</th>
+                        <th width="150">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in knowledge_items %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-alt text-muted me-2"></i>
+                                <div>
+                                    <div class="fw-semibold">{{ item.original_filename }}</div>
+                                    {% if item.content_summary %}
+                                    <small class="text-muted">{{ item.content_summary[:40] }}{% if item.content_summary|length > 40 %}...{% endif %}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ item.file_type.upper() }}</span>
+                        </td>
+                        <td>{{ item.file_size_display }}</td>
+                        <td>
+                            <span class="status-badge status-{{ item.status }}">
+                                {% if item.status == 'active' %}
+                                    <i class="fas fa-check-circle me-1"></i>使用中
+                                {% else %}
+                                    <i class="fas fa-pause-circle me-1"></i>已暂停
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <small>{{ item.upload_time.strftime('%m-%d %H:%M') }}</small>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <!-- 切换状态按钮 -->
+                                <form method="POST" action="{{ url_for('toggle_knowledge_status', item_id=item.id) }}" class="d-inline">
+                                    {% if item.status == 'active' %}
+                                    <button type="submit" class="btn btn-outline-warning" title="暂停使用">
+                                        <i class="fas fa-pause"></i>
+                                    </button>
+                                    {% else %}
+                                    <button type="submit" class="btn btn-outline-success" title="启用使用">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    {% endif %}
+                                </form>
+                                
+                                <!-- 删除按钮 -->
+                                <form method="POST" action="{{ url_for('delete_knowledge', item_id=item.id) }}" 
+                                      class="d-inline" onsubmit="return confirm('确定要删除这个文件吗？')">
+                                    <button type="submit" class="btn btn-outline-danger" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-<!-- 快速操作 -->
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-rocket me-2"></i>快速操作
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{{ url_for('upload_knowledge') }}" class="btn btn-admin-primary">
-                        <i class="fas fa-upload me-2"></i>上传新文件
-                    </a>
-                    <a href="{{ url_for('knowledge_list') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-list me-2"></i>查看所有文件
-                    </a>
-                    <a href="{{ url_for('knowledge_list', status='active') }}" class="btn btn-outline-success">
-                        <i class="fas fa-check me-2"></i>查看使用中的文件
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-info-circle me-2"></i>使用说明
-                </h5>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled mb-0">
-                    <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i>
-                        支持的文件类型：txt, pdf, doc, docx, xlsx, csv, md, json
-                    </li>
-                    <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i>
-                        最大文件大小：16MB
-                    </li>
-                    <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i>
-                        可以随时启用/暂停知识条目的使用
-                    </li>
-                    <li class="mb-0">
-                        <i class="fas fa-check text-success me-2"></i>
-                        删除操作会同时移除文件和数据库记录
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% if stats.total == 0 %}
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="text-center py-5">
-            <i class="fas fa-database fa-4x text-muted mb-3"></i>
-            <h4>知识库为空</h4>
-            <p class="text-muted mb-4">还没有上传任何知识文件，开始上传您的第一个文件吧！</p>
-            <a href="{{ url_for('upload_knowledge') }}" class="btn btn-admin-primary btn-lg">
-                <i class="fas fa-upload me-2"></i>立即上传
-            </a>
-        </div>
-    </div>
+{% else %}
+<!-- 空状态 -->
+<div class="text-center py-5">
+    <i class="fas fa-database fa-4x text-muted mb-3"></i>
+    <h4>暂无文件</h4>
+    {% if search_query or status_filter %}
+    <p class="text-muted mb-4">尝试调整搜索条件</p>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary me-2">
+        <i class="fas fa-times me-1"></i>清除筛选
+    </a>
+    {% else %}
+    <p class="text-muted mb-4">还没有上传任何文件</p>
+    {% endif %}
+    <a href="{{ url_for('upload_knowledge') }}" class="btn btn-admin-primary">
+        <i class="fas fa-upload me-1"></i>上传文件
+    </a>
 </div>
 {% endif %}
+
+<!-- 使用说明 -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-info-circle me-1"></i>使用说明
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <small>
+                    <strong>支持格式：</strong>txt, pdf, doc, docx, xlsx, csv, md, json<br>
+                    <strong>最大大小：</strong>16MB
+                </small>
+            </div>
+            <div class="col-md-6">
+                <small>
+                    <strong>状态说明：</strong>使用中的文件会被AI调用，已暂停的文件不会被使用
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

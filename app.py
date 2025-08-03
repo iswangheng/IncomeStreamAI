@@ -244,27 +244,7 @@ def get_file_size(file_obj):
 # Knowledge Base Management Routes
 @app.route('/admin')
 def admin_dashboard():
-    """后台管理主页"""
-    # 获取统计数据
-    total_items = KnowledgeItem.query.count()
-    active_items = KnowledgeItem.query.filter_by(status='active').count()
-    paused_items = KnowledgeItem.query.filter_by(status='paused').count()
-    
-    stats = {
-        'total': total_items,
-        'active': active_items,
-        'paused': paused_items,
-        'deleted': total_items - active_items - paused_items
-    }
-    
-    return render_template('admin/dashboard.html', stats=stats)
-
-@app.route('/admin/knowledge')
-def knowledge_list():
-    """知识库列表页面"""
-    page = request.args.get('page', 1, type=int)
-    per_page = 10
-    
+    """后台管理主页 - 直接显示文件列表"""
     # 查询条件
     status_filter = request.args.get('status', '')
     search_query = request.args.get('search', '')
@@ -277,17 +257,15 @@ def knowledge_list():
     if search_query:
         query = query.filter(KnowledgeItem.original_filename.contains(search_query))
     
-    # 按上传时间倒序排列
-    query = query.order_by(KnowledgeItem.upload_time.desc())
+    # 按上传时间倒序排列，只显示未删除的文件
+    knowledge_items = query.filter(KnowledgeItem.status != 'deleted').order_by(KnowledgeItem.upload_time.desc()).all()
     
-    knowledge_items = query.paginate(
-        page=page, per_page=per_page, error_out=False
-    )
-    
-    return render_template('admin/knowledge_list.html', 
+    return render_template('admin/dashboard.html', 
                          knowledge_items=knowledge_items,
                          status_filter=status_filter,
                          search_query=search_query)
+
+
 
 @app.route('/admin/knowledge/upload', methods=['GET', 'POST'])
 def upload_knowledge():
@@ -332,7 +310,7 @@ def upload_knowledge():
                 db.session.commit()
                 
                 flash(f'文件 "{file.filename}" 上传成功', 'success')
-                return redirect(url_for('knowledge_list'))
+                return redirect(url_for('admin_dashboard'))
                 
             except Exception as e:
                 flash(f'上传失败: {str(e)}', 'error')
@@ -357,11 +335,11 @@ def toggle_knowledge_status(item_id):
         message = '已启用使用'
     else:
         flash('无法切换已删除项目的状态', 'error')
-        return redirect(url_for('knowledge_list'))
+        return redirect(url_for('admin_dashboard'))
     
     db.session.commit()
     flash(f'"{item.original_filename}" {message}', 'success')
-    return redirect(url_for('knowledge_list'))
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/knowledge/<int:item_id>/delete', methods=['POST'])
 def delete_knowledge(item_id):
@@ -381,20 +359,9 @@ def delete_knowledge(item_id):
     except Exception as e:
         flash(f'删除失败: {str(e)}', 'error')
     
-    return redirect(url_for('knowledge_list'))
+    return redirect(url_for('admin_dashboard'))
 
-@app.route('/admin/knowledge/<int:item_id>/edit', methods=['GET', 'POST'])
-def edit_knowledge(item_id):
-    """编辑知识库条目"""
-    item = KnowledgeItem.query.get_or_404(item_id)
-    
-    if request.method == 'POST':
-        item.content_summary = request.form.get('summary', '')
-        db.session.commit()
-        flash(f'"{item.original_filename}" 信息已更新', 'success')
-        return redirect(url_for('knowledge_list'))
-    
-    return render_template('admin/edit_knowledge.html', item=item)
+
 
 @app.route('/result')
 def result():

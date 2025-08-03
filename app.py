@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
@@ -508,22 +508,28 @@ def ai_chat():
         # 添加当前用户消息
         messages.append({"role": "user", "content": message})
         
-        # 调用OpenAI API
+        # 调用OpenAI API (流式响应)
         response = client.chat.completions.create(
             model=model,
             messages=messages,
             max_tokens=1000,
-            temperature=0.7
+            temperature=0.7,
+            stream=True
         )
         
-        ai_response = response.choices[0].message.content
+        # 生成流式响应
+        def generate_stream():
+            full_response = ""
+            for chunk in response:
+                if chunk.choices[0].delta.content is not None:
+                    content = chunk.choices[0].delta.content
+                    full_response += content
+                    yield f"data: {json.dumps({'content': content, 'type': 'delta'})}\n\n"
+            
+            # 发送完成信号
+            yield f"data: {json.dumps({'type': 'done', 'full_response': full_response, 'model_used': model, 'knowledge_used': use_knowledge})}\n\n"
         
-        return jsonify({
-            'success': True, 
-            'response': ai_response,
-            'model_used': model,
-            'knowledge_used': use_knowledge
-        })
+        return Response(generate_stream(), mimetype='text/plain')
         
     except Exception as e:
         print(f"AI对话错误: {e}")

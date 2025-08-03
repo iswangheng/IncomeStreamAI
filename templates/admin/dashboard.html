@@ -517,13 +517,13 @@ function sendChatMessage() {
     messageInput.value = '';
     
     // 显示AI思考状态
-    const thinkingId = addMessageToChat('assistant', '思考中...', true);
+    const assistantMessageId = addMessageToChat('assistant', '正在思考...', true);
     
     // 获取设置
     const model = document.getElementById('modelSelect').value;
     const useKnowledge = document.getElementById('useKnowledge').checked;
     
-    // 发送请求到后端
+    // 发送流式请求到后端
     fetch('/admin/ai-chat', {
         method: 'POST',
         headers: {
@@ -536,26 +536,68 @@ function sendChatMessage() {
             chat_history: chatHistory
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        // 移除思考状态
-        document.getElementById(thinkingId).remove();
-        
-        if (data.success) {
-            // 添加AI回复
-            addMessageToChat('assistant', data.response);
-            // 更新对话历史
-            chatHistory.push({role: 'user', content: message});
-            chatHistory.push({role: 'assistant', content: data.response});
-        } else {
-            addMessageToChat('assistant', '抱歉，发生了错误: ' + data.error, false, 'error');
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
         }
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullResponse = '';
+        
+        // 更新消息内容为空，准备接收流式内容
+        updateMessageContent(assistantMessageId, '');
+        
+        function readStream() {
+            reader.read().then(({ done, value }) => {
+                if (done) {
+                    // 处理最后的Markdown渲染
+                    if (fullResponse) {
+                        updateMessageContent(assistantMessageId, fullResponse, true);
+                        // 更新对话历史
+                        chatHistory.push({role: 'user', content: message});
+                        chatHistory.push({role: 'assistant', content: fullResponse});
+                    }
+                    return;
+                }
+                
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // 保留不完整的行
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.type === 'delta' && data.content) {
+                                fullResponse += data.content;
+                                updateMessageContent(assistantMessageId, fullResponse);
+                            } else if (data.type === 'done') {
+                                // 流式完成，最终渲染Markdown
+                                updateMessageContent(assistantMessageId, data.full_response, true);
+                                chatHistory.push({role: 'user', content: message});
+                                chatHistory.push({role: 'assistant', content: data.full_response});
+                                return;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing SSE data:', e);
+                        }
+                    }
+                }
+                
+                readStream();
+            }).catch(error => {
+                console.error('Stream reading error:', error);
+                updateMessageContent(assistantMessageId, '抱歉，发生了网络错误，请重试。', true, 'error');
+            });
+        }
+        
+        readStream();
     })
     .catch(error => {
-        // 移除思考状态
-        document.getElementById(thinkingId).remove();
-        addMessageToChat('assistant', '网络错误，请重试', false, 'error');
         console.error('Error:', error);
+        updateMessageContent(assistantMessageId, '抱歉，发生了网络错误，请重试。', true, 'error');
     });
 }
 
@@ -574,7 +616,7 @@ function addMessageToChat(role, content, isTemporary = false, type = 'normal') {
         <div class="d-flex ${role === 'user' ? 'justify-content-end' : 'justify-content-start'}">
             <div class="message-bubble ${bgClass} p-3 rounded-3" style="max-width: 80%;">
                 ${role === 'user' ? '<i class="fas fa-user me-2"></i>' : '<i class="fas fa-robot me-2"></i>'}
-                <span class="message-content">${content}</span>
+                <div class="message-content">${role === 'user' ? escapeHtml(content) : content}</div>
             </div>
         </div>
     `;
@@ -583,6 +625,42 @@ function addMessageToChat(role, content, isTemporary = false, type = 'normal') {
     chatMessages.scrollTop = chatMessages.scrollHeight;
     
     return messageId;
+}
+
+function updateMessageContent(messageId, content, isMarkdown = false, type = 'normal') {
+    const messageElement = document.getElementById(messageId);
+    if (!messageElement) return;
+    
+    const contentElement = messageElement.querySelector('.message-content');
+    if (!contentElement) return;
+    
+    if (type === 'error') {
+        contentElement.innerHTML = escapeHtml(content);
+        messageElement.querySelector('.message-bubble').className = 
+            messageElement.querySelector('.message-bubble').className.replace(/bg-\w+/, 'bg-danger text-white');
+    } else if (isMarkdown && typeof marked !== 'undefined') {
+        // 渲染Markdown
+        contentElement.innerHTML = marked.parse(content);
+        // 高亮代码块
+        if (typeof hljs !== 'undefined') {
+            contentElement.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        }
+    } else {
+        // 显示原始文本（实时流式输出）
+        contentElement.innerHTML = escapeHtml(content);
+    }
+    
+    // 滚动到底部
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function clearChat() {
@@ -608,5 +686,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// 初始化marked和highlight.js
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof marked !== 'undefined') {
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (err) {}
+                }
+                return code;
+            },
+            breaks: true,
+            gfm: true
+        });
+    }
+});
 </script>
+
+<!-- Markdown解析库 -->
+<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+<!-- 代码高亮 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
 {% endblock %}

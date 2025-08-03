@@ -261,6 +261,104 @@ body {
     border-radius: 0 8px 8px 0;
 }
 
+/* Markdown样式 */
+.message-content h1, .message-content h2, .message-content h3,
+.message-content h4, .message-content h5, .message-content h6 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.message-content h1 { font-size: 1.5rem; }
+.message-content h2 { font-size: 1.4rem; }
+.message-content h3 { font-size: 1.3rem; }
+.message-content h4 { font-size: 1.2rem; }
+.message-content h5 { font-size: 1.1rem; }
+.message-content h6 { font-size: 1rem; }
+
+.message-content p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.message-content ul, .message-content ol {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+}
+
+.message-content li {
+    margin-bottom: 0.25rem;
+}
+
+.message-content code {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.125rem 0.25rem;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+}
+
+.message-content pre {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 0.75rem 0;
+    overflow-x: auto;
+}
+
+.message-content pre code {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-size: 0.875rem;
+}
+
+.message-content blockquote {
+    border-left: 4px solid #007bff;
+    padding-left: 1rem;
+    margin: 0.75rem 0;
+    font-style: italic;
+    color: #6c757d;
+}
+
+.message-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+}
+
+.message-content th, .message-content td {
+    border: 1px solid #dee2e6;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.message-content th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.message-content strong {
+    font-weight: 600;
+}
+
+.message-content em {
+    font-style: italic;
+}
+
+/* 流式输出效果 */
+.message-content.streaming::after {
+    content: '▋';
+    animation: blink 1s infinite;
+    color: #007bff;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
 .display-4, .display-5 {
     font-weight: 300;
     color: var(--text-dark);

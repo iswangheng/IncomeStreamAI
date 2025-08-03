@@ -1,5 +1,26 @@
 # Angela - 非劳务收入路径设计师
 
+## AI Agent协作规范
+
+### 🚫 严格禁止的行为
+- 不要修改任何未被用户明确要求的代码文件或逻辑
+- 不要删除、重命名、重构已有函数、类、模块或接口
+- 不要擅自引入、移除或更换依赖包（如 npm、pip 模块等）
+- 不要改动数据库结构或运行迁移脚本，除非用户特别说明
+- 不要优化、简化、重构任何未被请求的业务代码
+
+### ✅ 明确允许的行为
+- 只对用户明确要求的部分进行代码补全、修复或添加新功能
+- 需要在生成代码中加入必要的注释、打印语句或 TODO 提示（需可被手动移除）
+- 可提供逻辑建议，但不能自动修改未被授权的部分
+
+### 💡 开发时需遵循的原则
+- **先理解，再编写**：在用户需求不清时，先提问确认，不要擅自假设
+- **按模块作业**：每次仅关注当前任务范围内的文件和函数
+- **保持最小变动原则**：尽量减少代码变动范围，确保已有功能不被破坏
+- **尊重已有风格**：遵循当前项目的命名、缩进、文件结构和框架习惯
+- **生成代码需附说明**：每段代码都需要用中文简短注释说明作用，便于人工审查
+
 ## Overview
 
 Angela is a Flask-based web application that serves as a non-labor income pathway designer. The application helps users input project information and receive AI-generated suggestions for creating alternative income streams. Users can describe their projects, add key personnel with their roles and resources, and get customized recommendations based on their specific situation.

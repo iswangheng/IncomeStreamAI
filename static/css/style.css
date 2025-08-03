@@ -121,10 +121,20 @@ body {
 }
 
 .btn-outline-secondary {
-    border: 2px solid var(--border-light);
-    color: var(--text-light);
+    border: 2px solid var(--warm-orange);
+    color: var(--text-dark);
+    background: var(--warm-white);
     border-radius: 20px;
     transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--warm-orange);
+    border-color: var(--warm-orange);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--shadow-soft);
 }
 
 .display-4, .display-5 {

@@ -348,15 +348,31 @@ body {
 }
 
 /* 流式输出效果 */
-.message-content.streaming::after {
-    content: '▋';
+.typing-indicator {
     animation: blink 1s infinite;
     color: #007bff;
+    font-weight: bold;
+    font-size: 1.2em;
 }
 
 @keyframes blink {
     0%, 50% { opacity: 1; }
     51%, 100% { opacity: 0; }
+}
+
+/* 确保Markdown元素在流式输出时的样式 */
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+.message-content ul:last-child,
+.message-content ol:last-child {
+    margin-bottom: 0;
+}
+
+/* 优化流式输出时的代码块样式 */
+.message-content pre:last-child {
+    margin-bottom: 0;
 }
 
 .display-4, .display-5 {

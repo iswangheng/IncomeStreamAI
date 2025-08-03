@@ -552,9 +552,9 @@ function sendChatMessage() {
         function readStream() {
             reader.read().then(({ done, value }) => {
                 if (done) {
-                    // 处理最后的Markdown渲染
+                    // 流式完成，移除打字指示器，最终渲染
                     if (fullResponse) {
-                        updateMessageContent(assistantMessageId, fullResponse, true);
+                        updateMessageContentFinal(assistantMessageId, fullResponse, true);
                         // 更新对话历史
                         chatHistory.push({role: 'user', content: message});
                         chatHistory.push({role: 'assistant', content: fullResponse});
@@ -572,10 +572,11 @@ function sendChatMessage() {
                             const data = JSON.parse(line.slice(6));
                             if (data.type === 'delta' && data.content) {
                                 fullResponse += data.content;
-                                updateMessageContent(assistantMessageId, fullResponse);
+                                // 实时渲染Markdown
+                                updateMessageContent(assistantMessageId, fullResponse, true);
                             } else if (data.type === 'done') {
-                                // 流式完成，最终渲染Markdown
-                                updateMessageContent(assistantMessageId, data.full_response, true);
+                                // 流式完成，最终确保渲染正确，移除打字指示器
+                                updateMessageContentFinal(assistantMessageId, data.full_response, true);
                                 chatHistory.push({role: 'user', content: message});
                                 chatHistory.push({role: 'assistant', content: data.full_response});
                                 return;
@@ -589,7 +590,7 @@ function sendChatMessage() {
                 readStream();
             }).catch(error => {
                 console.error('Stream reading error:', error);
-                updateMessageContent(assistantMessageId, '抱歉，发生了网络错误，请重试。', true, 'error');
+                updateMessageContentFinal(assistantMessageId, '抱歉，发生了网络错误，请重试。', false, 'error');
             });
         }
         
@@ -597,7 +598,7 @@ function sendChatMessage() {
     })
     .catch(error => {
         console.error('Error:', error);
-        updateMessageContent(assistantMessageId, '抱歉，发生了网络错误，请重试。', true, 'error');
+        updateMessageContentFinal(assistantMessageId, '抱歉，发生了网络错误，请重试。', false, 'error');
     });
 }
 
@@ -639,16 +640,66 @@ function updateMessageContent(messageId, content, isMarkdown = false, type = 'no
         messageElement.querySelector('.message-bubble').className = 
             messageElement.querySelector('.message-bubble').className.replace(/bg-\w+/, 'bg-danger text-white');
     } else if (isMarkdown && typeof marked !== 'undefined') {
-        // 渲染Markdown
-        contentElement.innerHTML = marked.parse(content);
-        // 高亮代码块
-        if (typeof hljs !== 'undefined') {
-            contentElement.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-            });
+        try {
+            // 实时渲染Markdown，包含流式输出指示器
+            let renderedContent = marked.parse(content);
+            
+            // 如果内容还在流式输出中（不完整），添加打字效果
+            if (!content.endsWith('.') && !content.endsWith('。') && !content.endsWith('!') && !content.endsWith('？')) {
+                renderedContent += '<span class="typing-indicator">▋</span>';
+            }
+            
+            contentElement.innerHTML = renderedContent;
+            
+            // 高亮代码块
+            if (typeof hljs !== 'undefined') {
+                contentElement.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+        } catch (e) {
+            // 如果Markdown解析失败，显示原始文本
+            contentElement.innerHTML = escapeHtml(content) + '<span class="typing-indicator">▋</span>';
         }
     } else {
         // 显示原始文本（实时流式输出）
+        contentElement.innerHTML = escapeHtml(content) + '<span class="typing-indicator">▋</span>';
+    }
+    
+    // 滚动到底部
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function updateMessageContentFinal(messageId, content, isMarkdown = false, type = 'normal') {
+    const messageElement = document.getElementById(messageId);
+    if (!messageElement) return;
+    
+    const contentElement = messageElement.querySelector('.message-content');
+    if (!contentElement) return;
+    
+    if (type === 'error') {
+        contentElement.innerHTML = escapeHtml(content);
+        messageElement.querySelector('.message-bubble').className = 
+            messageElement.querySelector('.message-bubble').className.replace(/bg-\w+/, 'bg-danger text-white');
+    } else if (isMarkdown && typeof marked !== 'undefined') {
+        try {
+            // 最终渲染Markdown，不包含打字指示器
+            let renderedContent = marked.parse(content);
+            contentElement.innerHTML = renderedContent;
+            
+            // 高亮代码块
+            if (typeof hljs !== 'undefined') {
+                contentElement.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
+            }
+        } catch (e) {
+            // 如果Markdown解析失败，显示原始文本
+            contentElement.innerHTML = escapeHtml(content);
+        }
+    } else {
+        // 显示原始文本
         contentElement.innerHTML = escapeHtml(content);
     }
     

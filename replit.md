@@ -119,6 +119,10 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 - ✅ 实现对话历史管理、清空对话、Enter键发送等功能
 - ✅ 修复模型构造问题，确保KnowledgeItem正确继承SQLAlchemy Base类
 - ✅ AI对话API成功连接OpenAI服务，支持实时知识库验证
+- ✅ **重大升级：实时Markdown流式渲染** - AI回答在流式输出过程中就能实时显示Markdown格式，包括标题、粗体、列表、代码块等，提供更好的用户体验
+- ✅ 完善流式输出效果，添加打字指示器和动画效果
+- ✅ 集成代码高亮功能，支持多种编程语言语法高亮
+- ✅ 优化Markdown样式，确保在流式输出时保持良好的视觉效果
 - 简化后台管理界面，移除复杂统计页面，只保留核心的文件管理和上传功能
 - 整合管理仪表板，直接显示文件列表而不是单独的统计页面
 - 精简导航结构，只保留"知识库管理"和"上传文件"两个主要功能

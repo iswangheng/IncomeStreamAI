@@ -267,6 +267,58 @@ body {
     box-shadow: 0 0 0 3px rgba(255, 140, 66, 0.1);
 }
 
+/* 展开/收起按钮样式 */
+.expand-toggle-btn {
+    border-radius: 20px;
+    border: 1px dashed #CCC;
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.expand-toggle-btn:hover {
+    border-color: var(--warm-orange);
+    color: var(--warm-orange);
+    background: rgba(255, 140, 66, 0.05);
+}
+
+/* 可展开区域动画 */
+.needs-expandable-section {
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.needs-expandable-section.expanding {
+    animation: expandDown 0.3s ease-out;
+}
+
+.needs-expandable-section.collapsing {
+    animation: collapseUp 0.3s ease-out;
+}
+
+@keyframes expandDown {
+    from {
+        max-height: 0;
+        opacity: 0;
+    }
+    to {
+        max-height: 500px;
+        opacity: 1;
+    }
+}
+
+@keyframes collapseUp {
+    from {
+        max-height: 500px;
+        opacity: 1;
+    }
+    to {
+        max-height: 0;
+        opacity: 0;
+    }
+}
+
 /* Print styles */
 @media print {
     body {

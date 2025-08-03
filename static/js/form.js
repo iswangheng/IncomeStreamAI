@@ -11,6 +11,49 @@ document.addEventListener('DOMContentLoaded', function() {
         addPersonCard();
     });
 
+    // 展开/收起功能
+    function setupExpandToggle(personCard) {
+        const toggleBtn = personCard.querySelector('.expand-toggle-btn');
+        const expandableSection = personCard.querySelector('.needs-expandable-section');
+        const toggleIcon = toggleBtn.querySelector('i');
+        
+        if (!toggleBtn || !expandableSection) return;
+        
+        toggleBtn.addEventListener('click', function() {
+            const isExpanded = expandableSection.style.display !== 'none';
+            
+            if (isExpanded) {
+                // 收起
+                expandableSection.style.transition = 'all 0.3s ease';
+                expandableSection.style.maxHeight = expandableSection.scrollHeight + 'px';
+                setTimeout(() => {
+                    expandableSection.style.maxHeight = '0';
+                    expandableSection.style.opacity = '0';
+                }, 10);
+                setTimeout(() => {
+                    expandableSection.style.display = 'none';
+                }, 300);
+                
+                toggleIcon.className = 'fas fa-angle-down me-1';
+                toggleBtn.innerHTML = '<i class="fas fa-angle-down me-1"></i>展开更多选项';
+            } else {
+                // 展开
+                expandableSection.style.display = 'block';
+                expandableSection.style.maxHeight = '0';
+                expandableSection.style.opacity = '0';
+                expandableSection.style.transition = 'all 0.3s ease';
+                
+                setTimeout(() => {
+                    expandableSection.style.maxHeight = expandableSection.scrollHeight + 'px';
+                    expandableSection.style.opacity = '1';
+                }, 10);
+                
+                toggleIcon.className = 'fas fa-angle-up me-1';
+                toggleBtn.innerHTML = '<i class="fas fa-angle-up me-1"></i>收起选项';
+            }
+        });
+    }
+
     function addPersonCard(shouldFocus = true) {
         // Hide the "no persons" message
         noPersonsMsg.style.display = 'none';
@@ -29,6 +72,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (needsContainer) {
             needsContainer.innerHTML = needsContainer.innerHTML.replace(/\$\{personId\}/g, personId);
         }
+        
+        // 添加展开/收起功能
+        setupExpandToggle(personCard);
         
         // Add remove functionality
         const removeBtn = personCard.querySelector('.remove-person-btn');

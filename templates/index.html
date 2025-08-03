@@ -183,149 +183,162 @@
                 <div class="col-12">
                     <label class="form-label">如何让此人开心（需求/痛点）</label>
                     <div class="needs-selection-container">
-                        <!-- 结果回报 -->
-                        <div class="tag-group mb-3">
-                            <h6 class="text-primary mb-2"><span class="badge bg-primary me-2">🔵</span>想看到回报 / 实际效果</h6>
-                            <div class="row g-2">
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="拿到分成" id="need_profit_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_profit_${personId}">拿到分成</label>
+                        <!-- 默认显示的前两个分类 -->
+                        <div class="needs-visible-section">
+                            <!-- 结果回报 -->
+                            <div class="tag-group mb-3">
+                                <h6 class="text-primary mb-2"><span class="badge bg-primary me-2">🔵</span>想看到回报 / 实际效果</h6>
+                                <div class="row g-2">
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="拿到分成" id="need_profit_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_profit_${personId}">拿到分成</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="带来客户" id="need_customers_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_customers_${personId}">带来客户</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="尽快落地" id="need_fast_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_fast_${personId}">项目尽快落地</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="持续收益" id="need_sustainable_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_sustainable_${personId}">能长期持续赚钱</label>
+                                    </div>
                                 </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="带来客户" id="need_customers_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_customers_${personId}">带来客户</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="尽快落地" id="need_fast_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_fast_${personId}">项目尽快落地</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="持续收益" id="need_sustainable_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_sustainable_${personId}">能长期持续赚钱</label>
+                            </div>
+
+                            <!-- 曝光影响 -->
+                            <div class="tag-group mb-3">
+                                <h6 class="text-success mb-2"><span class="badge bg-success me-2">🟢</span>想被看见 / 被宣传</h6>
+                                <div class="row g-2">
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="品牌曝光" id="need_exposure_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_exposure_${personId}">有品牌曝光</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="打造人设" id="need_persona_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_persona_${personId}">打造人设 / 专家身份</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="圈层精准" id="need_precise_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_precise_${personId}">曝光圈子精准</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="成为发起人" id="need_leader_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_leader_${personId}">项目以他为主导</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 曝光影响 -->
-                        <div class="tag-group mb-3">
-                            <h6 class="text-success mb-2"><span class="badge bg-success me-2">🟢</span>想被看见 / 被宣传</h6>
-                            <div class="row g-2">
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="品牌曝光" id="need_exposure_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_exposure_${personId}">有品牌曝光</label>
+                        <!-- 展开时显示的其他分类 -->
+                        <div class="needs-expandable-section" style="display: none;">
+                            <!-- 主导控制 -->
+                            <div class="tag-group mb-3">
+                                <h6 class="text-warning mb-2"><span class="badge bg-warning me-2">🟡</span>想主导项目 / 有话语权</h6>
+                                <div class="row g-2">
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="自己决定节奏" id="need_pace_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_pace_${personId}">自己决定节奏</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="不想被工具化" id="need_not_tool_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_not_tool_${personId}">不想只是资源人</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="决定合作人" id="need_choose_partner_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_choose_partner_${personId}">想决定和谁合作</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="想策划包装" id="need_planning_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_planning_${personId}">想参与内容策划</label>
+                                    </div>
                                 </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="打造人设" id="need_persona_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_persona_${personId}">打造人设 / 专家身份</label>
+                            </div>
+
+                            <!-- 风险规避 -->
+                            <div class="tag-group mb-3">
+                                <h6 class="text-danger mb-2"><span class="badge bg-danger me-2">🟠</span>不想冒风险</h6>
+                                <div class="row g-2">
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="不担责" id="need_no_risk_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_no_risk_${personId}">不出钱不担责</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="不公开露脸" id="need_no_public_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_no_public_${personId}">不公开露脸</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="避开冲突" id="need_avoid_conflict_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_avoid_conflict_${personId}">不影响已有合作方</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="信息保密" id="need_confidential_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_confidential_${personId}">希望信息保密</label>
+                                    </div>
                                 </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="圈层精准" id="need_precise_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_precise_${personId}">曝光圈子精准</label>
+                            </div>
+
+                            <!-- 被尊重 -->
+                            <div class="tag-group mb-3">
+                                <h6 class="text-info mb-2"><span class="badge bg-info me-2">🔴</span>想被尊重 / 有地位</h6>
+                                <div class="row g-2">
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="成为顾问" id="need_advisor_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_advisor_${personId}">成为顾问/专家</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="体现价值" id="need_valuable_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_valuable_${personId}">体现出他很重要</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="圈子有地位" id="need_status_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_status_${personId}">提升圈子里的地位</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="自己组的局" id="need_own_game_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_own_game_${personId}">像是他发起的局</label>
+                                    </div>
                                 </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="成为发起人" id="need_leader_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_leader_${personId}">项目以他为主导</label>
+                            </div>
+
+                            <!-- 人脉情绪 -->
+                            <div class="tag-group mb-3">
+                                <h6 class="text-dark mb-2"><span class="badge bg-dark me-2">🟣</span>在乎人脉 / 感受</h6>
+                                <div class="row g-2">
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="拓展人脉" id="need_network_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_network_${personId}">拓展人脉</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="有参与感" id="need_involvement_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_involvement_${personId}">有参与感 / 成就感</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="能当谈资" id="need_talking_point_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_talking_point_${personId}">项目能当谈资</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" class="btn-check" name="person_needs[]" value="被邀请的感觉" id="need_invited_${personId}">
+                                        <label class="btn btn-outline-secondary btn-sm" for="need_invited_${personId}">有被邀请的感觉</label>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <!-- 其他自定义 -->
+                            <div class="tag-group">
+                                <h6 class="text-muted mb-2"><span class="badge bg-secondary me-2">✍️</span>其他（可补充描述）</h6>
+                                <textarea class="form-control" name="person_needs_extra[]" rows="2" 
+                                          placeholder="还有什么特别的点会让他愿意参与？比如：老板刚批预算，或者最近想冲数据..."></textarea>
                             </div>
                         </div>
 
-                        <!-- 主导控制 -->
-                        <div class="tag-group mb-3">
-                            <h6 class="text-warning mb-2"><span class="badge bg-warning me-2">🟡</span>想主导项目 / 有话语权</h6>
-                            <div class="row g-2">
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="自己决定节奏" id="need_pace_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_pace_${personId}">自己决定节奏</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="不想被工具化" id="need_not_tool_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_not_tool_${personId}">不想只是资源人</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="决定合作人" id="need_choose_partner_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_choose_partner_${personId}">想决定和谁合作</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="想策划包装" id="need_planning_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_planning_${personId}">想参与内容策划</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 风险规避 -->
-                        <div class="tag-group mb-3">
-                            <h6 class="text-danger mb-2"><span class="badge bg-danger me-2">🟠</span>不想冒风险</h6>
-                            <div class="row g-2">
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="不担责" id="need_no_risk_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_no_risk_${personId}">不出钱不担责</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="不公开露脸" id="need_no_public_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_no_public_${personId}">不公开露脸</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="避开冲突" id="need_avoid_conflict_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_avoid_conflict_${personId}">不影响已有合作方</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="信息保密" id="need_confidential_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_confidential_${personId}">希望信息保密</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 被尊重 -->
-                        <div class="tag-group mb-3">
-                            <h6 class="text-info mb-2"><span class="badge bg-info me-2">🔴</span>想被尊重 / 有地位</h6>
-                            <div class="row g-2">
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="成为顾问" id="need_advisor_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_advisor_${personId}">成为顾问/专家</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="体现价值" id="need_valuable_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_valuable_${personId}">体现出他很重要</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="圈子有地位" id="need_status_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_status_${personId}">提升圈子里的地位</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="自己组的局" id="need_own_game_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_own_game_${personId}">像是他发起的局</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 人脉情绪 -->
-                        <div class="tag-group mb-3">
-                            <h6 class="text-dark mb-2"><span class="badge bg-dark me-2">🟣</span>在乎人脉 / 感受</h6>
-                            <div class="row g-2">
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="拓展人脉" id="need_network_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_network_${personId}">拓展人脉</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="有参与感" id="need_involvement_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_involvement_${personId}">有参与感 / 成就感</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="能当谈资" id="need_talking_point_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_talking_point_${personId}">项目能当谈资</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" class="btn-check" name="person_needs[]" value="被邀请的感觉" id="need_invited_${personId}">
-                                    <label class="btn btn-outline-secondary btn-sm" for="need_invited_${personId}">有被邀请的感觉</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 其他自定义 -->
-                        <div class="tag-group">
-                            <h6 class="text-muted mb-2"><span class="badge bg-secondary me-2">✍️</span>其他（可补充描述）</h6>
-                            <textarea class="form-control" name="person_needs_extra[]" rows="2" 
-                                      placeholder="还有什么特别的点会让他愿意参与？比如：老板刚批预算，或者最近想冲数据..."></textarea>
+                        <!-- 展开/收起按钮 -->
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm expand-toggle-btn">
+                                <i class="fas fa-angle-down me-1"></i>展开更多选项
+                            </button>
                         </div>
                     </div>
                 </div>

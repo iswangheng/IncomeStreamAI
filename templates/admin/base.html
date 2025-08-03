@@ -261,12 +261,21 @@
             padding: 12px 24px;
             font-weight: 600;
             transition: all 0.3s ease;
+            color: white !important;
         }
         
         .btn-admin-primary:hover {
-            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            background: linear-gradient(135deg, #4c63d2 0%, #553c9a 100%);
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
+            color: white !important;
+        }
+        
+        .btn-admin-primary:focus,
+        .btn-admin-primary:active {
+            background: linear-gradient(135deg, #4c63d2 0%, #553c9a 100%);
+            color: white !important;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
         
         .btn-outline-secondary {

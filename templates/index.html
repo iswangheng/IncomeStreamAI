@@ -68,20 +68,23 @@
 
             <!-- Module B: Key Persons Cards -->
             <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h3 class="card-title mb-0">
                         <i class="fas fa-users me-2"></i>模块 B：关键人物
                     </h3>
-                    <button type="button" class="btn btn-outline-info btn-sm" id="addPersonBtn">
-                        <i class="fas fa-plus me-1"></i>添加关键人物
-                    </button>
                 </div>
                 <div class="card-body">
                     <div id="personsContainer">
                         <!-- Person cards will be added here dynamically -->
                     </div>
-                    <div class="text-muted" id="noPersonsMsg">
-                        <i class="fas fa-info-circle me-2"></i>点击"添加关键人物"开始添加项目相关的重要人员
+                    <div class="text-muted mb-3" id="noPersonsMsg">
+                        <i class="fas fa-info-circle me-2"></i>点击下方按钮开始添加项目相关的重要人员
+                    </div>
+                    <!-- 添加关键人物按钮 - 固定在模块底部 -->
+                    <div class="text-center">
+                        <button type="button" class="btn btn-primary" id="addPersonBtn" style="border-radius: 20px; padding: 10px 24px;">
+                            <i class="fas fa-plus me-2"></i>添加关键人物
+                        </button>
                     </div>
                 </div>
             </div>

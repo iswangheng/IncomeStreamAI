@@ -256,7 +256,11 @@ body {
 
 /* 表单系统 */
 .form-group {
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-4);
+}
+
+.person-card .form-group:last-child {
+    margin-bottom: 0;
 }
 
 .form-label {
@@ -371,7 +375,7 @@ textarea.form-control {
     background: var(--color-bg-primary);
     border: 1px solid var(--color-gray-200);
     border-radius: var(--radius-xl);
-    padding: var(--space-6);
+    padding: var(--space-4);
     margin-bottom: var(--space-4);
     position: relative;
     transition: var(--transition-base);
@@ -386,7 +390,9 @@ textarea.form-control {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--space-3); /* 减少底部间距 */
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-gray-100);
 }
 
 .person-number {

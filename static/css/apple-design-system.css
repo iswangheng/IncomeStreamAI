@@ -182,13 +182,13 @@ body {
 .main-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: var(--space-8) var(--space-6);
+    padding: var(--space-10) var(--space-6) var(--space-16); /* 增加上下内边距 */
 }
 
 /* 页面标题区域 */
 .page-header {
     text-align: center;
-    margin-bottom: var(--space-16);
+    margin-bottom: var(--space-20); /* 增加标题下方间距到80px */
 }
 
 .page-title {
@@ -216,6 +216,7 @@ body {
     border: 0.5px solid var(--color-gray-200);
     overflow: hidden;
     transition: var(--transition-base);
+    margin-bottom: var(--space-12); /* 增加卡片间距到48px */
 }
 
 .card:hover {
@@ -511,7 +512,11 @@ textarea.form-control {
 /* 响应式设计 */
 @media (max-width: 768px) {
     .main-content {
-        padding: var(--space-6) var(--space-4);
+        padding: var(--space-8) var(--space-4) var(--space-12);
+    }
+    
+    .page-header {
+        margin-bottom: var(--space-16);
     }
     
     .page-title {
@@ -520,6 +525,10 @@ textarea.form-control {
     
     .page-subtitle {
         font-size: var(--text-lg);
+    }
+    
+    .card {
+        margin-bottom: var(--space-8);
     }
     
     .card-body {
@@ -537,11 +546,19 @@ textarea.form-control {
     }
     
     .main-content {
-        padding: var(--space-4) var(--space-3);
+        padding: var(--space-6) var(--space-3) var(--space-10);
+    }
+    
+    .page-header {
+        margin-bottom: var(--space-12);
     }
     
     .page-title {
         font-size: var(--text-3xl);
+    }
+    
+    .card {
+        margin-bottom: var(--space-6);
     }
 }
 

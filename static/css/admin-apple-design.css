@@ -144,7 +144,7 @@
 
 /* 页面标题区域 */
 .admin-page-header {
-    padding: var(--space-8) var(--space-6) var(--space-6);
+    padding: var(--space-10) var(--space-6) var(--space-10); /* 增加上下间距 */
 }
 
 .admin-page-title {
@@ -164,8 +164,8 @@
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-6);
-    padding: 0 var(--space-6) var(--space-6);
+    gap: var(--space-8); /* 增加卡片间距 */
+    padding: 0 var(--space-6) var(--space-12); /* 增加底部间距 */
 }
 
 .stats-card {
@@ -233,7 +233,7 @@
 
 /* 数据表格 */
 .table-container {
-    margin: var(--space-6);
+    margin: var(--space-8) var(--space-6) var(--space-12); /* 增加上下间距 */
     background: var(--color-bg-primary);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-sm);
@@ -392,12 +392,12 @@
 .upload-zone {
     border: 2px dashed var(--color-gray-300);
     border-radius: var(--radius-xl);
-    padding: var(--space-12);
+    padding: var(--space-16); /* 增加内边距 */
     text-align: center;
     background: var(--color-bg-primary);
     transition: var(--transition-base);
     cursor: pointer;
-    margin: var(--space-6);
+    margin: var(--space-8) var(--space-6) var(--space-12); /* 增加上下间距 */
 }
 
 .upload-zone:hover {

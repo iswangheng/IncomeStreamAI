@@ -46,11 +46,13 @@
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'error' if category == 'error' else 'info' }} slide-up">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+                <div style="margin-bottom: var(--space-8);">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'error' if category == 'error' else 'info' }} slide-up">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
 
@@ -172,12 +174,12 @@
             </div>
 
             <!-- 提交按钮 -->
-            <div style="text-align: center; margin-top: var(--space-8);">
+            <div style="text-align: center; margin-top: var(--space-16); padding-top: var(--space-12); border-top: 1px solid var(--color-gray-200);">
                 <button type="submit" class="btn btn-primary btn-large interactive">
                     <i class="fas fa-magic me-2"></i>
                     开始AI智能分析
                 </button>
-                <p style="margin-top: var(--space-4); color: var(--color-text-secondary); font-size: var(--text-sm);">
+                <p style="margin-top: var(--space-6); color: var(--color-text-secondary); font-size: var(--text-sm);">
                     基于您提供的信息，AI将在几秒内生成专业的收入管道设计方案
                 </p>
             </div>

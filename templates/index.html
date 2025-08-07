@@ -4,19 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Angela · 非劳务收入管道设计师</title>
+    
+    <!-- 预加载关键字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/modern-style.css') }}" rel="stylesheet">
+    
+    <!-- SEO 优化 -->
+    <meta name="description" content="Angela - 顶级AI驱动的非劳务收入管道设计工具，智能生成创新收入方案">
+    <meta name="keywords" content="AI收入设计,非劳务收入,智能管道,商业策略">
 </head>
 <body>
     <div class="container my-5">
-        <!-- Header Section -->
+        <!-- 现代化顶级头部设计 -->
         <div class="text-center mb-5">
-            <h1 class="display-4 mb-3" style="color: var(--text-dark); font-weight: 600;">
-                Angela
-            </h1>
-            <h2 class="h3 mb-4" style="color: var(--warm-orange); font-weight: 500;">非劳务收入管道设计师</h2>
-            <p class="lead" style="color: var(--text-light); max-width: 600px; margin: 0 auto;">我将根据你输入的信息，为你推演出可行的非劳务收入方案</p>
+            <div style="position: relative; z-index: 2;">
+                <h1 class="display-4 mb-4 position-relative">
+                    Angela
+                </h1>
+                <h2 class="h3 mb-4 gradient-text">非劳务收入管道设计师</h2>
+                <p class="lead">我将运用先进AI算法，为你精准设计创新的非劳务收入解决方案</p>
+                
+                <!-- 装饰性元素 -->
+                <div style="position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 200px; height: 200px; background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%); border-radius: 50%; z-index: -1; animation: pulse 3s ease-in-out infinite;"></div>
+            </div>
         </div>
 
         <!-- Flash Messages -->
@@ -33,10 +48,10 @@
 
         <form method="POST" action="{{ url_for('generate') }}" id="mainForm">
             <!-- Module A: Project Basic Information -->
-            <div class="card mb-4">
+            <div class="card mb-5">
                 <div class="card-header">
                     <h3 class="card-title mb-0">
-                        <i class="fas fa-info-circle me-2"></i>一、项目基础信息
+                        <i class="fas fa-rocket me-2"></i>项目基础信息
                     </h3>
                 </div>
                 <div class="card-body">
@@ -67,10 +82,10 @@
             </div>
 
             <!-- Module B: Key Persons Cards -->
-            <div class="card mb-4">
+            <div class="card mb-5">
                 <div class="card-header">
                     <h3 class="card-title mb-0">
-                        <i class="fas fa-users me-2"></i>二、关键人物清单
+                        <i class="fas fa-users-gear me-2"></i>关键人物清单
                     </h3>
                 </div>
                 <div class="card-body">
@@ -90,10 +105,10 @@
             </div>
 
             <!-- Module C: External Resources -->
-            <div class="card mb-4">
+            <div class="card mb-5">
                 <div class="card-header">
                     <h3 class="card-title mb-0">
-                        <i class="fas fa-boxes me-2"></i>三、你可提供的其他资源（可选）
+                        <i class="fas fa-layer-group me-2"></i>可用资源配置
                     </h3>
                 </div>
                 <div class="card-body">
@@ -141,19 +156,21 @@
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-lg px-5 py-3" style="font-size: 1.1rem; border-radius: 25px;">
-                    <i class="fas fa-magic me-2"></i>生成非劳务收入管道草案
+            <!-- 现代化提交按钮 -->
+            <div class="text-center mt-5">
+                <button type="submit" class="btn btn-primary btn-lg px-5 py-3" style="font-size: 1.2rem; border-radius: 20px; min-width: 280px; position: relative; overflow: hidden;">
+                    <i class="fas fa-brain me-2"></i>
+                    <span class="fw-bold">启动AI智能分析</span>
                 </button>
+                <p class="text-muted mt-3 small">我们的AI将在30秒内为您生成专业的收入管道方案</p>
             </div>
         </form>
     </div>
 
     <!-- Person Card Template (Hidden) -->
     <template id="personCardTemplate">
-        <div class="person-card border rounded p-3 mb-3 position-relative">
-            <button type="button" class="btn btn-outline-danger btn-sm position-absolute top-0 end-0 m-2 remove-person-btn">
+        <div class="person-card mb-4 position-relative">
+            <button type="button" class="btn-remove position-absolute top-0 end-0 m-3 remove-person-btn" title="移除此人物">
                 <i class="fas fa-times"></i>
             </button>
             <div class="row g-3">

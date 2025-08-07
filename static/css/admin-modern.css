@@ -1,0 +1,637 @@
+/* 
+ * Angela - Modern Admin Dashboard Design
+ * 管理后台现代化设计系统
+ */
+
+/* ==== 管理后台专用配色 ==== */
+:root {
+    /* 管理后台深色主题 */
+    --admin-bg-primary: #0f172a;
+    --admin-bg-secondary: #1e293b;
+    --admin-bg-tertiary: #334155;
+    --admin-glass: rgba(255, 255, 255, 0.03);
+    --admin-glass-hover: rgba(255, 255, 255, 0.06);
+    
+    /* 管理后台霓虹色系 */
+    --admin-neon-cyan: #06b6d4;
+    --admin-neon-purple: #8b5cf6;
+    --admin-neon-green: #10b981;
+    --admin-neon-orange: #f59e0b;
+    --admin-neon-red: #ef4444;
+    
+    /* 管理后台渐变 */
+    --admin-gradient-primary: linear-gradient(135deg, var(--admin-neon-cyan), var(--admin-neon-purple));
+    --admin-gradient-success: linear-gradient(135deg, var(--admin-neon-green), var(--admin-neon-cyan));
+    --admin-gradient-warning: linear-gradient(135deg, var(--admin-neon-orange), var(--admin-neon-red));
+    --admin-gradient-bg: linear-gradient(135deg, var(--admin-bg-primary) 0%, var(--admin-bg-secondary) 50%, var(--admin-bg-tertiary) 100%);
+    
+    /* 管理后台文字色彩 */
+    --admin-text-primary: #f8fafc;
+    --admin-text-secondary: #cbd5e1;
+    --admin-text-accent: var(--admin-neon-cyan);
+    
+    /* 管理后台阴影 */
+    --admin-shadow-sm: 0 2px 8px rgba(6, 182, 212, 0.15);
+    --admin-shadow-md: 0 8px 32px rgba(6, 182, 212, 0.2);
+    --admin-shadow-lg: 0 16px 64px rgba(6, 182, 212, 0.25);
+    --admin-shadow-neon: 0 0 20px rgba(6, 182, 212, 0.4), 0 0 40px rgba(6, 182, 212, 0.2);
+    
+    /* 管理后台边框 */
+    --admin-border: 1px solid rgba(255, 255, 255, 0.08);
+    --admin-border-neon: 1px solid rgba(6, 182, 212, 0.3);
+    
+    /* 状态颜色 */
+    --admin-status-active: var(--admin-neon-green);
+    --admin-status-paused: var(--admin-neon-orange);
+    --admin-status-error: var(--admin-neon-red);
+}
+
+/* ==== 全局管理后台样式 ==== */
+body {
+    background: var(--admin-gradient-bg);
+    font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: var(--admin-text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+/* 管理后台背景动画 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+    animation: adminBackgroundShift 25s ease-in-out infinite alternate;
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes adminBackgroundShift {
+    0% { opacity: 0.4; transform: scale(1) rotate(0deg); }
+    100% { opacity: 0.6; transform: scale(1.05) rotate(1deg); }
+}
+
+/* ==== 管理后台头部 ==== */
+.admin-header {
+    background: var(--admin-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: var(--admin-border);
+    border-radius: 0 0 24px 24px;
+    padding: 2rem 0;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--admin-gradient-primary);
+    opacity: 0.8;
+}
+
+.admin-header h1 {
+    background: var(--admin-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.admin-header .lead {
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+}
+
+/* ==== 管理后台导航 ==== */
+.admin-nav {
+    background: var(--admin-glass);
+    backdrop-filter: blur(15px);
+    border: var(--admin-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 3rem;
+    box-shadow: var(--admin-shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-nav::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--admin-gradient-primary);
+    opacity: 0.6;
+}
+
+.admin-nav .nav-link {
+    color: var(--admin-text-secondary);
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-nav .nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--admin-gradient-primary);
+    opacity: 0.1;
+    transition: left 0.3s ease;
+}
+
+.admin-nav .nav-link:hover::before,
+.admin-nav .nav-link.active::before {
+    left: 0;
+}
+
+.admin-nav .nav-link:hover,
+.admin-nav .nav-link.active {
+    color: var(--admin-neon-cyan);
+    background: rgba(6, 182, 212, 0.1);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-sm);
+}
+
+/* ==== 管理后台卡片 ==== */
+.card {
+    background: var(--admin-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: var(--admin-border);
+    border-radius: 20px;
+    box-shadow: var(--admin-shadow-sm);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--admin-gradient-primary);
+    opacity: 0.6;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--admin-shadow-md);
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+.card-header {
+    background: rgba(6, 182, 212, 0.05);
+    border: none;
+    padding: 2rem;
+    border-radius: 20px 20px 0 0 !important;
+    border-bottom: var(--admin-border);
+}
+
+.card-title {
+    color: var(--admin-text-primary);
+    font-weight: 700;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.card-title i {
+    background: var(--admin-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-right: 0.75rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* ==== 管理后台统计卡片 ==== */
+.stat-card {
+    background: var(--admin-glass);
+    backdrop-filter: blur(15px);
+    border: var(--admin-border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--admin-gradient-primary);
+    opacity: 0.8;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--admin-shadow-md);
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: var(--admin-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--admin-text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ==== 管理后台按钮 ==== */
+.btn-admin-primary {
+    background: var(--admin-gradient-primary);
+    border: none;
+    color: white;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-admin-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.3s ease;
+}
+
+.btn-admin-primary:hover::before {
+    left: 100%;
+}
+
+.btn-admin-primary:hover {
+    background: var(--admin-gradient-primary);
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: var(--admin-shadow-neon);
+}
+
+/* ==== 管理后台表单控件 ==== */
+.form-control,
+.form-select {
+    background: var(--admin-glass);
+    backdrop-filter: blur(10px);
+    border: var(--admin-border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: var(--admin-text-primary);
+    transition: all 0.3s ease;
+}
+
+.form-control::placeholder {
+    color: var(--admin-text-secondary);
+    opacity: 0.7;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background: var(--admin-glass-hover);
+    border-color: var(--admin-neon-cyan);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+    color: var(--admin-text-primary);
+    outline: none;
+}
+
+.form-label {
+    color: var(--admin-text-primary);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+/* ==== 管理后台状态徽章 ==== */
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.status-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--admin-status-active);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-paused {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--admin-status-paused);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--admin-status-error);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ==== 管理后台表格 ==== */
+.table {
+    background: transparent;
+    color: var(--admin-text-primary);
+}
+
+.table th {
+    color: var(--admin-text-primary);
+    font-weight: 600;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(6, 182, 212, 0.05);
+    padding: 1rem;
+}
+
+.table td {
+    color: var(--admin-text-secondary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background: var(--admin-glass-hover);
+    color: var(--admin-text-primary);
+}
+
+/* ==== 管理后台按钮组 ==== */
+.btn-group-sm .btn {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    border-radius: 8px;
+}
+
+.btn-outline-primary,
+.btn-outline-success,
+.btn-outline-warning,
+.btn-outline-danger {
+    background: transparent;
+    backdrop-filter: blur(10px);
+    border-width: 1px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary {
+    border-color: var(--admin-neon-cyan);
+    color: var(--admin-neon-cyan);
+}
+
+.btn-outline-primary:hover {
+    background: var(--admin-gradient-primary);
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-success {
+    border-color: var(--admin-neon-green);
+    color: var(--admin-neon-green);
+}
+
+.btn-outline-success:hover {
+    background: var(--admin-gradient-success);
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-warning {
+    border-color: var(--admin-neon-orange);
+    color: var(--admin-neon-orange);
+}
+
+.btn-outline-warning:hover {
+    background: var(--admin-gradient-warning);
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-danger {
+    border-color: var(--admin-neon-red);
+    color: var(--admin-neon-red);
+}
+
+.btn-outline-danger:hover {
+    background: linear-gradient(135deg, var(--admin-neon-red), #dc2626);
+    border-color: transparent;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* ==== 管理后台模态框 ==== */
+.modal-content {
+    background: var(--admin-glass);
+    backdrop-filter: blur(20px);
+    border: var(--admin-border);
+    border-radius: 20px;
+    box-shadow: var(--admin-shadow-lg);
+}
+
+.modal-header {
+    background: rgba(6, 182, 212, 0.05);
+    border-bottom: var(--admin-border);
+    border-radius: 20px 20px 0 0 !important;
+}
+
+.modal-title {
+    color: var(--admin-text-primary);
+    font-weight: 700;
+}
+
+.modal-body {
+    color: var(--admin-text-secondary);
+}
+
+.modal-footer {
+    border-top: var(--admin-border);
+}
+
+/* ==== 管理后台警告消息 ==== */
+.alert {
+    background: var(--admin-glass);
+    backdrop-filter: blur(15px);
+    border: var(--admin-border);
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    color: var(--admin-text-primary);
+}
+
+.alert-info {
+    border-left: 4px solid var(--admin-neon-cyan);
+    background: rgba(6, 182, 212, 0.05);
+}
+
+.alert-success {
+    border-left: 4px solid var(--admin-neon-green);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.alert-warning {
+    border-left: 4px solid var(--admin-neon-orange);
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.alert-danger {
+    border-left: 4px solid var(--admin-neon-red);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+/* ==== 管理后台响应式设计 ==== */
+@media (max-width: 768px) {
+    .admin-header h1 {
+        font-size: 2rem;
+    }
+    
+    .card-header,
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+}
+
+/* ==== 管理后台滚动条 ==== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--admin-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--admin-gradient-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--admin-gradient-success);
+}
+
+/* ==== 管理后台加载动画 ==== */
+.fa-spinner {
+    animation: adminSpin 1s linear infinite;
+}
+
+@keyframes adminSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ==== 管理后台徽章 ==== */
+.badge {
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.bg-primary {
+    background: var(--admin-gradient-primary) !important;
+}
+
+.bg-secondary {
+    background: rgba(203, 213, 225, 0.2) !important;
+    color: var(--admin-text-secondary);
+    border: 1px solid rgba(203, 213, 225, 0.3);
+}
+
+/* ==== 管理后台网格背景 ==== */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: 
+        linear-gradient(rgba(6, 182, 212, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: adminGridMove 40s ease-in-out infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes adminGridMove {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(15px, 15px); }
+}
+
+/* ==== 文字效果 ==== */
+.text-muted {
+    color: var(--admin-text-secondary) !important;
+}
+
+.text-primary {
+    color: var(--admin-neon-cyan) !important;
+}
+
+.fw-semibold {
+    font-weight: 600;
+}
+
+.fw-bold {
+    font-weight: 700;
+}

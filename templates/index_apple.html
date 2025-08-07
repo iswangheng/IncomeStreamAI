@@ -101,7 +101,7 @@
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-users"></i>
-                        关键团队成员
+                        关键人物列表
                     </h3>
                 </div>
                 <div class="card-body">
@@ -109,10 +109,18 @@
                         <!-- 初始人物卡片将由JavaScript动态生成 -->
                     </div>
                     
-                    <button type="button" class="add-person-btn interactive" onclick="addPerson()">
-                        <i class="fas fa-plus me-2"></i>
-                        添加团队成员
-                    </button>
+                    <div class="text-center mt-4" id="emptyState">
+                        <p class="text-muted">
+                            <i class="fas fa-users-slash"></i>
+                            还没有添加关键人物，点击下方按钮开始添加
+                        </p>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-primary interactive" onclick="addPerson()">
+                            <i class="fas fa-plus me-2"></i>
+                            添加关键人物
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -208,27 +216,211 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">姓名</label>
-                    <input type="text" class="form-control" name="person_name[]" placeholder="团队成员姓名">
+                    <label class="form-label">人物代号/姓名</label>
+                    <input type="text" class="form-control" name="person_name[]" placeholder="例如：A总">
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">角色职责</label>
-                    <input type="text" class="form-control" name="person_role[]" placeholder="如：技术负责人、市场总监等">
+                    <label class="form-label">身份角色</label>
+                    <select class="form-control" name="person_role[]">
+                        <option value="">选择身份角色</option>
+                        <option value="品牌方代表">品牌方代表</option>
+                        <option value="投资方（或投资人）">投资方（或投资人）</option>
+                        <option value="渠道资源持有者">渠道资源持有者</option>
+                        <option value="平台运营方">平台运营方</option>
+                        <option value="社群/流量掌控者">社群/流量掌控者</option>
+                        <option value="IP/内容方">IP/内容方</option>
+                        <option value="产品方">产品方</option>
+                        <option value="外部专家顾问">外部专家顾问</option>
+                    </select>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">可提供资源</label>
-                    <textarea class="form-control" name="person_resources[]" placeholder="描述此人能为项目提供的资源、技能或人脉..." rows="3"></textarea>
+                    <label class="form-label">掌握的资源</label>
+                    <input type="text" class="form-control" name="person_resources[]" 
+                           placeholder="请用逗号分隔多个资源，例如：品牌内容资源,产品分销权限">
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">期望获得</label>
-                    <textarea class="form-control" name="person_needs[]" placeholder="描述此人希望通过项目获得什么..." rows="2"></textarea>
+                    <label class="form-label">如何让此人开心（需求/痛点）</label>
+                    <div class="needs-selection-container">
+                        <!-- 默认显示的前两个分类 -->
+                        <div class="needs-visible-section">
+                            <!-- 结果回报 -->
+                            <div class="tag-group" style="margin-bottom: var(--space-3);">
+                                <h6 style="color: var(--color-primary); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
+                                    <span style="background: var(--color-primary); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🔵</span>想看到回报 / 实际效果
+                                </h6>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="拿到分成">
+                                        <span>拿到分成</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="带来客户">
+                                        <span>带来客户</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="尽快落地">
+                                        <span>项目尽快落地</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="持续收益">
+                                        <span>能长期持续赚钱</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 曝光影响 -->
+                            <div class="tag-group" style="margin-bottom: var(--space-3);">
+                                <h6 style="color: var(--color-success); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
+                                    <span style="background: var(--color-success); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🟢</span>想被看见 / 被宣传
+                                </h6>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="品牌曝光">
+                                        <span>有品牌曝光</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="打造人设">
+                                        <span>打造人设 / 专家身份</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="圈层精准">
+                                        <span>曝光圈子精准</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="成为发起人">
+                                        <span>项目以他为主导</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 展开时显示的其他分类 -->
+                        <div class="needs-expandable-section" style="display: none;">
+                            <!-- 主导控制 -->
+                            <div class="tag-group" style="margin-bottom: var(--space-3);">
+                                <h6 style="color: var(--color-warning); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
+                                    <span style="background: var(--color-warning); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🟡</span>想主导项目 / 有话语权
+                                </h6>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="自己决定节奏">
+                                        <span>自己决定节奏</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="不想被工具化">
+                                        <span>不想只是资源人</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="决定合作人">
+                                        <span>想决定和谁合作</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="想策划包装">
+                                        <span>想参与内容策划</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 风险规避 -->
+                            <div class="tag-group" style="margin-bottom: var(--space-3);">
+                                <h6 style="color: var(--color-error); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
+                                    <span style="background: var(--color-error); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🟠</span>不想冒风险
+                                </h6>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="不担责">
+                                        <span>不出钱不担责</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="不公开露脸">
+                                        <span>不公开露脸</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="避开冲突">
+                                        <span>不影响已有合作方</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="信息保密">
+                                        <span>希望信息保密</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 被尊重 -->
+                            <div class="tag-group" style="margin-bottom: var(--space-3);">
+                                <h6 style="color: var(--color-info); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
+                                    <span style="background: var(--color-info); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🔴</span>想被尊重 / 有地位
+                                </h6>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="成为顾问">
+                                        <span>成为顾问/专家</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="体现价值">
+                                        <span>体现出他很重要</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="圈子有地位">
+                                        <span>提升圈子里的地位</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="自己组的局">
+                                        <span>像是他发起的局</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 人脉情绪 -->
+                            <div class="tag-group" style="margin-bottom: var(--space-3);">
+                                <h6 style="color: var(--color-gray-700); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
+                                    <span style="background: var(--color-gray-700); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🟣</span>在乎人脉 / 感受
+                                </h6>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="拓展人脉">
+                                        <span>拓展人脉</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="有参与感">
+                                        <span>有参与感 / 成就感</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="能当谈资">
+                                        <span>项目能当谈资</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="被邀请的感觉">
+                                        <span>有被邀请的感觉</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 其他自定义 -->
+                            <div class="tag-group">
+                                <h6 style="color: var(--color-gray-600); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
+                                    <span style="background: var(--color-gray-600); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">✍️</span>其他（可补充描述）
+                                </h6>
+                                <textarea class="form-control" name="person_needs_extra[]" rows="2" 
+                                          placeholder="还有什么特别的点会让他愿意参与？比如：老板刚批预算，或者最近想冲数据..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- 展开/收起按钮 -->
+                        <div style="text-align: center; margin-top: var(--space-3);">
+                            <button type="button" class="btn-outline expand-toggle-btn" style="font-size: var(--text-sm); padding: var(--space-1) var(--space-3);" onclick="toggleExpand(this)">
+                                <i class="fas fa-angle-down me-1"></i>展开更多选项
+                            </button>
+                        </div>
+                    </div>
                 </div>
             `;
             
             container.appendChild(personCard);
+            updateEmptyState();
         }
         
         // 删除人物卡片
@@ -238,6 +430,7 @@
             setTimeout(() => {
                 card.remove();
                 updatePersonNumbers();
+                updateEmptyState();
             }, 300);
         }
         
@@ -252,6 +445,53 @@
             });
             personCount = cards.length;
         }
+        
+        // 更新空状态显示
+        function updateEmptyState() {
+            const emptyState = document.getElementById('emptyState');
+            const cards = document.querySelectorAll('.person-card');
+            if (emptyState) {
+                emptyState.style.display = cards.length === 0 ? 'block' : 'none';
+            }
+        }
+        
+        // 切换展开状态
+        function toggleExpand(button) {
+            const container = button.closest('.needs-selection-container');
+            const expandableSection = container.querySelector('.needs-expandable-section');
+            const icon = button.querySelector('i');
+            
+            if (expandableSection.style.display === 'none') {
+                expandableSection.style.display = 'block';
+                icon.className = 'fas fa-angle-up me-1';
+                button.innerHTML = '<i class="fas fa-angle-up me-1"></i>收起选项';
+            } else {
+                expandableSection.style.display = 'none';
+                icon.className = 'fas fa-angle-down me-1';
+                button.innerHTML = '<i class="fas fa-angle-down me-1"></i>展开更多选项';
+            }
+        }
+        
+        // 其他资源复选框功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const otherResourceCheckbox = document.getElementById('other_resource_checkbox');
+            const otherResourceText = document.getElementById('other_resource_text');
+            
+            if (otherResourceCheckbox && otherResourceText) {
+                otherResourceCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        otherResourceText.style.display = 'block';
+                        otherResourceText.focus();
+                    } else {
+                        otherResourceText.style.display = 'none';
+                        otherResourceText.value = '';
+                    }
+                });
+            }
+            
+            // 初始化空状态
+            updateEmptyState();
+        });
         
         // 处理其他资源输入框显示
         document.getElementById('other_resource_checkbox').addEventListener('change', function() {

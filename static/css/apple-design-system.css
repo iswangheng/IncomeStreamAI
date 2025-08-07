@@ -386,9 +386,7 @@ textarea.form-control {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--space-4);
-    padding-bottom: var(--space-3);
-    border-bottom: 1px solid var(--color-gray-200);
+    margin-bottom: var(--space-3); /* 减少底部间距 */
 }
 
 .person-number {
@@ -560,6 +558,71 @@ textarea.form-control {
     .card {
         margin-bottom: var(--space-6);
     }
+}
+
+/* checkbox-tag样式用于关键人物需求标签 */
+.checkbox-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-2);
+    margin: var(--space-1);
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition-base);
+    font-size: var(--text-xs);
+    line-height: 1.2;
+    user-select: none;
+}
+
+.checkbox-tag:hover {
+    background: var(--color-gray-50);
+    border-color: var(--color-primary);
+}
+
+.checkbox-tag input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-tag input[type="checkbox"]:checked + span {
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-2);
+    margin: -2px;
+}
+
+.checkbox-tag span {
+    transition: var(--transition-fast);
+}
+
+/* 需求选择容器特殊样式 */
+.needs-selection-container {
+    margin-top: var(--space-3);
+}
+
+.tag-group .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+}
+
+/* 覆盖特定的btn-outline样式用于展开按钮 */
+.expand-toggle-btn.btn-outline {
+    background: transparent;
+    border: 1px solid var(--color-gray-300);
+    color: var(--color-text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-base);
+}
+
+.expand-toggle-btn.btn-outline:hover {
+    background: var(--color-gray-50);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
 /* 动画和过渡 */

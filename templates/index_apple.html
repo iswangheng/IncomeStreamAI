@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angela · 非劳务收入管道设计师</title>
+    
+    <!-- 预加载关键字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Apple级别设计系统 -->
+    <link href="{{ url_for('static', filename='css/apple-design-system.css') }}" rel="stylesheet">
+    
+    <!-- SEO优化 -->
+    <meta name="description" content="Angela - Apple级别AI驱动的非劳务收入管道设计工具，世界一流的用户体验">
+    <meta name="keywords" content="AI收入设计,非劳务收入,智能管道,商业策略,Apple设计">
+</head>
+<body>
+    <!-- Apple风格导航栏 -->
+    <nav class="navigation-bar">
+        <div class="nav-content">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                Angela
+            </a>
+            <div class="nav-actions">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary btn-small">
+                    <i class="fas fa-cog me-2"></i>管理中心
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <!-- 页面标题区域 -->
+        <header class="page-header fade-in">
+            <h1 class="page-title">非劳务收入管道设计师</h1>
+            <p class="page-subtitle">运用先进AI算法，为您精准设计创新的非劳务收入解决方案。基于您的项目信息和团队资源，生成个性化的收入管道策略。</p>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'error' else 'info' }} slide-up">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- 主要表单 -->
+        <form method="POST" action="{{ url_for('generate') }}" id="mainForm" class="slide-up">
+            
+            <!-- 项目基础信息模块 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-rocket"></i>
+                        项目基础信息
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="project_name" class="form-label">项目名称</label>
+                        <input type="text" class="form-control" id="project_name" name="project_name" 
+                               placeholder="请输入您的项目名称" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="project_description" class="form-label">项目背景描述</label>
+                        <textarea class="form-control" id="project_description" name="project_description" 
+                                  placeholder="详细描述您的项目背景、目标和现状..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="project_stage" class="form-label">项目阶段</label>
+                        <select class="form-control" id="project_stage" name="project_stage">
+                            <option value="">选择项目当前阶段</option>
+                            <option value="idea">想法阶段</option>
+                            <option value="planning">规划阶段</option>
+                            <option value="development">开发阶段</option>
+                            <option value="testing">测试阶段</option>
+                            <option value="launch">准备上线</option>
+                            <option value="running">已上线运营</option>
+                            <option value="scaling">规模化扩展</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 关键人物模块 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-users"></i>
+                        关键团队成员
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="personsContainer">
+                        <!-- 初始人物卡片将由JavaScript动态生成 -->
+                    </div>
+                    
+                    <button type="button" class="add-person-btn interactive" onclick="addPerson()">
+                        <i class="fas fa-plus me-2"></i>
+                        添加团队成员
+                    </button>
+                </div>
+            </div>
+
+            <!-- 外部资源模块 -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-network-wired"></i>
+                        外部资源与合作
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <label class="form-label">可用的外部资源（多选）</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="external_resources" value="政府补贴">
+                            <span>政府补贴</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="external_resources" value="投资机构">
+                            <span>投资机构</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="external_resources" value="合作伙伴">
+                            <span>合作伙伴</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="external_resources" value="供应链">
+                            <span>供应链资源</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="external_resources" value="技术平台">
+                            <span>技术平台</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="external_resources" value="媒体渠道">
+                            <span>媒体渠道</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="external_resources" value="行业协会">
+                            <span>行业协会</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="external_resources" value="专业服务">
+                            <span>专业服务机构</span>
+                        </label>
+                    </div>
+                    
+                    <!-- 其他资源输入 -->
+                    <div class="form-group" style="margin-top: var(--space-6);">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="other_resource_checkbox" name="other_resource_checkbox">
+                            <span>其他资源</span>
+                        </label>
+                        <input type="text" class="form-control" id="other_resource_text" name="other_resource_text" 
+                               placeholder="请描述其他可用的外部资源..." style="margin-top: var(--space-3); display: none;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提交按钮 -->
+            <div style="text-align: center; margin-top: var(--space-8);">
+                <button type="submit" class="btn btn-primary btn-large interactive">
+                    <i class="fas fa-magic me-2"></i>
+                    开始AI智能分析
+                </button>
+                <p style="margin-top: var(--space-4); color: var(--color-text-secondary); font-size: var(--text-sm);">
+                    基于您提供的信息，AI将在几秒内生成专业的收入管道设计方案
+                </p>
+            </div>
+        </form>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 人物计数器
+        let personCount = 0;
+        
+        // 添加人物卡片
+        function addPerson() {
+            personCount++;
+            const container = document.getElementById('personsContainer');
+            
+            const personCard = document.createElement('div');
+            personCard.className = 'person-card slide-up';
+            personCard.innerHTML = `
+                <div class="person-card-header">
+                    <div class="person-number">${personCount}</div>
+                    <button type="button" class="remove-person-btn" onclick="removePerson(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">姓名</label>
+                    <input type="text" class="form-control" name="person_name[]" placeholder="团队成员姓名">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">角色职责</label>
+                    <input type="text" class="form-control" name="person_role[]" placeholder="如：技术负责人、市场总监等">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">可提供资源</label>
+                    <textarea class="form-control" name="person_resources[]" placeholder="描述此人能为项目提供的资源、技能或人脉..." rows="3"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">期望获得</label>
+                    <textarea class="form-control" name="person_needs[]" placeholder="描述此人希望通过项目获得什么..." rows="2"></textarea>
+                </div>
+            `;
+            
+            container.appendChild(personCard);
+        }
+        
+        // 删除人物卡片
+        function removePerson(button) {
+            const card = button.closest('.person-card');
+            card.style.animation = 'slideUp 0.3s ease-out reverse';
+            setTimeout(() => {
+                card.remove();
+                updatePersonNumbers();
+            }, 300);
+        }
+        
+        // 更新人物编号
+        function updatePersonNumbers() {
+            const cards = document.querySelectorAll('.person-card');
+            cards.forEach((card, index) => {
+                const numberElement = card.querySelector('.person-number');
+                if (numberElement) {
+                    numberElement.textContent = index + 1;
+                }
+            });
+            personCount = cards.length;
+        }
+        
+        // 处理其他资源输入框显示
+        document.getElementById('other_resource_checkbox').addEventListener('change', function() {
+            const textInput = document.getElementById('other_resource_text');
+            if (this.checked) {
+                textInput.style.display = 'block';
+                textInput.focus();
+            } else {
+                textInput.style.display = 'none';
+                textInput.value = '';
+            }
+        });
+        
+        // 表单提交前验证
+        document.getElementById('mainForm').addEventListener('submit', function(e) {
+            const projectName = document.getElementById('project_name').value.trim();
+            const projectDescription = document.getElementById('project_description').value.trim();
+            
+            if (!projectName || !projectDescription) {
+                e.preventDefault();
+                alert('请填写项目名称和背景描述');
+                return;
+            }
+            
+            // 添加提交动画
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在分析...';
+            submitBtn.disabled = true;
+        });
+        
+        // 页面加载时添加初始人物卡片
+        document.addEventListener('DOMContentLoaded', function() {
+            addPerson();
+        });
+        
+        // 添加平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // 添加输入框焦点动画
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+    </script>
+</body>
+</html>

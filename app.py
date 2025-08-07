@@ -103,8 +103,8 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    """Main form page for user input"""
-    return render_template('index.html')
+    """Main form page for user input - Apple design"""
+    return render_template('index_apple.html')
 
 @app.route('/generate', methods=['POST'])
 def generate():
@@ -144,8 +144,6 @@ def generate():
         if other_resource_text and request.form.get('other_resource_checkbox'):
             external_resources.append(other_resource_text)
         
-        external_resources = request.form.getlist('external_resources')
-        
         # Create JSON structure as per PRD
         form_data = {
             "project_name": project_name,
@@ -161,7 +159,7 @@ def generate():
         # Generate AI suggestions (simulated for demo)
         suggestions = generate_ai_suggestions(form_data)
         
-        return render_template('result.html', 
+        return render_template('result_apple.html', 
                              form_data=form_data, 
                              suggestions=suggestions)
     
@@ -180,46 +178,50 @@ def generate_ai_suggestions(form_data):
     
     suggestions = []
     
-    # Suggestion 1: Revenue Sharing Model
+    # Generate AI suggestions with proper format for Apple design templates
     suggestion1 = {
-        "title": "收益分成模式",
-        "description": f"基于{project_name}项目，建立多方收益分成机制",
-        "details": [
-            "与品牌方建立产品销售分成关系，获得销售额的10-15%分成",
-            "整合渠道资源，为品牌方提供精准流量导入",
-            "建立长期合作关系，确保持续收益流"
+        "title": "收益分成合作模式",
+        "description": f"基于{project_name}项目建立多方收益分成机制，与合作伙伴共享收益，降低风险的同时确保持续收入流。",
+        "implementation_steps": [
+            "分析项目核心价值点，确定可分成的收益环节",
+            "识别潜在合作伙伴，建立初步接触渠道", 
+            "制定公平透明的收益分成比例方案",
+            "签署正式合作协议，明确各方权责",
+            "建立收益监控和分配机制"
         ],
-        "key_roles": [person["name"] for person in key_persons[:2]],
-        "revenue_potential": "中等-稳定",
-        "implementation_difficulty": "中等"
+        "required_resources": ["法务支持", "财务系统", "合作伙伴网络"],
+        "key_roles": [person["name"] for person in key_persons[:3] if person.get("name")],
+        "estimated_revenue": "月收入 3-8万元"
     }
     
-    # Suggestion 2: Platform Integration Model
     suggestion2 = {
-        "title": "平台整合变现模式",
-        "description": "通过整合多方资源，搭建收益分发平台",
-        "details": [
-            "建立资源整合平台，连接品牌方、渠道方和内容方",
-            "收取平台服务费和交易佣金",
-            "提供增值服务，如数据分析、营销策划等"
+        "title": "知识产权授权模式",
+        "description": f"将{project_name}的核心技术、方法论或品牌价值进行标准化，通过授权许可获得持续收入。",
+        "implementation_steps": [
+            "梳理项目中的核心知识产权和可复制资产",
+            "完善知识产权保护，申请相关专利或版权",
+            "开发标准化授权方案和培训体系",
+            "寻找目标授权客户，进行市场推广",
+            "建立授权管理和技术支持体系"
         ],
-        "key_roles": [person["name"] for person in key_persons],
-        "revenue_potential": "高-可扩展",
-        "implementation_difficulty": "较高"
+        "required_resources": ["知识产权律师", "标准化文档", "培训材料"],
+        "key_roles": [person["name"] for person in key_persons if person.get("name") and "技术" in person.get("role", "")],
+        "estimated_revenue": "年收入 15-50万元"
     }
     
-    # Suggestion 3: Consulting & Advisory Model
     suggestion3 = {
-        "title": "顾问咨询收费模式",
-        "description": "基于项目经验，提供专业咨询服务",
-        "details": [
-            "为类似项目提供策划和执行咨询服务",
-            "建立行业专家网络，收取介绍费和咨询费",
-            "开发标准化解决方案，实现规模化收费"
+        "title": "顾问咨询服务模式", 
+        "description": f"基于{project_name}的成功经验，为同行业客户提供专业咨询服务，建立专家品牌价值。",
+        "implementation_steps": [
+            "总结项目成功经验，形成方法论体系",
+            "建立个人或团队专业品牌形象",
+            "开发咨询服务产品线和定价体系",
+            "通过内容营销建立行业影响力",
+            "建立客户获取和服务交付流程"
         ],
-        "key_roles": ["项目负责人", "行业专家"],
-        "revenue_potential": "中等-专业化",
-        "implementation_difficulty": "较低"
+        "required_resources": ["品牌建设", "内容创作", "客户关系管理"],
+        "key_roles": [person["name"] for person in key_persons[:2] if person.get("name")],
+        "estimated_revenue": "项目收入 5-20万元"
     }
     
     suggestions = [suggestion1, suggestion2, suggestion3]
@@ -260,7 +262,7 @@ def admin_dashboard():
     # 按上传时间倒序排列，只显示未删除的文件
     knowledge_items = query.filter(KnowledgeItem.status != 'deleted').order_by(KnowledgeItem.upload_time.desc()).all()
     
-    return render_template('admin/dashboard.html', 
+    return render_template('admin/dashboard_apple.html', 
                          knowledge_items=knowledge_items,
                          status_filter=status_filter,
                          search_query=search_query)

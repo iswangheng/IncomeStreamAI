@@ -1,0 +1,413 @@
+{% extends "admin/base_apple.html" %}
+
+{% block title %}管理仪表板 - Angela AI{% endblock %}
+
+{% block content %}
+<!-- 页面标题区域 -->
+<div class="admin-page-header">
+    <h1 class="admin-page-title">管理仪表板</h1>
+    <p class="admin-page-subtitle">知识库管理与系统监控</p>
+</div>
+
+<!-- 统计卡片 -->
+<div class="stats-grid">
+    <div class="stats-card fade-in">
+        <div class="stats-header">
+            <div class="stats-icon" style="background: var(--color-primary);">
+                <i class="fas fa-database"></i>
+            </div>
+        </div>
+        <div class="stats-value">{{ knowledge_items|length }}</div>
+        <div class="stats-label">知识库文件</div>
+        <div class="stats-change positive">
+            <i class="fas fa-arrow-up me-1"></i>
+            活跃状态
+        </div>
+    </div>
+    
+    <div class="stats-card fade-in" style="animation-delay: 0.1s;">
+        <div class="stats-header">
+            <div class="stats-icon" style="background: var(--status-active);">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+        <div class="stats-value">{{ knowledge_items|selectattr("status", "equalto", "active")|list|length }}</div>
+        <div class="stats-label">活跃文件</div>
+        <div class="stats-change positive">
+            <i class="fas fa-arrow-up me-1"></i>
+            可用于AI处理
+        </div>
+    </div>
+    
+    <div class="stats-card fade-in" style="animation-delay: 0.2s;">
+        <div class="stats-header">
+            <div class="stats-icon" style="background: var(--status-paused);">
+                <i class="fas fa-pause-circle"></i>
+            </div>
+        </div>
+        <div class="stats-value">{{ knowledge_items|selectattr("status", "equalto", "paused")|list|length }}</div>
+        <div class="stats-label">暂停文件</div>
+        <div class="stats-change">
+            <i class="fas fa-minus me-1"></i>
+            临时停用
+        </div>
+    </div>
+    
+    <div class="stats-card fade-in" style="animation-delay: 0.3s;">
+        <div class="stats-header">
+            <div class="stats-icon" style="background: var(--color-accent);">
+                <i class="fas fa-chart-line"></i>
+            </div>
+        </div>
+        <div class="stats-value">{{ (knowledge_items|sum(attribute='file_size') / 1024 / 1024)|round(1) }}</div>
+        <div class="stats-label">总大小 (MB)</div>
+        <div class="stats-change">
+            <i class="fas fa-database me-1"></i>
+            存储空间使用
+        </div>
+    </div>
+</div>
+
+<!-- 文件上传区域 -->
+<div class="upload-zone fade-in" style="animation-delay: 0.4s;" onclick="document.getElementById('fileInput').click()">
+    <div class="upload-icon">
+        <i class="fas fa-cloud-upload-alt"></i>
+    </div>
+    <h4 class="upload-title">上传知识库文件</h4>
+    <p class="upload-description">将文件拖拽到此处，或点击选择文件上传</p>
+    <div class="upload-formats">
+        支持格式：TXT, PDF, DOC, DOCX, XLSX, CSV, MD, JSON
+    </div>
+    
+    <form id="uploadForm" action="{{ url_for('upload_knowledge') }}" method="post" enctype="multipart/form-data" style="display: none;">
+        <input type="file" id="fileInput" name="file" accept=".txt,.pdf,.doc,.docx,.xlsx,.csv,.md,.json">
+        <input type="text" id="summaryInput" name="summary" placeholder="文件描述（可选）">
+    </form>
+</div>
+
+<!-- 快速创建文本知识 -->
+<div class="card fade-in" style="animation-delay: 0.5s; margin: var(--space-6);">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-plus-circle"></i>
+            快速创建文本知识
+        </h3>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('create_text_knowledge') }}" method="post">
+            <div class="form-group">
+                <label for="textTitle" class="form-label">标题</label>
+                <input type="text" class="form-control" id="textTitle" name="title" placeholder="输入知识条目标题" required>
+            </div>
+            <div class="form-group">
+                <label for="textContent" class="form-label">内容</label>
+                <textarea class="form-control" id="textContent" name="content" rows="6" placeholder="输入知识条目内容..." required></textarea>
+            </div>
+            <div style="text-align: right;">
+                <button type="submit" class="btn btn-primary interactive">
+                    <i class="fas fa-save me-2"></i>
+                    创建知识条目
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 知识库文件列表 -->
+<div class="table-container fade-in" style="animation-delay: 0.6s;">
+    <div class="table-header">
+        <h3 class="table-title">知识库文件列表</h3>
+        <div class="table-filters">
+            <form method="GET" style="display: flex; align-items: center; gap: var(--space-3);">
+                <input type="text" name="search" class="filter-input" placeholder="搜索文件名..." 
+                       value="{{ search_query or '' }}">
+                <select name="status" class="filter-select">
+                    <option value="">全部状态</option>
+                    <option value="active" {{ 'selected' if status_filter == 'active' }}>活跃</option>
+                    <option value="paused" {{ 'selected' if status_filter == 'paused' }}>暂停</option>
+                </select>
+                <button type="submit" class="btn btn-secondary btn-small">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    {% if knowledge_items %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>文件名</th>
+                <th>类型</th>
+                <th>大小</th>
+                <th>状态</th>
+                <th>上传时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in knowledge_items %}
+            <tr class="slide-up" style="animation-delay: {{ loop.index * 0.05 }}s;">
+                <td>
+                    <div style="display: flex; align-items: center;">
+                        <div style="width: 40px; height: 40px; background: var(--color-primary); color: var(--color-text-inverse); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-right: var(--space-3); font-weight: var(--font-semibold);">
+                            {% if item.file_type == 'text' %}
+                                <i class="fas fa-file-text"></i>
+                            {% elif item.file_type in ['pdf'] %}
+                                <i class="fas fa-file-pdf"></i>
+                            {% elif item.file_type in ['doc', 'docx'] %}
+                                <i class="fas fa-file-word"></i>
+                            {% elif item.file_type in ['xlsx', 'csv'] %}
+                                <i class="fas fa-file-excel"></i>
+                            {% elif item.file_type == 'json' %}
+                                <i class="fas fa-file-code"></i>
+                            {% else %}
+                                <i class="fas fa-file"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div style="font-weight: var(--font-medium); color: var(--color-text-primary);">{{ item.original_filename }}</div>
+                            <div style="font-size: var(--text-xs); color: var(--color-text-secondary);">{{ item.filename }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span style="font-size: var(--text-xs); text-transform: uppercase; font-weight: var(--font-semibold); color: var(--color-text-secondary);">
+                        {{ item.file_type }}
+                    </span>
+                </td>
+                <td>{{ "%.1f"|format(item.file_size / 1024) }} KB</td>
+                <td>
+                    {% if item.status == 'active' %}
+                        <span class="status-badge active">活跃</span>
+                    {% elif item.status == 'paused' %}
+                        <span class="status-badge paused">暂停</span>
+                    {% else %}
+                        <span class="status-badge draft">{{ item.status }}</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--color-text-secondary);">
+                    {{ item.upload_time.strftime('%Y-%m-%d %H:%M') }}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        {% if item.file_type == 'text' %}
+                        <button type="button" class="action-btn edit" onclick="editTextItem({{ item.id }}, '{{ item.original_filename }}', '{{ item.content_summary|replace("'", "\\'") }}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        {% endif %}
+                        
+                        <form method="post" action="{{ url_for('toggle_knowledge_status', item_id=item.id) }}" style="display: inline;">
+                            <button type="submit" class="action-btn toggle">
+                                {% if item.status == 'active' %}
+                                    <i class="fas fa-pause"></i>
+                                {% else %}
+                                    <i class="fas fa-play"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+                        
+                        <form method="post" action="{{ url_for('delete_knowledge', item_id=item.id) }}" 
+                              onsubmit="return confirm('确定要删除这个文件吗？')" style="display: inline;">
+                            <button type="submit" class="action-btn delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-folder-open"></i>
+        </div>
+        <h4 class="empty-title">暂无知识库文件</h4>
+        <p class="empty-description">
+            {% if search_query or status_filter %}
+                未找到符合条件的文件，请尝试调整搜索条件。
+            {% else %}
+                开始上传文件或创建文本知识条目来建设您的知识库。
+            {% endif %}
+        </p>
+        {% if not search_query and not status_filter %}
+        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-plus me-2"></i>
+            上传第一个文件
+        </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- 编辑文本模态框 -->
+<div class="modal-overlay" id="editModal" style="display: none;" onclick="closeEditModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h4 class="modal-title">编辑文本知识条目</h4>
+            <button type="button" class="modal-close" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="editForm" method="post">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editTitle" class="form-label">标题</label>
+                    <input type="text" class="form-control" id="editTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="editContent" class="form-label">内容</label>
+                    <textarea class="form-control" id="editContent" name="content" rows="8" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    保存更改
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 文件上传处理
+document.getElementById('fileInput').addEventListener('change', function() {
+    if (this.files.length > 0) {
+        const fileName = this.files[0].name;
+        const summary = prompt(`为文件 "${fileName}" 添加描述（可选）：`);
+        if (summary !== null) {
+            document.getElementById('summaryInput').value = summary;
+        }
+        document.getElementById('uploadForm').submit();
+    }
+});
+
+// 拖拽上传
+const uploadZone = document.querySelector('.upload-zone');
+
+uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+});
+
+uploadZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+});
+
+uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('dragover');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const fileInput = document.getElementById('fileInput');
+        fileInput.files = files;
+        
+        const fileName = files[0].name;
+        const summary = prompt(`为文件 "${fileName}" 添加描述（可选）：`);
+        if (summary !== null) {
+            document.getElementById('summaryInput').value = summary;
+        }
+        document.getElementById('uploadForm').submit();
+    }
+});
+
+// 编辑文本项目
+function editTextItem(itemId, title, content) {
+    document.getElementById('editTitle').value = title.replace('.txt', '');
+    document.getElementById('editContent').value = content;
+    document.getElementById('editForm').action = `/admin/knowledge/${itemId}/edit`;
+    document.getElementById('editModal').style.display = 'flex';
+    
+    // 添加显示动画
+    setTimeout(() => {
+        document.querySelector('.modal-content').style.transform = 'scale(1)';
+        document.querySelector('.modal-content').style.opacity = '1';
+    }, 10);
+}
+
+// 关闭编辑模态框
+function closeEditModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    
+    const modal = document.getElementById('editModal');
+    const content = document.querySelector('.modal-content');
+    
+    content.style.transform = 'scale(0.95)';
+    content.style.opacity = '0';
+    
+    setTimeout(() => {
+        modal.style.display = 'none';
+        content.style.transform = 'scale(1)';
+        content.style.opacity = '1';
+    }, 200);
+}
+
+// 键盘快捷键
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeEditModal();
+    }
+});
+
+// 页面加载动画
+document.addEventListener('DOMContentLoaded', function() {
+    // 为统计卡片添加交错动画
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // 为表格行添加交错动画
+    const tableRows = document.querySelectorAll('.data-table tbody tr');
+    tableRows.forEach((row, index) => {
+        row.style.animationDelay = `${0.7 + index * 0.05}s`;
+    });
+    
+    // 添加滚动动画观察器
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    // 观察所有动画元素
+    document.querySelectorAll('.slide-up').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+});
+
+// 表单验证增强
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>处理中...';
+            submitBtn.disabled = true;
+            
+            // 如果表单验证失败，恢复按钮状态
+            setTimeout(() => {
+                if (!this.checkValidity()) {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }, 100);
+        }
+    });
+});
+</script>
+{% endblock %}

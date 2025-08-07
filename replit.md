@@ -43,7 +43,7 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 ## User Preferences
 
 - **Communication Style**: 使用中文交流，简单易懂的日常用语
-- **UI Design Style**: 清新明亮优雅风格。采用明亮背景色系配合柔和渐变色彩，优雅紫蓝(#667eea)和天空蓝(#4facfe)为主色调，极浅蓝白背景(#fafbff)搭配纯白卡片。整体设计轻盈舒适，具有现代感的同时保持友好亲和，适合长时间使用，给用户带来愉悦的视觉体验。
+- **UI Design Style**: Apple级别设计系统。遵循Apple Human Interface Guidelines，采用系统级设计令牌体系。主色调为iOS蓝(#007AFF)配合中性灰色系，实现简洁、优雅、功能性和高可访问性的完美平衡。设计哲学注重内容优先、直观交互和视觉层次，为用户提供世界顶级的使用体验。
 
 ## System Architecture
 
@@ -51,12 +51,12 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 - **Template Engine**: Jinja2 templating with Flask for server-side rendering
 - **UI Framework**: Bootstrap 5 with custom warm theme for responsive design
 - **Design System**: 
-  - Color Palette: 明亮背景 (#fafbff), 优雅紫蓝 (#667eea), 天空蓝 (#4facfe), 柔和粉 (#f093fb)
-  - Layout: 清新卡片布局，明亮渐变背景，优雅圆角设计
-  - Typography: Inter font family for modern readability
-  - Animations: 平滑过渡动画，悬停效果，淡入效果
+  - Color Palette: iOS蓝 (#007AFF), 系统灰色级联, 语义化状态色彩
+  - Layout: Apple风格卡片系统，毛玻璃导航栏，精确间距网格 (8pt系统)
+  - Typography: Apple系统字体栈 (-apple-system, SF Pro Display风格)
+  - Animations: Apple级别微交互，弹性过渡，视差滚动效果
 - **JavaScript**: Vanilla JavaScript for dynamic form interactions (adding/removing person cards)
-- **Styling**: 清新明亮优雅CSS样式系统，明亮主题，柔和色彩系统，Bootstrap集成，Font Awesome图标
+- **Styling**: Apple级别CSS设计系统，完整设计令牌库，响应式网格，无障碍优化，Bootstrap 5集成，Font Awesome 6图标
 - **Language**: Chinese (zh-CN) interface with warm, friendly tone
 
 ### Backend Architecture
@@ -114,14 +114,14 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 - **Real-time Testing**: 对话测试模块验证知识库效果，支持开关知识库上下文
 
 ## Recent Changes (2025-08-07)
-- ✅ **重大UI重新设计：世界顶级现代化界面升级**
-  - 全面采用深色主题配合霓虹色彩系统 (#0a0a0f + #00d4ff + #8b5cf6 + #f472b6)
-  - 实现玻璃态效果(Glassmorphism)和流体渐变设计
-  - 现代化卡片布局和微交互动画系统
-  - 重新设计首页表单界面，采用顶级视觉风格
-  - 重新设计管理后台，现代化仪表板界面
-  - 重新设计结果页面，高端展示效果
-  - 创建现代化CSS样式系统(modern-style.css, admin-modern.css)
+- ✅ **重大升级：Apple级别UI设计系统实施**
+  - 创建世界一流的Apple风格设计系统 (apple-design-system.css)
+  - 实施完整的设计令牌系统：颜色、字体、间距、阴影、动画
+  - 重新设计首页界面 (index_apple.html) - 现代Apple风格表单设计
+  - 重新设计结果页面 (result_apple.html) - 优雅的数据展示和交互
+  - 重新设计管理后台 (dashboard_apple.html, base_apple.html) - 专业级管理界面
+  - 采用Apple Human Interface Guidelines标准
+  - 实现无障碍优化和响应式设计
 - ✅ 完成AI对话测试模块集成，支持OpenAI多模型选择
 - ✅ 新增知识库上下文切换功能，可测试知识库效果
 - ✅ 实现对话历史管理、清空对话、Enter键发送等功能

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Angela AI 智能管理中心{% endblock %}</title>
+    
+    <!-- 预加载关键字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Apple级别设计系统 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/apple-design-system.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-apple-design.css') }}">
+    
+    <!-- SEO优化 -->
+    <meta name="description" content="Angela AI 智能管理中心 - Apple级别的管理界面">
+    <meta name="robots" content="noindex, nofollow">
+</head>
+<body class="admin-layout">
+    <!-- 侧边栏导航 -->
+    <aside class="admin-sidebar">
+        <div class="admin-brand">
+            <i class="fas fa-brain"></i>
+            <h1>Angela AI</h1>
+        </div>
+        
+        <nav>
+            <ul class="admin-nav">
+                <li class="admin-nav-item">
+                    <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-link active">
+                        <i class="fas fa-tachometer-alt"></i>
+                        仪表板
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="#knowledge" class="admin-nav-link">
+                        <i class="fas fa-database"></i>
+                        知识库管理
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="#analytics" class="admin-nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        数据分析
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a href="#settings" class="admin-nav-link">
+                        <i class="fas fa-cog"></i>
+                        系统设置
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div style="margin-top: auto; padding-top: var(--space-8);">
+            <a href="{{ url_for('index') }}" class="btn btn-outline" style="width: 100%;">
+                <i class="fas fa-home me-2"></i>
+                返回前台
+            </a>
+        </div>
+    </aside>
+
+    <!-- 主要内容区域 -->
+    <main class="admin-main">
+        <!-- 顶部工具栏 -->
+        <div class="admin-toolbar">
+            <div class="admin-breadcrumb">
+                <a href="{{ url_for('admin_dashboard') }}">管理中心</a>
+                <span class="separator">/</span>
+                <span>{% block breadcrumb %}仪表板{% endblock %}</span>
+            </div>
+            <div class="admin-actions">
+                <button type="button" class="btn btn-secondary btn-small" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div style="width: 32px; height: 32px; background: var(--color-primary); color: var(--color-text-inverse); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-weight: var(--font-semibold); cursor: pointer;">
+                    A
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div style="padding: 0 var(--space-6); margin-top: var(--space-4);">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'error' if category == 'error' else 'success' if category == 'success' else 'info' }} fade-in">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- 页面内容 -->
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 管理后台通用脚本 -->
+    <script>
+        // 移动端菜单切换
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            sidebar.classList.toggle('open');
+        });
+
+        // 点击主内容区域时关闭移动端菜单
+        document.querySelector('.admin-main').addEventListener('click', function() {
+            const sidebar = document.querySelector('.admin-sidebar');
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        // 活跃导航链接更新
+        function updateActiveNav() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.admin-nav-link');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // 页面加载时更新活跃导航
+        document.addEventListener('DOMContentLoaded', updateActiveNav);
+
+        // 添加页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为所有fade-in元素添加动画
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+                el.style.opacity = '0';
+                el.style.animation = 'fadeIn 0.6s ease forwards';
+            });
+
+            // 添加滚动时的动画观察器
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('slide-up');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            // 观察所有卡片和统计项目
+            document.querySelectorAll('.stats-card, .card, .table-container').forEach(el => {
+                observer.observe(el);
+            });
+        });
+
+        // 全局错误处理
+        window.addEventListener('error', function(e) {
+            console.error('页面错误:', e.error);
+        });
+
+        // 添加键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K 快速搜索
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.querySelector('.filter-input');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+            
+            // ESC 关闭模态框
+            if (e.key === 'Escape') {
+                const modals = document.querySelectorAll('.modal-overlay');
+                modals.forEach(modal => {
+                    if (modal.style.display !== 'none') {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        // 添加表单自动保存功能（对于长表单）
+        function enableAutoSave(formSelector) {
+            const form = document.querySelector(formSelector);
+            if (!form) return;
+
+            const inputs = form.querySelectorAll('input, textarea, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    const formData = new FormData(form);
+                    localStorage.setItem('autoSave_' + form.id, JSON.stringify(Object.fromEntries(formData)));
+                });
+            });
+
+            // 页面加载时恢复数据
+            const savedData = localStorage.getItem('autoSave_' + form.id);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                Object.keys(data).forEach(key => {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input && data[key]) {
+                        input.value = data[key];
+                    }
+                });
+            }
+
+            // 表单提交时清除保存的数据
+            form.addEventListener('submit', function() {
+                localStorage.removeItem('autoSave_' + form.id);
+            });
+        }
+
+        // 添加实时状态更新
+        function startStatusPolling() {
+            setInterval(async function() {
+                try {
+                    const response = await fetch('/admin/status', {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateStatusIndicators(data);
+                    }
+                } catch (error) {
+                    console.log('状态更新失败:', error);
+                }
+            }, 30000); // 每30秒更新一次
+        }
+
+        function updateStatusIndicators(data) {
+            // 更新统计数字
+            const statsElements = document.querySelectorAll('[data-stat]');
+            statsElements.forEach(el => {
+                const statType = el.getAttribute('data-stat');
+                if (data[statType] !== undefined) {
+                    el.textContent = data[statType];
+                }
+            });
+        }
+    </script>
+    
+    {% block scripts %}
+    {% endblock %}
+</body>
+</html>

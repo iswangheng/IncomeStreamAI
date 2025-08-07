@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能收入路径分析结果 - Angela</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Apple级别设计系统 -->
+    <link href="{{ url_for('static', filename='css/apple-design-system.css') }}" rel="stylesheet">
+    
+    <!-- SEO优化 -->
+    <meta name="description" content="Angela AI - Apple级别智能收入路径分析结果，世界一流的专业收入管道设计方案">
+    <meta name="keywords" content="AI收入分析,智能收入方案,收入路径设计,Apple设计">
+</head>
+<body>
+    <!-- Apple风格导航栏 -->
+    <nav class="navigation-bar">
+        <div class="nav-content">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <i class="fas fa-brain"></i>
+                Angela
+            </a>
+            <div class="nav-actions">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary btn-small">
+                    <i class="fas fa-cog me-2"></i>管理中心
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <!-- 成功页面标题区域 -->
+        <header class="page-header fade-in">
+            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: var(--space-6);">
+                <div style="width: 80px; height: 80px; background: var(--color-success); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; margin-right: var(--space-4);">
+                    <i class="fas fa-check" style="font-size: var(--text-2xl); color: var(--color-text-inverse);"></i>
+                </div>
+                <div>
+                    <h1 class="page-title" style="margin-bottom: var(--space-1);">分析完成</h1>
+                    <p class="page-subtitle">基于您的项目信息，已生成专业的收入管道方案</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- 项目概览卡片 -->
+        <div class="card slide-up" style="margin-bottom: var(--space-8);">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-lightbulb"></i>
+                    项目智能概览
+                </h3>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-6);">
+                    <div>
+                        <div style="font-weight: var(--font-semibold); color: var(--color-text-secondary); font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-1);">项目名称</div>
+                        <div style="font-size: var(--text-lg); font-weight: var(--font-medium);">{{ form_data.project_name }}</div>
+                    </div>
+                    <div>
+                        <div style="font-weight: var(--font-semibold); color: var(--color-text-secondary); font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-1);">项目阶段</div>
+                        <div style="font-size: var(--text-lg); font-weight: var(--font-medium);">{{ form_data.project_stage or '未指定' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-weight: var(--font-semibold); color: var(--color-text-secondary); font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-1);">团队规模</div>
+                        <div style="font-size: var(--text-lg); font-weight: var(--font-medium);">{{ form_data.key_persons|length }} 人</div>
+                    </div>
+                    <div>
+                        <div style="font-weight: var(--font-semibold); color: var(--color-text-secondary); font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-1);">外部资源</div>
+                        <div style="font-size: var(--text-lg); font-weight: var(--font-medium);">{{ form_data.external_resources|length }} 项</div>
+                    </div>
+                </div>
+                
+                {% if form_data.project_description %}
+                <div style="margin-top: var(--space-6); padding-top: var(--space-6); border-top: 0.5px solid var(--color-gray-200);">
+                    <div style="font-weight: var(--font-semibold); color: var(--color-text-secondary); font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">项目背景</div>
+                    <p style="color: var(--color-text-primary); line-height: var(--leading-relaxed);">{{ form_data.project_description }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI生成的收入管道方案 -->
+        <div class="card slide-up">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-magic"></i>
+                    AI收入管道设计方案
+                </h3>
+            </div>
+            <div class="card-body">
+                {% for suggestion in suggestions %}
+                <div style="background: var(--color-bg-secondary); border-radius: var(--radius-xl); padding: var(--space-6); margin-bottom: var(--space-6); {% if loop.last %}margin-bottom: 0;{% endif %}">
+                    <div style="display: flex; align-items: flex-start; margin-bottom: var(--space-4);">
+                        <div style="width: 40px; height: 40px; background: var(--color-primary); color: var(--color-text-inverse); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-weight: var(--font-bold); margin-right: var(--space-4); flex-shrink: 0;">
+                            {{ loop.index }}
+                        </div>
+                        <div style="flex: 1;">
+                            <h4 style="font-size: var(--text-xl); font-weight: var(--font-semibold); color: var(--color-text-primary); margin-bottom: var(--space-2);">
+                                {{ suggestion.title }}
+                            </h4>
+                            {% if suggestion.estimated_revenue %}
+                            <div style="display: inline-flex; align-items: center; background: rgba(52, 199, 89, 0.1); color: var(--color-success); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: var(--font-semibold); margin-bottom: var(--space-3);">
+                                <i class="fas fa-dollar-sign me-1"></i>
+                                预估收入：{{ suggestion.estimated_revenue }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <p style="color: var(--color-text-primary); line-height: var(--leading-relaxed); margin-bottom: var(--space-4);">
+                        {{ suggestion.description }}
+                    </p>
+                    
+                    {% if suggestion.implementation_steps %}
+                    <div style="margin-bottom: var(--space-4);">
+                        <div style="font-weight: var(--font-semibold); color: var(--color-text-primary); margin-bottom: var(--space-2); font-size: var(--text-base);">实施步骤：</div>
+                        <ol style="padding-left: var(--space-6); color: var(--color-text-secondary);">
+                            {% for step in suggestion.implementation_steps %}
+                            <li style="margin-bottom: var(--space-1); line-height: var(--leading-relaxed);">{{ step }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                    {% endif %}
+                    
+                    {% if suggestion.required_resources %}
+                    <div style="margin-bottom: var(--space-4);">
+                        <div style="font-weight: var(--font-semibold); color: var(--color-text-primary); margin-bottom: var(--space-2); font-size: var(--text-base);">所需资源：</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                            {% for resource in suggestion.required_resources %}
+                            <span style="background: var(--color-gray-100); color: var(--color-text-secondary); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-sm);">{{ resource }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if suggestion.key_roles %}
+                    <div>
+                        <div style="font-weight: var(--font-semibold); color: var(--color-text-primary); margin-bottom: var(--space-2); font-size: var(--text-base);">涉及角色：</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                            {% for role in suggestion.key_roles %}
+                            <span style="background: var(--color-primary); color: var(--color-text-inverse); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-sm); font-weight: var(--font-medium);">{{ role }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 团队成员信息 -->
+        {% if form_data.key_persons %}
+        <div class="card slide-up" style="margin-top: var(--space-8);">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-users"></i>
+                    团队成员分析
+                </h3>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-6);">
+                    {% for person in form_data.key_persons %}
+                    <div style="background: var(--color-bg-primary); border: 1px solid var(--color-gray-200); border-radius: var(--radius-lg); padding: var(--space-4);">
+                        <div style="display: flex; align-items: center; margin-bottom: var(--space-3);">
+                            <div style="width: 48px; height: 48px; background: var(--color-primary); color: var(--color-text-inverse); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-weight: var(--font-bold); margin-right: var(--space-3);">
+                                {{ person.name[0]|upper if person.name else '?' }}
+                            </div>
+                            <div>
+                                <div style="font-weight: var(--font-semibold); color: var(--color-text-primary);">{{ person.name or '未命名' }}</div>
+                                <div style="color: var(--color-text-secondary); font-size: var(--text-sm);">{{ person.role or '未指定角色' }}</div>
+                            </div>
+                        </div>
+                        {% if person.resources %}
+                        <div style="margin-bottom: var(--space-2);">
+                            <div style="font-weight: var(--font-medium); color: var(--color-text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-1);">可提供资源</div>
+                            <p style="color: var(--color-text-primary); font-size: var(--text-sm); line-height: var(--leading-relaxed);">
+                                {% if person.resources is string %}
+                                    {{ person.resources }}
+                                {% else %}
+                                    {{ person.resources|join(', ') }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endif %}
+                        {% if person.make_happy %}
+                        <div>
+                            <div style="font-weight: var(--font-medium); color: var(--color-text-secondary); font-size: var(--text-sm); margin-bottom: var(--space-1);">期望获得</div>
+                            <p style="color: var(--color-text-primary); font-size: var(--text-sm); line-height: var(--leading-relaxed);">{{ person.make_happy }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 行动按钮 -->
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-4); margin-top: var(--space-12); text-align: center;">
+            <a href="{{ url_for('index') }}" class="btn btn-outline btn-large interactive">
+                <i class="fas fa-arrow-left me-2"></i>
+                重新设计方案
+            </a>
+            <button class="btn btn-secondary btn-large interactive" onclick="window.print()">
+                <i class="fas fa-download me-2"></i>
+                保存为PDF
+            </button>
+            <button class="btn btn-primary btn-large interactive" onclick="shareSolution()">
+                <i class="fas fa-share me-2"></i>
+                分享方案
+            </button>
+        </div>
+
+        <!-- 详细分析数据（可折叠） -->
+        <div class="card slide-up" style="margin-top: var(--space-8);">
+            <div class="card-header" style="cursor: pointer;" onclick="toggleDetails()">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-line"></i>
+                    详细分析数据
+                    <i class="fas fa-chevron-down ms-2" id="detailsChevron" style="transition: var(--transition-fast);"></i>
+                </h3>
+            </div>
+            <div class="card-body" id="detailsContent" style="display: none;">
+                <div style="background: var(--color-gray-50); border-radius: var(--radius-md); padding: var(--space-4); font-family: var(--font-family-mono); font-size: var(--text-sm); overflow-x: auto;">
+                    <pre style="margin: 0; white-space: pre-wrap; line-height: var(--leading-relaxed);">{{ form_data | tojson(indent=2) }}</pre>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 切换详细信息显示
+        function toggleDetails() {
+            const content = document.getElementById('detailsContent');
+            const chevron = document.getElementById('detailsChevron');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.display = 'none';
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // 分享解决方案
+        function shareSolution() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Angela AI - 智能收入管道设计方案',
+                    text: '查看我的AI生成收入管道设计方案',
+                    url: window.location.href
+                }).catch(console.error);
+            } else {
+                // 复制到剪贴板
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('链接已复制到剪贴板');
+                }).catch(() => {
+                    // 降级处理
+                    const textArea = document.createElement('textarea');
+                    textArea.value = window.location.href;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('链接已复制到剪贴板');
+                });
+            }
+        }
+
+        // 页面加载动画
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为所有卡片添加交错动画
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // 添加滚动动画观察器
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            // 观察所有动画元素
+            document.querySelectorAll('.slide-up').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        });
+
+        // 打印优化
+        window.addEventListener('beforeprint', function() {
+            // 展开所有折叠内容以便打印
+            document.getElementById('detailsContent').style.display = 'block';
+        });
+        
+        window.addEventListener('afterprint', function() {
+            // 打印后恢复折叠状态
+            document.getElementById('detailsContent').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

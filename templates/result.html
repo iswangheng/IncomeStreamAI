@@ -12,29 +12,22 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/modern-style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/elegant-light.css') }}" rel="stylesheet">
     
     <!-- SEO优化 -->
     <meta name="description" content="Angela AI - 智能收入路径分析结果，顶级专业的收入管道设计方案">
     <meta name="keywords" content="AI收入分析,智能收入方案,收入路径设计">
 </head>
 <body>
-    <div class="container my-5">
-        <!-- 现代化结果页头部 -->
-        <div class="text-center mb-5">
-            <div style="position: relative; z-index: 2;">
-                <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width: 120px; height: 120px; background: var(--gradient-accent); border-radius: 50%; box-shadow: var(--shadow-neon); animation: pulse 2s ease-in-out infinite;">
-                    <i class="fas fa-chart-line text-white" style="font-size: 3rem;"></i>
-                </div>
-                <h1 class="display-4 mb-4 position-relative gradient-text">
-                    智能分析完成
-                </h1>
-                <p class="lead">基于您的项目信息，我们的AI已为您生成专业的收入管道方案</p>
-                
-                <!-- 装饰性成功指示器 -->
-                <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); width: 150px; height: 150px; background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%); border-radius: 50%; z-index: -1;"></div>
-            </div>
+    <!-- 清新优雅结果页标题 -->
+    <div class="main-title fade-in-up">
+        <div class="container">
+            <h1><i class="fas fa-chart-line me-3"></i>智能分析完成</h1>
+            <p>基于您的项目信息，已生成专业的收入管道方案</p>
         </div>
+    </div>
+
+    <div class="container">
 
         <!-- 现代化项目概览 -->
         <div class="card mb-5">

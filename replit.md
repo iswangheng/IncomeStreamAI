@@ -43,7 +43,7 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 ## User Preferences
 
 - **Communication Style**: 使用中文交流，简单易懂的日常用语
-- **UI Design Style**: 已完全重新设计为世界顶级现代化风格。采用深色主题配合霓虹色彩系统，玻璃态效果(Glassmorphism)和流体渐变设计。主色调为深蓝黑背景(#0a0a0f)搭配霓虹蓝(#00d4ff)、紫色(#8b5cf6)和粉色(#f472b6)渐变。卡片采用毛玻璃效果，圆角设计，微交互动画，整体风格现代、酷炫、科技感强。
+- **UI Design Style**: 清新明亮优雅风格。采用明亮背景色系配合柔和渐变色彩，优雅紫蓝(#667eea)和天空蓝(#4facfe)为主色调，极浅蓝白背景(#fafbff)搭配纯白卡片。整体设计轻盈舒适，具有现代感的同时保持友好亲和，适合长时间使用，给用户带来愉悦的视觉体验。
 
 ## System Architecture
 
@@ -51,12 +51,12 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 - **Template Engine**: Jinja2 templating with Flask for server-side rendering
 - **UI Framework**: Bootstrap 5 with custom warm theme for responsive design
 - **Design System**: 
-  - Color Palette: 深蓝黑背景 (#0a0a0f), 霓虹蓝 (#00d4ff), 紫色 (#8b5cf6), 粉色 (#f472b6)
-  - Layout: 玻璃态卡片布局，流体渐变背景，现代圆角设计
+  - Color Palette: 明亮背景 (#fafbff), 优雅紫蓝 (#667eea), 天空蓝 (#4facfe), 柔和粉 (#f093fb)
+  - Layout: 清新卡片布局，明亮渐变背景，优雅圆角设计
   - Typography: Inter font family for modern readability
-  - Animations: 微交互动画，悬停效果，流体过渡，打字动画
+  - Animations: 平滑过渡动画，悬停效果，淡入效果
 - **JavaScript**: Vanilla JavaScript for dynamic form interactions (adding/removing person cards)
-- **Styling**: 现代化CSS样式系统，深色主题，霓虹色彩系统，Bootstrap集成，Font Awesome图标
+- **Styling**: 清新明亮优雅CSS样式系统，明亮主题，柔和色彩系统，Bootstrap集成，Font Awesome图标
 - **Language**: Chinese (zh-CN) interface with warm, friendly tone
 
 ### Backend Architecture

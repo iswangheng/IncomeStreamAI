@@ -379,56 +379,7 @@ function showLoadingOverlay() {
     document.body.appendChild(overlay);
 }
 
-/**
- * 鼠标跟随光标效果
- */
-let cursor = null;
-function initCursorEffect() {
-    cursor = document.createElement('div');
-    cursor.className = 'custom-cursor';
-    cursor.style.cssText = `
-        position: fixed;
-        width: 20px;
-        height: 20px;
-        background: linear-gradient(135deg, #667eea, #f093fb);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 9999;
-        opacity: 0;
-        transition: all 0.1s ease;
-        mix-blend-mode: difference;
-    `;
-    document.body.appendChild(cursor);
-    
-    document.addEventListener('mousemove', (e) => {
-        cursor.style.left = e.clientX - 10 + 'px';
-        cursor.style.top = e.clientY - 10 + 'px';
-        cursor.style.opacity = '0.8';
-    });
-    
-    document.addEventListener('mouseleave', () => {
-        cursor.style.opacity = '0';
-    });
-    
-    // 交互元素悬浮效果
-    const interactiveElements = document.querySelectorAll('a, button, input, .card');
-    interactiveElements.forEach(el => {
-        el.addEventListener('mouseenter', () => {
-            cursor.style.transform = 'scale(2)';
-            cursor.style.opacity = '0.6';
-        });
-        
-        el.addEventListener('mouseleave', () => {
-            cursor.style.transform = 'scale(1)';
-            cursor.style.opacity = '0.8';
-        });
-    });
-}
-
-// 在桌面设备上启用光标效果
-if (window.innerWidth > 768) {
-    initCursorEffect();
-}
+// 鼠标跟随光标效果已移除，使用普通鼠标样式
 
 /**
  * 性能优化：节流函数
@@ -454,10 +405,8 @@ function handleResize() {
     if (isMobile) {
         // 移动设备优化
         document.body.classList.add('mobile-optimized');
-        if (cursor) cursor.style.display = 'none';
     } else {
         document.body.classList.remove('mobile-optimized');
-        if (cursor) cursor.style.display = 'block';
     }
 }
 

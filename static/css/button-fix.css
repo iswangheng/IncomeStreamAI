@@ -1,0 +1,52 @@
+/* 按钮修复样式 - 临时解决方案 */
+
+/* 重置所有按钮样式，确保可见性 */
+.btn {
+    background: #007AFF !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 25px !important;
+    padding: 12px 24px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    min-height: 44px !important;
+    transition: all 0.3s ease !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 100 !important;
+    position: relative !important;
+}
+
+.btn:hover {
+    background: #0056CC !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(0, 122, 255, 0.3) !important;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+    color: white !important;
+}
+
+.btn-large {
+    padding: 16px 32px !important;
+    font-size: 18px !important;
+    min-height: 56px !important;
+}
+
+/* 确保图标正常显示 */
+.btn i {
+    color: white !important;
+    margin-right: 8px !important;
+}

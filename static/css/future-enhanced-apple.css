@@ -197,6 +197,13 @@ body::after {
     transition: all var(--transition-enhanced);
     border: none;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-full);
+    min-height: 44px;
 }
 
 .btn::before {
@@ -216,24 +223,35 @@ body::after {
 
 .btn-primary {
     background: var(--future-gradient-primary);
-    color: white;
+    color: white !important;
     box-shadow: var(--shadow-glow-blue);
+    border: none;
 }
 
 .btn-primary:hover {
+    color: white !important;
     transform: translateY(-3px);
     box-shadow: var(--shadow-glow-blue), 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
 .btn-secondary {
     background: var(--future-gradient-secondary);
-    color: white;
+    color: white !important;
     box-shadow: var(--shadow-glow-pink);
+    border: none;
 }
 
 .btn-secondary:hover {
+    color: white !important;
     transform: translateY(-3px);
     box-shadow: var(--shadow-glow-pink), 0 8px 25px rgba(240, 147, 251, 0.3);
+}
+
+.btn-large {
+    padding: var(--space-4) var(--space-8);
+    font-size: var(--text-lg);
+    min-height: 56px;
+    font-weight: var(--font-semibold);
 }
 
 .btn.interactive {

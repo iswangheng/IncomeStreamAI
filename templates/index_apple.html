@@ -226,48 +226,62 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">身份角色（可多选）</label>
+                    <label class="form-label">
+                        身份角色（可多选）
+                        <span class="help-icon" data-tooltip="请选择该人物在项目中的身份角色，可选择多个">
+                            <i class="fas fa-question-circle"></i>
+                        </span>
+                    </label>
                     <div class="role-selection-container">
                         <div class="role-checkbox-group">
                             <label class="checkbox-item role-item" data-desc="有需求/有预算的一方，项目最终买单者或提出方（如企业客户、政府采购）">
                                 <input type="checkbox" name="person_role[]" value="buyer">
                                 <span>需求方 / 采购方</span>
+                                <div class="role-tooltip">有需求/有预算的一方，项目最终买单者或提出方</div>
                             </label>
                             <label class="checkbox-item role-item" data-desc="提供资金或赞助，换取回报/分润/权益（如VC、天使、品牌赞助商）">
                                 <input type="checkbox" name="person_role[]" value="investor">
                                 <span>投资方 / 资金方</span>
+                                <div class="role-tooltip">提供资金或赞助，换取回报/分润/权益</div>
                             </label>
                             <label class="checkbox-item role-item" data-desc="提供可销售的产品或服务（实体或数字），可作为变现载体（如品牌方、课程/软件提供方）">
                                 <input type="checkbox" name="person_role[]" value="product">
                                 <span>产品方 / 服务方</span>
+                                <div class="role-tooltip">提供可销售的产品或服务，可作为变现载体</div>
                             </label>
                             <label class="checkbox-item role-item" data-desc="提供原创内容、IP或影响力资源，可用于引流与联名（如自媒体、作家、IP方）">
                                 <input type="checkbox" name="person_role[]" value="content">
                                 <span>内容方 / IP方</span>
+                                <div class="role-tooltip">提供原创内容、IP或影响力资源，可用于引流与联名</div>
                             </label>
                             <label class="checkbox-item role-item" data-desc="负责落地与产出结果，按方案交付（如活动执行公司、研发/制作团队）">
                                 <input type="checkbox" name="person_role[]" value="delivery">
                                 <span>交付方 / 执行方</span>
+                                <div class="role-tooltip">负责落地与产出结果，按方案交付</div>
                             </label>
                             <label class="checkbox-item role-item" data-desc="拥有分发能力，把产品/内容推广给用户（如代理商、电商平台、社群主、媒体）">
                                 <input type="checkbox" name="person_role[]" value="channel">
                                 <span>渠道方 / 推广方</span>
+                                <div class="role-tooltip">拥有分发能力，把产品/内容推广给用户</div>
                             </label>
                             <label class="checkbox-item role-item" data-desc="运营并维护某平台/系统/入口，掌控流量与规则（如APP/SaaS/媒体平台运营）">
                                 <input type="checkbox" name="person_role[]" value="ops">
                                 <span>平台运营方</span>
+                                <div class="role-tooltip">运营并维护某平台/系统/入口，掌控流量与规则</div>
                             </label>
                             <label class="checkbox-item role-item" data-desc="整合各方资源、定节奏并推动落地的牵头者（如项目经理、总策划、行业协会）">
                                 <input type="checkbox" name="person_role[]" value="orchestrator">
                                 <span>统筹方 / 牵头方</span>
+                                <div class="role-tooltip">整合各方资源、定节奏并推动落地的牵头者</div>
                             </label>
                             <label class="checkbox-item role-item" data-desc="提供专业知识、资质或背书，提高可信度（如行业顾问、认证机构、导师）">
                                 <input type="checkbox" name="person_role[]" value="expert">
                                 <span>外部专家 / 顾问</span>
+                                <div class="role-tooltip">提供专业知识、资质或背书，提高可信度</div>
                             </label>
                         </div>
-                        <div class="role-description" id="roleDesc_\${personCount}">
-                            <small class="text-muted">请选择一个或多个角色，悬停查看详细说明</small>
+                        <div class="selected-roles-summary" id="selectedRoles_\${personCount}">
+                            <small class="text-muted">尚未选择角色</small>
                         </div>
                     </div>
                 </div>
@@ -548,47 +562,40 @@
         // 初始化角色提示功能
         function initRoleTooltips(personCard) {
             const roleItems = personCard.querySelectorAll('.role-item');
-            const descContainer = personCard.querySelector('.role-description small');
+            const summaryContainer = personCard.querySelector('.selected-roles-summary');
             
             roleItems.forEach(item => {
                 const checkbox = item.querySelector('input[type="checkbox"]');
-                const desc = item.getAttribute('data-desc');
                 
-                // 悬停显示描述
-                item.addEventListener('mouseenter', () => {
-                    descContainer.textContent = desc;
-                    descContainer.style.color = '#667eea';
-                });
-                
-                item.addEventListener('mouseleave', () => {
-                    updateRoleDescription(personCard);
-                });
-                
-                // 选择变化时更新描述
+                // 选择变化时更新摘要
                 checkbox.addEventListener('change', () => {
-                    updateRoleDescription(personCard);
+                    updateRolesSummary(personCard);
                 });
             });
+            
+            // 初始更新摘要
+            updateRolesSummary(personCard);
         }
         
-        // 更新角色描述显示
-        function updateRoleDescription(personCard) {
+        // 更新已选角色摘要
+        function updateRolesSummary(personCard) {
             const checkedItems = personCard.querySelectorAll('.role-item input[type="checkbox"]:checked');
-            const descContainer = personCard.querySelector('.role-description small');
+            const summaryContainer = personCard.querySelector('.selected-roles-summary');
+            const summaryText = summaryContainer.querySelector('small');
             
             if (checkedItems.length === 0) {
-                descContainer.textContent = '请选择一个或多个角色，悬停查看详细说明';
-                descContainer.style.color = '#666';
+                summaryText.textContent = '尚未选择角色';
+                summaryContainer.classList.remove('has-selection');
             } else if (checkedItems.length === 1) {
                 const selectedItem = checkedItems[0].closest('.role-item');
-                descContainer.textContent = `已选择：${selectedItem.querySelector('span').textContent}`;
-                descContainer.style.color = '#667eea';
+                summaryText.textContent = `已选择：${selectedItem.querySelector('span').textContent}`;
+                summaryContainer.classList.add('has-selection');
             } else {
                 const roleNames = Array.from(checkedItems).map(cb => 
                     cb.closest('.role-item').querySelector('span').textContent
                 );
-                descContainer.textContent = `已选择 ${checkedItems.length} 个角色：${roleNames.join('、')}`;
-                descContainer.style.color = '#667eea';
+                summaryText.textContent = `已选择 ${checkedItems.length} 个角色：${roleNames.join('、')}`;
+                summaryContainer.classList.add('has-selection');
             }
         }
         

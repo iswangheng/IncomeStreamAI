@@ -473,8 +473,13 @@
                                 <h6 style="color: var(--color-gray-600); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
                                     <span style="background: var(--color-gray-600); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">✍️</span>其他（可补充描述）
                                 </h6>
-                                <textarea class="form-control" name="person_needs_extra[]" rows="2" 
-                                          placeholder="还有什么特别的点会让他愿意参与？比如：老板刚批预算，或者最近想冲数据..."></textarea>
+                                <div class="other-input-container">
+                                    <textarea class="form-control dynamic-placeholder-textarea" name="person_needs_extra[]" rows="2" 
+                                              placeholder="还有什么特别的点会让他愿意参与？"></textarea>
+                                    <button type="button" class="inspiration-btn" onclick="showInspirationModal(this)">
+                                        <i class="fas fa-lightbulb"></i> 灵感
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -493,6 +498,9 @@
             
             // 初始化角色提示功能
             initRoleTooltips(personCard);
+            
+            // 为新卡片设置随机提示语
+            setRandomPlaceholder();
         }
         
         // 删除人物卡片
@@ -563,6 +571,9 @@
             
             // 初始化空状态
             updateEmptyState();
+            
+            // 初始化动态提示语
+            setRandomPlaceholder();
         });
         
         // 处理其他资源输入框显示
@@ -614,6 +625,97 @@
                 );
                 summaryText.textContent = `已选择 ${checkedItems.length} 个角色：${roleNames.join('、')}`;
                 summaryContainer.classList.add('has-selection');
+            }
+        }
+        
+        // 动态提示语数据
+        const inspirationTexts = [
+            "老板刚批预算，需要尽快花掉",
+            "最近要冲 KPI / 冲业绩", 
+            "有闲置团队 / 场地 / 资源想利用",
+            "想测试一个新市场/新渠道的反应",
+            "需要快速刷一个案例 / 成功故事",
+            "刚拿到新产品，想找机会试水",
+            "需要应付上级/甲方的活动要求",
+            "希望年底前完成某个指标",
+            "想在圈子里制造一次话题",
+            "最近空档期，想找事做保持曝光",
+            "希望用项目换取长期合作关系",
+            "临时有媒体/活动曝光机会",
+            "需要短期内验证一个想法是否可行",
+            "想占个\"坑位\"避免竞争对手先做",
+            "最近资金或资源到期，不用就浪费"
+        ];
+        
+        // 随机设置提示语
+        function setRandomPlaceholder() {
+            const textareas = document.querySelectorAll('.dynamic-placeholder-textarea');
+            textareas.forEach(textarea => {
+                const randomText = inspirationTexts[Math.floor(Math.random() * inspirationTexts.length)];
+                textarea.placeholder = `还有什么特别的点会让他愿意参与？比如：${randomText}`;
+            });
+        }
+        
+        // 显示灵感模态框
+        function showInspirationModal(button) {
+            const textarea = button.parentElement.querySelector('textarea');
+            
+            // 创建模态框
+            const modal = document.createElement('div');
+            modal.className = 'inspiration-modal';
+            modal.innerHTML = `
+                <div class="inspiration-modal-content">
+                    <button class="inspiration-modal-close" onclick="closeInspirationModal()">&times;</button>
+                    <h5><i class="fas fa-lightbulb" style="color: #667eea; margin-right: 8px;"></i>常见动机灵感</h5>
+                    <div class="inspiration-list">
+                        ${inspirationTexts.map(text => 
+                            `<div class="inspiration-item" onclick="selectInspiration(this, '${text.replace(/'/g, "\\'")}')">${text}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 存储当前 textarea 引用
+            modal.targetTextarea = textarea;
+            
+            // 显示模态框
+            setTimeout(() => modal.classList.add('show'), 10);
+            
+            // 点击背景关闭
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeInspirationModal();
+                }
+            });
+        }
+        
+        // 选择灵感文本
+        function selectInspiration(item, text) {
+            const modal = document.querySelector('.inspiration-modal');
+            if (modal && modal.targetTextarea) {
+                const currentValue = modal.targetTextarea.value;
+                if (currentValue) {
+                    modal.targetTextarea.value = currentValue + (currentValue.endsWith('\n') ? '' : '\n') + text;
+                } else {
+                    modal.targetTextarea.value = text;
+                }
+                modal.targetTextarea.focus();
+            }
+            closeInspirationModal();
+        }
+        
+        // 关闭灵感模态框
+        function closeInspirationModal() {
+            const modal = document.querySelector('.inspiration-modal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    if (modal.parentNode) {
+                        modal.parentNode.removeChild(modal);
+                    }
+                }, 300);
             }
         }
         

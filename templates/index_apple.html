@@ -288,40 +288,70 @@
                 
                 <div class="form-group">
                     <label class="form-label">掌握的资源（必填 ≥ 1）</label>
-                    <p class="resource-hint">他现在就能调动的具体东西（带平台/数量/对象/权限），用于搭建路径。</p>
+                    <p class="resource-description">请描述他现在就能调动的具体资源，例如：预算金额、用户数量、平台权限等</p>
                     
-                    <!-- 候选资源标签区 -->
-                    <div class="resource-suggestions-container" id="resourceSuggestions_\${personCount}">
+                    <!-- 智能推荐区域 -->
+                    <div class="resource-smart-section">
+                        <div class="resource-suggestions-header">
+                            <i class="fas fa-lightbulb text-warning"></i>
+                            <span>根据身份角色推荐</span>
+                            <small class="text-muted">（选择上方角色后显示相关资源）</small>
+                        </div>
                         <div class="resource-suggestions-scroll">
-                            <!-- 动态生成的候选标签 -->
+                            <div class="no-role-selected">
+                                <i class="fas fa-arrow-up"></i>
+                                请先选择身份角色以获得智能推荐
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- 自由输入框 -->
-                    <div class="resource-input-container">
-                        <input type="text" class="form-control resource-input dynamic-placeholder-resource" 
-                               placeholder="微信社群5个、视频号10万粉、年度广告预算50万、产品试用码100个、活动场地一天、品牌对接人：XX"
-                               data-person-id="\${personCount}">
-                        <button type="button" class="resource-example-btn" onclick="addResourceExample(this)">
-                            <i class="fas fa-magic"></i> 一键示例
-                        </button>
+                    <!-- 输入区域 -->
+                    <div class="resource-input-section">
+                        <div class="input-section-header">
+                            <i class="fas fa-edit text-primary"></i>
+                            <span>手动添加资源</span>
+                            <div class="input-hints">
+                                <span class="hint-item">💬 输入后按回车</span>
+                                <span class="hint-item">📋 支持粘贴多个</span>
+                                <span class="hint-item">⌫ 空白时按退格删除</span>
+                            </div>
+                        </div>
+                        <div class="resource-input-box">
+                            <input type="text" class="form-control resource-input dynamic-placeholder-resource" 
+                                   placeholder="例如：微信群3个，视频号8万粉，年度预算30万"
+                                   data-person-id="\${personCount}">
+                            <div class="input-actions">
+                                <button type="button" class="btn-input-action" onclick="addResourceExample(this)" title="一键添加示例">
+                                    <i class="fas fa-magic"></i>
+                                </button>
+                                <button type="button" class="btn-input-action" onclick="clearResourceInput(this)" title="清空输入">
+                                    <i class="fas fa-eraser"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     
-                    <!-- 已选资源标签区 -->
-                    <div class="selected-resources-container empty" id="selectedResources_\${personCount}">
-                        <!-- 已选标签将显示在这里 -->
+                    <!-- 已选资源显示区 -->
+                    <div class="selected-resources-section">
+                        <div class="selected-header">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <span>已添加的资源</span>
+                            <span class="resource-count">0</span>
+                        </div>
+                        <div class="selected-resources-container empty">
+                            <div class="empty-state">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>还没有添加任何资源</span>
+                                <small>点击上方推荐标签或在输入框中添加</small>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- 隐藏字段存储最终数据 -->
                     <input type="hidden" name="person_resources[]" class="resources-data">
                     
-                    <!-- 弱提示 -->
-                    <div class="resource-tip">
-                        <small class="text-muted">💡 身份=位置；资源=可调用的'具体东西'。</small>
-                    </div>
-                    
                     <!-- 验证提示区域 -->
-                    <div class="resource-validation" id="resourceValidation_\${personCount}" style="display: none;">
+                    <div class="resource-validation" style="display: none;">
                         <!-- 验证提示信息 -->
                     </div>
                 </div>
@@ -541,7 +571,6 @@
             roleCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', () => {
                     updateResourceSuggestions(personCard);
-                    updateRoleSummary(personCard);
                 });
             });
             
@@ -766,8 +795,23 @@
                     suggestionsContainer.appendChild(tag);
                 });
             } else {
-                suggestionsContainer.innerHTML = '<div style="color: var(--color-gray-500); font-size: var(--text-sm); padding: 8px;">请先选择身份角色以获得资源推荐</div>';
+                suggestionsContainer.innerHTML = '<div class="no-role-selected"><i class="fas fa-arrow-up"></i>请先选择身份角色以获得智能推荐</div>';
             }
+        }
+        
+        // 更新资源计数
+        function updateResourceCount(personCard) {
+            const container = personCard.querySelector('.selected-resources-container');
+            const countElement = personCard.querySelector('.resource-count');
+            const tags = container.querySelectorAll('.selected-resource-tag');
+            countElement.textContent = tags.length;
+        }
+        
+        // 清空输入框
+        function clearResourceInput(button) {
+            const input = button.closest('.resource-input-box').querySelector('.resource-input');
+            input.value = '';
+            input.focus();
         }
         
         // 切换资源候选标签
@@ -815,6 +859,7 @@
             container.appendChild(tag);
             container.classList.add('has-resources');
             container.classList.remove('empty');
+            updateResourceCount(targetCard);
             updateResourcesData(personId);
         }
         
@@ -827,10 +872,11 @@
                 tag.remove();
             }
             
-            if (container.children.length === 0) {
+            if (container.querySelectorAll('.selected-resource-tag').length === 0) {
                 container.classList.remove('has-resources');
                 container.classList.add('empty');
             }
+            updateResourceCount(targetCard);
             
             // 更新候选标签状态
             const currentCard = container.closest('.person-card');

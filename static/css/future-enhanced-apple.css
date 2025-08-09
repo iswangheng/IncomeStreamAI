@@ -427,58 +427,76 @@ body::after {
     font-size: 10px;
 }
 
-/* 资源输入系统样式 */
-.resource-hint {
-    font-size: var(--text-xs);
-    color: var(--color-gray-600);
-    margin-bottom: var(--space-3);
-    font-style: italic;
+/* 资源输入系统 - 重新设计为更直观的UI */
+.resource-description {
+    font-size: var(--text-sm);
+    color: var(--color-gray-700);
+    margin-bottom: var(--space-4);
+    padding: var(--space-2);
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 3px solid #667eea;
+    border-radius: 4px;
 }
 
-.resource-suggestions-container {
-    margin-bottom: var(--space-3);
+/* 智能推荐区域 */
+.resource-smart-section {
+    margin-bottom: var(--space-4);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.resource-suggestions-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: rgba(102, 126, 234, 0.05);
+    border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-gray-700);
 }
 
 .resource-suggestions-scroll {
+    padding: var(--space-3);
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-2);
-    overflow-x: auto;
-    padding: var(--space-2) 0;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(102, 126, 234, 0.3) transparent;
+    min-height: 60px;
+    background: white;
 }
 
-.resource-suggestions-scroll::-webkit-scrollbar {
-    height: 4px;
-}
-
-.resource-suggestions-scroll::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 2px;
-}
-
-.resource-suggestions-scroll::-webkit-scrollbar-thumb {
-    background: rgba(102, 126, 234, 0.3);
-    border-radius: 2px;
+.no-role-selected {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-gray-500);
+    font-size: var(--text-sm);
+    font-style: italic;
+    width: 100%;
+    justify-content: center;
+    padding: var(--space-4);
 }
 
 .resource-suggestion-tag {
-    flex-shrink: 0;
     padding: 6px 12px;
-    background: rgba(102, 126, 234, 0.08);
-    border: 1px solid rgba(102, 126, 234, 0.2);
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
     border-radius: 16px;
     font-size: var(--text-sm);
     color: #667eea;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    position: relative;
 }
 
 .resource-suggestion-tag:hover {
-    background: rgba(102, 126, 234, 0.15);
-    border-color: rgba(102, 126, 234, 0.4);
+    background: rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.5);
     transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
 }
 
 .resource-suggestion-tag.selected {
@@ -487,75 +505,198 @@ body::after {
     border-color: #667eea;
 }
 
-.resource-input-container {
+.resource-suggestion-tag::after {
+    content: '点击添加';
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.resource-suggestion-tag:hover::after {
+    opacity: 1;
+}
+
+/* 输入区域 */
+.resource-input-section {
+    margin-bottom: var(--space-4);
+    border: 1px solid rgba(34, 139, 34, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.input-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3);
+    background: rgba(34, 139, 34, 0.05);
+    border-bottom: 1px solid rgba(34, 139, 34, 0.1);
+}
+
+.input-section-header > span {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-gray-700);
+}
+
+.input-hints {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.hint-item {
+    font-size: var(--text-xs);
+    color: var(--color-gray-500);
+    background: rgba(255, 255, 255, 0.7);
+    padding: 2px 6px;
+    border-radius: 10px;
+    border: 1px solid rgba(34, 139, 34, 0.2);
+}
+
+.resource-input-box {
     position: relative;
-    margin-bottom: var(--space-3);
+    padding: var(--space-3);
+    background: white;
 }
 
 .resource-input {
-    padding-right: 90px;
-}
-
-.resource-example-btn {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(102, 126, 234, 0.1);
-    border: 1px solid rgba(102, 126, 234, 0.3);
-    color: #667eea;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    cursor: pointer;
+    width: 100%;
+    padding: var(--space-3);
+    padding-right: 80px;
+    border: 2px solid rgba(34, 139, 34, 0.2);
+    border-radius: 6px;
+    font-size: var(--text-sm);
     transition: all 0.2s ease;
 }
 
-.resource-example-btn:hover {
-    background: rgba(102, 126, 234, 0.15);
-    border-color: rgba(102, 126, 234, 0.5);
-    transform: translateY(-51%);
+.resource-input:focus {
+    border-color: #228B22;
+    box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+    outline: none;
 }
 
-.resource-example-btn i {
-    margin-right: 3px;
-    font-size: 10px;
+.input-actions {
+    position: absolute;
+    right: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: var(--space-1);
+}
+
+.btn-input-action {
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(34, 139, 34, 0.3);
+    background: rgba(34, 139, 34, 0.1);
+    color: #228B22;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+}
+
+.btn-input-action:hover {
+    background: rgba(34, 139, 34, 0.2);
+    border-color: rgba(34, 139, 34, 0.5);
+    transform: scale(1.05);
+}
+
+/* 已选资源区域 */
+.selected-resources-section {
+    border: 1px solid rgba(255, 140, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.selected-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    background: rgba(255, 140, 0, 0.05);
+    border-bottom: 1px solid rgba(255, 140, 0, 0.1);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-gray-700);
+}
+
+.resource-count {
+    background: #FF8C00;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: var(--text-xs);
+    min-width: 20px;
+    text-align: center;
 }
 
 .selected-resources-container {
+    padding: var(--space-3);
+    background: white;
+    min-height: 80px;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
-    margin-bottom: var(--space-2);
-    min-height: 32px;
-    padding: var(--space-2);
-    border: 1px dashed rgba(102, 126, 234, 0.3);
-    border-radius: 8px;
-    transition: all 0.2s ease;
+    align-items: flex-start;
+    align-content: flex-start;
 }
 
-.selected-resources-container.has-resources {
-    border-style: solid;
-    background: rgba(102, 126, 234, 0.02);
-}
-
-.selected-resources-container.empty::before {
-    content: "点击上方候选标签或在输入框中添加资源";
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
     color: var(--color-gray-500);
+    text-align: center;
+    padding: var(--space-4);
+}
+
+.empty-state i {
+    font-size: 24px;
+    margin-bottom: var(--space-2);
+    opacity: 0.5;
+}
+
+.empty-state span {
     font-size: var(--text-sm);
-    font-style: italic;
+    margin-bottom: var(--space-1);
+}
+
+.empty-state small {
+    font-size: var(--text-xs);
+    opacity: 0.8;
+}
+
+.selected-resources-container.has-resources .empty-state {
+    display: none;
 }
 
 .selected-resource-tag {
     display: inline-flex;
     align-items: center;
-    padding: 4px 8px;
-    background: #667eea;
+    padding: 6px 10px;
+    background: #FF8C00;
     color: white;
-    border-radius: 12px;
+    border-radius: 16px;
     font-size: var(--text-sm);
-    gap: 4px;
-    animation: fadeInScale 0.2s ease;
+    gap: 6px;
+    animation: fadeInScale 0.3s ease;
+    box-shadow: 0 2px 4px rgba(255, 140, 0, 0.2);
 }
 
 .selected-resource-tag .remove-btn {
@@ -564,31 +705,31 @@ body::after {
     color: white;
     cursor: pointer;
     padding: 0;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    opacity: 0.7;
+    font-size: 14px;
+    opacity: 0.8;
     transition: all 0.2s ease;
 }
 
 .selected-resource-tag .remove-btn:hover {
     opacity: 1;
     background: rgba(255, 255, 255, 0.2);
-}
-
-.resource-tip {
-    margin-bottom: var(--space-2);
+    transform: scale(1.1);
 }
 
 .resource-validation {
+    margin-top: var(--space-2);
     padding: var(--space-2);
     border-radius: 6px;
     font-size: var(--text-sm);
-    margin-top: var(--space-2);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
 }
 
 .resource-validation.warning {
@@ -603,6 +744,14 @@ body::after {
     color: #721c24;
 }
 
+.resource-validation::before {
+    content: '⚠️';
+}
+
+.resource-validation.error::before {
+    content: '❌';
+}
+
 @keyframes fadeInScale {
     from {
         opacity: 0;
@@ -611,6 +760,24 @@ body::after {
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .input-hints {
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+    
+    .hint-item {
+        font-size: 10px;
+    }
+    
+    .input-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
     }
 }
 

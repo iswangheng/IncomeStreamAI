@@ -113,7 +113,13 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 - **Result Processing**: Template structure for AI-generated content display
 - **Real-time Testing**: 对话测试模块验证知识库效果，支持开关知识库上下文
 
-## Recent Changes (2025-08-07)
+## Recent Changes (2025-08-09)
+- ✅ **UI文案优化** - 更新页面副标题文案，突出关键人物分析功能
+- ✅ **按钮可见性修复** - 创建专门的按钮修复样式，解决按钮显示问题
+- ✅ **页面间距优化** - 调整提交按钮区域间距，提升界面紧凑性
+- ✅ **移除鼠标特效** - 去除自定义鼠标跟随圆圈效果，保持标准交互体验
+
+## Previous Changes (2025-08-07)
 - ✅ **重大升级：Apple级别UI设计系统实施**
   - 创建世界一流的Apple风格设计系统 (apple-design-system.css)
   - 实施完整的设计令牌系统：颜色、字体、间距、阴影、动画

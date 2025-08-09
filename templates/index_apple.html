@@ -799,13 +799,6 @@
             countElement.textContent = tags.length;
         }
         
-        // 清空输入框
-        function clearResourceInput(button) {
-            const input = button.closest('.resource-input-box').querySelector('.resource-input');
-            input.value = '';
-            input.focus();
-        }
-        
         // 切换资源候选标签
         function toggleResourceSuggestion(tagElement, resource, personId) {
             if (tagElement.classList.contains('selected')) {
@@ -989,20 +982,7 @@
             });
         }
         
-        // 一键示例功能
-        function addResourceExample(button) {
-            const currentCard = button.closest('.person-card');
-            const input = currentCard.querySelector('.resource-input');
-            const personId = input.dataset.personId;
-            
-            // 随机选择一个示例模板
-            const example = resourceExamples[Math.floor(Math.random() * resourceExamples.length)];
-            
-            // 添加示例资源
-            example.forEach(resource => {
-                addSelectedResource(resource, personId);
-            });
-        }
+
         
         // 初始化空状态显示
         function initResourceEmptyState() {

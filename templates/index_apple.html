@@ -297,52 +297,56 @@
                     <div class="needs-selection-container">
                         <!-- 默认显示的前两个分类 -->
                         <div class="needs-visible-section">
-                            <!-- 结果回报 -->
+                            <!-- 想看到回报 -->
                             <div class="tag-group" style="margin-bottom: var(--space-3);">
-                                <h6 style="color: var(--color-primary); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
-                                    <span style="background: var(--color-primary); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🔵</span>想看到回报 / 实际效果
+                                <h6 style="color: var(--color-success); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
+                                    <span style="background: var(--color-success); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🟢</span>想看到回报 / 实际效果
                                 </h6>
                                 <div class="checkbox-group">
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="拿到分成">
-                                        <span>拿到分成</span>
+                                        <input type="checkbox" name="person_needs[]" value="share_revenue">
+                                        <span>拿到分成/抽成</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="带来客户">
-                                        <span>带来客户</span>
+                                        <input type="checkbox" name="person_needs[]" value="bring_leads">
+                                        <span>带来客户/用户</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="尽快落地">
+                                        <input type="checkbox" name="person_needs[]" value="fast_execution">
                                         <span>项目尽快落地</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="持续收益">
+                                        <input type="checkbox" name="person_needs[]" value="recurring_income">
                                         <span>能长期持续赚钱</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="use_idle_assets">
+                                        <span>有资源被用起来（不闲置）</span>
                                     </label>
                                 </div>
                             </div>
 
-                            <!-- 曝光影响 -->
+                            <!-- 想被看到 -->
                             <div class="tag-group" style="margin-bottom: var(--space-3);">
-                                <h6 style="color: var(--color-success); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
-                                    <span style="background: var(--color-success); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🟢</span>想被看见 / 被宣传
+                                <h6 style="color: var(--color-primary); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-semibold);">
+                                    <span style="background: var(--color-primary); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🔵</span>想被看到 / 被宣传
                                 </h6>
                                 <div class="checkbox-group">
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="品牌曝光">
-                                        <span>有品牌曝光</span>
+                                        <input type="checkbox" name="person_needs[]" value="brand_exposure">
+                                        <span>有品牌露出（线上/线下）</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="打造人设">
-                                        <span>打造人设 / 专家身份</span>
+                                        <input type="checkbox" name="person_needs[]" value="build_expert_brand">
+                                        <span>打造个人标签/专家身份</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="圈层精准">
-                                        <span>曝光圈子精准</span>
+                                        <input type="checkbox" name="person_needs[]" value="targeted_exposure">
+                                        <span>曝光到目标圈层</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="成为发起人">
-                                        <span>项目以他为主导</span>
+                                        <input type="checkbox" name="person_needs[]" value="look_like_initiator">
+                                        <span>项目中看起来是主导者</span>
                                     </label>
                                 </div>
                             </div>
@@ -357,20 +361,20 @@
                                 </h6>
                                 <div class="checkbox-group">
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="自己决定节奏">
-                                        <span>自己决定节奏</span>
+                                        <input type="checkbox" name="person_needs[]" value="control_pace">
+                                        <span>自己定节奏</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="不想被工具化">
-                                        <span>不想只是资源人</span>
+                                        <input type="checkbox" name="person_needs[]" value="choose_partners">
+                                        <span>决定和谁合作</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="决定合作人">
-                                        <span>想决定和谁合作</span>
+                                        <input type="checkbox" name="person_needs[]" value="decide_content">
+                                        <span>决定内容/产品怎么做</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="想策划包装">
-                                        <span>想参与内容策划</span>
+                                        <input type="checkbox" name="person_needs[]" value="own_planning">
+                                        <span>有发起权/策划权</span>
                                     </label>
                                 </div>
                             </div>
@@ -382,20 +386,24 @@
                                 </h6>
                                 <div class="checkbox-group">
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="不担责">
+                                        <input type="checkbox" name="person_needs[]" value="no_money_no_liability">
                                         <span>不出钱不担责</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="不公开露脸">
+                                        <input type="checkbox" name="person_needs[]" value="no_public_appearance">
                                         <span>不公开露脸</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="避开冲突">
+                                        <input type="checkbox" name="person_needs[]" value="no_conflict_current_partner">
                                         <span>不影响已有合作方</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="信息保密">
-                                        <span>希望信息保密</span>
+                                        <input type="checkbox" name="person_needs[]" value="keep_confidential">
+                                        <span>保证信息保密</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="stealth_mode">
+                                        <span>可隐身参与（不被对手知道）</span>
                                     </label>
                                 </div>
                             </div>
@@ -407,19 +415,19 @@
                                 </h6>
                                 <div class="checkbox-group">
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="成为顾问">
+                                        <input type="checkbox" name="person_needs[]" value="be_consultant">
                                         <span>成为顾问/专家</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="体现价值">
-                                        <span>体现出他很重要</span>
+                                        <input type="checkbox" name="person_needs[]" value="be_recognized">
+                                        <span>被认可很重要</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="圈子有地位">
-                                        <span>提升圈子里的地位</span>
+                                        <input type="checkbox" name="person_needs[]" value="raise_status_in_circle">
+                                        <span>提升在圈子里的地位</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="自己组的局">
+                                        <input type="checkbox" name="person_needs[]" value="as_initiator">
                                         <span>像是他发起的局</span>
                                     </label>
                                 </div>
@@ -432,20 +440,24 @@
                                 </h6>
                                 <div class="checkbox-group">
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="拓展人脉">
+                                        <input type="checkbox" name="person_needs[]" value="expand_network">
                                         <span>拓展人脉</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="有参与感">
-                                        <span>有参与感 / 成就感</span>
+                                        <input type="checkbox" name="person_needs[]" value="sense_of_participation">
+                                        <span>有参与感/成就感</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="能当谈资">
-                                        <span>项目能当谈资</span>
+                                        <input type="checkbox" name="person_needs[]" value="talk_value">
+                                        <span>项目能当作谈资</span>
                                     </label>
                                     <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="被邀请的感觉">
+                                        <input type="checkbox" name="person_needs[]" value="feel_invited">
                                         <span>有被邀请的感觉</span>
+                                    </label>
+                                    <label class="checkbox-tag">
+                                        <input type="checkbox" name="person_needs[]" value="learn_info">
+                                        <span>能接触到新信息/学到东西</span>
                                     </label>
                                 </div>
                             </div>

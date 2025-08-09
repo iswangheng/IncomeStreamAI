@@ -1,0 +1,67 @@
+{
+  "groups": [
+    {
+      "id": "result",
+      "title": "想看到回报 / 实际效果",
+      "items": [
+        {"value": "share_revenue", "label": "拿到分成/抽成"},
+        {"value": "bring_leads", "label": "带来客户/用户"},
+        {"value": "fast_execution", "label": "项目尽快落地"},
+        {"value": "recurring_income", "label": "能长期持续赚钱"},
+        {"value": "use_idle_assets", "label": "有资源被用起来（不闲置）"}
+      ]
+    },
+    {
+      "id": "exposure",
+      "title": "想被看到 / 被宣传",
+      "items": [
+        {"value": "brand_exposure", "label": "有品牌露出（线上/线下）"},
+        {"value": "build_expert_brand", "label": "打造个人标签/专家身份"},
+        {"value": "targeted_exposure", "label": "曝光到目标圈层"},
+        {"value": "look_like_initiator", "label": "项目中看起来是主导者"}
+      ]
+    },
+    {
+      "id": "control",
+      "title": "想主导项目 / 有话语权",
+      "items": [
+        {"value": "control_pace", "label": "自己定节奏"},
+        {"value": "choose_partners", "label": "决定和谁合作"},
+        {"value": "decide_content", "label": "决定内容/产品怎么做"},
+        {"value": "own_planning", "label": "有发起权/策划权"}
+      ]
+    },
+    {
+      "id": "risk",
+      "title": "不想冒风险",
+      "items": [
+        {"value": "no_money_no_liability", "label": "不出钱不担责"},
+        {"value": "no_public_appearance", "label": "不公开露脸"},
+        {"value": "no_conflict_current_partner", "label": "不影响已有合作方"},
+        {"value": "keep_confidential", "label": "保证信息保密"},
+        {"value": "stealth_mode", "label": "可隐身参与（不被对手知道）"}
+      ]
+    },
+    {
+      "id": "status",
+      "title": "想被尊重 / 有地位",
+      "items": [
+        {"value": "be_consultant", "label": "成为顾问/专家"},
+        {"value": "be_recognized", "label": "被认可很重要"},
+        {"value": "raise_status_in_circle", "label": "提升在圈子里的地位"},
+        {"value": "as_initiator", "label": "像是他发起的局"}
+      ]
+    },
+    {
+      "id": "relationship",
+      "title": "在乎人脉 / 感受",
+      "items": [
+        {"value": "expand_network", "label": "拓展人脉"},
+        {"value": "sense_of_participation", "label": "有参与感/成就感"},
+        {"value": "talk_value", "label": "项目能当作谈资"},
+        {"value": "feel_invited", "label": "有被邀请的感觉"},
+        {"value": "learn_info", "label": "能接触到新信息/学到东西"}
+      ]
+    }
+  ]
+}

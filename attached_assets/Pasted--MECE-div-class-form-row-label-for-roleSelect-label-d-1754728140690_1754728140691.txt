@@ -1,0 +1,106 @@
+<!-- 关键人物 · 身份角色（MECE 版） -->
+<div class="form-row">
+  <label for="roleSelect">身份角色（必选）</label>
+
+  <div class="select-with-help">
+    <select id="roleSelect" name="person_role" aria-describedby="roleDesc">
+      <option value="" disabled selected>请选择关键角色</option>
+
+      <option value="buyer" data-desc="有需求/有预算的一方，项目最终买单者或提出方（如企业客户、政府采购）">
+        需求方 / 采购方
+      </option>
+
+      <option value="investor" data-desc="提供资金或赞助，换取回报/分润/权益（如VC、天使、品牌赞助商）">
+        投资方 / 资金方
+      </option>
+
+      <option value="product" data-desc="提供可销售的产品或服务（实体或数字），可作为变现载体（如品牌方、课程/软件提供方）">
+        产品方 / 服务方
+      </option>
+
+      <option value="content" data-desc="提供原创内容、IP或影响力资源，可用于引流与联名（如自媒体、作家、IP方）">
+        内容方 / IP方
+      </option>
+
+      <option value="delivery" data-desc="负责落地与产出结果，按方案交付（如活动执行公司、研发/制作团队）">
+        交付方 / 执行方
+      </option>
+
+      <option value="channel" data-desc="拥有分发能力，把产品/内容推广给用户（如代理商、电商平台、社群主、媒体）">
+        渠道方 / 推广方
+      </option>
+
+      <option value="ops" data-desc="运营并维护某平台/系统/入口，掌控流量与规则（如APP/SaaS/媒体平台运营）">
+        平台运营方
+      </option>
+
+      <option value="orchestrator" data-desc="整合各方资源、定节奏并推动落地的牵头者（如项目经理、总策划、行业协会）">
+        统筹方 / 牵头方
+      </option>
+
+      <option value="expert" data-desc="提供专业知识、资质或背书，提高可信度（如行业顾问、认证机构、导师）">
+        外部专家 / 顾问
+      </option>
+    </select>
+
+    <!-- 桌面端悬浮提示泡泡 -->
+    <span id="roleTip" class="tip" role="tooltip" aria-hidden="true"></span>
+  </div>
+
+  <!-- 移动端/可访问性：随选择变化的说明文字 -->
+  <small id="roleDesc" class="role-desc" aria-live="polite"></small>
+</div>
+
+<style>
+  .form-row { margin: 12px 0; }
+  label { display:block; margin-bottom:6px; font-weight:600; }
+  select { width:100%; max-width:520px; padding:8px 10px; }
+  .select-with-help { position:relative; display:inline-block; }
+  .tip {
+    position:absolute; left:0; right:auto; top:44px; 
+    max-width:520px; padding:8px 10px; font-size:12px; line-height:1.4;
+    background:#fff; border:1px solid #e5e5e5; border-radius:6px; 
+    box-shadow:0 6px 18px rgba(0,0,0,.08); color:#333;
+    pointer-events:none; opacity:0; transform:translateY(-4px); transition:.16s;
+    z-index:10;
+  }
+  .tip.show { opacity:1; transform:translateY(0); }
+  .role-desc { display:block; margin-top:6px; color:#666; max-width:520px; }
+</style>
+
+<script>
+  (function () {
+    const sel = document.getElementById('roleSelect');
+    const tip = document.getElementById('roleTip');
+    const desc = document.getElementById('roleDesc');
+
+    function updateHelp() {
+      const opt = sel.options[sel.selectedIndex];
+      const text = opt?.dataset?.desc || '';
+      desc.textContent = text;
+      if (text) { tip.textContent = text; }
+    }
+
+    // 初始
+    updateHelp();
+
+    // 选择变更时更新说明
+    sel.addEventListener('change', updateHelp);
+
+    // 桌面端：悬浮显示 tip
+    sel.addEventListener('mouseenter', () => {
+      if (desc.textContent) { tip.classList.add('show'); tip.setAttribute('aria-hidden','false'); }
+    });
+    sel.addEventListener('mouseleave', () => {
+      tip.classList.remove('show'); tip.setAttribute('aria-hidden','true');
+    });
+
+    // 键盘/焦点辅助
+    sel.addEventListener('focus', () => {
+      if (desc.textContent) { tip.classList.add('show'); tip.setAttribute('aria-hidden','false'); }
+    });
+    sel.addEventListener('blur', () => {
+      tip.classList.remove('show'); tip.setAttribute('aria-hidden','true');
+    });
+  })();
+</script>

@@ -274,6 +274,54 @@ body::after {
     visibility: visible !important;
 }
 
+/* ==== 角色选择增强样式 ==== */
+.role-selection-container {
+    margin-top: 8px;
+}
+
+.role-checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.role-item {
+    position: relative;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.role-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+    border-color: rgba(102, 126, 234, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.role-item input[type="checkbox"]:checked + span {
+    font-weight: 600;
+    color: #667eea;
+}
+
+.role-description {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 6px;
+    border-left: 3px solid #667eea;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.role-description small {
+    font-size: 12px;
+    line-height: 1.4;
+    color: #666;
+}
+
 /* ==== 表单增强效果 ==== */
 .form-control {
     background: rgba(255, 255, 255, 0.8);

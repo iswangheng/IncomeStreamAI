@@ -308,7 +308,7 @@
                     </div>
                     
                     <!-- 已选资源标签区 -->
-                    <div class="selected-resources-container" id="selectedResources_\${personCount}">
+                    <div class="selected-resources-container empty" id="selectedResources_\${personCount}">
                         <!-- 已选标签将显示在这里 -->
                     </div>
                     
@@ -541,8 +541,12 @@
             roleCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', () => {
                     updateResourceSuggestions(personCard);
+                    updateRoleSummary(personCard);
                 });
             });
+            
+            // 初始化资源推荐（显示提示信息）
+            updateResourceSuggestions(personCard);
             
             // 为新卡片设置随机提示语
             setRandomPlaceholder();
@@ -739,7 +743,7 @@
         function updateResourceSuggestions(personCard) {
             const personId = personCard.querySelector('.resource-input').dataset.personId;
             const roleCheckboxes = personCard.querySelectorAll('input[name="person_role[]"]:checked');
-            const suggestionsContainer = personCard.querySelector(`#resourceSuggestions_${personId} .resource-suggestions-scroll`);
+            const suggestionsContainer = personCard.querySelector('.resource-suggestions-scroll');
             
             // 获取所有选中角色的候选资源（并集）
             const allSuggestions = new Set();
@@ -781,7 +785,8 @@
         
         // 添加选中的资源
         function addSelectedResource(resource, personId) {
-            const container = document.querySelector(`#selectedResources_${personId}`);
+            const targetCard = document.querySelector(`[data-person-id="${personId}"]`).closest('.person-card');
+            const container = targetCard.querySelector('.selected-resources-container');
             const existingTags = Array.from(container.querySelectorAll('.selected-resource-tag'));
             
             // 检查是否已存在
@@ -815,7 +820,8 @@
         
         // 移除选中的资源
         function removeSelectedResource(resource, personId) {
-            const container = document.querySelector(`#selectedResources_${personId}`);
+            const targetCard = document.querySelector(`[data-person-id="${personId}"]`).closest('.person-card');
+            const container = targetCard.querySelector('.selected-resources-container');
             const tag = container.querySelector(`[data-resource="${resource}"]`);
             if (tag) {
                 tag.remove();
@@ -827,8 +833,8 @@
             }
             
             // 更新候选标签状态
-            const personCard = container.closest('.person-card');
-            const suggestionTags = personCard.querySelectorAll('.resource-suggestion-tag');
+            const currentCard = container.closest('.person-card');
+            const suggestionTags = currentCard.querySelectorAll('.resource-suggestion-tag');
             suggestionTags.forEach(tag => {
                 if (tag.textContent === resource) {
                     tag.classList.remove('selected');
@@ -862,7 +868,8 @@
         
         // 显示资源验证提示
         function showResourceValidation(personId, message, type) {
-            const validationElement = document.querySelector(`#resourceValidation_${personId}`);
+            const targetCard = document.querySelector(`[data-person-id="${personId}"]`).closest('.person-card');
+            const validationElement = targetCard.querySelector('.resource-validation');
             validationElement.textContent = message;
             validationElement.className = `resource-validation ${type}`;
             validationElement.style.display = 'block';
@@ -888,11 +895,12 @@
         
         // 更新资源数据到隐藏字段
         function updateResourcesData(personId) {
-            const container = document.querySelector(`#selectedResources_${personId}`);
+            const targetCard = document.querySelector(`[data-person-id="${personId}"]`).closest('.person-card');
+            const container = targetCard.querySelector('.selected-resources-container');
             const tags = container.querySelectorAll('.selected-resource-tag');
             const resources = Array.from(tags).map(tag => formatResource(tag.dataset.resource));
             
-            const hiddenInput = container.closest('.person-card').querySelector('.resources-data');
+            const hiddenInput = targetCard.querySelector('.resources-data');
             hiddenInput.value = JSON.stringify(resources);
         }
         
@@ -919,7 +927,8 @@
                     }
                 } else if (e.key === 'Backspace' && this.value === '') {
                     // 删除最后一个标签
-                    const container = document.querySelector(`#selectedResources_${personId}`);
+                    const currentCard = this.closest('.person-card');
+                    const container = currentCard.querySelector('.selected-resources-container');
                     const lastTag = container.querySelector('.selected-resource-tag:last-child');
                     if (lastTag) {
                         const resource = lastTag.dataset.resource;
@@ -944,8 +953,8 @@
         
         // 一键示例功能
         function addResourceExample(button) {
-            const personCard = button.closest('.person-card');
-            const input = personCard.querySelector('.resource-input');
+            const currentCard = button.closest('.person-card');
+            const input = currentCard.querySelector('.resource-input');
             const personId = input.dataset.personId;
             
             // 随机选择一个示例模板

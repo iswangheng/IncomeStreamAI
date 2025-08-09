@@ -572,7 +572,6 @@ body::after {
 .resource-input {
     width: 100%;
     padding: var(--space-3);
-    padding-right: 80px;
     border: 2px solid rgba(34, 139, 34, 0.2);
     border-radius: 6px;
     font-size: var(--text-sm);
@@ -585,35 +584,7 @@ body::after {
     outline: none;
 }
 
-.input-actions {
-    position: absolute;
-    right: var(--space-3);
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    gap: var(--space-1);
-}
 
-.btn-input-action {
-    width: 28px;
-    height: 28px;
-    border: 1px solid rgba(34, 139, 34, 0.3);
-    background: rgba(34, 139, 34, 0.1);
-    color: #228B22;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 12px;
-}
-
-.btn-input-action:hover {
-    background: rgba(34, 139, 34, 0.2);
-    border-color: rgba(34, 139, 34, 0.5);
-    transform: scale(1.05);
-}
 
 /* 已选资源区域 */
 .selected-resources-section {

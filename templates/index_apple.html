@@ -287,9 +287,43 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">掌握的资源</label>
-                    <input type="text" class="form-control" name="person_resources[]" 
-                           placeholder="请用逗号分隔多个资源，例如：品牌内容资源,产品分销权限">
+                    <label class="form-label">掌握的资源（必填 ≥ 1）</label>
+                    <p class="resource-hint">他现在就能调动的具体东西（带平台/数量/对象/权限），用于搭建路径。</p>
+                    
+                    <!-- 候选资源标签区 -->
+                    <div class="resource-suggestions-container" id="resourceSuggestions_\${personCount}">
+                        <div class="resource-suggestions-scroll">
+                            <!-- 动态生成的候选标签 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 自由输入框 -->
+                    <div class="resource-input-container">
+                        <input type="text" class="form-control resource-input dynamic-placeholder-resource" 
+                               placeholder="微信社群5个、视频号10万粉、年度广告预算50万、产品试用码100个、活动场地一天、品牌对接人：XX"
+                               data-person-id="\${personCount}">
+                        <button type="button" class="resource-example-btn" onclick="addResourceExample(this)">
+                            <i class="fas fa-magic"></i> 一键示例
+                        </button>
+                    </div>
+                    
+                    <!-- 已选资源标签区 -->
+                    <div class="selected-resources-container" id="selectedResources_\${personCount}">
+                        <!-- 已选标签将显示在这里 -->
+                    </div>
+                    
+                    <!-- 隐藏字段存储最终数据 -->
+                    <input type="hidden" name="person_resources[]" class="resources-data">
+                    
+                    <!-- 弱提示 -->
+                    <div class="resource-tip">
+                        <small class="text-muted">💡 身份=位置；资源=可调用的'具体东西'。</small>
+                    </div>
+                    
+                    <!-- 验证提示区域 -->
+                    <div class="resource-validation" id="resourceValidation_\${personCount}" style="display: none;">
+                        <!-- 验证提示信息 -->
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -499,6 +533,17 @@
             // 初始化角色提示功能
             initRoleTooltips(personCard);
             
+            // 初始化资源输入功能
+            initResourceInput(personCard);
+            
+            // 监听角色变化更新资源推荐
+            const roleCheckboxes = personCard.querySelectorAll('input[name="person_role[]"]');
+            roleCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    updateResourceSuggestions(personCard);
+                });
+            });
+            
             // 为新卡片设置随机提示语
             setRandomPlaceholder();
         }
@@ -628,6 +673,33 @@
             }
         }
         
+        // 角色到资源的映射
+        const roleToResourceSuggestions = {
+            "buyer": ["采购预算", "项目立项权", "签约权限", "内部宣传位", "目标客户名单"],
+            "investor": ["赞助额度", "现金预算", "投后服务渠道", "投委会背书", "路演名额"],
+            "product": ["产品试用名额", "样品/兑换码", "分销价权限", "售后/客服支持", "API/SDK授权"],
+            "content": ["公众号/视频号/抖音号X粉", "版权授权", "专栏/播客位", "内容制作团队", "素材库"],
+            "delivery": ["执行团队编制", "设计/拍摄/研发能力", "供应链/施工队", "制作/交付SOP", "搭建工具/模板"],
+            "channel": ["社群X个", "私域好友数X", "媒体投放位", "电商渠道位", "线下门店/展位"],
+            "ops": ["APP/小程序入口位", "Push/弹窗位", "频道/专题页", "数据看板访问", "客服体系接入"],
+            "orchestrator": ["跨方对接权", "项目排期控制", "合同模板/法务接口", "行业协会关系", "内推白名单"],
+            "expert": ["专业认证/资质", "顾问背书", "评审名额", "培训课程", "行业人脉图谱"]
+        };
+        
+        // 资源示例模板
+        const resourceExamples = [
+            ["视频号8万粉", "社群2个", "品牌对接人：本地咖啡连锁"],
+            ["SaaS试用名额100个", "API授权（14天）", "实施团队2人/2周"],
+            ["赞助额度30万", "项目排期控制权", "合同模板/法务接口"]
+        ];
+        
+        // 资源输入随机提示语
+        const resourcePlaceholders = [
+            "微信社群5个、视频号10万粉、年度广告预算50万、产品试用码100个、活动场地一天、品牌对接人：XX",
+            "电商渠道位3个、线下门店2家、KOL合作位2期、媒体采访资源、API授权、课程版权",
+            "企业客户名单200条、招商会场地、投委会路演名额、供应链工厂档期、施工队2组"
+        ];
+        
         // 动态提示语数据
         const inspirationTexts = [
             "老板刚批预算，需要尽快花掉",
@@ -653,6 +725,247 @@
             textareas.forEach(textarea => {
                 const randomText = inspirationTexts[Math.floor(Math.random() * inspirationTexts.length)];
                 textarea.placeholder = `还有什么特别的点会让他愿意参与？比如：${randomText}`;
+            });
+            
+            // 设置资源输入的随机提示语
+            const resourceInputs = document.querySelectorAll('.dynamic-placeholder-resource');
+            resourceInputs.forEach(input => {
+                const randomPlaceholder = resourcePlaceholders[Math.floor(Math.random() * resourcePlaceholders.length)];
+                input.placeholder = randomPlaceholder;
+            });
+        }
+        
+        // 更新资源候选标签
+        function updateResourceSuggestions(personCard) {
+            const personId = personCard.querySelector('.resource-input').dataset.personId;
+            const roleCheckboxes = personCard.querySelectorAll('input[name="person_role[]"]:checked');
+            const suggestionsContainer = personCard.querySelector(`#resourceSuggestions_${personId} .resource-suggestions-scroll`);
+            
+            // 获取所有选中角色的候选资源（并集）
+            const allSuggestions = new Set();
+            roleCheckboxes.forEach(checkbox => {
+                const role = checkbox.value;
+                if (roleToResourceSuggestions[role]) {
+                    roleToResourceSuggestions[role].forEach(resource => allSuggestions.add(resource));
+                }
+            });
+            
+            // 清空并重新生成候选标签
+            suggestionsContainer.innerHTML = '';
+            
+            if (allSuggestions.size > 0) {
+                allSuggestions.forEach(resource => {
+                    const tag = document.createElement('div');
+                    tag.className = 'resource-suggestion-tag';
+                    tag.textContent = resource;
+                    tag.onclick = () => toggleResourceSuggestion(tag, resource, personId);
+                    suggestionsContainer.appendChild(tag);
+                });
+            } else {
+                suggestionsContainer.innerHTML = '<div style="color: var(--color-gray-500); font-size: var(--text-sm); padding: 8px;">请先选择身份角色以获得资源推荐</div>';
+            }
+        }
+        
+        // 切换资源候选标签
+        function toggleResourceSuggestion(tagElement, resource, personId) {
+            if (tagElement.classList.contains('selected')) {
+                // 移除资源
+                removeSelectedResource(resource, personId);
+                tagElement.classList.remove('selected');
+            } else {
+                // 添加资源
+                addSelectedResource(resource, personId);
+                tagElement.classList.add('selected');
+            }
+        }
+        
+        // 添加选中的资源
+        function addSelectedResource(resource, personId) {
+            const container = document.querySelector(`#selectedResources_${personId}`);
+            const existingTags = Array.from(container.querySelectorAll('.selected-resource-tag'));
+            
+            // 检查是否已存在
+            if (existingTags.some(tag => tag.dataset.resource === resource)) {
+                return;
+            }
+            
+            // 验证资源格式
+            const validation = validateResource(resource);
+            if (validation.type === 'error') {
+                showResourceValidation(personId, validation.message, 'error');
+                return;
+            } else if (validation.type === 'warning') {
+                showResourceValidation(personId, validation.message, 'warning');
+            }
+            
+            // 创建标签
+            const tag = document.createElement('div');
+            tag.className = 'selected-resource-tag';
+            tag.dataset.resource = resource;
+            tag.innerHTML = `
+                <span>${resource}</span>
+                <button type="button" class="remove-btn" onclick="removeSelectedResource('${resource.replace(/'/g, "\\'")}', '${personId}')">&times;</button>
+            `;
+            
+            container.appendChild(tag);
+            container.classList.add('has-resources');
+            container.classList.remove('empty');
+            updateResourcesData(personId);
+        }
+        
+        // 移除选中的资源
+        function removeSelectedResource(resource, personId) {
+            const container = document.querySelector(`#selectedResources_${personId}`);
+            const tag = container.querySelector(`[data-resource="${resource}"]`);
+            if (tag) {
+                tag.remove();
+            }
+            
+            if (container.children.length === 0) {
+                container.classList.remove('has-resources');
+                container.classList.add('empty');
+            }
+            
+            // 更新候选标签状态
+            const personCard = container.closest('.person-card');
+            const suggestionTags = personCard.querySelectorAll('.resource-suggestion-tag');
+            suggestionTags.forEach(tag => {
+                if (tag.textContent === resource) {
+                    tag.classList.remove('selected');
+                }
+            });
+            
+            updateResourcesData(personId);
+        }
+        
+        // 验证资源格式
+        function validateResource(resource) {
+            // 长度检查
+            if (resource.length > 40) {
+                return {
+                    type: 'error',
+                    message: '请更精炼，保留关键信息（平台/数量/权限），单条不超过40字。'
+                };
+            }
+            
+            // 空泛词检查
+            const vaguePattern = /(资源|人脉|渠道|预算|粉丝|关系|能力|团队)$/;
+            if (vaguePattern.test(resource.trim())) {
+                return {
+                    type: 'warning',
+                    message: '请具体到平台/数量/对象/权限，例如"视频号10万粉"而不是"粉丝"。'
+                };
+            }
+            
+            return { type: 'success' };
+        }
+        
+        // 显示资源验证提示
+        function showResourceValidation(personId, message, type) {
+            const validationElement = document.querySelector(`#resourceValidation_${personId}`);
+            validationElement.textContent = message;
+            validationElement.className = `resource-validation ${type}`;
+            validationElement.style.display = 'block';
+            
+            // 3秒后自动隐藏警告
+            if (type === 'warning') {
+                setTimeout(() => {
+                    validationElement.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 格式化资源文本
+        function formatResource(resource) {
+            return resource
+                .replace(/，/g, ',')  // 全角逗号转半角
+                .replace(/(\d+)w/gi, '$1万')  // w转万
+                .replace(/(\d+)万\+/g, '$1万')  // 万+转万
+                .replace(/社群x(\d+)/g, '社群$1个')  // 社群x3转社群3个
+                .replace(/粉(\d+)w/g, '粉丝$1万')  // 粉5w转粉丝5万
+                .trim();
+        }
+        
+        // 更新资源数据到隐藏字段
+        function updateResourcesData(personId) {
+            const container = document.querySelector(`#selectedResources_${personId}`);
+            const tags = container.querySelectorAll('.selected-resource-tag');
+            const resources = Array.from(tags).map(tag => formatResource(tag.dataset.resource));
+            
+            const hiddenInput = container.closest('.person-card').querySelector('.resources-data');
+            hiddenInput.value = JSON.stringify(resources);
+        }
+        
+        // 处理资源输入框
+        function initResourceInput(personCard) {
+            const input = personCard.querySelector('.resource-input');
+            const personId = input.dataset.personId;
+            
+            // 回车和逗号分隔
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const value = this.value.trim();
+                    if (value) {
+                        // 按逗号或换行分割
+                        const resources = value.split(/[,，\n]/).map(r => r.trim()).filter(r => r);
+                        resources.forEach(resource => {
+                            const formatted = formatResource(resource);
+                            if (formatted) {
+                                addSelectedResource(formatted, personId);
+                            }
+                        });
+                        this.value = '';
+                    }
+                } else if (e.key === 'Backspace' && this.value === '') {
+                    // 删除最后一个标签
+                    const container = document.querySelector(`#selectedResources_${personId}`);
+                    const lastTag = container.querySelector('.selected-resource-tag:last-child');
+                    if (lastTag) {
+                        const resource = lastTag.dataset.resource;
+                        removeSelectedResource(resource, personId);
+                    }
+                }
+            });
+            
+            // 粘贴处理
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const resources = paste.split(/[,，\n]/).map(r => r.trim()).filter(r => r);
+                resources.forEach(resource => {
+                    const formatted = formatResource(resource);
+                    if (formatted) {
+                        addSelectedResource(formatted, personId);
+                    }
+                });
+            });
+        }
+        
+        // 一键示例功能
+        function addResourceExample(button) {
+            const personCard = button.closest('.person-card');
+            const input = personCard.querySelector('.resource-input');
+            const personId = input.dataset.personId;
+            
+            // 随机选择一个示例模板
+            const example = resourceExamples[Math.floor(Math.random() * resourceExamples.length)];
+            
+            // 添加示例资源
+            example.forEach(resource => {
+                addSelectedResource(resource, personId);
+            });
+        }
+        
+        // 初始化空状态显示
+        function initResourceEmptyState() {
+            const containers = document.querySelectorAll('.selected-resources-container');
+            containers.forEach(container => {
+                if (container.children.length === 0) {
+                    container.classList.add('empty');
+                } else {
+                    container.classList.remove('empty');
+                }
             });
         }
         

@@ -375,7 +375,18 @@
             </div>
             
             <div class="estimated-time">
-                正在启动AI分析：<span id="timeRemaining">准备中...</span>
+                <span id="analysisStatus">AI正在智能分析</span>：<span id="timeRemaining">准备中...</span>
+            </div>
+            
+            <!-- 实时状态显示 -->
+            <div class="real-time-status" style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(10px);">
+                <div id="currentStep" style="font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 10px;">
+                    正在初始化分析引擎...
+                </div>
+                <div class="progress-detail" style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.6);">
+                    <span id="progressText">准备阶段</span>
+                    <span id="progressPercent">0%</span>
+                </div>
             </div>
         </div>
     </div>
@@ -413,12 +424,51 @@
             const progress = (elapsed / totalDuration) * 100;
             document.getElementById('progressFill').style.width = Math.min(progress, 100) + '%';
             
-            // 更新显示文本
-            if (progress >= 100) {
-                document.getElementById('timeRemaining').textContent = '启动分析中...';
+            // 更新实时状态显示
+            updateRealTimeStatus(progress);
+        }
+        
+        // 更新实时状态显示
+        function updateRealTimeStatus(progress) {
+            const currentStepEl = document.getElementById('currentStep');
+            const progressTextEl = document.getElementById('progressText');
+            const progressPercentEl = document.getElementById('progressPercent');
+            const analysisStatusEl = document.getElementById('analysisStatus');
+            const timeRemainingEl = document.getElementById('timeRemaining');
+            
+            if (progress < 20) {
+                currentStepEl.textContent = '正在收集项目基础信息和人物资源...';
+                progressTextEl.textContent = '数据预处理';
+                analysisStatusEl.textContent = 'AI正在初始化';
+                timeRemainingEl.textContent = '数据准备中...';
+            } else if (progress < 40) {
+                currentStepEl.textContent = '正在分析关键人物的资源和需求匹配...';
+                progressTextEl.textContent = '资源映射';
+                analysisStatusEl.textContent = 'AI正在思考';
+                timeRemainingEl.textContent = '分析人物资源...';
+            } else if (progress < 60) {
+                currentStepEl.textContent = '正在查询知识库，寻找最佳收入模式...';
+                progressTextEl.textContent = '模式匹配';
+                analysisStatusEl.textContent = 'AI正在决策';
+                timeRemainingEl.textContent = '设计收入路径...';
+            } else if (progress < 80) {
+                currentStepEl.textContent = '正在制定具体执行步骤和风险评估...';
+                progressTextEl.textContent = '方案设计';
+                analysisStatusEl.textContent = 'AI正在规划';
+                timeRemainingEl.textContent = '生成执行方案...';
+            } else if (progress < 100) {
+                currentStepEl.textContent = '正在整合分析结果，生成最终报告...';
+                progressTextEl.textContent = '结果生成';
+                analysisStatusEl.textContent = 'AI即将完成';
+                timeRemainingEl.textContent = '准备展示结果...';
             } else {
-                document.getElementById('timeRemaining').textContent = '准备分析...';
+                currentStepEl.textContent = '✅ 分析完成！正在跳转到结果页面...';
+                progressTextEl.textContent = '分析完成';
+                analysisStatusEl.textContent = '分析已完成';
+                timeRemainingEl.textContent = '即将跳转...';
             }
+            
+            progressPercentEl.textContent = Math.round(progress) + '%';
         }
 
         // 激活步骤
@@ -472,8 +522,10 @@
                         }
                     }
                     
-                    // 立即调用AI分析
-                    callAIAnalysis();
+                    // 短暂延迟后跳转，让用户看到完成状态
+                    setTimeout(() => {
+                        callAIAnalysis();
+                    }, 800);
                 }
             }, 100);
         }

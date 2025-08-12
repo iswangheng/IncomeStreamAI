@@ -216,6 +216,7 @@ def generate():
         app.logger.info(f"Processing analysis for: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         suggestions = generate_ai_suggestions(form_data)
         session['analysis_result'] = suggestions
+        app.logger.info(f"AI analysis completed successfully")
         
         # 详细调试session存储
         app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")

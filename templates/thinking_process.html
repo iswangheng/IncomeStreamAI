@@ -381,17 +381,17 @@
     </div>
 
     <script>
-        // 思考过程步骤和时间配置 - 现在直接跳转到真实分析
+        // 思考过程步骤和时间配置 - 快速过渡到AI分析
         const steps = [
-            { id: 'step1', duration: 500, title: '分析项目信息', desc: '正在解析您的项目背景和目标设定' },
-            { id: 'step2', duration: 500, title: '评估关键人物资源', desc: '分析每位关键人物的资源和潜在贡献' },
-            { id: 'step3', duration: 500, title: '匹配收入模式', desc: '结合知识库寻找最适合的变现路径' },
-            { id: 'step4', duration: 500, title: '设计执行方案', desc: '制定详细的实施步骤和时间规划' },
-            { id: 'step5', duration: 500, title: '生成完整报告', desc: '整合分析结果，生成个性化方案' }
+            { id: 'step1', duration: 200, title: '分析项目信息', desc: '正在解析您的项目背景和目标设定' },
+            { id: 'step2', duration: 200, title: '评估关键人物资源', desc: '分析每位关键人物的资源和潜在贡献' },
+            { id: 'step3', duration: 200, title: '匹配收入模式', desc: '结合知识库寻找最适合的变现路径' },
+            { id: 'step4', duration: 200, title: '设计执行方案', desc: '制定详细的实施步骤和时间规划' },
+            { id: 'step5', duration: 200, title: '生成完整报告', desc: '整合分析结果，生成个性化方案' }
         ];
 
         let currentStep = 0;
-        let totalDuration = steps.reduce((sum, step) => sum + step.duration, 0);
+        let totalDuration = steps.reduce((sum, step) => sum + step.duration, 0); // 总共1秒
         let elapsed = 0;
         let startTime = Date.now();
 
@@ -472,10 +472,8 @@
                         }
                     }
                     
-                    // 延迟1秒后调用AI分析
-                    setTimeout(() => {
-                        callAIAnalysis();
-                    }, 1000);
+                    // 立即调用AI分析
+                    callAIAnalysis();
                 }
             }, 100);
         }

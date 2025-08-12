@@ -392,12 +392,12 @@
 .upload-zone {
     border: 2px dashed var(--color-gray-300);
     border-radius: var(--radius-xl);
-    padding: var(--space-16); /* 增加内边距 */
+    padding: var(--space-16);
     text-align: center;
     background: var(--color-bg-primary);
     transition: var(--transition-base);
     cursor: pointer;
-    margin: var(--space-8) var(--space-6) var(--space-12); /* 增加上下间距 */
+    margin: var(--space-8) 0; /* 上下一致的边距，左右为0让容器控制居中 */
 }
 
 .upload-zone:hover {
@@ -841,6 +841,14 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--space-6);
+}
+
+.upload-section {
+    padding: var(--space-8) var(--space-6);
+}
+
+.upload-section .card {
+    margin: var(--space-8) 0;
 }
 
 /* 响应式设计 */

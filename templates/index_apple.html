@@ -137,40 +137,90 @@
                     </h3>
                 </div>
                 <div class="card-body">
-                    <label class="form-label">你还有哪些其他资源</label>
-                    <div class="checkbox-group">
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="external_resources" value="政府补贴">
-                            <span>政府补贴</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="external_resources" value="投资机构">
-                            <span>投资机构</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="external_resources" value="合作伙伴">
-                            <span>合作伙伴</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="external_resources" value="供应链">
-                            <span>供应链资源</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="external_resources" value="技术平台">
-                            <span>技术平台</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="external_resources" value="媒体渠道">
-                            <span>媒体渠道</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="external_resources" value="行业协会">
-                            <span>行业协会</span>
-                        </label>
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="external_resources" value="专业服务">
-                            <span>专业服务机构</span>
-                        </label>
+                    <!-- 区别说明 -->
+                    <div class="resource-description">
+                        <i class="fas fa-info-circle me-2"></i>
+                        这里填写"不依赖单个人"的资源，例如组织、平台、政策、公共合作伙伴<br>
+                        <strong>区别：</strong>关键人物资源 = 需要去找人拿；外部资源 = 你直接就能用
+                    </div>
+
+                    <!-- 资源分类 -->
+                    <div class="resource-categories">
+                        <!-- 资金支持类 -->
+                        <div class="resource-category-section">
+                            <h5 class="resource-category-title">
+                                <i class="fas fa-coins me-2"></i>
+                                资金支持
+                            </h5>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="external_resources" value="政府补贴">
+                                    <span>政府补贴</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="external_resources" value="投资机构">
+                                    <span>投资机构</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 市场渠道类 -->
+                        <div class="resource-category-section">
+                            <h5 class="resource-category-title">
+                                <i class="fas fa-bullhorn me-2"></i>
+                                市场渠道
+                            </h5>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="external_resources" value="媒体渠道">
+                                    <span>媒体渠道</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="external_resources" value="行业协会">
+                                    <span>行业协会</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 执行能力类 -->
+                        <div class="resource-category-section">
+                            <h5 class="resource-category-title">
+                                <i class="fas fa-cogs me-2"></i>
+                                执行能力
+                            </h5>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="external_resources" value="供应链资源">
+                                    <span>供应链资源</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="external_resources" value="技术平台">
+                                    <span>技术平台</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="external_resources" value="专业服务机构">
+                                    <span>专业服务机构</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 战略合作类 -->
+                        <div class="resource-category-section">
+                            <h5 class="resource-category-title">
+                                <i class="fas fa-handshake me-2"></i>
+                                战略合作
+                            </h5>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="external_resources" value="已有合作伙伴">
+                                    <span>已有合作伙伴</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="external_resources" value="联盟组织">
+                                    <span>联盟组织</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- 其他资源输入 -->
@@ -180,7 +230,8 @@
                             <span>其他资源</span>
                         </label>
                         <input type="text" class="form-control" id="other_resource_text" name="other_resource_text" 
-                               placeholder="请描述其他可用的外部资源..." style="margin-top: var(--space-3); display: none;">
+                               placeholder="例如：公司签署的框架协议、认证资质、专利技术、开放API接口等..." 
+                               style="margin-top: var(--space-3); display: none;">
                     </div>
                 </div>
             </div>

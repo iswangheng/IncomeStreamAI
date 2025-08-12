@@ -431,11 +431,63 @@ body::after {
 .resource-description {
     font-size: var(--text-sm);
     color: var(--color-gray-700);
-    margin-bottom: var(--space-4);
-    padding: var(--space-2);
+    margin-bottom: var(--space-6);
+    padding: var(--space-4);
     background: rgba(102, 126, 234, 0.05);
     border-left: 3px solid #667eea;
-    border-radius: 4px;
+    border-radius: 6px;
+    line-height: 1.6;
+}
+
+/* 资源分类样式 */
+.resource-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.resource-category-section {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: var(--space-4);
+    transition: all 0.2s ease;
+}
+
+.resource-category-section:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(102, 126, 234, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.resource-category-title {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-gray-800);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.resource-category-title i {
+    color: #667eea;
+    font-size: 16px;
+}
+
+.resource-category-section .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+@media (max-width: 768px) {
+    .resource-categories {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* 智能推荐区域 */

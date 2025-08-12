@@ -130,6 +130,12 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
   - Apple设计系统色彩应用：iOS蓝标题、语义化颜色系统
   - 智能分页处理、页脚信息、自动文件命名（按日期）
   - 导出进度指示、错误处理、按钮状态管理
+- ✅ **Apple风格导航栏添加** - 为结果页面添加固定顶部导航系统
+  - 毛玻璃效果导航栏，固定定位不遮挡内容
+  - 左侧返回按钮和品牌标识，右侧管理后台入口
+  - 返回按钮悬停动画效果，向左滑动视觉反馈
+  - 响应式设计适配，移动端优化布局调整
+  - 移除页面底部重复的返回按钮，优化操作流程
 - ✅ **关键Bug修复：资源输入功能完全修复** - 解决第二个人物的手动资源输入被错误添加到第一个人物的问题
   - 修复JavaScript选择器逻辑，使用.resource-input[data-person-id]确保精确定位
   - 更正四个核心函数：addSelectedResource, removeSelectedResource, showResourceValidation, updateResourcesData

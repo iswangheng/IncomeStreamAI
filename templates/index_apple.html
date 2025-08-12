@@ -1258,11 +1258,41 @@
                 formData.externalResources = ['暂无明确外部资源'];
             }
             
-            // 保存表单数据到sessionStorage，然后跳转到思考页面
-            sessionStorage.setItem('analysisFormData', JSON.stringify(formData));
+            // 发送数据到后端Flask而不是sessionStorage
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/generate';
+            form.style.display = 'none';
             
-            // 跳转到AI思考过程页面
-            window.location.href = '/thinking';
+            // 添加项目基础信息
+            const addInput = (name, value) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                form.appendChild(input);
+            };
+            
+            addInput('project_name', formData.projectName);
+            addInput('project_description', formData.projectDescription);
+            addInput('project_stage', formData.projectStage);
+            
+            // 添加关键人物数据
+            formData.keyPersons.forEach((person, index) => {
+                addInput('person_name[]', person.name);
+                addInput('person_role[]', person.roles.join(','));
+                addInput('person_resources[]', person.resources.join(','));
+                addInput('person_needs[]', person.makeHappy.join(','));
+            });
+            
+            // 添加外部资源数据
+            formData.externalResources.forEach(resource => {
+                addInput('external_resources', resource);
+            });
+            
+            // 提交表单
+            document.body.appendChild(form);
+            form.submit();
         });
         
         // 测试案例数据
@@ -1358,7 +1388,7 @@
                         scrollToForm();
                         
                         // 显示成功提示
-                        showNotification('测试案例已加载完成！您可以直接提交分析，或根据需要修改参数', 'success');
+                        showNotification('示例案例已加载完成！您可以直接提交分析，或根据需要修改参数', 'success');
                     }
                 });
             });

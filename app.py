@@ -172,6 +172,9 @@ def analyze():
 def generate():
     """Process form data and redirect to thinking page"""
     try:
+        app.logger.info(f"Generate route accessed - Request method: {request.method}")
+        app.logger.info(f"Generate route - Form data keys: {list(request.form.keys())}")
+        app.logger.info(f"Generate route - Content type: {request.content_type}")
         # Get form data
         project_name = request.form.get('project_name', '').strip()
         project_description = request.form.get('project_description', '').strip()

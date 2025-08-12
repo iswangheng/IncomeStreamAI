@@ -513,6 +513,75 @@ def delete_knowledge(item_id):
     return redirect(url_for('admin_dashboard'))
 
 
+# ============= 非劳务收入路径生成 API =============
+
+@app.route('/generate-paths', methods=['POST'])
+def generate_paths():
+    """生成非劳务收入路径"""
+    try:
+        from openai_service import angela_ai
+        
+        # 获取表单数据
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': '无效的请求数据'}), 400
+        
+        # 记录请求开始时间
+        start_time = datetime.now()
+        
+        # 使用AI服务生成路径
+        result = angela_ai.generate_income_paths(data, db.session)
+        
+        # 记录处理时间
+        processing_time = (datetime.now() - start_time).total_seconds()
+        result['meta'] = {
+            'processing_time': processing_time,
+            'generated_at': start_time.isoformat(),
+            'version': '1.0'
+        }
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Path generation error: {e}")
+        return jsonify({
+            'error': '路径生成失败',
+            'message': str(e)
+        }), 500
+
+@app.route('/refine-path', methods=['POST'])
+def refine_path():
+    """细化指定路径"""
+    try:
+        from openai_service import angela_ai
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': '无效的请求数据'}), 400
+        
+        path_data = data.get('path_data')
+        refinement_data = data.get('refinement_data')
+        
+        if not path_data or not refinement_data:
+            return jsonify({'error': '缺少必要的路径数据或细化信息'}), 400
+        
+        # 使用AI服务细化路径
+        result = angela_ai.refine_path(path_data, refinement_data, db.session)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Path refinement error: {e}")
+        return jsonify({
+            'error': '路径细化失败',
+            'message': str(e)
+        }), 500
+
+@app.route('/result')
+def result():
+    """结果页面"""
+    return render_template('result_apple.html')
+
 @app.route('/admin/ai-chat', methods=['POST'])
 def ai_chat():
     """AI对话测试接口"""
@@ -605,12 +674,6 @@ def ai_chat():
             'success': False, 
             'error': f'AI服务暂时不可用: {str(e)}'
         })
-
-
-@app.route('/result')
-def result():
-    """Results page (in case of direct access)"""
-    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

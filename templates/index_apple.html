@@ -1110,13 +1110,14 @@
             }
         }
         
-        // 表单提交前验证
+        // 表单提交前验证和处理
         document.getElementById('mainForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // 阻止默认表单提交
+            
             const projectName = document.getElementById('project_name').value.trim();
             const projectDescription = document.getElementById('project_description').value.trim();
             
             if (!projectName || !projectDescription) {
-                e.preventDefault();
                 alert('请填写项目名称和背景描述');
                 return;
             }
@@ -1125,6 +1126,55 @@
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在分析...';
             submitBtn.disabled = true;
+            
+            // 收集表单数据
+            const formData = {
+                projectName: projectName,
+                projectDescription: projectDescription,
+                projectStage: document.getElementById('project_stage').value,
+                keyPersons: [],
+                externalResources: []
+            };
+            
+            // 收集关键人物数据
+            document.querySelectorAll('.person-card').forEach(card => {
+                const name = card.querySelector('.person-name').value.trim();
+                if (name) {
+                    const person = {
+                        name: name,
+                        roles: Array.from(card.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value),
+                        resources: [],
+                        makeHappy: Array.from(card.querySelectorAll('.happiness-checkbox:checked')).map(cb => cb.value),
+                        notes: card.querySelector('.person-notes').value.trim()
+                    };
+                    
+                    // 收集个人资源
+                    const resourcesText = card.querySelector('.person-resources').value.trim();
+                    if (resourcesText) {
+                        person.resources = resourcesText.split('\n').filter(r => r.trim()).map(r => r.trim());
+                    }
+                    
+                    formData.keyPersons.push(person);
+                }
+            });
+            
+            // 收集外部资源
+            const externalResourcesContainer = document.querySelector('.selected-resources .resource-chips');
+            if (externalResourcesContainer) {
+                const resourceChips = externalResourcesContainer.querySelectorAll('.resource-chip');
+                resourceChips.forEach(chip => {
+                    const resourceText = chip.textContent.replace('×', '').trim();
+                    if (resourceText) {
+                        formData.externalResources.push(resourceText);
+                    }
+                });
+            }
+            
+            // 保存到sessionStorage，供结果页使用
+            sessionStorage.setItem('angelaFormData', JSON.stringify(formData));
+            
+            // 跳转到结果页
+            window.location.href = '/result';
         });
         
         // 页面加载时添加初始人物卡片

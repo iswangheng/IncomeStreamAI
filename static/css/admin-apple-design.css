@@ -774,26 +774,110 @@
     transform: scale(1.02);
 }
 
-/* 隐藏不需要的元素 */
-.mobile-only {
-    display: none;
+/* 新的全屏布局 */
+.admin-main-full {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--color-background);
+    padding: 0;
 }
 
-/* 简化导航样式 */
-.admin-nav {
-    display: none;
+/* 简化的头部区域 */
+.admin-header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-4) 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.admin-breadcrumb {
-    font-size: var(--text-lg);
-    font-weight: var(--font-semibold);
+.admin-header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-brand-inline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.admin-brand-inline i {
+    font-size: var(--text-xl);
+    color: var(--color-primary);
+}
+
+.admin-brand-inline h1 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
     color: var(--color-text-primary);
+    margin: 0;
+}
+
+.admin-subtitle {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    background: var(--color-background-secondary);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-md);
+}
+
+/* 更新内容区域样式 */
+.admin-page-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-6);
+}
+
+.stats-grid,
+.upload-section,
+.table-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-6);
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-    .mobile-only {
-        display: block;
+    .admin-header-content {
+        padding: 0 var(--space-4);
+        flex-direction: column;
+        gap: var(--space-3);
+        align-items: flex-start;
+    }
+    
+    .admin-brand-inline {
+        order: 1;
+    }
+    
+    .admin-brand-inline h1 {
+        font-size: var(--text-lg);
+    }
+    
+    .btn.btn-outline {
+        order: 2;
+        align-self: flex-end;
+        font-size: var(--text-sm);
+        padding: var(--space-2) var(--space-3);
+    }
+    
+    .admin-page-header,
+    .stats-grid,
+    .upload-section,
+    .table-container {
+        padding-left: var(--space-4);
+        padding-right: var(--space-4);
+    }
+    
+    .admin-page-header {
+        padding-top: var(--space-6);
+        padding-bottom: var(--space-6);
     }
     
     .upload-progress {
@@ -813,5 +897,10 @@
     
     .upload-progress-track {
         width: 100%;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
     }
 }

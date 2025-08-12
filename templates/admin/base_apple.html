@@ -25,32 +25,20 @@
     <meta name="robots" content="noindex, nofollow">
 </head>
 <body class="admin-layout">
-    <!-- 侧边栏导航 -->
-    <aside class="admin-sidebar">
-        <div class="admin-brand">
-            <i class="fas fa-brain"></i>
-            <h1>Angela AI</h1>
-        </div>
-        
-        <div style="margin-top: auto; padding-top: var(--space-8);">
-            <a href="{{ url_for('index') }}" class="btn btn-outline" style="width: 100%;">
-                <i class="fas fa-home me-2"></i>
-                返回前台
-            </a>
-        </div>
-    </aside>
-
     <!-- 主要内容区域 -->
-    <main class="admin-main">
-        <!-- 顶部工具栏 -->
-        <div class="admin-toolbar">
-            <div class="admin-breadcrumb">
-                <span>{% block breadcrumb %}知识库管理{% endblock %}</span>
-            </div>
-            <div class="admin-actions">
-                <button type="button" class="btn btn-secondary btn-small mobile-only" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
+    <main class="admin-main-full">
+        <!-- 简化的顶部区域 -->
+        <div class="admin-header">
+            <div class="admin-header-content">
+                <div class="admin-brand-inline">
+                    <i class="fas fa-brain"></i>
+                    <h1>Angela AI</h1>
+                    <span class="admin-subtitle">管理中心</span>
+                </div>
+                <a href="{{ url_for('index') }}" class="btn btn-outline">
+                    <i class="fas fa-home me-2"></i>
+                    返回前台
+                </a>
             </div>
         </div>
 
@@ -78,20 +66,17 @@
     
     <!-- 管理后台通用脚本 -->
     <script>
-        // 移动端菜单切换（仅在移动端存在按钮时）
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', function() {
-                const sidebar = document.querySelector('.admin-sidebar');
-                sidebar.classList.toggle('open');
-            });
-
-            // 点击主内容区域时关闭移动端菜单
-            document.querySelector('.admin-main').addEventListener('click', function() {
-                const sidebar = document.querySelector('.admin-sidebar');
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('open');
-                }
+        // 表格搜索功能
+        const searchInput = document.querySelector('.filter-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const tableRows = document.querySelectorAll('.data-table tbody tr');
+                
+                tableRows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
             });
         }
 

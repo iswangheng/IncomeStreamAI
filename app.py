@@ -222,7 +222,7 @@ def generate_ai_suggestions(form_data):
         app.logger.info(f"Calling Angela AI with data: {json.dumps(converted_data, ensure_ascii=False)}")
         
         # 调用AI生成服务
-        ai_result = angela_ai.generate_income_pathways(converted_data, db)
+        ai_result = angela_ai.generate_income_paths(converted_data, db)
         
         app.logger.info(f"AI generated result: {json.dumps(ai_result, ensure_ascii=False)}")
         

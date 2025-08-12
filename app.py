@@ -228,8 +228,8 @@ def generate():
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully")
         
-        # Redirect to thinking page instead of processing immediately
-        return redirect(url_for('thinking_process'))
+        # AI分析已完成，直接跳转到结果页面
+        return redirect(url_for('results'))
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")

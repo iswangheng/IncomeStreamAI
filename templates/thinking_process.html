@@ -470,16 +470,16 @@
                         }
                     }
                     
-                    // 延迟1秒后跳转到结果页面
+                    // 延迟1秒后调用AI分析
                     setTimeout(() => {
-                        submitFormData();
+                        callAIAnalysis();
                     }, 1000);
                 }
             }, 100);
         }
 
-        // 提交表单数据并跳转到结果页面
-        function submitFormData() {
+        // 调用AI分析并跳转到结果页面
+        function callAIAnalysis() {
             // 从URL参数或sessionStorage获取表单数据
             const formData = sessionStorage.getItem('analysisFormData');
             if (formData) {

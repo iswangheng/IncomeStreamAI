@@ -203,64 +203,98 @@ def generate():
         return redirect(url_for('index'))
 
 def generate_ai_suggestions(form_data):
-    """Generate AI suggestions based on form data"""
-    # This is where you would integrate with an actual LLM API
-    # For now, we'll return realistic suggestions based on the input
-    
-    project_name = form_data.get('project_name', '')
-    key_persons = form_data.get('key_persons', [])
-    
-    suggestions = []
-    
-    # Generate AI suggestions with proper format for Apple design templates
-    suggestion1 = {
-        "title": "收益分成合作模式",
-        "description": f"基于{project_name}项目建立多方收益分成机制，与合作伙伴共享收益，降低风险的同时确保持续收入流。",
-        "implementation_steps": [
-            "分析项目核心价值点，确定可分成的收益环节",
-            "识别潜在合作伙伴，建立初步接触渠道", 
-            "制定公平透明的收益分成比例方案",
-            "签署正式合作协议，明确各方权责",
-            "建立收益监控和分配机制"
-        ],
-        "required_resources": ["法务支持", "财务系统", "合作伙伴网络"],
-        "key_roles": [person["name"] for person in key_persons[:3] if person.get("name")],
-        "estimated_revenue": "月收入 3-8万元"
-    }
-    
-    suggestion2 = {
-        "title": "知识产权授权模式",
-        "description": f"将{project_name}的核心技术、方法论或品牌价值进行标准化，通过授权许可获得持续收入。",
-        "implementation_steps": [
-            "梳理项目中的核心知识产权和可复制资产",
-            "完善知识产权保护，申请相关专利或版权",
-            "开发标准化授权方案和培训体系",
-            "寻找目标授权客户，进行市场推广",
-            "建立授权管理和技术支持体系"
-        ],
-        "required_resources": ["知识产权律师", "标准化文档", "培训材料"],
-        "key_roles": [person["name"] for person in key_persons if person.get("name") and "技术" in person.get("role", "")],
-        "estimated_revenue": "年收入 15-50万元"
-    }
-    
-    suggestion3 = {
-        "title": "顾问咨询服务模式", 
-        "description": f"基于{project_name}的成功经验，为同行业客户提供专业咨询服务，建立专家品牌价值。",
-        "implementation_steps": [
-            "总结项目成功经验，形成方法论体系",
-            "建立个人或团队专业品牌形象",
-            "开发咨询服务产品线和定价体系",
-            "通过内容营销建立行业影响力",
-            "建立客户获取和服务交付流程"
-        ],
-        "required_resources": ["品牌建设", "内容创作", "客户关系管理"],
-        "key_roles": [person["name"] for person in key_persons[:2] if person.get("name")],
-        "estimated_revenue": "项目收入 5-20万元"
-    }
-    
-    suggestions = [suggestion1, suggestion2, suggestion3]
-    
-    return suggestions
+    """Generate AI suggestions using OpenAI API"""
+    try:
+        from openai_service import AngelaAI
+        
+        # 使用真正的AI服务生成方案
+        angela_ai = AngelaAI()
+        
+        # 转换数据格式以匹配openai_service的预期格式
+        converted_data = {
+            'projectName': form_data.get('projectName', form_data.get('project_name', '')),
+            'projectDescription': form_data.get('projectDescription', form_data.get('project_description', '')),
+            'projectStage': form_data.get('projectStage', form_data.get('project_stage', '')),
+            'keyPersons': form_data.get('keyPersons', form_data.get('key_persons', [])),
+            'externalResources': form_data.get('externalResources', form_data.get('external_resources', []))
+        }
+        
+        app.logger.info(f"Calling Angela AI with data: {json.dumps(converted_data, ensure_ascii=False)}")
+        
+        # 调用AI生成服务
+        ai_result = angela_ai.generate_income_pathways(converted_data, db)
+        
+        app.logger.info(f"AI generated result: {json.dumps(ai_result, ensure_ascii=False)}")
+        
+        return ai_result
+        
+    except Exception as e:
+        app.logger.error(f"Error generating AI suggestions: {str(e)}")
+        # 发生错误时返回默认结果
+        project_name = form_data.get('projectName', form_data.get('project_name', ''))
+        key_persons = form_data.get('keyPersons', form_data.get('key_persons', []))
+        
+        # 备用数据结构，匹配新模板的格式
+        return {
+            "overview": f"基于{project_name}项目的资源分析，我们为您设计了以下非劳务收入路径方案。",
+            "situation_summary": "当前已掌握资源集中在关键人物的渠道和影响力，需要进一步整合变现路径。",
+            "capability_gaps": [
+                "市场推广渠道",
+                "资金周转能力", 
+                "标准化流程",
+                "客户获取机制"
+            ],
+            "pathways": [
+                {
+                    "title": "收益分成合作模式",
+                    "scene": f"基于{project_name}建立多方收益分成机制",
+                    "who_moves_first": "项目负责人先行建立合作框架",
+                    "steps": [
+                        {
+                            "owner": "项目负责人",
+                            "action": "分析项目核心价值点，确定可分成的收益环节",
+                            "reason": "明确价值创造环节是制定分成机制的基础"
+                        },
+                        {
+                            "owner": "商务团队", 
+                            "action": "识别潜在合作伙伴，建立初步接触渠道",
+                            "reason": "扩展合作网络，降低单一风险"
+                        },
+                        {
+                            "owner": "财务团队",
+                            "action": "制定公平透明的收益分成比例方案",
+                            "reason": "确保各方利益平衡，维持长期合作"
+                        }
+                    ],
+                    "key_resources": [person.get("name", "") for person in key_persons[:2] if person.get("name")],
+                    "mvp_content": "先与1-2家核心合作伙伴试点，验证分成模式的可行性"
+                },
+                {
+                    "title": "知识产权授权模式", 
+                    "scene": f"将{project_name}的核心价值标准化授权",
+                    "who_moves_first": "技术团队主导知识产权梳理",
+                    "steps": [
+                        {
+                            "owner": "技术团队",
+                            "action": "梳理项目中的核心知识产权和可复制资产",
+                            "reason": "明确可授权的价值内容"
+                        },
+                        {
+                            "owner": "法务团队",
+                            "action": "建立知识产权保护和授权框架",
+                            "reason": "确保授权的合法性和可控性"
+                        },
+                        {
+                            "owner": "市场团队",
+                            "action": "寻找潜在授权客户和合作伙伴",
+                            "reason": "拓展授权市场，实现规模化收入"
+                        }
+                    ],
+                    "key_resources": [person.get("name", "") for person in key_persons if person.get("name")],
+                    "mvp_content": "先完成核心技术的标准化，向1家试点企业授权验证"
+                }
+            ]
+        }
 
 # Helper functions
 def allowed_file(filename):

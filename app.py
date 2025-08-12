@@ -109,27 +109,40 @@ def index():
 @app.route('/thinking')
 def thinking_process():
     """AI thinking process visualization page"""
+    from flask import session
+    # Get form data from session
+    form_data = session.get('analysis_form_data')
+    if not form_data:
+        flash('会话已过期，请重新提交表单', 'error')
+        return redirect(url_for('index'))
+    
     return render_template('thinking_process.html')
 
-@app.route('/analyze', methods=['POST'])
+@app.route('/analyze', methods=['GET'])
 def analyze():
-    """Process form data and generate AI suggestions via AJAX"""
+    """Generate AI suggestions and return result page"""
     try:
-        # Get JSON data from request
-        form_data = request.get_json()
+        from flask import session
+        # Get form data from session
+        form_data = session.get('analysis_form_data')
         
         if not form_data:
-            return jsonify({'error': '无效的请求数据'}), 400
+            flash('会话已过期，请重新提交表单', 'error')
+            return redirect(url_for('index'))
         
         # Validate required fields
         if not form_data.get('projectName') or not form_data.get('projectDescription'):
-            return jsonify({'error': '项目名称和背景描述不能为空'}), 400
+            flash('项目名称和背景描述不能为空', 'error')
+            return redirect(url_for('index'))
         
         # Log the received data
-        app.logger.info(f"Received form data for analysis: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
+        app.logger.info(f"Processing analysis for: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         
         # Generate AI suggestions
         suggestions = generate_ai_suggestions(form_data)
+        
+        # Clear the session data after use
+        session.pop('analysis_form_data', None)
         
         # Return the result page HTML
         return render_template('result_apple_redesigned.html', 
@@ -138,11 +151,12 @@ def analyze():
     
     except Exception as e:
         app.logger.error(f"Error processing analysis: {str(e)}")
-        return jsonify({'error': '分析过程中发生错误，请重试'}), 500
+        flash('分析过程中发生错误，请重试', 'error')
+        return redirect(url_for('index'))
 
 @app.route('/generate', methods=['POST'])
 def generate():
-    """Process form data and generate AI suggestions"""
+    """Process form data and redirect to thinking page"""
     try:
         # Get form data
         project_name = request.form.get('project_name', '').strip()
@@ -180,22 +194,22 @@ def generate():
         
         # Create JSON structure as per PRD
         form_data = {
-            "project_name": project_name,
-            "project_description": project_description,
-            "project_stage": project_stage,
-            "key_persons": key_persons,
-            "external_resources": external_resources
+            "projectName": project_name,
+            "projectDescription": project_description,
+            "projectStage": project_stage,
+            "keyPersons": key_persons,
+            "externalResources": external_resources
         }
+        
+        # Store form data in session for the thinking page to use
+        from flask import session
+        session['analysis_form_data'] = form_data
         
         # Log the received data
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         
-        # Generate AI suggestions (simulated for demo)
-        suggestions = generate_ai_suggestions(form_data)
-        
-        return render_template('result_apple_redesigned.html', 
-                             form_data=form_data, 
-                             result=suggestions)
+        # Redirect to thinking page instead of processing immediately
+        return redirect(url_for('thinking_process'))
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")

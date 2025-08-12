@@ -375,19 +375,19 @@
             </div>
             
             <div class="estimated-time">
-                预计完成时间：<span id="timeRemaining">30-45秒</span>
+                正在启动AI分析：<span id="timeRemaining">准备中...</span>
             </div>
         </div>
     </div>
 
     <script>
-        // 思考过程步骤和时间配置
+        // 思考过程步骤和时间配置 - 现在直接跳转到真实分析
         const steps = [
-            { id: 'step1', duration: 3000, title: '分析项目信息', desc: '正在解析您的项目背景和目标设定' },
-            { id: 'step2', duration: 4000, title: '评估关键人物资源', desc: '分析每位关键人物的资源和潜在贡献' },
-            { id: 'step3', duration: 6000, title: '匹配收入模式', desc: '结合知识库寻找最适合的变现路径' },
-            { id: 'step4', duration: 5000, title: '设计执行方案', desc: '制定详细的实施步骤和时间规划' },
-            { id: 'step5', duration: 3000, title: '生成完整报告', desc: '整合分析结果，生成个性化方案' }
+            { id: 'step1', duration: 500, title: '分析项目信息', desc: '正在解析您的项目背景和目标设定' },
+            { id: 'step2', duration: 500, title: '评估关键人物资源', desc: '分析每位关键人物的资源和潜在贡献' },
+            { id: 'step3', duration: 500, title: '匹配收入模式', desc: '结合知识库寻找最适合的变现路径' },
+            { id: 'step4', duration: 500, title: '设计执行方案', desc: '制定详细的实施步骤和时间规划' },
+            { id: 'step5', duration: 500, title: '生成完整报告', desc: '整合分析结果，生成个性化方案' }
         ];
 
         let currentStep = 0;
@@ -413,10 +413,12 @@
             const progress = (elapsed / totalDuration) * 100;
             document.getElementById('progressFill').style.width = Math.min(progress, 100) + '%';
             
-            // 更新剩余时间
-            const remaining = Math.max(0, totalDuration - elapsed);
-            const seconds = Math.ceil(remaining / 1000);
-            document.getElementById('timeRemaining').textContent = seconds + '秒';
+            // 更新显示文本
+            if (progress >= 100) {
+                document.getElementById('timeRemaining').textContent = '启动分析中...';
+            } else {
+                document.getElementById('timeRemaining').textContent = '准备分析...';
+            }
         }
 
         // 激活步骤
@@ -480,37 +482,8 @@
 
         // 调用AI分析并跳转到结果页面
         function callAIAnalysis() {
-            // 从URL参数或sessionStorage获取表单数据
-            const formData = sessionStorage.getItem('analysisFormData');
-            if (formData) {
-                fetch('/analyze', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: formData
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.text();
-                    }
-                    throw new Error('分析请求失败');
-                })
-                .then(html => {
-                    // 直接替换当前页面内容
-                    document.open();
-                    document.write(html);
-                    document.close();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('分析过程中出现错误，请重试');
-                    window.location.href = '/';
-                });
-            } else {
-                // 没有表单数据，回到首页
-                window.location.href = '/';
-            }
+            // 直接跳转到分析页面，数据已经在服务器session中
+            window.location.href = '/analyze';
         }
 
         // 页面加载完成后开始

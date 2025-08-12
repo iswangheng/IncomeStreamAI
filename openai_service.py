@@ -15,7 +15,7 @@ class AngelaAI:
     """Angela - 非劳务收入路径设计AI服务"""
     
     def __init__(self):
-        self.model = "gpt-4o"
+        self.model = "gpt-4o-2024-11-20"  # 使用最新的稳定版本
         self.max_tokens = 4000
         
     def format_make_happy(self, make_happy_data: List[str]) -> str:

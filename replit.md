@@ -113,7 +113,22 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
 - **Result Processing**: Template structure for AI-generated content display
 - **Real-time Testing**: 对话测试模块验证知识库效果，支持开关知识库上下文
 
-## Recent Changes (2025-08-09)
+## Recent Changes (2025-08-12)
+- ✅ **关键Bug修复：资源输入功能完全修复** - 解决第二个人物的手动资源输入被错误添加到第一个人物的问题
+  - 修复JavaScript选择器逻辑，使用.resource-input[data-person-id]确保精确定位
+  - 更正四个核心函数：addSelectedResource, removeSelectedResource, showResourceValidation, updateResourcesData
+  - 资源输入现在完全按照人物卡片正确归属，支持回车添加、粘贴批量添加、退格删除
+- ✅ **表单提交流程彻底重构** - 解决用户点击提交后卡在"AI正在智能分析"界面无法跳转的问题
+  - 重写JavaScript数据收集逻辑，正确获取人物姓名、角色、资源、需求数据
+  - 实现完整的AJAX提交流程，使用fetch API替代直接表单提交
+  - 优化结果页面数据传递，支持直接使用AI返回结果避免重复请求
+  - 添加完整错误处理和用户反馈机制
+- ✅ **OpenAI模型升级** - 更新到最新稳定版本gpt-4o-2024-11-20，确保API调用兼容性
+  - 验证新模型完全支持JSON结构化输出和复杂提示处理
+  - 后端API测试通过，17秒内成功生成完整的收入路径方案
+  - 知识库集成和多人物分析功能验证正常
+
+## Previous Changes (2025-08-09)
 - ✅ **重大升级：资源输入系统完全重构** - 基于世界一流UI设计准则的直观资源输入界面
   - 三个清晰分区：智能推荐区（蓝色）、手动输入区（绿色）、已选资源区（橙色）
   - 每个区域都有明确的视觉提示和操作说明，无需学习即可使用

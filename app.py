@@ -31,6 +31,11 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
+# 修复Session配置 - 确保session正常工作
+app.config['SESSION_COOKIE_SECURE'] = False  # 开发环境允许HTTP
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 # File upload configuration
 UPLOAD_FOLDER = 'uploads/knowledge'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'doc', 'docx', 'xlsx', 'csv', 'md', 'json'}

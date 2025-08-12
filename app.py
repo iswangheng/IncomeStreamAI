@@ -159,9 +159,9 @@ def generate():
         # Generate AI suggestions (simulated for demo)
         suggestions = generate_ai_suggestions(form_data)
         
-        return render_template('result_apple.html', 
+        return render_template('result_apple_redesigned.html', 
                              form_data=form_data, 
-                             suggestions=suggestions)
+                             result=suggestions)
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")

@@ -774,8 +774,28 @@
     transform: scale(1.02);
 }
 
+/* 隐藏不需要的元素 */
+.mobile-only {
+    display: none;
+}
+
+/* 简化导航样式 */
+.admin-nav {
+    display: none;
+}
+
+.admin-breadcrumb {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
+    .mobile-only {
+        display: block;
+    }
+    
     .upload-progress {
         margin: var(--space-4);
     }

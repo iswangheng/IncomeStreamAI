@@ -1190,29 +1190,11 @@
                 formData.externalResources = ['暂无明确外部资源'];
             }
             
-            // 发送数据到后端进行AI分析
-            fetch('/generate-paths', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                // 保存结果到sessionStorage
-                sessionStorage.setItem('angelaResult', JSON.stringify(data));
-                sessionStorage.setItem('angelaFormData', JSON.stringify(formData));
-                
-                // 跳转到结果页面
-                window.location.href = '/result';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                submitBtn.innerHTML = '重新生成方案';
-                submitBtn.disabled = false;
-                alert('生成方案时出现错误，请重试');
-            });
+            // 保存表单数据到sessionStorage，然后跳转到思考页面
+            sessionStorage.setItem('analysisFormData', JSON.stringify(formData));
+            
+            // 跳转到AI思考过程页面
+            window.location.href = '/thinking';
         });
         
         // 页面加载时添加初始人物卡片

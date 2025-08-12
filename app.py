@@ -106,6 +106,40 @@ def index():
     """Main form page for user input - Apple design"""
     return render_template('index_apple.html')
 
+@app.route('/thinking')
+def thinking_process():
+    """AI thinking process visualization page"""
+    return render_template('thinking_process.html')
+
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    """Process form data and generate AI suggestions via AJAX"""
+    try:
+        # Get JSON data from request
+        form_data = request.get_json()
+        
+        if not form_data:
+            return jsonify({'error': '无效的请求数据'}), 400
+        
+        # Validate required fields
+        if not form_data.get('projectName') or not form_data.get('projectDescription'):
+            return jsonify({'error': '项目名称和背景描述不能为空'}), 400
+        
+        # Log the received data
+        app.logger.info(f"Received form data for analysis: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
+        
+        # Generate AI suggestions
+        suggestions = generate_ai_suggestions(form_data)
+        
+        # Return the result page HTML
+        return render_template('result_apple_redesigned.html', 
+                             form_data=form_data, 
+                             result=suggestions)
+    
+    except Exception as e:
+        app.logger.error(f"Error processing analysis: {str(e)}")
+        return jsonify({'error': '分析过程中发生错误，请重试'}), 500
+
 @app.route('/generate', methods=['POST'])
 def generate():
     """Process form data and generate AI suggestions"""

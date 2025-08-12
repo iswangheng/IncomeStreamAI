@@ -136,6 +136,12 @@ Angela is a Flask-based web application that serves as a non-labor income pathwa
   - 返回按钮悬停动画效果，向左滑动视觉反馈
   - 响应式设计适配，移动端优化布局调整
   - 移除页面底部重复的返回按钮，优化操作流程
+- ✅ **AI思考过程可视化系统** - 解决长时间等待问题，提升用户体验
+  - 创建独立思考过程页面，展示Angela AI分析步骤
+  - 5个分析阶段：项目信息、人物资源、收入模式、执行方案、完整报告
+  - 渐进式步骤激活、进度条显示、剩余时间预估
+  - 浮动装饰动画、毛玻璃卡片设计、Apple风格视觉效果
+  - 实时后台AI处理，完成后自动跳转结果页面
 - ✅ **关键Bug修复：资源输入功能完全修复** - 解决第二个人物的手动资源输入被错误添加到第一个人物的问题
   - 修复JavaScript选择器逻辑，使用.resource-input[data-person-id]确保精确定位
   - 更正四个核心函数：addSelectedResource, removeSelectedResource, showResourceValidation, updateResourcesData

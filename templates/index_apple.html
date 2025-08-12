@@ -865,7 +865,9 @@
         
         // 添加选中的资源
         function addSelectedResource(resource, personId) {
-            const targetCard = document.querySelector(`[data-person-id="${personId}"]`).closest('.person-card');
+            // 使用更精确的选择器，通过resource-input类找到正确的人物卡片
+            const resourceInput = document.querySelector(`.resource-input[data-person-id="${personId}"]`);
+            const targetCard = resourceInput.closest('.person-card');
             const container = targetCard.querySelector('.selected-resources-container');
             const existingTags = Array.from(container.querySelectorAll('.selected-resource-tag'));
             
@@ -901,7 +903,9 @@
         
         // 移除选中的资源
         function removeSelectedResource(resource, personId) {
-            const targetCard = document.querySelector(`[data-person-id="${personId}"]`).closest('.person-card');
+            // 使用更精确的选择器，通过resource-input类找到正确的人物卡片
+            const resourceInput = document.querySelector(`.resource-input[data-person-id="${personId}"]`);
+            const targetCard = resourceInput.closest('.person-card');
             const container = targetCard.querySelector('.selected-resources-container');
             const tag = container.querySelector(`[data-resource="${resource}"]`);
             if (tag) {
@@ -950,7 +954,9 @@
         
         // 显示资源验证提示
         function showResourceValidation(personId, message, type) {
-            const targetCard = document.querySelector(`[data-person-id="${personId}"]`).closest('.person-card');
+            // 使用更精确的选择器，通过resource-input类找到正确的人物卡片
+            const resourceInput = document.querySelector(`.resource-input[data-person-id="${personId}"]`);
+            const targetCard = resourceInput.closest('.person-card');
             const validationElement = targetCard.querySelector('.resource-validation');
             validationElement.textContent = message;
             validationElement.className = `resource-validation ${type}`;
@@ -977,7 +983,9 @@
         
         // 更新资源数据到隐藏字段
         function updateResourcesData(personId) {
-            const targetCard = document.querySelector(`[data-person-id="${personId}"]`).closest('.person-card');
+            // 使用更精确的选择器，通过resource-input类找到正确的人物卡片
+            const resourceInput = document.querySelector(`.resource-input[data-person-id="${personId}"]`);
+            const targetCard = resourceInput.closest('.person-card');
             const container = targetCard.querySelector('.selected-resources-container');
             const tags = container.querySelectorAll('.selected-resource-tag');
             const resources = Array.from(tags).map(tag => formatResource(tag.dataset.resource));

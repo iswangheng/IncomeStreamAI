@@ -1276,14 +1276,14 @@
                         name: '升学规划师朋友',
                         roles: ['channel'],
                         resources: ['学员流量', '家长信任', '升学咨询客户群体'],
-                        makeHappy: ['reliable_cooperation'],
+                        makeHappy: ['no_conflict_current_partner', 'keep_confidential', 'recurring_income'],
                         notes: '有稳定的学员需求，但苦于找不到靠谱的英语培训合作方'
                     },
                     {
                         name: '英语培训机构负责人',
                         roles: ['product', 'delivery'],
                         resources: ['课程内容', '师资团队', '教学系统'],
-                        makeHappy: ['stable_enrollment'],
+                        makeHappy: ['expand_network', 'bring_leads', 'targeted_exposure'],
                         notes: '想要转型线上，获取更多流量，愿意提供标准化产品'
                     }
                 ],
@@ -1298,14 +1298,14 @@
                         name: '社恐房东',
                         roles: ['investor'],
                         resources: ['临街双层商铺', '长期租约意愿', '稳定收租需求'],
-                        makeHappy: ['avoid_management_hassle'],
+                        makeHappy: ['no_money_no_liability', 'no_public_appearance', 'recurring_income'],
                         notes: '不想处理复杂的租客关系，希望有稳定可靠的长期租客'
                     },
                     {
                         name: '便利店经营者',
                         roles: ['ops'],
                         resources: ['零售经营经验', '供应链资源', '现金流管理能力'],
-                        makeHappy: ['good_location'],
+                        makeHappy: ['recurring_income', 'use_idle_assets', 'expand_network'],
                         notes: '需要临街位置做生意，愿意支付合理房租'
                     }
                 ],
@@ -1320,14 +1320,14 @@
                         name: '老板',
                         roles: ['buyer', 'investor'],
                         resources: ['资金预算', '商业资源网络', '项目决策权'],
-                        makeHappy: ['cost_efficiency', 'loyal_support'],
+                        makeHappy: ['share_revenue', 'control_pace', 'use_idle_assets'],
                         notes: '需要花钱买时间，欣赏情绪稳定、积极主动、便宜好用的员工'
                     },
                     {
                         name: '供应商伙伴',
                         roles: ['product', 'channel'],
                         resources: ['设备供应能力', '行业渠道', '技术支持'],
-                        makeHappy: ['business_opportunities'],
+                        makeHappy: ['expand_network', 'bring_leads', 'brand_exposure'],
                         notes: '希望通过合作获得更多商业机会和项目资源'
                     }
                 ],
@@ -1419,6 +1419,13 @@
                         // 填充备注
                         const notesTextarea = currentCard.querySelector('textarea[name="person_notes[]"]');
                         if (notesTextarea) notesTextarea.value = person.notes || '';
+                        
+                        // 在最后一个人物加载完成后更新编号
+                        if (index === caseData.persons.length - 1) {
+                            setTimeout(() => {
+                                updatePersonNumbers();
+                            }, 100);
+                        }
                         
                     }, index * 200);
                 });

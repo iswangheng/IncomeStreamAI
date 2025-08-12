@@ -130,33 +130,23 @@ def thinking_process():
     
     return render_template('thinking_process.html')
 
-@app.route('/analyze', methods=['GET'])
-def analyze():
-    """Generate AI suggestions and return result page"""
+@app.route('/results')
+def results():
+    """Display AI analysis result page"""
     try:
         from flask import session
-        # Get form data from session
+        # Get form data and result from session
         form_data = session.get('analysis_form_data')
-        app.logger.info(f"Analyze route - session data: {form_data}")
+        suggestions = session.get('analysis_result')
         
-        if not form_data:
-            app.logger.warning("No form data found in session for analyze route")
+        if not form_data or not suggestions:
+            app.logger.warning("No analysis data found in session for result page")
             flash('会话已过期，请重新提交表单', 'error')
             return redirect(url_for('index'))
         
-        # Validate required fields
-        if not form_data.get('projectName') or not form_data.get('projectDescription'):
-            flash('项目名称和背景描述不能为空', 'error')
-            return redirect(url_for('index'))
-        
-        # Log the received data
-        app.logger.info(f"Processing analysis for: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
-        
-        # Generate AI suggestions
-        suggestions = generate_ai_suggestions(form_data)
-        
         # Clear the session data after use
         session.pop('analysis_form_data', None)
+        session.pop('analysis_result', None)
         
         # Return the result page HTML
         return render_template('result_apple_redesigned.html', 
@@ -164,8 +154,8 @@ def analyze():
                              result=suggestions)
     
     except Exception as e:
-        app.logger.error(f"Error processing analysis: {str(e)}")
-        flash('分析过程中发生错误，请重试', 'error')
+        app.logger.error(f"Error displaying results: {str(e)}")
+        flash('显示结果时发生错误，请重试', 'error')
         return redirect(url_for('index'))
 
 @app.route('/generate', methods=['POST'])
@@ -218,9 +208,14 @@ def generate():
             "externalResources": external_resources
         }
         
-        # Store form data in session for the thinking page to use
+        # Store form data in session 
         from flask import session
         session['analysis_form_data'] = form_data
+        
+        # 立即进行AI分析并存储结果
+        app.logger.info(f"Processing analysis for: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
+        suggestions = generate_ai_suggestions(form_data)
+        session['analysis_result'] = suggestions
         
         # 详细调试session存储
         app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")
@@ -767,10 +762,7 @@ def result_preview():
     
     return render_template('result_apple_redesigned.html', result=mock_result)
 
-@app.route('/result')
-def result():
-    """结果页面"""
-    return render_template('result_apple.html')
+
 
 @app.route('/admin/ai-chat', methods=['POST'])
 def ai_chat():

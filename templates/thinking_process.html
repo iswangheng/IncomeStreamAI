@@ -478,10 +478,10 @@
             }, 100);
         }
 
-        // 调用AI分析并跳转到结果页面
+        // 跳转到结果页面
         function callAIAnalysis() {
-            // 直接跳转到分析页面，数据已经在服务器session中
-            window.location.href = '/analyze';
+            // 直接跳转到结果页面，AI分析已在generate路由中完成
+            window.location.href = '/results';
         }
 
         // 页面加载完成后开始

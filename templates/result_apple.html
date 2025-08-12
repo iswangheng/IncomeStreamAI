@@ -528,11 +528,23 @@
         let selectedPathId = null;
         let originalFormData = null;
 
-        // 页面加载时从URL参数或sessionStorage获取数据
+        // 页面加载时从sessionStorage获取数据
         document.addEventListener('DOMContentLoaded', function() {
-            // 尝试从sessionStorage获取表单数据
+            // 尝试从sessionStorage获取表单数据和AI结果
             const formData = sessionStorage.getItem('angelaFormData');
-            if (formData) {
+            const resultData = sessionStorage.getItem('angelaResult');
+            
+            if (formData && resultData) {
+                originalFormData = JSON.parse(formData);
+                currentResult = JSON.parse(resultData);
+                
+                // 更新项目名称显示
+                document.getElementById('projectNameDisplay').textContent = `为"${originalFormData.projectName || '您的项目'}"生成收入路径方案`;
+                
+                // 直接显示结果，不需要重新请求
+                showResults(currentResult);
+            } else if (formData) {
+                // 只有表单数据没有结果时，才进行AI分析
                 originalFormData = JSON.parse(formData);
                 document.getElementById('projectNameDisplay').textContent = `为"${originalFormData.projectName || '您的项目'}"生成收入路径方案`;
                 generatePaths(originalFormData);

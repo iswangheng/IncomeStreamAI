@@ -1146,30 +1146,37 @@
             
             // 收集关键人物数据
             document.querySelectorAll('.person-card').forEach(card => {
-                const name = card.querySelector('.person-name').value.trim();
+                const nameInput = card.querySelector('input[name="person_name[]"]');
+                const name = nameInput ? nameInput.value.trim() : '';
                 if (name) {
                     const person = {
                         name: name,
-                        roles: Array.from(card.querySelectorAll('.role-checkbox:checked')).map(cb => cb.value),
+                        roles: Array.from(card.querySelectorAll('input[name="person_role[]"]:checked')).map(cb => cb.value),
                         resources: [],
-                        makeHappy: Array.from(card.querySelectorAll('.happiness-checkbox:checked')).map(cb => cb.value),
-                        notes: card.querySelector('.person-notes').value.trim()
+                        makeHappy: Array.from(card.querySelectorAll('input[name="person_needs[]"]:checked')).map(cb => cb.value),
+                        notes: ''
                     };
                     
-                    // 收集个人资源
-                    const resourcesText = card.querySelector('.person-resources').value.trim();
-                    if (resourcesText) {
-                        person.resources = resourcesText.split('\n').filter(r => r.trim()).map(r => r.trim());
+                    // 收集个人资源（从已选资源标签中获取）
+                    const resourceTags = card.querySelectorAll('.selected-resource-tag');
+                    if (resourceTags.length > 0) {
+                        person.resources = Array.from(resourceTags).map(tag => tag.dataset.resource);
+                    }
+                    
+                    // 收集备注（从其他自定义输入获取）
+                    const notesInput = card.querySelector('textarea[name="person_needs_extra[]"]');
+                    if (notesInput) {
+                        person.notes = notesInput.value.trim();
                     }
                     
                     formData.keyPersons.push(person);
                 }
             });
             
-            // 收集外部资源
-            const externalResourcesContainer = document.querySelector('.selected-resources .resource-chips');
-            if (externalResourcesContainer) {
-                const resourceChips = externalResourcesContainer.querySelectorAll('.resource-chip');
+            // 收集外部资源（从外部资源区域）
+            const externalResourcesSection = document.getElementById('external-resources-section');
+            if (externalResourcesSection) {
+                const resourceChips = externalResourcesSection.querySelectorAll('.resource-chip');
                 resourceChips.forEach(chip => {
                     const resourceText = chip.textContent.replace('×', '').trim();
                     if (resourceText) {
@@ -1178,11 +1185,34 @@
                 });
             }
             
-            // 保存到sessionStorage，供结果页使用
-            sessionStorage.setItem('angelaFormData', JSON.stringify(formData));
+            // 如果没有外部资源，添加一个默认值
+            if (formData.externalResources.length === 0) {
+                formData.externalResources = ['暂无明确外部资源'];
+            }
             
-            // 跳转到结果页
-            window.location.href = '/result';
+            // 发送数据到后端进行AI分析
+            fetch('/generate-paths', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 保存结果到sessionStorage
+                sessionStorage.setItem('angelaResult', JSON.stringify(data));
+                sessionStorage.setItem('angelaFormData', JSON.stringify(formData));
+                
+                // 跳转到结果页面
+                window.location.href = '/result';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitBtn.innerHTML = '重新生成方案';
+                submitBtn.disabled = false;
+                alert('生成方案时出现错误，请重试');
+            });
         });
         
         // 页面加载时添加初始人物卡片

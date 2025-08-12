@@ -68,21 +68,33 @@
     </div>
 </div>
 
-<!-- 文件上传区域 -->
+<!-- 多文件上传区域 -->
 <div class="upload-zone fade-in" style="animation-delay: 0.4s;" onclick="document.getElementById('fileInput').click()">
     <div class="upload-icon">
         <i class="fas fa-cloud-upload-alt"></i>
     </div>
     <h4 class="upload-title">上传知识库文件</h4>
-    <p class="upload-description">将文件拖拽到此处，或点击选择文件上传</p>
+    <p class="upload-description">将文件拖拽到此处，或点击选择文件上传（支持多文件选择）</p>
     <div class="upload-formats">
         支持格式：TXT, PDF, DOC, DOCX, XLSX, CSV, MD, JSON
     </div>
     
-    <form id="uploadForm" action="{{ url_for('upload_knowledge') }}" method="post" enctype="multipart/form-data" style="display: none;">
-        <input type="file" id="fileInput" name="file" accept=".txt,.pdf,.doc,.docx,.xlsx,.csv,.md,.json">
-        <input type="text" id="summaryInput" name="summary" placeholder="文件描述（可选）">
+    <form id="uploadForm" action="{{ url_for('upload_knowledge_multiple') }}" method="post" enctype="multipart/form-data" style="display: none;">
+        <input type="file" id="fileInput" name="files" accept=".txt,.pdf,.doc,.docx,.xlsx,.csv,.md,.json" multiple>
     </form>
+</div>
+
+<!-- 上传进度显示区域 -->
+<div id="uploadProgress" class="upload-progress" style="display: none;">
+    <div class="progress-header">
+        <h5>上传进度</h5>
+        <button type="button" class="close-progress" onclick="hideUploadProgress()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div id="uploadList" class="upload-list">
+        <!-- 动态生成上传项目 -->
+    </div>
 </div>
 
 <!-- 快速创建文本知识 -->
@@ -276,15 +288,10 @@
 
 {% block scripts %}
 <script>
-// 文件上传处理
+// 多文件上传处理
 document.getElementById('fileInput').addEventListener('change', function() {
     if (this.files.length > 0) {
-        const fileName = this.files[0].name;
-        const summary = prompt(`为文件 "${fileName}" 添加描述（可选）：`);
-        if (summary !== null) {
-            document.getElementById('summaryInput').value = summary;
-        }
-        document.getElementById('uploadForm').submit();
+        handleFileUpload(Array.from(this.files));
     }
 });
 
@@ -305,19 +312,131 @@ uploadZone.addEventListener('drop', function(e) {
     e.preventDefault();
     this.classList.remove('dragover');
     
-    const files = e.dataTransfer.files;
+    const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-        const fileInput = document.getElementById('fileInput');
-        fileInput.files = files;
-        
-        const fileName = files[0].name;
-        const summary = prompt(`为文件 "${fileName}" 添加描述（可选）：`);
-        if (summary !== null) {
-            document.getElementById('summaryInput').value = summary;
-        }
-        document.getElementById('uploadForm').submit();
+        handleFileUpload(files);
     }
 });
+
+// 处理文件上传
+async function handleFileUpload(files) {
+    if (files.length === 0) return;
+    
+    // 显示上传进度区域
+    showUploadProgress();
+    
+    // 清空之前的上传列表
+    const uploadList = document.getElementById('uploadList');
+    uploadList.innerHTML = '';
+    
+    // 为每个文件创建进度项
+    files.forEach(file => {
+        const uploadItem = createUploadItem(file);
+        uploadList.appendChild(uploadItem);
+    });
+    
+    // 逐个上传文件
+    for (let i = 0; i < files.length; i++) {
+        await uploadSingleFile(files[i], i);
+    }
+    
+    // 上传完成后延迟隐藏进度区域
+    setTimeout(() => {
+        hideUploadProgress();
+        // 刷新页面显示新上传的文件
+        location.reload();
+    }, 2000);
+}
+
+// 上传单个文件
+async function uploadSingleFile(file, index) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const uploadItem = document.querySelector(`[data-file-index="${index}"]`);
+    const progressBar = uploadItem.querySelector('.upload-progress-bar');
+    const statusIcon = uploadItem.querySelector('.upload-status i');
+    const statusText = uploadItem.querySelector('.upload-status-text');
+    
+    try {
+        statusText.textContent = '上传中...';
+        
+        const response = await fetch('{{ url_for("upload_knowledge") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            progressBar.style.width = '100%';
+            statusIcon.className = 'fas fa-check-circle';
+            statusIcon.style.color = 'var(--status-active)';
+            statusText.textContent = '上传成功';
+            uploadItem.classList.add('upload-success');
+        } else {
+            throw new Error('上传失败');
+        }
+    } catch (error) {
+        statusIcon.className = 'fas fa-times-circle';
+        statusIcon.style.color = 'var(--status-error)';
+        statusText.textContent = '上传失败';
+        uploadItem.classList.add('upload-error');
+    }
+}
+
+// 创建上传项目DOM
+function createUploadItem(file) {
+    const item = document.createElement('div');
+    item.className = 'upload-item';
+    item.setAttribute('data-file-index', document.querySelectorAll('.upload-item').length);
+    
+    item.innerHTML = `
+        <div class="upload-item-info">
+            <div class="upload-file-icon">
+                <i class="fas fa-file"></i>
+            </div>
+            <div class="upload-file-details">
+                <div class="upload-file-name">${file.name}</div>
+                <div class="upload-file-size">${formatFileSize(file.size)}</div>
+            </div>
+        </div>
+        <div class="upload-item-progress">
+            <div class="upload-progress-track">
+                <div class="upload-progress-bar" style="width: 0%"></div>
+            </div>
+            <div class="upload-status">
+                <i class="fas fa-clock"></i>
+                <span class="upload-status-text">等待上传</span>
+            </div>
+        </div>
+    `;
+    
+    return item;
+}
+
+// 显示上传进度区域
+function showUploadProgress() {
+    const progressArea = document.getElementById('uploadProgress');
+    progressArea.style.display = 'block';
+    setTimeout(() => {
+        progressArea.classList.add('show');
+    }, 10);
+}
+
+// 隐藏上传进度区域
+function hideUploadProgress() {
+    const progressArea = document.getElementById('uploadProgress');
+    progressArea.classList.remove('show');
+    setTimeout(() => {
+        progressArea.style.display = 'none';
+    }, 300);
+}
+
+// 格式化文件大小
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
 
 // 编辑文本项目
 function editTextItem(itemId, title, content) {

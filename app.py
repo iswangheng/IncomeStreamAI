@@ -303,7 +303,7 @@ def upload_knowledge():
             knowledge_item.file_path = file_path
             knowledge_item.file_type = file_extension
             knowledge_item.file_size = file_size
-            knowledge_item.content_summary = request.form.get('summary', '')
+            knowledge_item.content_summary = ''  # 移除描述功能
             knowledge_item.status = 'active'
             
             db.session.add(knowledge_item)
@@ -321,6 +321,71 @@ def upload_knowledge():
     
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/knowledge/upload-multiple', methods=['POST'])
+def upload_knowledge_multiple():
+    """批量上传知识库文件"""
+    files = request.files.getlist('files')
+    if not files or all(f.filename == '' for f in files):
+        flash('没有选择文件', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    upload_results = []
+    success_count = 0
+    error_count = 0
+    
+    for file in files:
+        file_path = None
+        if file and file.filename and allowed_file(file.filename):
+            try:
+                filename = secure_filename(file.filename)
+                # 添加时间戳避免文件名冲突
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
+                filename = timestamp + filename
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                
+                # 获取文件大小
+                file_size = get_file_size(file)
+                file.save(file_path)
+                
+                # 获取文件扩展名
+                file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'unknown'
+                
+                # 保存到数据库
+                knowledge_item = KnowledgeItem()
+                knowledge_item.filename = filename
+                knowledge_item.original_filename = file.filename
+                knowledge_item.file_path = file_path
+                knowledge_item.file_type = file_extension
+                knowledge_item.file_size = file_size
+                knowledge_item.content_summary = ''  # 移除描述功能
+                knowledge_item.status = 'active'
+                
+                db.session.add(knowledge_item)
+                db.session.commit()
+                
+                upload_results.append({'filename': file.filename, 'status': 'success'})
+                success_count += 1
+                
+            except Exception as e:
+                upload_results.append({'filename': file.filename, 'status': 'error', 'error': str(e)})
+                error_count += 1
+                # 删除已保存的文件
+                if file_path and os.path.exists(file_path):
+                    os.remove(file_path)
+        else:
+            upload_results.append({'filename': file.filename if file else 'unknown', 'status': 'error', 'error': '不支持的文件类型'})
+            error_count += 1
+    
+    # 生成结果消息
+    if success_count > 0 and error_count == 0:
+        flash(f'成功上传 {success_count} 个文件', 'success')
+    elif success_count > 0 and error_count > 0:
+        flash(f'成功上传 {success_count} 个文件，{error_count} 个文件失败', 'warning')
+    else:
+        flash(f'上传失败，{error_count} 个文件未能上传', 'error')
+    
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/admin/knowledge/create-text', methods=['POST'])
 def create_text_knowledge():
     """创建文本知识条目"""
@@ -331,6 +396,7 @@ def create_text_knowledge():
         flash('标题和内容不能为空', 'error')
         return redirect(url_for('admin_dashboard'))
     
+    file_path = None
     try:
         # 创建文本文件
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_')
@@ -363,7 +429,7 @@ def create_text_knowledge():
         flash(f'创建失败: {str(e)}', 'error')
         # 删除已保存的文件
         try:
-            if os.path.exists(file_path):
+            if file_path and os.path.exists(file_path):
                 os.remove(file_path)
         except:
             pass

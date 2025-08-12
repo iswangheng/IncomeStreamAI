@@ -112,7 +112,9 @@ def thinking_process():
     from flask import session
     # Get form data from session
     form_data = session.get('analysis_form_data')
+    app.logger.info(f"Thinking page - session data: {form_data}")
     if not form_data:
+        app.logger.warning("No form data found in session for thinking page")
         flash('会话已过期，请重新提交表单', 'error')
         return redirect(url_for('index'))
     
@@ -125,8 +127,10 @@ def analyze():
         from flask import session
         # Get form data from session
         form_data = session.get('analysis_form_data')
+        app.logger.info(f"Analyze route - session data: {form_data}")
         
         if not form_data:
+            app.logger.warning("No form data found in session for analyze route")
             flash('会话已过期，请重新提交表单', 'error')
             return redirect(url_for('index'))
         
@@ -207,6 +211,7 @@ def generate():
         
         # Log the received data
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
+        app.logger.info(f"Session data stored successfully")
         
         # Redirect to thinking page instead of processing immediately
         return redirect(url_for('thinking_process'))

@@ -522,18 +522,69 @@
                         }
                     }
                     
-                    // 短暂延迟后跳转，让用户看到完成状态
+                    // 开始检查AI分析状态
                     setTimeout(() => {
-                        callAIAnalysis();
+                        checkAnalysisStatus();
                     }, 800);
                 }
             }, 100);
         }
 
-        // 跳转到结果页面
-        function callAIAnalysis() {
-            // 直接跳转到结果页面，AI分析已在generate路由中完成
-            window.location.href = '/results';
+        // AI分析状态检查
+        let analysisStarted = false;
+        let checkCount = 0;
+        
+        function checkAnalysisStatus() {
+            checkCount++;
+            console.log(`Checking analysis status, attempt: ${checkCount}`);
+            
+            fetch('/check_analysis_status')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`Analysis status response:`, data);
+                    
+                    if (data.status === 'completed') {
+                        // 分析完成，跳转到结果页面
+                        document.getElementById('currentStep').textContent = '✅ 分析完成！正在跳转...';
+                        document.getElementById('analysisStatus').textContent = '分析已完成';
+                        setTimeout(() => {
+                            window.location.href = '/results';
+                        }, 1000);
+                    } else if (data.status === 'error') {
+                        // 分析出错
+                        document.getElementById('currentStep').textContent = '❌ 分析出错：' + data.message;
+                        document.getElementById('analysisStatus').textContent = '分析出错';
+                    } else if (data.status === 'processing') {
+                        // 分析进行中，继续检查
+                        const progress = data.progress || 50;
+                        updateProgressDisplay(progress);
+                        setTimeout(checkAnalysisStatus, 2000); // 2秒后再次检查
+                    }
+                })
+                .catch(error => {
+                    console.error('Analysis status check failed:', error);
+                    setTimeout(checkAnalysisStatus, 3000); // 出错时3秒后重试
+                });
+        }
+        
+        function updateProgressDisplay(progress) {
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            
+            // 根据进度更新状态文本
+            if (progress < 30) {
+                document.getElementById('currentStep').textContent = '正在初始化AI分析引擎...';
+                document.getElementById('analysisStatus').textContent = 'AI正在启动';
+            } else if (progress < 60) {
+                document.getElementById('currentStep').textContent = '正在分析项目资源和人物关系...';
+                document.getElementById('analysisStatus').textContent = 'AI正在思考';
+            } else if (progress < 90) {
+                document.getElementById('currentStep').textContent = '正在生成收入路径方案...';
+                document.getElementById('analysisStatus').textContent = 'AI正在设计';
+            } else {
+                document.getElementById('currentStep').textContent = '正在整理分析结果...';
+                document.getElementById('analysisStatus').textContent = 'AI即将完成';
+            }
         }
 
         // 页面加载完成后开始

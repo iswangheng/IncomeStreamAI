@@ -130,6 +130,61 @@ def thinking_process():
     
     return render_template('thinking_process.html')
 
+@app.route('/check_analysis_status', methods=['GET'])
+def check_analysis_status():
+    """检查AI分析状态的AJAX端点"""
+    try:
+        from flask import session, jsonify
+        import threading
+        
+        form_data = session.get('analysis_form_data')
+        status = session.get('analysis_status', 'not_started')
+        result = session.get('analysis_result')
+        
+        app.logger.info(f"Check analysis status: {status}")
+        
+        if not form_data:
+            return jsonify({'status': 'error', 'message': '没有找到分析数据'})
+        
+        # 如果还没开始分析，启动分析
+        if status == 'processing' and result is None:
+            # 启动后台分析
+            def run_analysis():
+                try:
+                    app.logger.info("Starting background AI analysis")
+                    suggestions = generate_ai_suggestions(form_data)
+                    # 直接修改session，不需要app_context
+                    session['analysis_result'] = suggestions
+                    session['analysis_status'] = 'completed'
+                    app.logger.info("Background AI analysis completed")
+                except Exception as e:
+                    app.logger.error(f"Background analysis error: {str(e)}")
+                    session['analysis_status'] = 'error'
+                    session['analysis_error'] = str(e)
+            
+            # 只有在第一次请求时启动分析
+            if not hasattr(check_analysis_status, 'analysis_started'):
+                check_analysis_status.analysis_started = True
+                thread = threading.Thread(target=run_analysis)
+                thread.daemon = True
+                thread.start()
+            
+            return jsonify({'status': 'processing', 'progress': 50})
+        
+        elif status == 'completed' and result:
+            return jsonify({'status': 'completed', 'redirect_url': '/results'})
+        
+        elif status == 'error':
+            error_msg = session.get('analysis_error', '分析过程中发生未知错误')
+            return jsonify({'status': 'error', 'message': error_msg})
+        
+        else:
+            return jsonify({'status': 'processing', 'progress': 25})
+            
+    except Exception as e:
+        app.logger.error(f"Error checking analysis status: {str(e)}")
+        return jsonify({'status': 'error', 'message': '检查分析状态时发生错误'})
+
 @app.route('/results')
 def results():
     """Display AI analysis result page"""
@@ -212,11 +267,9 @@ def generate():
         from flask import session
         session['analysis_form_data'] = form_data
         
-        # 立即进行AI分析并存储结果
-        app.logger.info(f"Processing analysis for: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
-        suggestions = generate_ai_suggestions(form_data)
-        session['analysis_result'] = suggestions
-        app.logger.info(f"AI analysis completed successfully")
+        # 设置分析状态为进行中
+        session['analysis_status'] = 'processing'
+        session['analysis_result'] = None
         
         # 详细调试session存储
         app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")
@@ -228,8 +281,8 @@ def generate():
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully")
         
-        # AI分析已完成，直接跳转到结果页面
-        return redirect(url_for('results'))
+        # 立即跳转到thinking页面，AI分析将在后台异步进行
+        return redirect(url_for('thinking_process'))
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")

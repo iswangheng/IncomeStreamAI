@@ -5,13 +5,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const personCardTemplate = document.getElementById('personCardTemplate');
     
     let personCounter = 0;
+    
+    // 性能优化: 缓存DOM查询结果
+    const domCache = new Map();
+    
+    // 性能优化: 防抖函数
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 
     // Add person card functionality
     addPersonBtn.addEventListener('click', function() {
         addPersonCard();
     });
 
-    // 展开/收起功能
+    // 优化的展开/收起功能
     function setupExpandToggle(personCard) {
         const toggleBtn = personCard.querySelector('.expand-toggle-btn');
         const expandableSection = personCard.querySelector('.needs-expandable-section');
@@ -19,42 +35,45 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!toggleBtn || !expandableSection) return;
         
+        // 使用CSS类而不是内联样式来提高性能
         toggleBtn.addEventListener('click', function() {
-            const isExpanded = expandableSection.style.display !== 'none';
+            const isExpanded = expandableSection.classList.contains('expanded');
             
             if (isExpanded) {
-                // 收起
-                expandableSection.style.transition = 'all 0.3s ease';
-                expandableSection.style.maxHeight = expandableSection.scrollHeight + 'px';
-                setTimeout(() => {
-                    expandableSection.style.maxHeight = '0';
-                    expandableSection.style.opacity = '0';
-                }, 10);
-                setTimeout(() => {
-                    expandableSection.style.display = 'none';
-                }, 300);
+                // 收起 - 使用CSS类切换
+                expandableSection.classList.remove('expanded');
+                expandableSection.classList.add('collapsing');
                 
                 toggleIcon.className = 'fas fa-angle-down me-1';
                 toggleBtn.innerHTML = '<i class="fas fa-angle-down me-1"></i>展开更多选项';
-            } else {
-                // 展开
-                expandableSection.style.display = 'block';
-                expandableSection.style.maxHeight = '0';
-                expandableSection.style.opacity = '0';
-                expandableSection.style.transition = 'all 0.3s ease';
                 
+                // 动画结束后隐藏元素
                 setTimeout(() => {
-                    expandableSection.style.maxHeight = expandableSection.scrollHeight + 'px';
-                    expandableSection.style.opacity = '1';
-                }, 10);
+                    expandableSection.classList.remove('collapsing');
+                    expandableSection.classList.add('collapsed');
+                }, 300);
+                
+            } else {
+                // 展开 - 使用CSS类切换
+                expandableSection.classList.remove('collapsed');
+                expandableSection.classList.add('expanding');
                 
                 toggleIcon.className = 'fas fa-angle-up me-1';
                 toggleBtn.innerHTML = '<i class="fas fa-angle-up me-1"></i>收起选项';
+                
+                // 动画结束后设置为展开状态
+                setTimeout(() => {
+                    expandableSection.classList.remove('expanding');
+                    expandableSection.classList.add('expanded');
+                }, 300);
             }
         });
     }
 
     function addPersonCard(shouldFocus = true) {
+        // 性能优化: 批量DOM操作
+        const fragment = document.createDocumentFragment();
+        
         // Hide the "no persons" message
         noPersonsMsg.style.display = 'none';
         
@@ -67,47 +86,49 @@ document.addEventListener('DOMContentLoaded', function() {
         const personId = personCounter;
         personCard.setAttribute('data-person-id', personId);
         
-        // 替换模板中的 ${personId} 占位符，为每个复选框创建唯一ID
-        const needsContainer = personCard.querySelector('.needs-selection-container');
-        if (needsContainer) {
-            needsContainer.innerHTML = needsContainer.innerHTML.replace(/\$\{personId\}/g, personId);
-        }
-        
-        // 添加展开/收起功能
-        setupExpandToggle(personCard);
-        
-        // Add remove functionality
-        const removeBtn = personCard.querySelector('.remove-person-btn');
-        removeBtn.addEventListener('click', function() {
-            removePersonCard(personCard);
-        });
-        
-        // Add the card to the container
-        personsContainer.appendChild(personCard);
-        
-        // 有条件的聚焦逻辑 - 用户点击添加时聚焦，自动添加时不聚焦
-        if (shouldFocus) {
-            const firstInput = personCard.querySelector('input[name="person_name[]"]');
-            if (firstInput) {
-                firstInput.focus();
+        // 性能优化: 一次性处理所有DOM操作
+        requestAnimationFrame(() => {
+            // 替换模板中的 ${personId} 占位符，为每个复选框创建唯一ID
+            const needsContainer = personCard.querySelector('.needs-selection-container');
+            if (needsContainer) {
+                needsContainer.innerHTML = needsContainer.innerHTML.replace(/\$\{personId\}/g, personId);
             }
-        }
-        
-        // Add animation
-        personCard.style.opacity = '0';
-        personCard.style.transform = 'translateY(-20px)';
-        setTimeout(() => {
-            personCard.style.transition = 'all 0.3s ease';
-            personCard.style.opacity = '1';
-            personCard.style.transform = 'translateY(0)';
-        }, 10);
+            
+            // 添加展开/收起功能
+            setupExpandToggle(personCard);
+            
+            // Add remove functionality
+            const removeBtn = personCard.querySelector('.remove-person-btn');
+            removeBtn.addEventListener('click', function() {
+                removePersonCard(personCard);
+            });
+            
+            // 使用CSS类来处理动画而不是内联样式
+            personCard.classList.add('person-card-entering');
+            
+            // Add the card to the container
+            personsContainer.appendChild(personCard);
+            
+            // 触发入场动画
+            setTimeout(() => {
+                personCard.classList.remove('person-card-entering');
+                personCard.classList.add('person-card-entered');
+            }, 50);
+            
+            // 有条件的聚焦逻辑 - 用户点击添加时聚焦，自动添加时不聚焦
+            if (shouldFocus) {
+                const firstInput = personCard.querySelector('input[name="person_name[]"]');
+                if (firstInput) {
+                    // 延迟聚焦避免影响动画
+                    setTimeout(() => firstInput.focus(), 350);
+                }
+            }
+        });
     }
 
     function removePersonCard(personCard) {
-        // Add fade out animation
-        personCard.style.transition = 'all 0.3s ease';
-        personCard.style.opacity = '0';
-        personCard.style.transform = 'translateY(-20px)';
+        // 使用CSS类处理退场动画
+        personCard.classList.add('person-card-leaving');
         
         setTimeout(() => {
             personCard.remove();
@@ -170,11 +191,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 10000);
     });
 
-    // Auto-resize textareas
+    // Auto-resize textareas with debouncing for performance
+    const autoResizeTextarea = debounce(function(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }, 100);
+    
     document.querySelectorAll('textarea').forEach(function(textarea) {
+        // 使用防抖来减少频繁的DOM操作
         textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = this.scrollHeight + 'px';
+            autoResizeTextarea(this);
+        });
+        
+        // 监听动态添加的textarea
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        const textareas = node.querySelectorAll ? node.querySelectorAll('textarea') : [];
+                        textareas.forEach(function(textarea) {
+                            textarea.addEventListener('input', function() {
+                                autoResizeTextarea(this);
+                            });
+                        });
+                    }
+                });
+            });
+        });
+        
+        observer.observe(personsContainer, {
+            childList: true,
+            subtree: true
         });
     });
 

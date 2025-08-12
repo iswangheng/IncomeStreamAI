@@ -14,11 +14,25 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/elegant-light.css') }}" rel="stylesheet">
     
+    <!-- 性能优化: 预加载关键资源 -->
+    <link rel="prefetch" href="{{ url_for('static', filename='js/form.js') }}">
+    
+    <!-- 性能优化: 初始页面加载时禁用动画 -->
+    <style>
+        .preload * {
+            -webkit-transition: none !important;
+            -moz-transition: none !important;
+            -ms-transition: none !important;
+            -o-transition: none !important;
+            transition: none !important;
+        }
+    </style>
+    
     <!-- SEO 优化 -->
     <meta name="description" content="Angela - 顶级AI驱动的非劳务收入管道设计工具，智能生成创新收入方案">
     <meta name="keywords" content="AI收入设计,非劳务收入,智能管道,商业策略">
 </head>
-<body>
+<body class="preload">
     <!-- 清新优雅主标题区域 -->
     <div class="main-title fade-in-up">
         <div class="container">
@@ -360,5 +374,35 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/form.js') }}"></script>
+    
+    <!-- 性能优化: 页面加载完成后启用动画 -->
+    <script>
+        window.addEventListener('load', function() {
+            // 移除预加载类以启用动画
+            document.body.classList.remove('preload');
+            
+            // 检测低性能设备并调整
+            if (navigator.hardwareConcurrency <= 2 || window.innerWidth <= 768) {
+                document.body.classList.add('low-performance');
+            }
+            
+            // 检测用户是否喜欢减少动画
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.body.classList.add('reduce-motion');
+            }
+        });
+        
+        // 优化滚动性能
+        let isScrolling = false;
+        window.addEventListener('scroll', function() {
+            if (!isScrolling) {
+                window.requestAnimationFrame(function() {
+                    // 在这里处理滚动相关的操作
+                    isScrolling = false;
+                });
+                isScrolling = true;
+            }
+        });
+    </script>
 </body>
 </html>

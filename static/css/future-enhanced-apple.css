@@ -1081,7 +1081,7 @@ body::after {
     padding: var(--space-3);
     margin: var(--space-2) 0;
     border-radius: var(--radius-lg);
-    transition: all var(--transition-enhanced);
+    transition: background 0.15s ease, border-color 0.15s ease;
     cursor: pointer;
     background: rgba(255, 255, 255, 0.5);
     border: 1px solid rgba(102, 126, 234, 0.1);
@@ -1090,7 +1090,6 @@ body::after {
 .checkbox-item:hover {
     background: rgba(102, 126, 234, 0.1);
     border-color: rgba(102, 126, 234, 0.3);
-    transform: translateX(5px);
 }
 
 .checkbox-item input[type="checkbox"] {
@@ -1140,28 +1139,83 @@ body::after {
     margin-bottom: var(--space-6);
     position: relative;
     overflow: hidden;
-    transition: all var(--transition-enhanced);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    /* GPU加速 */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
-.person-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
-    transition: left 0.6s;
-}
-
-.person-card:hover::before {
-    left: 100%;
-}
-
+/* 简化hover效果，移除复杂的伪元素动画 */
 .person-card:hover {
-    transform: translateY(-5px) scale(1.02);
+    transform: translateY(-2px) translateZ(0);
     box-shadow: var(--shadow-glow-blue);
     border-color: rgba(102, 126, 234, 0.4);
+}
+
+/* 入场动画优化 */
+.person-card-entering {
+    opacity: 0;
+    transform: translateY(-10px) translateZ(0);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.person-card-entered {
+    opacity: 1;
+    transform: translateY(0) translateZ(0);
+}
+
+/* 退场动画优化 */
+.person-card-leaving {
+    opacity: 0;
+    transform: translateY(-10px) translateZ(0);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* 展开/收起动画优化 */
+.needs-expandable-section {
+    transition: max-height 0.25s ease, opacity 0.25s ease;
+    overflow: hidden;
+}
+
+.needs-expandable-section.collapsed {
+    max-height: 0;
+    opacity: 0;
+    display: none;
+}
+
+.needs-expandable-section.expanding {
+    display: block;
+    max-height: 0;
+    opacity: 0;
+    animation: expandSection 0.25s ease forwards;
+}
+
+.needs-expandable-section.expanded {
+    display: block;
+    max-height: none;
+    opacity: 1;
+}
+
+.needs-expandable-section.collapsing {
+    animation: collapseSection 0.25s ease forwards;
+}
+
+@keyframes expandSection {
+    to {
+        max-height: 800px; /* 足够大的值 */
+        opacity: 1;
+    }
+}
+
+@keyframes collapseSection {
+    from {
+        max-height: 800px;
+        opacity: 1;
+    }
+    to {
+        max-height: 0;
+        opacity: 0;
+    }
 }
 
 .person-card-header {
@@ -1195,14 +1249,16 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all var(--transition-enhanced);
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
     cursor: pointer;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .remove-person-btn:hover {
     background: #ff3b30;
     color: white;
-    transform: scale(1.1) rotate(90deg);
+    transform: scale(1.05) translateZ(0);
 }
 
 /* ==== 空状态增强 ==== */
@@ -1265,25 +1321,28 @@ body::after {
         margin-bottom: var(--space-6);
     }
     
-    .card:hover {
-        transform: translateY(-4px);
-    }
-    
-    .btn:hover {
-        transform: translateY(-2px);
-    }
-    
-    .checkbox-item:hover {
+    /* 移动设备上禁用hover效果以提高滚动性能 */
+    .card:hover,
+    .btn:hover,
+    .checkbox-item:hover,
+    .person-card:hover,
+    .remove-person-btn:hover {
         transform: none;
-    }
-    
-    .person-card:hover {
-        transform: translateY(-3px);
+        box-shadow: none;
     }
     
     /* 移动设备粒子效果优化 */
     .particle-container {
         display: none;
+    }
+    
+    /* 移动设备滚动优化 */
+    * {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .person-card {
+        will-change: auto; /* 减少移动设备GPU使用 */
     }
 }
 
@@ -1320,4 +1379,77 @@ body::after {
 .preload-animations * {
     animation-duration: 0s !important;
     transition-duration: 0s !important;
+}
+
+/* 滚动性能优化 */
+body {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 减少重绘重排 */
+.card, .person-card, .btn {
+    contain: layout style;
+}
+
+/* 优化复选框性能 */
+.checkbox-item input[type="checkbox"] {
+    contain: layout style;
+    transform: translateZ(0);
+}
+
+/* 减少不必要的动画在低性能设备上 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 低性能设备检测优化 */
+@media (max-width: 768px) and (max-height: 1024px) {
+    .person-card-entering,
+    .person-card-leaving {
+        transition-duration: 0.15s;
+    }
+    
+    .needs-expandable-section {
+        transition-duration: 0.15s;
+    }
+}
+
+/* 低性能设备样式 */
+.low-performance .person-card {
+    will-change: auto;
+}
+
+.low-performance .person-card:hover {
+    transform: none;
+}
+
+.low-performance .person-card-entering,
+.low-performance .person-card-leaving {
+    transition-duration: 0.1s;
+}
+
+.low-performance .needs-expandable-section {
+    transition-duration: 0.1s;
+}
+
+.low-performance .checkbox-item:hover {
+    transform: none;
+}
+
+/* 减少动画偏好设置 */
+.reduce-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* 预加载状态下禁用所有动画 */
+.preload * {
+    transition: none !important;
+    animation: none !important;
 }

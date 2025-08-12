@@ -35,6 +35,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 app.config['SESSION_COOKIE_SECURE'] = False  # 开发环境允许HTTP
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # session 1小时过期
 
 # File upload configuration
 UPLOAD_FOLDER = 'uploads/knowledge'
@@ -115,6 +116,10 @@ def index():
 def thinking_process():
     """AI thinking process visualization page"""
     from flask import session
+    # 详细调试session状态
+    app.logger.info(f"Thinking page - Full session: {dict(session)}")
+    app.logger.info(f"Thinking page - Session ID: {session.sid if hasattr(session, 'sid') else 'No SID'}")
+    
     # Get form data from session
     form_data = session.get('analysis_form_data')
     app.logger.info(f"Thinking page - session data: {form_data}")
@@ -213,6 +218,12 @@ def generate():
         # Store form data in session for the thinking page to use
         from flask import session
         session['analysis_form_data'] = form_data
+        
+        # 详细调试session存储
+        app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")
+        session.permanent = True  # 设置session为永久性
+        app.logger.info(f"Generate route - After storing - Full session: {dict(session)}")
+        app.logger.info(f"Generate route - Session modified: {session.modified}")
         
         # Log the received data
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")

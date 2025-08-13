@@ -616,8 +616,16 @@
                         } else if (data.status === 'error' || data.status === 'timeout') {
                             realAnalysisCompleted = true;
                             if (data.status === 'timeout') {
-                                addThinkingLine('>>> ⏰ AI分析超时，启用备用方案', 'system');
+                                addThinkingLine('>>> ⏰ 网络连接超时，启用备用方案', 'system');
                                 addThinkingLine('>>> 🔄 正在生成基础建议...', 'system');
+                                // 对于超时，仍然跳转到结果页面，后端会处理备用方案
+                                updateStatusDisplay(100, '分析完成！');
+                                setTimeout(() => {
+                                    addThinkingLine('>>> ✅ 跳转到结果页面...', 'conclusion');
+                                    setTimeout(() => {
+                                        window.location.href = '/results';
+                                    }, 1000);
+                                }, 2000);
                             } else if (data.error_code === 'NO_FORM_DATA') {
                                 addThinkingLine('>>> 🔄 检测到会话中断，重新初始化...', 'system');
                                 // 如果是NO_FORM_DATA错误，返回首页重新开始
@@ -627,16 +635,16 @@
                                 return;
                             } else {
                                 addThinkingLine('>>> ❌ 分析过程遇到问题', 'system');
-                            }
-                            addThinkingLine(`>>> ${data.message || '未知错误'}`, 'system');
-                            
-                            // 即使超时或错误，也显示结果页面
-                            setTimeout(() => {
-                                addThinkingLine('>>> 🚀 跳转到结果页面...', 'system');
+                                addThinkingLine(`>>> ${data.message || '未知错误'}`, 'system');
+                                
+                                // 对于一般错误，也跳转到结果页面显示错误信息
                                 setTimeout(() => {
-                                    window.location.href = '/results';
-                                }, 1000);
-                            }, 2000);
+                                    addThinkingLine('>>> 🚀 跳转到结果页面...', 'system');
+                                    setTimeout(() => {
+                                        window.location.href = '/results';
+                                    }, 1000);
+                                }, 2000);
+                            }
                             
                         } else if (data.status === 'processing') {
                             // 标记真实进度已开始

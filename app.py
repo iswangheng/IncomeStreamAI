@@ -215,7 +215,7 @@ def _internal_check_analysis_status():
         })
     
     # 处理需要开始或重试的分析
-    if status == 'not_started' or (status == 'processing' and result is None):
+    if status == 'not_started' or (status == 'processing' and result is None and not result_id):
         return _handle_analysis_execution(form_data, session)
     
     # 默认处理中状态 - 返回真实进度
@@ -273,9 +273,10 @@ def _handle_analysis_execution(form_data, session):
             # 在session中只存储结果ID
             session['analysis_result_id'] = result_id
             session['analysis_status'] = 'completed'
-            # 清理session中的大数据
-            if 'analysis_result' in session:
-                del session['analysis_result']
+            session['analysis_progress'] = 100
+            session['analysis_stage'] = '分析完成！'
+            # 保留一份备份在session中以防数据库读取失败
+            session['analysis_result'] = suggestions
             
             app.logger.info(f"AI analysis completed successfully, result stored with ID: {result_id}")
             return jsonify({
@@ -300,14 +301,23 @@ def _handle_analysis_execution(form_data, session):
         app.logger.error(f"Analysis execution error: {error_msg}")
         app.logger.error(f"Analysis traceback: {traceback.format_exc()}")
         
-        session['analysis_status'] = 'error'
-        session['analysis_error'] = error_msg
-        
-        return jsonify({
-            'status': 'error', 
-            'message': f'分析过程遇到问题: {error_msg}',
-            'error_code': 'EXECUTION_ERROR'
-        })
+        # 如果是网络超时错误，尝试提供更友好的反馈
+        if 'timeout' in error_msg.lower() or 'connection' in error_msg.lower():
+            session['analysis_status'] = 'timeout'
+            session['analysis_error'] = '网络连接超时，正在使用备用方案生成基础建议'
+            return jsonify({
+                'status': 'timeout', 
+                'message': '网络连接超时，正在启用备用方案...',
+                'error_code': 'NETWORK_TIMEOUT'
+            })
+        else:
+            session['analysis_status'] = 'error'
+            session['analysis_error'] = error_msg
+            return jsonify({
+                'status': 'error', 
+                'message': f'分析过程遇到问题: {error_msg}',
+                'error_code': 'EXECUTION_ERROR'
+            })
 
 @app.route('/results')
 def results():
@@ -363,10 +373,23 @@ def results():
                                          result=suggestions,
                                          status='completed')
         
-        elif status == 'error':
-            # 分析出错，显示错误信息
+        elif status == 'error' or status == 'timeout':
+            # 分析出错或超时，显示错误信息或备用方案
             error_msg = session.get('analysis_error', '分析过程中发生未知错误')
-            app.logger.info(f"Analysis error - showing error page: {error_msg}")
+            app.logger.info(f"Analysis {status} - showing fallback page: {error_msg}")
+            
+            # 如果是超时，生成基础建议作为备用方案
+            if status == 'timeout':
+                try:
+                    fallback_result = generate_fallback_suggestions(form_data)
+                    return render_template('result_apple_redesigned.html',
+                                         form_data=form_data,
+                                         result=fallback_result,
+                                         status='completed',
+                                         fallback_mode=True)
+                except Exception as e:
+                    app.logger.error(f"Fallback generation failed: {str(e)}")
+            
             return render_template('result_apple_redesigned.html',
                                  form_data=form_data,
                                  status='error',
@@ -1169,6 +1192,72 @@ def ai_chat():
             'success': False, 
             'error': f'AI服务暂时不可用: {str(e)}'
         })
+
+def generate_fallback_suggestions(form_data):
+    """当AI服务不可用时生成基础建议"""
+    project_name = form_data.get('project_name', '您的项目')
+    people = form_data.get('people', [])
+    
+    # 基于表单数据生成基础建议
+    fallback_suggestions = {
+        "situation_analysis": f"根据您提交的项目信息「{project_name}」和团队配置，我们为您准备了以下基础收入路径建议。虽然当前AI深度分析服务暂时不可用，但基于常见的非劳务收入模式，为您提供这些可行的起步方案。",
+        "missing_gaps": [
+            "建立标准化流程体系",
+            "设计自动化收入机制", 
+            "构建客户获取渠道",
+            "完善产品服务体系"
+        ],
+        "income_paths": []
+    }
+    
+    # 生成基础路径建议
+    if people:
+        # 基于人员配置生成建议
+        path1 = {
+            "path_title": "知识产品化收入",
+            "path_scene": "将团队专业知识转化为可复制的数字产品",
+            "who_moves_first": f"{people[0].get('name', '团队负责人')}率先整理核心知识体系",
+            "execution_steps": [
+                {"owner": people[0].get('name', '负责人'), "action": "梳理并文档化核心专业知识和经验"},
+                {"owner": "团队", "action": "设计在线课程或知识付费产品"},
+                {"owner": "市场推广", "action": "建立内容营销和客户获取渠道"},
+                {"owner": "运营", "action": "建立自动化销售和交付系统"}
+            ],
+            "mvp_content": "在24小时内：选择一个最有把握的专业话题，录制15分钟的试听课程，发布到社交平台测试反响。"
+        }
+        
+        path2 = {
+            "path_title": "服务标准化收入",
+            "path_scene": "将现有服务流程标准化，实现规模化复制",
+            "who_moves_first": "运营负责人设计标准化服务流程",
+            "execution_steps": [
+                {"owner": "运营", "action": "分析现有服务流程，制定标准化作业指导"},
+                {"owner": "技术", "action": "开发或选择支持工具，提高服务效率"},
+                {"owner": "销售", "action": "设计可复制的客户获取和转化流程"},
+                {"owner": "管理", "action": "建立质量控制和客户满意度跟踪系统"}
+            ],
+            "mvp_content": "在24小时内：选择一项核心服务，编写详细的标准作业流程，并用实际客户测试一遍完整流程。"
+        }
+        
+        fallback_suggestions["income_paths"] = [path1, path2]
+    else:
+        # 没有人员信息时的通用建议
+        path1 = {
+            "path_title": "个人品牌变现",
+            "path_scene": "基于个人专业能力建立品牌影响力",
+            "who_moves_first": "项目发起人开始内容输出",
+            "execution_steps": [
+                {"owner": "个人", "action": "确定专业定位和目标受众"},
+                {"owner": "个人", "action": "制定内容输出计划，持续分享专业见解"},
+                {"owner": "个人", "action": "建立社交媒体矩阵，扩大影响力"},
+                {"owner": "个人", "action": "设计变现产品（咨询、课程、工具等）"}
+            ],
+            "mvp_content": "在24小时内：在主要社交平台发布一篇专业观点文章，观察互动反馈。"
+        }
+        
+        fallback_suggestions["income_paths"] = [path1]
+    
+    return fallback_suggestions
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

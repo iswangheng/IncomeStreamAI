@@ -266,18 +266,17 @@
         
         /* Status Bar */
         .status-bar {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 20px;
             background: rgba(0, 0, 0, 0.9);
             padding: 10px 20px;
             border: 1px solid #00ff41;
             border-radius: 25px;
             z-index: 100;
+            margin-bottom: 20px;
+            max-width: 400px;
         }
         
         .status-indicator {
@@ -401,6 +400,17 @@
             <p class="ai-subtitle">Neural Network Analysis In Progress...</p>
         </div>
         
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span id="statusText">初始化神经网络...</span>
+            </div>
+            <div class="status-indicator">
+                <span id="progressText">0%</span>
+            </div>
+        </div>
+        
         <!-- Main Thinking Display -->
         <div class="thinking-display">
             <div class="terminal-header">
@@ -414,17 +424,6 @@
             
             <div class="thinking-content" id="thinkingContent">
                 <!-- Thinking process will be inserted here dynamically -->
-            </div>
-        </div>
-        
-        <!-- Status Bar -->
-        <div class="status-bar">
-            <div class="status-indicator">
-                <div class="status-dot"></div>
-                <span id="statusText">初始化神经网络...</span>
-            </div>
-            <div class="status-indicator">
-                <span id="progressText">0%</span>
             </div>
         </div>
     </div>

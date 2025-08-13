@@ -547,7 +547,7 @@
                 pollCount++;
                 console.log(`Polling real analysis status, attempt: ${pollCount}`);
                 
-                fetch('/analysis_status')
+                fetch('/check_analysis_status')
                     .then(response => response.json())
                     .then(data => {
                         console.log('Real analysis status:', data);

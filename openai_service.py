@@ -81,37 +81,52 @@ class AngelaAI:
             ).all()
             
             if not knowledge_items:
-                return "知识库暂无可用内容"
+                return self.get_core_knowledge_fallback()
             
-            # 提取关键词进行匹配（简化版）
-            keywords = []
-            if project_description:
-                keywords.extend(project_description.split()[:10])  # 项目描述前10个词
+            # 优先查找非劳务收入相关的知识库内容
+            non_labor_income_items = [item for item in knowledge_items 
+                                    if item.content_summary and ('非劳务收入' in item.content_summary or 
+                                                               '管道' in item.content_summary or
+                                                               '租金' in item.content_summary or
+                                                               '股份' in item.content_summary or
+                                                               '版权' in item.content_summary)]
             
-            for person in key_persons:
-                if person.get('roles'):
-                    keywords.extend(person['roles'])
-                if person.get('resources'):
-                    keywords.extend(person['resources'][:3])  # 每人前3个资源
-            
-            keywords.extend(external_resources[:5])  # 前5个外部资源
-            
-            # 从知识库条目中选择最相关的内容摘要
             relevant_snippets = []
-            for item in knowledge_items[:6]:  # 最多选择6个条目
-                if item.content_summary and len(relevant_snippets) < 3:
-                    # 简化的相关性检查
-                    summary = item.content_summary[:200]  # 前200字符
+            
+            # 如果找到非劳务收入相关内容，优先使用
+            if non_labor_income_items:
+                for item in non_labor_income_items[:2]:  # 最多2个核心条目
+                    if item.content_summary:
+                        # 提取更多有用信息，特别关注核心原理和案例
+                        summary = item.content_summary[:800]  # 增加到800字符获取更多信息
+                        relevant_snippets.append(f"• {summary}")
+                        item.usage_count += 1
+            
+            # 补充其他相关条目
+            other_items = [item for item in knowledge_items if item not in non_labor_income_items]
+            for item in other_items[:2]:  # 最多再补充2个
+                if item.content_summary and len(relevant_snippets) < 4:
+                    summary = item.content_summary[:300]
                     relevant_snippets.append(f"• {summary}")
-                    
-                    # 更新使用次数
                     item.usage_count += 1
             
-            return "\n".join(relevant_snippets) if relevant_snippets else "知识库内容暂不相关"
+            # 如果没有找到相关内容，返回核心知识要点
+            if not relevant_snippets:
+                return self.get_core_knowledge_fallback()
+            
+            return "\n".join(relevant_snippets)
             
         except Exception as e:
             logger.error(f"Knowledge base retrieval error: {e}")
-            return "知识库检索异常，使用默认策略"
+            return self.get_core_knowledge_fallback()
+
+    def get_core_knowledge_fallback(self) -> str:
+        """当知识库检索失败时的核心知识要点"""
+        return """• 非劳务收入核心公式：意识+能量+能力（行动）=结果
+• 七大类型：租金（万物皆可租）、利息、股份/红利、版权、专利、企业连锁、团队收益
+• 三步法则：盘资源→搭管道→动真格
+• 核心原则：让关键环节的关键人物都高兴，严格区分需换取的人物资源vs可直接动用的外部资源
+• 成功要素：1)设计共赢机制 2)掌握核心信息+筛选规则 3)前置合作规则"""
     
     def generate_income_paths(self, form_data: Dict[str, Any], db_session) -> Dict[str, Any]:
         """生成非劳务收入路径"""
@@ -129,13 +144,32 @@ class AngelaAI:
             )
             
             # 构造系统提示
-            system_prompt = """你是"Angela"，专精"非劳务收入路径设计"的高级策略顾问。
-原则：
-- 只输出可执行的方案，不空话。每条方案都要能立刻行动。
-- 明确"谁先动、动什么、怎么动"，提供最小可验证原型（MVP）。
-- 严格区分【关键人物资源（需换取/打动）】与【外部资源（可直接动用）】的用法。
-- 发现信息缺口时，提出【建议补齐的关键角色类型】与可行获取路径（去哪找、用什么话术）。
-- 输出结构固定，字段齐全，便于前端渲染。"""
+            system_prompt = """你是"Angela"，专精"非劳务收入管道设计"的高级策略顾问，掌握成熟的造物法则。
+
+【核心公式】意识+能量+能力（行动）=结果
+- 意识：设计让所有关键人物都高兴的方案/规则（不用自己出能力）
+- 能量：关键环节的关键人物都得高兴，为什么高兴？因为获得了他们想要的
+- 能力：让结果发生的所有关键环节能力（人、钱、时间、资源等，借用别人的）
+
+【非劳务收入七大类型】租金、利息、股份/红利、版权、专利、企业连锁、团队收益
+重点关注：租金（万物皆可租）、版权（经验变现）、股份（资源换股权）
+
+【三步成功法则】
+1. 盘资源：识别可互相连接的各方，找出能互相连接的几方
+2. 搭管道：设计清晰闭环，让三方及以上形成稳定合作
+3. 动真格：站稳中间人位置，让每方都离不开你
+
+【设计管道的核心要素】
+- 让关键环节关键人物都高兴：设计共赢机制，每方都有明确收获
+- 掌握核心信息+筛选规则：不让各方直接对接，保持中心位置
+- 前置合作规则：事前谈清楚协议、抽成、流程、职责，确保可复制
+
+【输出原则】
+- 只输出可执行方案，每条都能立刻行动，明确"谁先动、动什么、怎么动"
+- 严格区分【关键人物资源（需换取/打动）】与【外部资源（可直接动用）】
+- 必须设计三方及以上的闭环结构，确保自己在管道中心不被跳过
+- 提供最小可验证原型（MVP），一天内就能开始测试
+- 发现信息缺口时，明确建议补齐的关键角色类型和获取路径"""
             
             # 构造用户提示
             user_content = f"""【项目名称】{project_name}
@@ -165,40 +199,56 @@ class AngelaAI:
 【知识库要点】（只给要点，避免冗长）
 {kb_snippets}"""
             
-            assistant_prompt = """请输出 JSON，字段与格式严格如下：
+            assistant_prompt = """请严格按照非劳务收入管道设计原理，输出以下JSON格式：
 {
   "overview": {
-    "situation": "当前已掌握资源与限制的总结（<=120字）",
+    "situation": "运用【意识+能量+能力=结果】公式分析当前情况（<=150字）",
+    "income_type": "主要适用的收入类型（租金/版权/股份/其他）",
+    "core_insight": "核心洞察：为什么这个项目能形成非劳务收入管道",
     "gaps": ["缺少的关键角色或环节1","..."],
     "suggested_roles_to_hunt": [
-      {"role":"渠道方/推广方","why":"理由","where_to_find":"去哪里找","outreach_script":"简短话术（<=80字）"}
+      {"role":"具体角色（如：本地餐饮老板/内容创作者）","why":"为什么需要这个角色","where_to_find":"具体去哪找（如：本地商会/小红书私信）","outreach_script":"开场话术（<=80字）"}
     ]
   },
   "paths": [
     {
       "id": "path_1",
-      "name": "路径名（<=16字）",
-      "scene": "在哪个场景/媒介下操作（如：微信群直播/线下小沙龙/联名推文）",
-      "who_moves_first": "由谁先出手（如：你先约KOL/先找品牌运营）",
+      "name": "路径名（<=20字）",
+      "income_mechanism": "收入机制（如：中介费分成/授权费/股权分红）",
+      "three_parties_structure": {
+        "party_a": "甲方名称和需求",
+        "party_b": "乙方名称和能提供的",
+        "your_role": "你的中间人价值和不可替代性"
+      },
+      "scene": "操作场景/媒介（如：微信群直播/线下沙龙/公众号合作）",
+      "who_moves_first": "首先行动者和具体动作",
       "action_steps": [
-        {"owner":"你","step":"做什么动作（具体到渠道/频次/形式）","why_it_works":"满足谁的动机/资源如何串联"},
-        {"owner":"关键人物A","step":"做什么","why_it_works":"..."}
+        {"owner":"你","step":"第1步具体动作（平台/形式/频率）","make_who_happy":"让谁高兴？为什么高兴？"},
+        {"owner":"关键人物A","step":"对方的响应动作","make_who_happy":"满足了谁的需求"},
+        {"owner":"你","step":"第2步跟进动作","make_who_happy":"进一步巩固哪方关系"},
+        {"owner":"关键人物B/外部资源","step":"第3步扩展动作","make_who_happy":"形成多赢局面"}
       ],
-      "use_key_person_resources": ["引用到的人与其具体资源清单..."],
-      "use_external_resources": ["直接动用的外部资源..."],
-      "revenue_trigger": "非劳务收益触发点（如分成/倒流/授权/转介绍）",
-      "mvp": "一天内可完成的最小验证动作（含成功判据，如报名数≥30/转化≥2%）",
-      "risks": ["风险点1","风险点2"],
-      "plan_b": "最关键风险的替代方案（具体）",
-      "kpis": ["行动KPI1","KPI2（含口径）"]
+      "use_key_person_resources": ["明确引用谁的什么具体资源"],
+      "use_external_resources": ["直接动用的外部资源"],
+      "revenue_trigger": "非劳务收益触发条件和机制（具体金额/比例）",
+      "mvp": "24小时内最小验证动作（含成功标准，如：3个意向客户确认/获得1个试点机会）",
+      "avoid_being_bypassed": "如何确保不被跳过的3个措施",
+      "risks": ["风险1","风险2"],
+      "plan_b": "主要风险的具体应对方案",
+      "scaling_potential": "规模化潜力（如：可复制到多少个区域/品类）"
     }
   ],
-  "notes": "补充建议（可为空）"
+  "implementation_priority": "建议实施顺序和理由",
+  "notes": "基于知识库案例的额外建议"
 }
-注意：
-- 最多返回3条路径，少而精。
-- 每个 action_steps 至少3步，尽量具体到"在哪个平台、用什么形式、频率多少"。
-- 用项目现有资源优先，其次才建议补齐角色。"""
+
+【设计要求】
+- 必须设计三方及以上闭环，确保你在管道中心位置
+- 每个路径都要有明确的非劳务收入触发机制（不能是你亲自干活赚钱）
+- action_steps要体现"让关键人物都高兴"的原则
+- MVP必须在24小时内可验证，有明确成功判据
+- 优先使用项目现有资源，巧妙串联各方需求
+- 参考知识库中的成功案例模式（如租金差价/授权分成/资源整合等）"""
             
             # 调用OpenAI API
             response = client.chat.completions.create(

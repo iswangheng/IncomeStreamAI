@@ -571,12 +571,72 @@ def results():
                                  error_message=error_msg)
         
         else:
-            # 分析未开始或正在进行，显示骨架屏
-            app.logger.info("Analysis not completed - showing loading skeleton")
-            return render_template('result_apple_redesigned.html',
-                                 form_data=form_data,
-                                 status='loading',
-                                 current_status=status)
+            # 如果没有完成的结果，强制生成备用方案或从数据库恢复
+            app.logger.warning(f"Results page accessed with non-completed status: {status}, forcing completion")
+            
+            # 尝试从数据库获取任何存在的结果
+            if result_id:
+                try:
+                    from models import AnalysisResult
+                    import json
+                    
+                    analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
+                    if analysis_record and analysis_record.result_data:
+                        suggestions = json.loads(analysis_record.result_data)
+                        app.logger.info(f"Found existing result in database for ID: {result_id}")
+                        return render_template('result_apple_redesigned.html', 
+                                             form_data=form_data, 
+                                             result=suggestions,
+                                             status='completed')
+                except Exception as e:
+                    app.logger.error(f"Failed to load result from database: {str(e)}")
+            
+            # 如果还是没有结果，生成紧急备用方案
+            app.logger.info("Generating emergency fallback solution")
+            try:
+                fallback_result = generate_fallback_suggestions(form_data)
+                
+                # 保存到数据库
+                try:
+                    from models import AnalysisResult
+                    import uuid
+                    import json
+                    
+                    emergency_id = str(uuid.uuid4())
+                    analysis_result = AnalysisResult(
+                        id=emergency_id,
+                        form_data=json.dumps(form_data, ensure_ascii=False),
+                        result_data=json.dumps(fallback_result, ensure_ascii=False),
+                        project_name=form_data.get('projectName', ''),
+                        project_description=form_data.get('projectDescription', ''),
+                        project_stage=form_data.get('projectStage', ''),
+                        team_size=len(form_data.get('keyPersons', [])),
+                        analysis_type='emergency_fallback'
+                    )
+                    db.session.add(analysis_result)
+                    db.session.commit()
+                    
+                    # 更新session
+                    session['analysis_status'] = 'completed'
+                    session['analysis_result_id'] = emergency_id
+                    session['analysis_result'] = fallback_result
+                    
+                    app.logger.info(f"Emergency fallback generated with ID: {emergency_id}")
+                except Exception as db_error:
+                    app.logger.error(f"Failed to save emergency fallback: {str(db_error)}")
+                
+                return render_template('result_apple_redesigned.html',
+                                     form_data=form_data,
+                                     result=fallback_result,
+                                     status='completed',
+                                     fallback_mode=True)
+                                     
+            except Exception as fallback_error:
+                app.logger.error(f"Emergency fallback generation failed: {str(fallback_error)}")
+                return render_template('result_apple_redesigned.html',
+                                     form_data=form_data,
+                                     status='error',
+                                     error_message='系统无法生成分析结果，请重新尝试')
     
     except Exception as e:
         app.logger.error(f"Error displaying results: {str(e)}")

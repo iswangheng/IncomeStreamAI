@@ -190,7 +190,7 @@ body::before {
 }
 
 .case-content h4 {
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
     font-weight: var(--font-semibold);
     color: var(--color-gray-900);
     margin-bottom: var(--space-2);
@@ -277,7 +277,7 @@ body::before {
     }
     
     .case-content h4 {
-        font-size: var(--text-base);
+        font-size: var(--text-lg);
         line-height: 1.4;
         margin-bottom: var(--space-2);
     }
@@ -342,7 +342,7 @@ body::before {
     }
     
     .case-content h4 {
-        font-size: var(--text-sm);
+        font-size: var(--text-base);
         font-weight: var(--font-semibold);
     }
     

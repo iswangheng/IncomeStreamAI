@@ -42,7 +42,7 @@
     <!-- 主要内容区域 -->
     <main class="main-content">
         <!-- 页面标题区域 -->
-        <header class="page-header fade-in">
+        <header class="page-header">
             <h1 class="page-title">非劳务收入管道设计师</h1>
             <p class="page-subtitle">根据您的项目和关键人物信息，生成个性化的非劳务收入管道方案</p>
             
@@ -129,10 +129,10 @@
         {% endwith %}
 
         <!-- 主要表单 -->
-        <form method="POST" action="{{ url_for('generate') }}" id="mainForm" class="slide-up">
+        <form method="POST" action="{{ url_for('generate') }}" id="mainForm">
             
             <!-- 项目基础信息模块 -->
-            <div class="card fade-in interactive-hover" style="animation-delay: 0.2s;">
+            <div class="card interactive-hover">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-rocket"></i>
@@ -169,7 +169,7 @@
             </div>
 
             <!-- 关键人物模块 -->
-            <div class="card fade-in interactive-hover" style="animation-delay: 0.4s;">
+            <div class="card interactive-hover">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-users"></i>
@@ -188,7 +188,7 @@
                         </p>
                     </div>
                     <div class="text-center">
-                        <button type="button" class="btn btn-primary interactive scale-in gpu-accelerated" onclick="addPerson()" style="animation-delay: 0.8s;">
+                        <button type="button" class="btn btn-primary interactive gpu-accelerated" onclick="addPerson()">
                             <i class="fas fa-plus me-2"></i>
                             添加关键人物
                         </button>
@@ -197,7 +197,7 @@
             </div>
 
             <!-- 外部资源模块 -->
-            <div class="card fade-in interactive-hover" style="animation-delay: 0.6s;">
+            <div class="card interactive-hover">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-network-wired"></i>
@@ -306,11 +306,11 @@
 
             <!-- 提交按钮 -->
             <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(0, 0, 0, 0.1);">
-                <button type="submit" class="btn btn-primary btn-large interactive scale-in gpu-accelerated" style="animation-delay: 1.2s;">
+                <button type="submit" class="btn btn-primary btn-large interactive gpu-accelerated">
                     <i class="fas fa-magic me-2"></i>
                     开始AI智能分析
                 </button>
-                <p style="margin-top: 16px; color: #666; font-size: 14px; animation-delay: 1.5s;" class="fade-in">
+                <p style="margin-top: 16px; color: #666; font-size: 14px;">
                     基于您提供的信息，AI将在几秒内生成专业的收入管道设计方案
                 </p>
             </div>
@@ -330,7 +330,7 @@
             const container = document.getElementById('personsContainer');
             
             const personCard = document.createElement('div');
-            personCard.className = 'person-card slide-up';
+            personCard.className = 'person-card';
             personCard.innerHTML = `
                 <div class="person-card-header">
                     <div class="person-number">${personCount}</div>

@@ -522,13 +522,13 @@
                 console.log('Column added to DOM, total columns:', matrixBg.children.length);
                 
                 // Cleanup
-                const duration = parseFloat(column.style.animationDuration) * 1000;
+                const cleanupDuration = parseFloat(column.style.animationDuration) * 1000;
                 setTimeout(() => {
                     clearInterval(changeInterval);
                     if (column.parentNode) {
                         column.parentNode.removeChild(column);
                     }
-                }, duration);
+                }, cleanupDuration);
             }
             
             // Create denser initial coverage
@@ -744,16 +744,17 @@
             // Initialize Matrix rain first
             createMatrixRain();
             
-            // Wait a moment for Matrix to start, then begin thinking process
+            // Start thinking process immediately
             setTimeout(() => {
                 console.log('Starting thinking process...');
                 showGenericThinking();
-                
-                // Start real analysis polling after a delay to ensure we see the thinking steps
-                setTimeout(() => {
-                    startRealAnalysisPolling();
-                }, 3000); // 3 second delay before polling
-            }, 500);
+            }, 100);
+            
+            // Start real analysis polling with a longer delay
+            setTimeout(() => {
+                console.log('Starting real analysis polling...');
+                startRealAnalysisPolling();
+            }, 5000); // 5 second delay to see more thinking steps
         });
     </script>
 </body>

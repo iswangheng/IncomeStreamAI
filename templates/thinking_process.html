@@ -500,50 +500,76 @@
         }
         
         function updateStatusDisplay(realProgress = null, realStage = null) {
-            // 优先使用后端真实进度，否则使用模拟进度
-            const simulationProgress = Math.min((currentStep / genericThinkingSteps.length) * 100, 100);
-            const displayProgress = realProgress !== null ? realProgress : simulationProgress;
+            let displayProgress, displayStage;
             
-            document.getElementById('progressText').textContent = Math.round(displayProgress) + '%';
-            
-            // 优先使用后端真实阶段信息
-            if (realStage) {
-                document.getElementById('statusText').textContent = realStage;
+            if (realProgress !== null && window.realProgressStarted) {
+                // 使用真实进度
+                displayProgress = realProgress;
+                displayStage = realStage || '分析正在进行中...';
             } else {
-                // 回退到模拟阶段信息
-                if (displayProgress < 20) {
-                    document.getElementById('statusText').textContent = '解析项目数据中...';
-                } else if (displayProgress < 40) {
-                    document.getElementById('statusText').textContent = '分析关键人物资源...';
-                } else if (displayProgress < 60) {
-                    document.getElementById('statusText').textContent = '匹配收入模式中...';
-                } else if (displayProgress < 80) {
-                    document.getElementById('statusText').textContent = '设计收入管道...';
-                } else if (displayProgress < 100) {
-                    document.getElementById('statusText').textContent = '生成分析报告...';
+                // 使用模拟进度，但当有真实进度时进行混合
+                const simulationProgress = Math.min((currentStep / genericThinkingSteps.length) * 100, 95);
+                
+                if (window.realProgressStarted && realProgress !== null) {
+                    // 混合模式：使用真实进度，但保持模拟的阶段描述流畅性
+                    displayProgress = Math.max(simulationProgress, realProgress);
                 } else {
-                    document.getElementById('statusText').textContent = '分析完成！';
+                    displayProgress = simulationProgress;
+                }
+                
+                // 使用模拟阶段信息（更丰富的描述）
+                if (displayProgress < 15) {
+                    displayStage = '初始化神经网络...';
+                } else if (displayProgress < 25) {
+                    displayStage = '解析项目数据中...';
+                } else if (displayProgress < 35) {
+                    displayStage = '分析关键人物资源...';
+                } else if (displayProgress < 45) {
+                    displayStage = '识别资源连接点...';
+                } else if (displayProgress < 55) {
+                    displayStage = '匹配收入模式中...';
+                } else if (displayProgress < 65) {
+                    displayStage = '设计收入管道...';
+                } else if (displayProgress < 75) {
+                    displayStage = '优化三方结构...';
+                } else if (displayProgress < 85) {
+                    displayStage = '生成执行方案...';
+                } else if (displayProgress < 95) {
+                    displayStage = '生成分析报告...';
+                } else {
+                    displayStage = '分析完成！';
+                }
+                
+                // 如果有真实阶段信息且真实进度已开始，优先使用真实阶段
+                if (realStage && window.realProgressStarted) {
+                    displayStage = realStage;
                 }
             }
+            
+            document.getElementById('progressText').textContent = Math.round(displayProgress) + '%';
+            document.getElementById('statusText').textContent = displayStage;
         }
         
         function showGenericThinking() {
-            // 只在没有真实进度时显示少量初始化步骤
-            if (currentStep < 3 && !realAnalysisCompleted && !window.realProgressStarted) {
+            if (currentStep < genericThinkingSteps.length && !realAnalysisCompleted) {
                 const step = genericThinkingSteps[currentStep];
                 
                 addThinkingLine(step.text, step.type);
-                updateStatusDisplay();
+                
+                // 如果有真实进度，使用真实进度；否则使用模拟进度
+                if (!window.realProgressStarted) {
+                    updateStatusDisplay();
+                }
                 currentStep++;
                 
-                // 更快的初始化步骤
-                setTimeout(showGenericThinking, Math.min(step.duration, 800));
-            } else if (!realAnalysisCompleted && !window.realProgressStarted) {
-                // 等待真实分析开始
-                addThinkingLine('# 正在初始化AI分析引擎...', 'analysis');
-                setTimeout(showGenericThinking, 1500);
+                // 继续显示思考步骤，但当有真实进度时调整速度
+                const delay = window.realProgressStarted ? Math.min(step.duration, 1000) : step.duration;
+                setTimeout(showGenericThinking, delay);
+            } else if (!realAnalysisCompleted) {
+                // 模拟步骤完成，但真实分析还没完成时显示等待信息
+                addThinkingLine('# 深度分析中，请稍候...', 'analysis');
+                setTimeout(showGenericThinking, 2000);
             }
-            // 一旦真实进度开始，完全停止模拟步骤
         }
         
         // Real backend analysis polling with synchronized display
@@ -603,21 +629,13 @@
                             const stage = data.stage || data.message || '分析正在进行中...';
                             updateStatusDisplay(progress, stage); // 同时更新进度和阶段信息
                             
-                            // 根据真实进度添加相应的思考行
-                            if (progress >= 10 && !window.stage10Shown) {
-                                addThinkingLine('>>> 🚀 开始AI分析...', 'system');
-                                window.stage10Shown = true;
-                            }
-                            if (progress >= 30 && !window.stage30Shown) {
-                                addThinkingLine('# 项目数据解析完成，开始深度分析...', 'analysis');
-                                window.stage30Shown = true;
-                            }
+                            // 根据真实进度添加关键节点的思考行（不干扰常规模拟步骤）
                             if (progress >= 50 && !window.stage50Shown) {
-                                addThinkingLine('# 正在匹配收入模式和管道设计...', 'analysis');
+                                addThinkingLine('>>> 🧠 AI核心引擎已激活，开始深度分析...', 'system');
                                 window.stage50Shown = true;
                             }
                             if (progress >= 90 && !window.stage90Shown) {
-                                addThinkingLine('# AI分析完成，正在生成详细报告...', 'system');
+                                addThinkingLine('>>> ⚡ AI分析引擎完成核心计算...', 'system');
                                 window.stage90Shown = true;
                             }
                             

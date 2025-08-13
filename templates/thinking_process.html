@@ -499,43 +499,51 @@
             }
         }
         
-        function updateStatusDisplay(realProgress = null) {
+        function updateStatusDisplay(realProgress = null, realStage = null) {
+            // 优先使用后端真实进度，否则使用模拟进度
             const simulationProgress = Math.min((currentStep / genericThinkingSteps.length) * 100, 100);
             const displayProgress = realProgress !== null ? realProgress : simulationProgress;
             
             document.getElementById('progressText').textContent = Math.round(displayProgress) + '%';
             
-            if (displayProgress < 20) {
-                document.getElementById('statusText').textContent = '解析项目数据中...';
-            } else if (displayProgress < 40) {
-                document.getElementById('statusText').textContent = '分析关键人物资源...';
-            } else if (displayProgress < 60) {
-                document.getElementById('statusText').textContent = '匹配收入模式中...';
-            } else if (displayProgress < 80) {
-                document.getElementById('statusText').textContent = '设计收入管道...';
-            } else if (displayProgress < 100) {
-                document.getElementById('statusText').textContent = '生成分析报告...';
+            // 优先使用后端真实阶段信息
+            if (realStage) {
+                document.getElementById('statusText').textContent = realStage;
             } else {
-                document.getElementById('statusText').textContent = '分析完成！';
+                // 回退到模拟阶段信息
+                if (displayProgress < 20) {
+                    document.getElementById('statusText').textContent = '解析项目数据中...';
+                } else if (displayProgress < 40) {
+                    document.getElementById('statusText').textContent = '分析关键人物资源...';
+                } else if (displayProgress < 60) {
+                    document.getElementById('statusText').textContent = '匹配收入模式中...';
+                } else if (displayProgress < 80) {
+                    document.getElementById('statusText').textContent = '设计收入管道...';
+                } else if (displayProgress < 100) {
+                    document.getElementById('statusText').textContent = '生成分析报告...';
+                } else {
+                    document.getElementById('statusText').textContent = '分析完成！';
+                }
             }
         }
         
         function showGenericThinking() {
-            if (currentStep < genericThinkingSteps.length && !realAnalysisCompleted) {
+            // 只在没有真实进度时显示少量初始化步骤
+            if (currentStep < 3 && !realAnalysisCompleted && !window.realProgressStarted) {
                 const step = genericThinkingSteps[currentStep];
                 
                 addThinkingLine(step.text, step.type);
                 updateStatusDisplay();
                 currentStep++;
                 
-                // Continue showing thinking steps with variable timing
-                setTimeout(showGenericThinking, step.duration);
-            } else if (!realAnalysisCompleted) {
-                // Generic steps finished, but real analysis not done yet
-                // Show waiting messages
-                addThinkingLine('# 深度分析中，请稍候...', 'analysis');
-                setTimeout(showGenericThinking, 2000);
+                // 更快的初始化步骤
+                setTimeout(showGenericThinking, Math.min(step.duration, 800));
+            } else if (!realAnalysisCompleted && !window.realProgressStarted) {
+                // 等待真实分析开始
+                addThinkingLine('# 正在初始化AI分析引擎...', 'analysis');
+                setTimeout(showGenericThinking, 1500);
             }
+            // 一旦真实进度开始，完全停止模拟步骤
         }
         
         // Real backend analysis polling with synchronized display
@@ -587,12 +595,34 @@
                             }, 2000);
                             
                         } else if (data.status === 'processing') {
-                            // Update progress if available
+                            // 标记真实进度已开始
+                            window.realProgressStarted = true;
+                            
+                            // 使用后端真实进度信息
                             const progress = data.progress || Math.min(80 + (pollCount / maxPolls * 15), 95);
-                            updateStatusDisplay(progress); // 允许进度动态更新，但保持合理范围
+                            const stage = data.stage || data.message || '分析正在进行中...';
+                            updateStatusDisplay(progress, stage); // 同时更新进度和阶段信息
+                            
+                            // 根据真实进度添加相应的思考行
+                            if (progress >= 10 && !window.stage10Shown) {
+                                addThinkingLine('>>> 🚀 开始AI分析...', 'system');
+                                window.stage10Shown = true;
+                            }
+                            if (progress >= 30 && !window.stage30Shown) {
+                                addThinkingLine('# 项目数据解析完成，开始深度分析...', 'analysis');
+                                window.stage30Shown = true;
+                            }
+                            if (progress >= 50 && !window.stage50Shown) {
+                                addThinkingLine('# 正在匹配收入模式和管道设计...', 'analysis');
+                                window.stage50Shown = true;
+                            }
+                            if (progress >= 90 && !window.stage90Shown) {
+                                addThinkingLine('# AI分析完成，正在生成详细报告...', 'system');
+                                window.stage90Shown = true;
+                            }
                             
                             if (pollCount < maxPolls) {
-                                setTimeout(poll, 800); // 更频繁的轮询，减少延迟
+                                setTimeout(poll, 500); // 更频繁的轮询，减少延迟
                             } else {
                                 addThinkingLine('>>> ⏰ 分析超时，正在跳转...', 'system');
                                 setTimeout(() => {

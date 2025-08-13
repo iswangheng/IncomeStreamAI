@@ -130,6 +130,8 @@ def thinking_process():
     # 确保分析状态正确初始化
     if 'analysis_status' not in session:
         session['analysis_status'] = 'not_started'
+        session['analysis_progress'] = 0
+        session['analysis_stage'] = '等待开始分析...'
     
     app.logger.info(f"Thinking page loaded with status: {session.get('analysis_status')}")
     return render_template('thinking_process.html')
@@ -216,12 +218,15 @@ def _internal_check_analysis_status():
     if status == 'not_started' or (status == 'processing' and result is None):
         return _handle_analysis_execution(form_data, session)
     
-    # 默认处理中状态
-    app.logger.info("Analysis in progress - returning processing status")
+    # 默认处理中状态 - 返回真实进度
+    progress = session.get('analysis_progress', 50)
+    stage = session.get('analysis_stage', '分析正在进行中...')
+    app.logger.info(f"Analysis in progress - Progress: {progress}%, Stage: {stage}")
     return jsonify({
         'status': 'processing', 
-        'progress': 50,
-        'message': '分析正在进行中，请稍候...'
+        'progress': progress,
+        'stage': stage,
+        'message': stage
     })
 
 def _handle_analysis_execution(form_data, session):
@@ -231,10 +236,14 @@ def _handle_analysis_execution(form_data, session):
     try:
         # 设置状态为处理中
         session['analysis_status'] = 'processing'
+        session['analysis_progress'] = 10
+        session['analysis_stage'] = '开始AI分析...'
         app.logger.info("Starting AI analysis in request context")
         
-        # 执行AI分析
-        suggestions = generate_ai_suggestions(form_data)
+        # 执行AI分析，设置进度追踪
+        session['analysis_progress'] = 30
+        session['analysis_stage'] = '正在分析项目数据...'
+        suggestions = generate_ai_suggestions(form_data, session)
         
         if suggestions and isinstance(suggestions, dict):
             # 分析成功 - 将结果存储到数据库而不是session，避免session过大
@@ -433,6 +442,8 @@ def generate():
         # 设置分析状态为未开始，等待thinking页面触发
         session['analysis_status'] = 'not_started'
         session['analysis_result'] = None
+        session['analysis_progress'] = 0
+        session['analysis_stage'] = '准备开始分析...'
         
         # 详细调试session存储
         app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")
@@ -452,7 +463,7 @@ def generate():
         flash('处理表单时发生错误，请重试', 'error')
         return redirect(url_for('index'))
 
-def generate_ai_suggestions(form_data):
+def generate_ai_suggestions(form_data, session=None):
     """Generate AI suggestions using OpenAI API with timeout and error handling"""
     import signal
     import time
@@ -481,9 +492,19 @@ def generate_ai_suggestions(form_data):
         
         app.logger.info(f"Calling Angela AI with data: {json.dumps(converted_data, ensure_ascii=False)}")
         
+        # 更新进度：开始AI分析
+        if session:
+            session['analysis_progress'] = 50
+            session['analysis_stage'] = '正在调用AI分析引擎...'
+        
         start_time = time.time()
         # 调用AI生成服务
         ai_result = angela_ai.generate_income_paths(converted_data, db)
+        
+        # 更新进度：AI分析完成
+        if session:
+            session['analysis_progress'] = 90
+            session['analysis_stage'] = '正在生成分析报告...'
         elapsed_time = time.time() - start_time
         
         # 取消超时

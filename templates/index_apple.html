@@ -84,15 +84,15 @@
                         </div>
                     </div>
                     
-                    <div class="demo-case-card" data-case="workplace-resources">
+                    <div class="demo-case-card" data-case="cicada-farming">
                         <div class="case-icon">
-                            <i class="fas fa-handshake"></i>
+                            <i class="fas fa-seedling"></i>
                         </div>
                         <div class="case-content">
-                            <h4>职场资源变现案例</h4>
-                            <p>半价工资换取老板资源，获得儿童乐园+版权+影响力的复利回报</p>
+                            <h4>知了猴养殖管道案例</h4>
+                            <p>1万元启动成本，搭建7条管道，实现年收入70万的农村创业</p>
                             <div class="case-tags">
-                                <span class="tag">职场关系</span>
+                                <span class="tag">农业创新</span>
                                 <span class="tag">资源整合</span>
                             </div>
                         </div>
@@ -1298,63 +1298,70 @@
         // 测试案例数据
         const demoTestCases = {
             'english-training': {
-                projectName: '英语培训资源整合',
-                projectDescription: '我有一个做升学规划的朋友，手上有很多家长客户资源，经常有英语培训需求。同时我也认识一个英语机构的负责人，他们有不错的课程和师资，但是缺少流量获取渠道。我觉得可以把这两个资源连接起来，但不知道怎么设计一个三方都受益的合作模式。',
-                projectStage: 'planning',
+                projectName: 'Bonnie英语培训管道',
+                projectDescription: '有一天，一个做升学规划的朋友在饭局上随口吐槽："最近合作的英语机构交付太差，特别不靠谱，你有没有靠谱的老师推荐？"我发现我有这个朋友就有生源，我可以去找老师就有交付，我来做连接不就能搭个闭环？而且机构交付差是因为价格太低只有市场价1/3，我就设计标准化产品配助教，成本降下来。',
+                projectStage: 'testing',
                 persons: [
                     {
                         name: '升学规划师朋友',
                         roles: ['channel'],
-                        resources: ['学员流量', '家长信任', '升学咨询客户群体'],
-                        makeHappy: ['no_conflict_current_partner', 'keep_confidential', 'recurring_income'],
-                        notes: '人脉很广，经常有家长问他英语培训推荐'
+                        resources: ['家长客户资源', '升学规划服务信任度', '教育圈人脉'],
+                        makeHappy: ['bring_leads', 'no_conflict_current_partner', 'recurring_income'],
+                        notes: '有流量焦虑，经常有家长问英语培训推荐'
                     },
                     {
-                        name: '英语培训机构负责人',
+                        name: '英语培训机构',
                         roles: ['product', 'delivery'],
-                        resources: ['课程内容', '师资团队', '教学系统'],
-                        makeHappy: ['expand_network', 'bring_leads', 'targeted_exposure'],
-                        notes: '课程质量不错，但一直缺乏有效的获客渠道'
+                        resources: ['英语课程产品', '师资助教团队', '线上教学系统'],
+                        makeHappy: ['bring_leads', 'brand_exposure', 'expand_network'],
+                        notes: '想转型线上，有流量焦虑，交付成本高'
                     }
                 ],
-                externalResources: ['技术平台', '支付系统']
+                externalResources: ['标准化产品设计能力', '三方合作协议模板']
             },
             'rental-business': {
-                projectName: '临街商铺资源利用',
-                projectDescription: '我认识一个房东朋友，他有个临街的双层商铺，因为比较社恐不太愿意跟太多租客打交道，要求必须整租。但是这样导致商铺空置了好几个月。我觉得这个位置其实挺好的，可能有机会做一些什么，但不确定具体怎么操作能让大家都满意。',
+                projectName: 'Angela临街商铺二房东管道',
+                projectDescription: '我打了20多个电话调研发现一个房东有临街双层商铺，挂了两三个月都租不出去，因为房东要求整租，很多人想分开租上下层。更重要的是，这个铺子没有煤气不能做热菜，所以餐饮做不了。但通过市场调研我发现一楼可以做便利店、水果店，二楼可以做美容SPA、理发店。房东还是个社恐，太好了！',
                 projectStage: 'testing',
                 persons: [
                     {
                         name: '社恐房东',
                         roles: ['investor'],
-                        resources: ['临街双层商铺', '长期租约意愿', '稳定收租需求'],
-                        makeHappy: ['no_money_no_liability', 'no_public_appearance', 'recurring_income'],
-                        notes: '性格内向，不喜欢和太多人打交道，但希望房租收入稳定'
+                        resources: ['临街双层商铺', '5年长期租约意愿', '稳定现金流需求'],
+                        makeHappy: ['recurring_income', 'no_money_no_liability', 'no_public_appearance'],
+                        notes: '社恐不想跟太多租客打交道，要求整租，铺子空置好几个月'
                     }
                 ],
-                externalResources: ['市场调研信息']
+                externalResources: ['20+电话市场调研结果', '商圈消费数据', '分租市场需求']
             },
-            'workplace-resources': {
-                projectName: '职场资源整合机会',
-                projectDescription: '我目前在一家公司工作，发现老板手上有很多商业资源和人脉，比如设备供应商、商场合作伙伴等。我在考虑是否可以用一种更聪明的方式利用这些职场资源，不只是单纯打工拿工资，而是能通过某种合作模式获得更大的价值回报。但还不太清楚具体怎么操作。',
-                projectStage: 'running',
+            'cicada-farming': {
+                projectName: '楚楚知了猴7条管道',
+                projectDescription: '我是十八线小县城美容院老板娘，全年无休当高强度打工者。老公开玩笑说"要不咱们养一片林子自己抓知了猴吧？"让我意识到这么多人吃知了猴，我为什么不能做供货方？我盘了4个关键资源：销路（烧烤摊、餐馆供不应求）、林地（老公同学有柳树林）、蝉卵（劳务市场乡亲能捡）、技术（当地养殖户教学）。',
+                projectStage: 'testing',
                 persons: [
                     {
-                        name: '老板',
-                        roles: ['buyer', 'investor'],
-                        resources: ['资金预算', '商业资源网络', '项目决策权'],
-                        makeHappy: ['share_revenue', 'control_pace', 'use_idle_assets'],
-                        notes: '看重员工的执行力和忠诚度，愿意分享资源给值得信任的人'
+                        name: '柳树林主',
+                        roles: ['investor'],
+                        resources: ['柳树林地', '除草需求', '长期合作意愿'],
+                        makeHappy: ['use_idle_assets', 'recurring_income', 'no_money_no_liability'],
+                        notes: '除草成本高是真正痛点，我们帮他除草换取低价租金'
                     },
                     {
-                        name: '供应商伙伴',
-                        roles: ['product', 'channel'],
-                        resources: ['设备供应能力', '行业渠道', '技术支持'],
-                        makeHappy: ['expand_network', 'bring_leads', 'brand_exposure'],
-                        notes: '希望扩大业务合作，寻找可靠的合作伙伴'
+                        name: '当地养殖户老师',
+                        roles: ['expert'],
+                        resources: ['知了猴养殖技术', '成功经验', '行业人脉'],
+                        makeHappy: ['be_recognized', 'brand_exposure', 'be_consultant'],
+                        notes: '被称为"乡村袁隆平"，感受到尊重后愿意倾囊相授'
+                    },
+                    {
+                        name: '劳务市场大爷大妈',
+                        roles: ['delivery'],
+                        resources: ['蝉卵采集能力', '山区熟悉度', '时间充裕'],
+                        makeHappy: ['recurring_income', 'control_pace', 'be_recognized'],
+                        notes: '以件计价不设打卡，干得开心效率更高'
                     }
                 ],
-                externalResources: ['媒体渠道', '专业服务机构']
+                externalResources: ['烧烤摊餐馆销路', '机械除草设备', '包教包会收购模式']
             }
         };
 

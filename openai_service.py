@@ -83,13 +83,22 @@ class AngelaAI:
             if not knowledge_items:
                 return self.get_core_knowledge_fallback()
             
+            # 构建项目关键词，用于匹配知识库案例
+            project_keywords = self._extract_project_keywords(project_description, key_persons)
+            
             # 优先查找非劳务收入相关的知识库内容
             non_labor_income_items = [item for item in knowledge_items 
                                     if item.content_summary and ('非劳务收入' in item.content_summary or 
                                                                '管道' in item.content_summary or
                                                                '租金' in item.content_summary or
                                                                '股份' in item.content_summary or
-                                                               '版权' in item.content_summary)]
+                                                               '版权' in item.content_summary or
+                                                               'Bonnie' in item.content_summary or
+                                                               'Angela' in item.content_summary or
+                                                               '楚楚' in item.content_summary or
+                                                               '知了猴' in item.content_summary or
+                                                               '英语培训' in item.content_summary or
+                                                               '商铺' in item.content_summary)]
             
             relevant_snippets = []
             
@@ -120,13 +129,28 @@ class AngelaAI:
             logger.error(f"Knowledge base retrieval error: {e}")
             return self.get_core_knowledge_fallback()
 
+    def _extract_project_keywords(self, project_description: str, key_persons: List[Dict]) -> List[str]:
+        """提取项目关键词用于知识库匹配"""
+        keywords = []
+        
+        # 从项目描述中提取关键词
+        if '英语' in project_description or '培训' in project_description:
+            keywords.extend(['英语培训', 'Bonnie', '升学规划'])
+        if '商铺' in project_description or '房东' in project_description or '租' in project_description:
+            keywords.extend(['商铺', '租金', 'Angela', '二房东'])  
+        if '知了猴' in project_description or '养殖' in project_description:
+            keywords.extend(['知了猴', '楚楚', '养殖'])
+            
+        return keywords
+
     def get_core_knowledge_fallback(self) -> str:
         """当知识库检索失败时的核心知识要点"""
         return """• 非劳务收入核心公式：意识+能量+能力（行动）=结果
 • 七大类型：租金（万物皆可租）、利息、股份/红利、版权、专利、企业连锁、团队收益
 • 三步法则：盘资源→搭管道→动真格
 • 核心原则：让关键环节的关键人物都高兴，严格区分需换取的人物资源vs可直接动用的外部资源
-• 成功要素：1)设计共赢机制 2)掌握核心信息+筛选规则 3)前置合作规则"""
+• 成功要素：1)设计共赢机制 2)掌握核心信息+筛选规则 3)前置合作规则
+• 成功案例参考：Bonnie英语培训管道（连接规划师+机构，年40万收入）、Angela商铺二房东（1万启动，8年72万收入）、楚楚知了猴管道（7条管道，年70万收入）"""
     
     def generate_income_paths(self, form_data: Dict[str, Any], db_session) -> Dict[str, Any]:
         """生成非劳务收入路径"""
@@ -248,7 +272,10 @@ class AngelaAI:
 - action_steps要体现"让关键人物都高兴"的原则
 - MVP必须在24小时内可验证，有明确成功判据
 - 优先使用项目现有资源，巧妙串联各方需求
-- 参考知识库中的成功案例模式（如租金差价/授权分成/资源整合等）"""
+- 参考知识库中的成功案例模式：
+  * Bonnie模式：连接有需求方+有产品方，设计标准化产品降低成本，三方合作协议确保不被跳过，抽成1000元/人，年收入40万
+  * Angela模式：市场调研发现供需不匹配，整租转分租赚差价，1万启动成本，与房东签长约确保稳定，8年收入72万  
+  * 楚楚模式：发现日常需求背后商机，整合4方资源（销路+林地+人力+技术），让每方都高兴，3个月搭建，年收入70万"""
             
             # 调用OpenAI API
             response = client.chat.completions.create(

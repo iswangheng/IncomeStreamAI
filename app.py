@@ -214,6 +214,51 @@ def _internal_check_analysis_status():
             'error_code': 'ANALYSIS_ERROR'
         })
     
+    # 处理超时状态 - 立即生成备用方案
+    if status == 'timeout':
+        app.logger.info("Analysis timeout detected, generating fallback solution")
+        try:
+            fallback_result = generate_fallback_suggestions(form_data)
+            
+            # 保存备用方案到数据库
+            import uuid
+            import json
+            from models import AnalysisResult
+            
+            fallback_id = str(uuid.uuid4())
+            analysis_result = AnalysisResult(
+                id=fallback_id,
+                form_data=json.dumps(form_data, ensure_ascii=False),
+                result_data=json.dumps(fallback_result, ensure_ascii=False),
+                project_name=form_data.get('project_name', ''),
+                project_description=form_data.get('project_description', ''),
+                project_stage=form_data.get('project_stage', ''),
+                team_size=len(form_data.get('people', [])),
+                analysis_type='fallback'
+            )
+            db.session.add(analysis_result)
+            db.session.commit()
+            
+            # 更新session状态
+            session['analysis_status'] = 'completed'
+            session['analysis_result_id'] = fallback_id
+            session['analysis_result'] = fallback_result
+            
+            app.logger.info(f"Fallback solution generated and saved with ID: {fallback_id}")
+            return jsonify({
+                'status': 'completed', 
+                'redirect_url': '/results',
+                'message': '已生成备用方案，正在跳转...'
+            })
+            
+        except Exception as fallback_error:
+            app.logger.error(f"Failed to generate fallback solution: {str(fallback_error)}")
+            return jsonify({
+                'status': 'error', 
+                'message': '生成备用方案失败，请重新提交',
+                'error_code': 'FALLBACK_FAILED'
+            })
+    
     # 处理需要开始或重试的分析
     if status == 'not_started' or (status == 'processing' and result is None and not result_id):
         return _handle_analysis_execution(form_data, session)
@@ -305,15 +350,54 @@ def _handle_analysis_execution(form_data, session):
         app.logger.error(f"Analysis execution error: {error_msg}")
         app.logger.error(f"Analysis traceback: {traceback.format_exc()}")
         
-        # 如果是网络超时错误，尝试提供更友好的反馈
-        if 'timeout' in error_msg.lower() or 'connection' in error_msg.lower():
+        # 如果是网络超时错误，立即生成备用方案
+        if 'timeout' in error_msg.lower() or 'connection' in error_msg.lower() or 'ssl' in error_msg.lower():
             session['analysis_status'] = 'timeout'
-            session['analysis_error'] = '网络连接超时，正在使用备用方案生成基础建议'
-            return jsonify({
-                'status': 'timeout', 
-                'message': '网络连接超时，正在启用备用方案...',
-                'error_code': 'NETWORK_TIMEOUT'
-            })
+            app.logger.info("Network timeout detected, immediately generating fallback")
+            
+            try:
+                fallback_result = generate_fallback_suggestions(form_data)
+                
+                # 保存备用方案到数据库
+                import uuid
+                import json
+                from models import AnalysisResult
+                
+                fallback_id = str(uuid.uuid4())
+                analysis_result = AnalysisResult(
+                    id=fallback_id,
+                    form_data=json.dumps(form_data, ensure_ascii=False),
+                    result_data=json.dumps(fallback_result, ensure_ascii=False),
+                    project_name=form_data.get('project_name', ''),
+                    project_description=form_data.get('project_description', ''),
+                    project_stage=form_data.get('project_stage', ''),
+                    team_size=len(form_data.get('people', [])),
+                    analysis_type='fallback'
+                )
+                db.session.add(analysis_result)
+                db.session.commit()
+                
+                # 更新session状态为完成
+                session['analysis_status'] = 'completed'
+                session['analysis_result_id'] = fallback_id
+                session['analysis_result'] = fallback_result
+                
+                app.logger.info(f"Fallback generated immediately due to timeout, ID: {fallback_id}")
+                return jsonify({
+                    'status': 'completed', 
+                    'redirect_url': '/results',
+                    'message': '网络不稳定，已生成备用方案...'
+                })
+                
+            except Exception as fallback_error:
+                app.logger.error(f"Fallback generation failed: {str(fallback_error)}")
+                session['analysis_status'] = 'error'
+                session['analysis_error'] = '网络超时且备用方案生成失败，请重试'
+                return jsonify({
+                    'status': 'error', 
+                    'message': '网络连接问题，请检查网络后重试',
+                    'error_code': 'NETWORK_AND_FALLBACK_FAILED'
+                })
         else:
             session['analysis_status'] = 'error'
             session['analysis_error'] = error_msg

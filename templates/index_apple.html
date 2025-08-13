@@ -1396,29 +1396,38 @@
 
         // 加载测试案例数据到表单
         function loadTestCase(caseData) {
-            console.log('=== DEBUG START ===');
-            console.log('Loading case data:', caseData.projectName);
+            // 强制显示所有表单元素（移除动画类避免时序问题）
+            const mainForm = document.getElementById('mainForm');
+            if (mainForm) {
+                // 移除可能影响显示的动画类
+                const animatedElements = mainForm.querySelectorAll('.fade-in, .slide-up');
+                animatedElements.forEach(el => {
+                    el.classList.remove('fade-in', 'slide-up');
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                    el.style.visibility = 'visible';
+                });
+                
+                // 强制重新布局
+                mainForm.style.display = 'block';
+                mainForm.offsetHeight; // 触发重绘
+            }
             
             // 填充项目基础信息
             const projectNameEl = document.getElementById('project_name');
             const projectDescEl = document.getElementById('project_description');
             const projectStageEl = document.getElementById('project_stage');
             
-            console.log('Found elements:', !!projectNameEl, !!projectDescEl, !!projectStageEl);
-            
             if (projectNameEl) {
                 projectNameEl.value = caseData.projectName || '';
                 projectNameEl.setAttribute('value', caseData.projectName || '');
-                console.log('Project name set to:', projectNameEl.value);
             }
             if (projectDescEl) {
                 projectDescEl.value = caseData.projectDescription || '';
                 projectDescEl.textContent = caseData.projectDescription || '';
-                console.log('Project desc set to:', projectDescEl.value.substring(0, 50) + '...');
             }
             if (projectStageEl) {
                 projectStageEl.value = caseData.projectStage || '';
-                console.log('Project stage set to:', projectStageEl.value);
             }
             
             // 清空现有人物卡片并重置计数器
@@ -1426,6 +1435,11 @@
             if (personsContainer) {
                 personsContainer.innerHTML = '';
                 personCount = 0; // 重置人物计数器
+                
+                // 确保容器可见
+                personsContainer.style.display = 'block';
+                personsContainer.style.opacity = '1';
+                personsContainer.style.visibility = 'visible';
             }
             
             // 添加测试案例中的人物
@@ -1436,16 +1450,22 @@
                     const currentCard = personCards[personCards.length - 1];
                         
                     if (!currentCard) return;
+                    
+                    // 强制显示人物卡片（移除动画类）
+                    currentCard.classList.remove('fade-in', 'slide-up');
+                    currentCard.style.opacity = '1';
+                    currentCard.style.transform = 'translateY(0)';
+                    currentCard.style.visibility = 'visible';
+                    currentCard.style.display = 'block';
                         
                     // 填充人物信息
                     const nameInput = currentCard.querySelector('input[name="person_name[]"]');
-                    console.log('Setting name for person:', person.name, 'Input found:', !!nameInput);
                     if (nameInput) {
                         nameInput.value = person.name || '';
                         nameInput.setAttribute('value', person.name || '');
-                        console.log('Name input value set to:', nameInput.value);
-                    } else {
-                        console.error('Name input not found in card:', currentCard);
+                        // 强制显示输入框内容
+                        nameInput.style.opacity = '1';
+                        nameInput.style.visibility = 'visible';
                     }
                         
                     // 选择角色
@@ -1485,13 +1505,6 @@
                     // 在最后一个人物加载完成后更新编号
                     if (index === caseData.persons.length - 1) {
                         updatePersonNumbers();
-                        console.log('=== DEBUG END ===');
-                        console.log('Final check - all inputs:');
-                        console.log('Project name value:', document.getElementById('project_name')?.value);
-                        console.log('Total person cards:', document.querySelectorAll('.person-card').length);
-                        document.querySelectorAll('input[name="person_name[]"]').forEach((input, i) => {
-                            console.log(`Person ${i+1} name:`, input.value);
-                        });
                     }
                 });
             }
@@ -1544,7 +1557,6 @@
                                 input.dispatchEvent(new Event('input', { bubbles: true }));
                             }
                         });
-                        console.log('Form redrawn, inputs refreshed');
                     }, 500);
                 }, 800);
             }

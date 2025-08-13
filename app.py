@@ -230,10 +230,10 @@ def _internal_check_analysis_status():
                 id=fallback_id,
                 form_data=json.dumps(form_data, ensure_ascii=False),
                 result_data=json.dumps(fallback_result, ensure_ascii=False),
-                project_name=form_data.get('project_name', ''),
-                project_description=form_data.get('project_description', ''),
-                project_stage=form_data.get('project_stage', ''),
-                team_size=len(form_data.get('people', [])),
+                project_name=form_data.get('projectName', ''),
+                project_description=form_data.get('projectDescription', ''),
+                project_stage=form_data.get('projectStage', ''),
+                team_size=len(form_data.get('keyPersons', [])),
                 analysis_type='fallback'
             )
             db.session.add(analysis_result)
@@ -305,10 +305,10 @@ def _handle_analysis_execution(form_data, session):
                     id=result_id,
                     form_data=json.dumps(form_data, ensure_ascii=False),
                     result_data=json.dumps(suggestions, ensure_ascii=False),
-                    project_name=form_data.get('project_name', ''),
-                    project_description=form_data.get('project_description', ''),
-                    project_stage=form_data.get('project_stage', ''),
-                    team_size=len(form_data.get('people', [])),
+                    project_name=form_data.get('projectName', ''),
+                    project_description=form_data.get('projectDescription', ''),
+                    project_stage=form_data.get('projectStage', ''),
+                    team_size=len(form_data.get('keyPersons', [])),
                     analysis_type='ai_analysis'
                 )
                 
@@ -368,10 +368,10 @@ def _handle_analysis_execution(form_data, session):
                     id=fallback_id,
                     form_data=json.dumps(form_data, ensure_ascii=False),
                     result_data=json.dumps(fallback_result, ensure_ascii=False),
-                    project_name=form_data.get('project_name', ''),
-                    project_description=form_data.get('project_description', ''),
-                    project_stage=form_data.get('project_stage', ''),
-                    team_size=len(form_data.get('people', [])),
+                    project_name=form_data.get('projectName', ''),
+                    project_description=form_data.get('projectDescription', ''),
+                    project_stage=form_data.get('projectStage', ''),
+                    team_size=len(form_data.get('keyPersons', [])),
                     analysis_type='fallback'
                 )
                 db.session.add(analysis_result)
@@ -479,10 +479,10 @@ def results():
                             id=fallback_id,
                             form_data=json.dumps(form_data, ensure_ascii=False),
                             result_data=json.dumps(fallback_result, ensure_ascii=False),
-                            project_name=form_data.get('project_name', ''),
-                            project_description=form_data.get('project_description', ''),
-                            project_stage=form_data.get('project_stage', ''),
-                            team_size=len(form_data.get('people', [])),
+                            project_name=form_data.get('projectName', ''),
+                            project_description=form_data.get('projectDescription', ''),
+                            project_stage=form_data.get('projectStage', ''),
+                            team_size=len(form_data.get('keyPersons', [])),
                             analysis_type='fallback'
                         )
                         

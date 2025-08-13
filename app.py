@@ -425,46 +425,56 @@ def results():
         
         app.logger.info(f"Results page - Status: {status}, Form data exists: {form_data is not None}, Result ID: {result_id}, Result data exists: {result_data is not None}")
         
+        # 如果有result_id但状态不对，尝试从数据库恢复完整信息
+        if result_id and status != 'completed':
+            app.logger.warning(f"Found result_id {result_id} but status is {status}, attempting recovery")
+            try:
+                from models import AnalysisResult
+                import json
+                
+                analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
+                if analysis_record:
+                    if analysis_record.form_data and not form_data:
+                        form_data = json.loads(analysis_record.form_data)
+                        session['analysis_form_data'] = form_data
+                        app.logger.info(f"Recovered form data from database for result ID: {result_id}")
+                    
+                    if analysis_record.result_data:
+                        result_data = json.loads(analysis_record.result_data)
+                        session['analysis_result'] = result_data
+                        session['analysis_status'] = 'completed'
+                        status = 'completed'  # 更新本地状态变量
+                        app.logger.info(f"Recovered analysis status and result data for ID: {result_id}")
+                else:
+                    app.logger.warning(f"No analysis record found for result ID: {result_id}")
+            except Exception as db_error:
+                app.logger.error(f"Failed to recover from database: {str(db_error)}")
+
         # 如果没有表单数据，尝试从最近的分析结果中恢复
         if not form_data:
-            app.logger.warning("No form data found in session, trying to recover from database")
+            app.logger.warning("No form data found in session, trying to recover from latest database record")
             
-            # 尝试从数据库中获取最近的分析结果
-            if result_id:
-                try:
-                    from models import AnalysisResult
-                    import json
-                    
-                    analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
-                    if analysis_record and analysis_record.form_data:
-                        form_data = json.loads(analysis_record.form_data)
-                        app.logger.info(f"Recovered form data from database for result ID: {result_id}")
-                    else:
-                        app.logger.warning(f"No analysis record found for result ID: {result_id}")
-                except Exception as db_error:
-                    app.logger.error(f"Failed to recover form data from database: {str(db_error)}")
-            
-            # 如果仍然没有表单数据，尝试获取用户最近的一条分析记录
-            if not form_data:
-                try:
-                    from models import AnalysisResult
-                    import json
-                    
-                    latest_record = AnalysisResult.query.order_by(AnalysisResult.id.desc()).first()
-                    if latest_record and latest_record.form_data:
-                        form_data = json.loads(latest_record.form_data)
-                        # 同时恢复其他session数据
-                        if latest_record.result_data:
-                            result_data = json.loads(latest_record.result_data)
-                            session['analysis_result'] = result_data
-                        session['analysis_form_data'] = form_data
-                        session['analysis_status'] = 'completed'
-                        session['analysis_result_id'] = latest_record.id
-                        app.logger.info(f"Recovered form data from latest database record: {latest_record.id}")
-                    else:
-                        app.logger.warning("No recent analysis records found in database")
-                except Exception as recovery_error:
-                    app.logger.error(f"Failed to recover from latest record: {str(recovery_error)}")
+            try:
+                from models import AnalysisResult
+                import json
+                
+                latest_record = AnalysisResult.query.order_by(AnalysisResult.id.desc()).first()
+                if latest_record and latest_record.form_data:
+                    form_data = json.loads(latest_record.form_data)
+                    # 同时恢复其他session数据
+                    if latest_record.result_data:
+                        result_data = json.loads(latest_record.result_data)
+                        session['analysis_result'] = result_data
+                    session['analysis_form_data'] = form_data
+                    session['analysis_status'] = 'completed'
+                    session['analysis_result_id'] = latest_record.id
+                    status = 'completed'  # 更新本地状态变量
+                    result_id = latest_record.id
+                    app.logger.info(f"Recovered form data from latest database record: {latest_record.id}")
+                else:
+                    app.logger.warning("No recent analysis records found in database")
+            except Exception as recovery_error:
+                app.logger.error(f"Failed to recover from latest record: {str(recovery_error)}")
             
             # 如果仍然无法恢复，重定向到首页
             if not form_data:

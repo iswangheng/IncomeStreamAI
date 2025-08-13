@@ -410,7 +410,7 @@
         <div class="status-bar">
             <div class="status-indicator">
                 <div class="status-dot"></div>
-                <span id="statusText">Initializing Neural Network...</span>
+                <span id="statusText">初始化神经网络...</span>
             </div>
             <div class="status-indicator">
                 <span id="progressText">0%</span>
@@ -605,17 +605,17 @@
             document.getElementById('progressText').textContent = Math.round(displayProgress) + '%';
             
             if (displayProgress < 20) {
-                document.getElementById('statusText').textContent = 'Parsing project data...';
+                document.getElementById('statusText').textContent = '解析项目数据中...';
             } else if (displayProgress < 40) {
-                document.getElementById('statusText').textContent = 'Analyzing key persons...';
+                document.getElementById('statusText').textContent = '分析关键人物资源...';
             } else if (displayProgress < 60) {
-                document.getElementById('statusText').textContent = 'Matching revenue patterns...';
+                document.getElementById('statusText').textContent = '匹配收入模式中...';
             } else if (displayProgress < 80) {
-                document.getElementById('statusText').textContent = 'Designing pipeline...';
+                document.getElementById('statusText').textContent = '设计收入管道...';
             } else if (displayProgress < 100) {
-                document.getElementById('statusText').textContent = 'Generating report...';
+                document.getElementById('statusText').textContent = '生成分析报告...';
             } else {
-                document.getElementById('statusText').textContent = 'Analysis complete!';
+                document.getElementById('statusText').textContent = '分析完成！';
             }
         }
         

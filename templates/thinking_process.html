@@ -39,18 +39,21 @@
         
         .matrix-column {
             position: absolute;
-            top: -50px;
+            top: 0px;
             writing-mode: vertical-lr;
             font-family: 'Courier New', 'Consolas', monospace;
-            font-size: 14px;
-            line-height: 1.2;
-            letter-spacing: 0px;
+            font-size: 16px;
+            line-height: 1.4;
+            letter-spacing: 2px;
             white-space: nowrap;
             animation: matrix-fall linear infinite;
             pointer-events: none;
-            color: #00ff41;
-            opacity: 1;
-            text-shadow: 0 0 10px #00ff41;
+            color: #00ff41 !important;
+            opacity: 1 !important;
+            text-shadow: 0 0 15px #00ff41 !important;
+            z-index: 10;
+            display: block !important;
+            visibility: visible !important;
         }
         
         .matrix-column.fast {
@@ -97,18 +100,12 @@
         
         @keyframes matrix-fall {
             0% {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
+                transform: translateY(0px);
                 opacity: 1;
             }
             100% {
-                transform: translateY(calc(100vh + 50px));
-                opacity: 0;
+                transform: translateY(300px);
+                opacity: 0.3;
             }
         }
         
@@ -474,8 +471,12 @@
                 const duration = (speed * 4 + 3);
                 column.style.animationDuration = duration + 's';
                 
-                // Ensure animation starts immediately
-                column.style.animationPlayState = 'running';
+                // Force visible styles
+                column.style.color = '#00ff41';
+                column.style.opacity = '1';
+                column.style.display = 'block';
+                column.style.visibility = 'visible';
+                column.style.zIndex = '10';
                 
                 console.log('Creating column at', xPos + '%', 'with', columnLength, 'characters');
                 
@@ -531,12 +532,10 @@
                 }, duration);
             }
             
-            // Create denser initial coverage
-            const screenWidth = window.innerWidth;
-            const columnsNeeded = Math.floor(screenWidth / 20); // One column every 20px
-            
-            for (let i = 0; i < columnsNeeded; i++) {
-                setTimeout(createColumn, Math.random() * 3000);
+            // Create test columns immediately for debugging
+            console.log('Creating test Matrix columns...');
+            for (let i = 0; i < 5; i++) {
+                setTimeout(createColumn, i * 200);
             }
             
             // Continuously spawn new columns

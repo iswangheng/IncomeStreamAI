@@ -413,18 +413,64 @@ def results():
     try:
         from flask import session
         
+        # 详细记录session状态
+        app.logger.info(f"Results page accessed - Full session: {dict(session)}")
+        app.logger.info(f"Results page - Session ID: {request.cookies.get('session', 'No session cookie')}")
+        
         # Get form data and analysis status from session
         form_data = session.get('analysis_form_data')
         status = session.get('analysis_status', 'not_started')
         result_id = session.get('analysis_result_id')
+        result_data = session.get('analysis_result')
         
-        app.logger.info(f"Results page - Status: {status}, Form data exists: {form_data is not None}, Result ID: {result_id}")
+        app.logger.info(f"Results page - Status: {status}, Form data exists: {form_data is not None}, Result ID: {result_id}, Result data exists: {result_data is not None}")
         
-        # 如果没有表单数据，说明会话过期或直接访问
+        # 如果没有表单数据，尝试从最近的分析结果中恢复
         if not form_data:
-            app.logger.warning("No form data found in session for result page")
-            flash('会话已过期，请重新提交表单', 'error')
-            return redirect(url_for('index'))
+            app.logger.warning("No form data found in session, trying to recover from database")
+            
+            # 尝试从数据库中获取最近的分析结果
+            if result_id:
+                try:
+                    from models import AnalysisResult
+                    import json
+                    
+                    analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
+                    if analysis_record and analysis_record.form_data:
+                        form_data = json.loads(analysis_record.form_data)
+                        app.logger.info(f"Recovered form data from database for result ID: {result_id}")
+                    else:
+                        app.logger.warning(f"No analysis record found for result ID: {result_id}")
+                except Exception as db_error:
+                    app.logger.error(f"Failed to recover form data from database: {str(db_error)}")
+            
+            # 如果仍然没有表单数据，尝试获取用户最近的一条分析记录
+            if not form_data:
+                try:
+                    from models import AnalysisResult
+                    import json
+                    
+                    latest_record = AnalysisResult.query.order_by(AnalysisResult.id.desc()).first()
+                    if latest_record and latest_record.form_data:
+                        form_data = json.loads(latest_record.form_data)
+                        # 同时恢复其他session数据
+                        if latest_record.result_data:
+                            result_data = json.loads(latest_record.result_data)
+                            session['analysis_result'] = result_data
+                        session['analysis_form_data'] = form_data
+                        session['analysis_status'] = 'completed'
+                        session['analysis_result_id'] = latest_record.id
+                        app.logger.info(f"Recovered form data from latest database record: {latest_record.id}")
+                    else:
+                        app.logger.warning("No recent analysis records found in database")
+                except Exception as recovery_error:
+                    app.logger.error(f"Failed to recover from latest record: {str(recovery_error)}")
+            
+            # 如果仍然无法恢复，重定向到首页
+            if not form_data:
+                app.logger.warning("Complete session recovery failed - redirecting to home")
+                flash('会话已过期，请重新提交表单', 'error')
+                return redirect(url_for('index'))
         
         # 根据分析状态决定显示内容
         if status == 'completed':

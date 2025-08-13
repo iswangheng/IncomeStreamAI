@@ -553,23 +553,26 @@
                         console.log('Real analysis status:', data);
                         
                         if (data.status === 'completed' && data.redirect_url) {
-                            // 确保显示完整的思考过程后才跳转
-                            if (currentStep >= genericThinkingSteps.length) {
-                                realAnalysisCompleted = true;
-                                addThinkingLine('>>> ✅ 分析完成！检测到专业收入管道方案', 'conclusion');
-                                addThinkingLine('>>> 🎯 正在整合最终报告...', 'system');
-                                updateStatusDisplay(100);
-                                
-                                setTimeout(() => {
-                                    addThinkingLine('>>> 🚀 跳转到结果页面...', 'system');
-                                    setTimeout(() => {
-                                        window.location.href = data.redirect_url;
-                                    }, 1500);
-                                }, 1000);
-                            } else {
-                                // 继续显示思考过程
-                                setTimeout(poll, 1000);
+                            // 后端分析完成，立即开始完成流程
+                            realAnalysisCompleted = true;
+                            
+                            // 快速完成剩余的思考步骤显示
+                            while (currentStep < genericThinkingSteps.length) {
+                                const step = genericThinkingSteps[currentStep];
+                                addThinkingLine(step.text, step.type);
+                                currentStep++;
                             }
+                            
+                            addThinkingLine('>>> ✅ 分析完成！检测到专业收入管道方案', 'conclusion');
+                            addThinkingLine('>>> 🎯 正在整合最终报告...', 'system');
+                            updateStatusDisplay(100);
+                            
+                            setTimeout(() => {
+                                addThinkingLine('>>> 🚀 跳转到结果页面...', 'system');
+                                setTimeout(() => {
+                                    window.location.href = data.redirect_url;
+                                }, 800); // 缩短跳转延迟
+                            }, 500); // 缩短整体延迟
                             
                         } else if (data.status === 'error') {
                             realAnalysisCompleted = true;
@@ -578,11 +581,11 @@
                             
                         } else if (data.status === 'processing') {
                             // Update progress if available
-                            const progress = data.progress || (pollCount / maxPolls * 100);
-                            updateStatusDisplay(Math.min(progress, 95)); // Cap at 95% until truly complete
+                            const progress = data.progress || Math.min(80 + (pollCount / maxPolls * 15), 95);
+                            updateStatusDisplay(progress); // 允许进度动态更新，但保持合理范围
                             
                             if (pollCount < maxPolls) {
-                                setTimeout(poll, 1500); // Poll every 1.5 seconds for real analysis
+                                setTimeout(poll, 800); // 更频繁的轮询，减少延迟
                             } else {
                                 addThinkingLine('>>> ⏰ 分析超时，正在跳转...', 'system');
                                 setTimeout(() => {
@@ -632,11 +635,11 @@
                 showGenericThinking();
             }, 100);
             
-            // Start real analysis polling with a longer delay
+            // Start real analysis polling with shorter delay
             setTimeout(() => {
                 console.log('Starting real analysis polling...');
                 startRealAnalysisPolling();
-            }, 5000); // 5 second delay to see more thinking steps
+            }, 2000); // 缩短延迟，更快开始真实分析
         });
     </script>
 </body>

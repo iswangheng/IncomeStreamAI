@@ -73,5 +73,26 @@ Angela is a Flask-based web application designed to help users generate non-labo
 
 ### AI Integration Points
 - **OpenAI API**: For real-time AI conversation and income pathway generation (supports models like `gpt-4o-2024-11-20`).
-- **Knowledge Base**: Automatic injection of knowledge base content into AI system prompts.
+- **Enhanced Knowledge Base System**: Intelligent knowledge retrieval with priority for non-labor income content, supports 800-character detailed snippets for richer context.
+- **Advanced Prompt Engineering**: Incorporates core non-labor income formula (意识+能量+能力=结果), seven income types, and proven success methodologies.
 - **Knowledge Base Management System**: Admin interface at `/admin` for managing knowledge files (upload, enable/disable, search/filter).
+
+## Recent Enhancements (2025-08-13)
+
+### Non-Labor Income Pipeline Generation Improvements
+- **Knowledge Base Integration**: Deep study and extraction of non-labor income core theories from knowledge base
+- **Core Formula Implementation**: Integrated "意识+能量+能力（行动）=结果" formula into AI analysis logic
+- **Seven Income Types Framework**: Added support for 租金、利息、股份/红利、版权、专利、企业连锁、团队收益
+- **Three-Step Success Methodology**: Implemented "盘资源→搭管道→动真格" framework in prompt design
+- **Enhanced Knowledge Retrieval**: 
+  - Prioritizes non-labor income related content from knowledge base
+  - Increased snippet length from 200 to 800 characters for richer context
+  - Added intelligent fallback with core knowledge when database retrieval fails
+- **Improved AI Prompts**:
+  - System prompt now includes proven methodologies and success patterns
+  - Assistant prompt requires three-party structure analysis for sustainable income streams
+  - Added "make_who_happy" analysis framework for each action step
+  - Enhanced MVP validation requirements (24-hour testable actions)
+- **Professional Analysis Structure**: New output format includes income mechanisms, scaling potential, and bypass-prevention measures
+
+These enhancements make the non-labor income pathway generation significantly more professional and reliable, based on proven successful cases and methodologies.

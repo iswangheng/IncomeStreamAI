@@ -115,30 +115,23 @@ def index():
 @app.route('/thinking')
 def thinking_process():
     """AI thinking process visualization page"""
-    from flask import session
-    # 详细调试session状态
-    app.logger.info(f"Thinking page - Full session: {dict(session)}")
-    app.logger.info(f"Thinking page - Session ID: {getattr(session, 'sid', 'No SID')}")
+    from flask import session, redirect, url_for, flash
     
     # Get form data from session
     form_data = session.get('analysis_form_data')
-    app.logger.info(f"Thinking page - session data: {form_data}")
+    app.logger.info(f"Thinking page - session data exists: {form_data is not None}")
     
-    # 即使没有session数据也显示thinking页面（用于演示Matrix效果）
+    # 如果没有表单数据，重定向到首页
     if not form_data:
-        app.logger.warning("No form data found in session for thinking page - showing demo")
-        # 创建演示用的默认数据
-        form_data = {
-            "projectName": "演示项目",
-            "projectDescription": "Matrix代码雨效果演示",
-            "projectStage": "planning",
-            "keyPersons": [{"name": "演示用户", "role": "测试员", "resources": ["测试资源"], "make_happy": "看到Matrix效果"}],
-            "externalResources": ["Matrix特效"]
-        }
-        session['analysis_form_data'] = form_data
-        session['analysis_status'] = 'not_started'
-        session['analysis_result'] = None  # 重置结果，强制重新分析
+        app.logger.warning("No form data found in session for thinking page - redirecting to home")
+        flash('请先填写项目信息', 'info')
+        return redirect(url_for('index'))
     
+    # 确保分析状态正确初始化
+    if 'analysis_status' not in session:
+        session['analysis_status'] = 'not_started'
+    
+    app.logger.info(f"Thinking page loaded with status: {session.get('analysis_status')}")
     return render_template('thinking_process.html')
 
 @app.route('/analysis_status', methods=['GET'])

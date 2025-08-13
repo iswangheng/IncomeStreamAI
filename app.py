@@ -118,7 +118,7 @@ def thinking_process():
     from flask import session
     # 详细调试session状态
     app.logger.info(f"Thinking page - Full session: {dict(session)}")
-    app.logger.info(f"Thinking page - Session ID: {session.sid if hasattr(session, 'sid') else 'No SID'}")
+    app.logger.info(f"Thinking page - Session ID: {getattr(session, 'sid', 'No SID')}")
     
     # Get form data from session
     form_data = session.get('analysis_form_data')
@@ -135,7 +135,7 @@ def check_analysis_status():
     """检查AI分析状态的AJAX端点"""
     try:
         from flask import session, jsonify
-        import threading
+        import time
         
         form_data = session.get('analysis_form_data')
         status = session.get('analysis_status', 'not_started')
@@ -146,30 +146,27 @@ def check_analysis_status():
         if not form_data:
             return jsonify({'status': 'error', 'message': '没有找到分析数据'})
         
-        # 如果还没开始分析，启动分析
-        if status == 'processing' and result is None:
-            # 启动后台分析
-            def run_analysis():
-                try:
-                    app.logger.info("Starting background AI analysis")
-                    suggestions = generate_ai_suggestions(form_data)
-                    # 直接修改session，不需要app_context
-                    session['analysis_result'] = suggestions
-                    session['analysis_status'] = 'completed'
-                    app.logger.info("Background AI analysis completed")
-                except Exception as e:
-                    app.logger.error(f"Background analysis error: {str(e)}")
-                    session['analysis_status'] = 'error'
-                    session['analysis_error'] = str(e)
-            
-            # 只有在第一次请求时启动分析
-            if not hasattr(check_analysis_status, 'analysis_started'):
-                check_analysis_status.analysis_started = True
-                thread = threading.Thread(target=run_analysis)
-                thread.daemon = True
-                thread.start()
-            
-            return jsonify({'status': 'processing', 'progress': 50})
+        # 如果还没开始分析，直接在请求中执行分析
+        if status == 'not_started' or (status == 'processing' and result is None):
+            try:
+                # 设置状态为处理中
+                session['analysis_status'] = 'processing'
+                
+                app.logger.info("Starting AI analysis in request context")
+                suggestions = generate_ai_suggestions(form_data)
+                
+                # 直接在请求上下文中设置结果
+                session['analysis_result'] = suggestions
+                session['analysis_status'] = 'completed'
+                
+                app.logger.info("AI analysis completed successfully")
+                return jsonify({'status': 'completed', 'redirect_url': '/results'})
+                
+            except Exception as e:
+                app.logger.error(f"Analysis error: {str(e)}")
+                session['analysis_status'] = 'error'
+                session['analysis_error'] = str(e)
+                return jsonify({'status': 'error', 'message': str(e)})
         
         elif status == 'completed' and result:
             return jsonify({'status': 'completed', 'redirect_url': '/results'})
@@ -179,6 +176,7 @@ def check_analysis_status():
             return jsonify({'status': 'error', 'message': error_msg})
         
         else:
+            # 应该不会到达这里，但提供一个默认响应
             return jsonify({'status': 'processing', 'progress': 25})
             
     except Exception as e:
@@ -267,8 +265,8 @@ def generate():
         from flask import session
         session['analysis_form_data'] = form_data
         
-        # 设置分析状态为进行中
-        session['analysis_status'] = 'processing'
+        # 设置分析状态为未开始，等待thinking页面触发
+        session['analysis_status'] = 'not_started'
         session['analysis_result'] = None
         
         # 详细调试session存储

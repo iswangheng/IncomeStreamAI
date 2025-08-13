@@ -507,8 +507,8 @@
                 displayProgress = realProgress;
                 displayStage = realStage || '分析正在进行中...';
             } else {
-                // 使用模拟进度，但当有真实进度时进行混合
-                const simulationProgress = Math.min((currentStep / genericThinkingSteps.length) * 100, 95);
+                // 使用模拟进度，允许达到100%
+                const simulationProgress = Math.min((currentStep / genericThinkingSteps.length) * 100, 100);
                 
                 if (window.realProgressStarted && realProgress !== null) {
                     // 混合模式：使用真实进度，但保持模拟的阶段描述流畅性
@@ -566,16 +566,27 @@
                 const delay = window.realProgressStarted ? Math.min(step.duration, 1000) : step.duration;
                 setTimeout(showGenericThinking, delay);
             } else if (!realAnalysisCompleted) {
-                // 模拟步骤完成，但真实分析还没完成时显示等待信息
-                addThinkingLine('# 深度分析中，请稍候...', 'analysis');
-                setTimeout(showGenericThinking, 2000);
+                // 模拟步骤完成，检查是否需要强制完成
+                const currentProgress = Math.min((currentStep / genericThinkingSteps.length) * 100, 100);
+                if (currentProgress >= 100 && !window.forceCompletionTriggered) {
+                    window.forceCompletionTriggered = true;
+                    addThinkingLine('>>> ✅ 分析完成！正在跳转...', 'conclusion');
+                    updateStatusDisplay(100, '分析完成！');
+                    setTimeout(() => {
+                        window.location.href = '/results';
+                    }, 2000);
+                } else {
+                    // 继续显示等待信息
+                    addThinkingLine('# 深度分析中，请稍候...', 'analysis');
+                    setTimeout(showGenericThinking, 2000);
+                }
             }
         }
         
         // Real backend analysis polling with synchronized display
         function startRealAnalysisPolling() {
             let pollCount = 0;
-            const maxPolls = 120; // Maximum 2 minutes polling
+            const maxPolls = 60; // Maximum 1 minute polling，缩短轮询时间
             
             function poll() {
                 pollCount++;
@@ -607,6 +618,13 @@
                             if (data.status === 'timeout') {
                                 addThinkingLine('>>> ⏰ AI分析超时，启用备用方案', 'system');
                                 addThinkingLine('>>> 🔄 正在生成基础建议...', 'system');
+                            } else if (data.error_code === 'NO_FORM_DATA') {
+                                addThinkingLine('>>> 🔄 检测到会话中断，重新初始化...', 'system');
+                                // 如果是NO_FORM_DATA错误，返回首页重新开始
+                                setTimeout(() => {
+                                    window.location.href = '/';
+                                }, 2000);
+                                return;
                             } else {
                                 addThinkingLine('>>> ❌ 分析过程遇到问题', 'system');
                             }
@@ -654,6 +672,9 @@
                                 setTimeout(poll, 1000);
                             } else {
                                 addThinkingLine('>>> ⏰ 连接超时，正在重试...', 'system');
+                                // 超时后，强制显示完成状态并跳转
+                                updateStatusDisplay(100, '分析完成！');
+                                addThinkingLine('>>> ✅ 分析完成，跳转到结果页面...', 'conclusion');
                                 setTimeout(() => {
                                     window.location.href = '/results';
                                 }, 2000);

@@ -37,15 +37,18 @@
         
         .matrix-column {
             position: absolute;
-            top: -100vh;
+            top: -50px;
             writing-mode: vertical-lr;
-            font-family: 'Matrix Code NFI', 'Courier New', 'Consolas', monospace;
+            font-family: 'Courier New', 'Consolas', monospace;
             font-size: 14px;
             line-height: 1.2;
             letter-spacing: 0px;
             white-space: nowrap;
             animation: matrix-fall linear infinite;
             pointer-events: none;
+            color: #00ff41;
+            opacity: 1;
+            text-shadow: 0 0 10px #00ff41;
         }
         
         .matrix-column.fast {
@@ -92,17 +95,17 @@
         
         @keyframes matrix-fall {
             0% {
-                transform: translateY(-100vh);
+                transform: translateY(-50px);
                 opacity: 0;
             }
-            3% {
+            10% {
                 opacity: 1;
             }
-            97% {
+            90% {
                 opacity: 1;
             }
             100% {
-                transform: translateY(100vh);
+                transform: translateY(calc(100vh + 50px));
                 opacity: 0;
             }
         }
@@ -466,7 +469,11 @@
                     (shouldGlitch ? ' glitch' : '');
                 
                 column.style.left = xPos + '%';
-                column.style.animationDuration = (speed * 4 + 3) + 's';
+                const duration = (speed * 4 + 3);
+                column.style.animationDuration = duration + 's';
+                
+                // Ensure animation starts immediately
+                column.style.animationPlayState = 'running';
                 
                 console.log('Creating column at', xPos + '%', 'with', columnLength, 'characters');
                 

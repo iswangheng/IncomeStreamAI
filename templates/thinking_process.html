@@ -22,35 +22,107 @@
             height: 100vh;
         }
         
-        /* Matrix Rain Effect */
+        /* Enhanced Matrix Rain Effect */
         .matrix-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            background: linear-gradient(180deg, #000000 0%, #001100 50%, #000500 100%);
             pointer-events: none;
             z-index: 1;
+            overflow: hidden;
         }
         
         .matrix-column {
             position: absolute;
-            top: -100px;
-            white-space: nowrap;
+            top: -100vh;
+            writing-mode: vertical-lr;
+            font-family: 'Matrix Code NFI', 'Courier New', 'Consolas', monospace;
             font-size: 14px;
-            line-height: 14px;
-            text-shadow: 0 0 8px #00ff41;
+            line-height: 1.2;
+            letter-spacing: 0px;
+            white-space: nowrap;
             animation: matrix-fall linear infinite;
+            pointer-events: none;
+        }
+        
+        .matrix-column.fast {
+            animation-duration: 2s !important;
+            font-size: 12px;
+        }
+        
+        .matrix-column.slow {
+            animation-duration: 8s !important;
+            font-size: 16px;
+        }
+        
+        .matrix-column.glitch {
+            animation: matrix-fall linear infinite, matrix-glitch 0.5s ease-in-out infinite;
+        }
+        
+        .matrix-char {
+            display: block;
+            transition: all 0.1s ease;
+        }
+        
+        .matrix-char.bright {
+            color: #ffffff;
+            text-shadow: 0 0 20px #00ff41, 0 0 30px #00ff41, 0 0 40px #00ff41;
+            font-weight: bold;
+        }
+        
+        .matrix-char.normal {
+            color: #00ff41;
+            text-shadow: 0 0 10px #00ff41, 0 0 15px #00ff41;
+        }
+        
+        .matrix-char.dim {
+            color: #008f11;
+            text-shadow: 0 0 5px #008f11;
+            opacity: 0.8;
+        }
+        
+        .matrix-char.fade {
+            color: #003311;
+            text-shadow: 0 0 2px #003311;
+            opacity: 0.4;
         }
         
         @keyframes matrix-fall {
             0% {
-                transform: translateY(-100px);
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+            3% {
+                opacity: 1;
+            }
+            97% {
                 opacity: 1;
             }
             100% {
                 transform: translateY(100vh);
                 opacity: 0;
+            }
+        }
+        
+        @keyframes matrix-glitch {
+            0%, 100% {
+                transform: translateX(0) translateY(var(--fall-y, 0));
+                filter: blur(0px);
+            }
+            25% {
+                transform: translateX(-2px) translateY(var(--fall-y, 0));
+                filter: blur(1px);
+            }
+            50% {
+                transform: translateX(2px) translateY(var(--fall-y, 0));
+                filter: blur(0px);
+            }
+            75% {
+                transform: translateX(-1px) translateY(var(--fall-y, 0));
+                filter: blur(0.5px);
             }
         }
         
@@ -347,41 +419,126 @@
     </div>
 
     <script>
-        // Matrix Rain Effect
+        // Enhanced Matrix Rain Effect
         function createMatrixRain() {
             const matrixBg = document.getElementById('matrixBg');
-            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz非劳务收入管道设计';
+            
+            // Extended character sets for more authentic Matrix look
+            const matrixChars = [
+                // Basic Latin numbers and letters
+                '0123456789',
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                'abcdefghijklmnopqrstuvwxyz',
+                // Katakana (Japanese characters like in the movie)
+                'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン',
+                // Special symbols
+                '!@#$%^&*()_+-=[]{}|;:,.<>?',
+                // Chinese characters related to income
+                '非劳务收入管道设计分析',
+                // Binary and hex
+                '01',
+                'ABCDEF'
+            ].join('');
+            
+            function getRandomChar() {
+                return matrixChars[Math.floor(Math.random() * matrixChars.length)];
+            }
             
             function createColumn() {
                 const column = document.createElement('div');
-                column.className = 'matrix-column';
-                column.style.left = Math.random() * 100 + '%';
-                column.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                column.style.fontSize = (Math.random() * 10 + 10) + 'px';
                 
-                let text = '';
-                for (let i = 0; i < Math.random() * 20 + 10; i++) {
-                    text += chars[Math.floor(Math.random() * chars.length)] + '\n';
+                // Randomize column properties
+                const speed = Math.random();
+                const columnLength = Math.floor(Math.random() * 25 + 15);
+                const xPos = Math.random() * 100;
+                const shouldGlitch = Math.random() < 0.15;
+                
+                // Set column classes and styles
+                column.className = 'matrix-column' + 
+                    (speed < 0.3 ? ' slow' : speed > 0.7 ? ' fast' : '') + 
+                    (shouldGlitch ? ' glitch' : '');
+                
+                column.style.left = xPos + '%';
+                column.style.animationDuration = (speed * 4 + 3) + 's';
+                
+                // Create character spans with different brightness levels
+                const chars = [];
+                for (let i = 0; i < columnLength; i++) {
+                    const span = document.createElement('span');
+                    span.className = 'matrix-char';
+                    span.textContent = getRandomChar();
+                    
+                    // Assign brightness classes (head is brightest, tail fades)
+                    if (i < 3) {
+                        span.classList.add('bright');
+                    } else if (i < 8) {
+                        span.classList.add('normal');
+                    } else if (i < 15) {
+                        span.classList.add('dim');
+                    } else {
+                        span.classList.add('fade');
+                    }
+                    
+                    chars.push(span);
+                    column.appendChild(span);
                 }
-                column.textContent = text;
+                
+                // Animate character changes during fall
+                const changeInterval = setInterval(() => {
+                    chars.forEach((char, index) => {
+                        if (Math.random() < 0.1) { // 10% chance to change each character
+                            char.textContent = getRandomChar();
+                        }
+                        
+                        // Occasionally make characters flicker
+                        if (Math.random() < 0.05 && index < 5) {
+                            char.style.opacity = Math.random() < 0.5 ? '0.3' : '1';
+                            setTimeout(() => {
+                                char.style.opacity = '';
+                            }, 100);
+                        }
+                    });
+                }, 150);
                 
                 matrixBg.appendChild(column);
                 
-                // Remove column after animation
+                // Cleanup
+                const duration = parseFloat(column.style.animationDuration) * 1000;
                 setTimeout(() => {
+                    clearInterval(changeInterval);
                     if (column.parentNode) {
                         column.parentNode.removeChild(column);
                     }
-                }, parseFloat(column.style.animationDuration) * 1000);
+                }, duration);
             }
             
-            // Create initial columns
-            for (let i = 0; i < 50; i++) {
-                setTimeout(createColumn, Math.random() * 2000);
+            // Create denser initial coverage
+            const screenWidth = window.innerWidth;
+            const columnsNeeded = Math.floor(screenWidth / 20); // One column every 20px
+            
+            for (let i = 0; i < columnsNeeded; i++) {
+                setTimeout(createColumn, Math.random() * 3000);
             }
             
-            // Continue creating columns
-            setInterval(createColumn, 200);
+            // Continuously spawn new columns
+            setInterval(() => {
+                if (Math.random() < 0.8) { // 80% chance to create a column
+                    createColumn();
+                }
+            }, 150);
+            
+            // Periodic cleanup of old columns
+            setInterval(() => {
+                const allColumns = matrixBg.querySelectorAll('.matrix-column');
+                if (allColumns.length > columnsNeeded * 3) {
+                    // Remove oldest columns if too many exist
+                    for (let i = 0; i < 10 && i < allColumns.length; i++) {
+                        if (allColumns[i].parentNode) {
+                            allColumns[i].parentNode.removeChild(allColumns[i]);
+                        }
+                    }
+                }
+            }, 5000);
         }
         
         // AI Thinking Process with Real Backend Sync

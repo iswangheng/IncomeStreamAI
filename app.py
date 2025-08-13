@@ -468,9 +468,9 @@ def generate_ai_suggestions(form_data):
         raise TimeoutError("AI分析超时")
     
     try:
-        # 设置30秒超时
+        # 设置35秒超时，给OpenAI客户端留足够时间
         signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(30)
+        signal.alarm(35)
         
         from openai_service import AngelaAI
         
@@ -505,12 +505,20 @@ def generate_ai_suggestions(form_data):
         # 取消超时
         signal.alarm(0)
         app.logger.error(f"AI analysis timeout: {str(e)}")
+        # 设置超时状态到session，让前端显示
+        from flask import session
+        session['analysis_status'] = 'timeout'
+        session['analysis_error'] = '分析超时，为您提供基础建议'
         return generate_fallback_result(form_data, "分析超时，为您提供基础建议")
         
     except Exception as e:
         # 取消超时
         signal.alarm(0)
         app.logger.error(f"Error generating AI suggestions: {str(e)}")
+        # 设置错误状态到session
+        from flask import session
+        session['analysis_status'] = 'error'
+        session['analysis_error'] = f'分析遇到问题: {str(e)}'
         return generate_fallback_result(form_data, f"分析遇到问题，为您提供基础建议")
 
 def generate_fallback_result(form_data, reason=""):

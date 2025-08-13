@@ -568,10 +568,23 @@
                                 window.location.href = data.redirect_url;
                             }, 1000);
                             
-                        } else if (data.status === 'error') {
+                        } else if (data.status === 'error' || data.status === 'timeout') {
                             realAnalysisCompleted = true;
-                            addThinkingLine('>>> ❌ 分析过程遇到问题', 'system');
-                            addThinkingLine(`>>> Error: ${data.message || '未知错误'}`, 'system');
+                            if (data.status === 'timeout') {
+                                addThinkingLine('>>> ⏰ AI分析超时，启用备用方案', 'system');
+                                addThinkingLine('>>> 🔄 正在生成基础建议...', 'system');
+                            } else {
+                                addThinkingLine('>>> ❌ 分析过程遇到问题', 'system');
+                            }
+                            addThinkingLine(`>>> ${data.message || '未知错误'}`, 'system');
+                            
+                            // 即使超时或错误，也显示结果页面
+                            setTimeout(() => {
+                                addThinkingLine('>>> 🚀 跳转到结果页面...', 'system');
+                                setTimeout(() => {
+                                    window.location.href = '/results';
+                                }, 1000);
+                            }, 2000);
                             
                         } else if (data.status === 'processing') {
                             // Update progress if available

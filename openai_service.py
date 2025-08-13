@@ -7,7 +7,11 @@ from typing import Dict, List, Any, Optional
 # OpenAI客户端初始化
 # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
 # do not change this unless explicitly requested by the user
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+import httpx
+client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY"),
+    timeout=httpx.Timeout(25.0)  # 设置25秒超时，留5秒给app.py的signal处理
+)
 
 logger = logging.getLogger(__name__)
 

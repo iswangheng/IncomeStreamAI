@@ -19,103 +19,10 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-            background: #000;
+            background: var(--page-bg);
             min-height: 100vh;
             margin: 0;
             padding: 0;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Matrix代码雨背景效果 */
-        .matrix-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, #000000 0%, #001100 50%, #000500 100%);
-            pointer-events: none;
-            z-index: 1;
-            overflow: hidden;
-        }
-        
-        .matrix-column {
-            position: absolute;
-            top: -100vh;
-            writing-mode: vertical-lr;
-            font-family: 'Courier New', 'Consolas', monospace;
-            font-size: 14px;
-            line-height: 1.2;
-            letter-spacing: 0px;
-            white-space: nowrap;
-            animation: matrix-fall linear infinite;
-            pointer-events: none;
-            opacity: 0.7;
-        }
-        
-        .matrix-column.fast {
-            animation-duration: 3s !important;
-            font-size: 12px;
-            opacity: 0.5;
-        }
-        
-        .matrix-column.slow {
-            animation-duration: 8s !important;
-            font-size: 16px;
-            opacity: 0.8;
-        }
-        
-        .matrix-char {
-            display: block;
-            transition: all 0.1s ease;
-        }
-        
-        .matrix-char.bright {
-            color: #ffffff;
-            text-shadow: 0 0 10px #00ff41;
-            font-weight: bold;
-        }
-        
-        .matrix-char.normal {
-            color: #00ff41;
-            text-shadow: 0 0 5px #00ff41;
-        }
-        
-        .matrix-char.dim {
-            color: #008f11;
-            text-shadow: 0 0 3px #008f11;
-            opacity: 0.6;
-        }
-        
-        .matrix-char.fade {
-            color: #003311;
-            opacity: 0.3;
-        }
-        
-        @keyframes matrix-fall {
-            0% {
-                transform: translateY(-100vh);
-                opacity: 0;
-            }
-            3% {
-                opacity: 0.7;
-            }
-            97% {
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(100vh);
-                opacity: 0;
-            }
-        }
-
-        /* 主内容层，在Matrix背景之上 */
-        .content-layer {
-            position: relative;
-            z-index: 10;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
-            min-height: 100vh;
         }
 
         /* 导航栏样式 */
@@ -205,8 +112,6 @@
             margin: 0 auto;
             padding: calc(60px + var(--space-8)) var(--space-4) var(--space-8);
             min-height: 100vh;
-            position: relative;
-            z-index: 10;
         }
 
         /* 主容器 - 已移动到导航栏样式部分 */
@@ -1352,8 +1257,7 @@
 
     {% endif %}
 
-    <!-- Matrix代码雨背景 -->
-    <div class="matrix-bg" id="matrixBg"></div>
+
 
     <!-- JavaScript -->
     <script>
@@ -1453,117 +1357,7 @@
         });
         {% endif %}
 
-        // Matrix代码雨效果
-        function initMatrixRain() {
-            const matrixBg = document.getElementById('matrixBg');
-            if (!matrixBg) return;
 
-            // Matrix字符集 - 数字、英文字母、日文片假名
-            const matrixChars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
-            
-            const numColumns = Math.floor(window.innerWidth / 20); // 每20px一列
-            
-            function createMatrixColumn() {
-                const column = document.createElement('div');
-                column.className = 'matrix-column';
-                
-                // 随机设置列的属性
-                const speed = Math.random();
-                if (speed < 0.3) {
-                    column.classList.add('fast');
-                    column.style.animationDuration = (2 + Math.random() * 2) + 's';
-                } else if (speed > 0.7) {
-                    column.classList.add('slow');
-                    column.style.animationDuration = (6 + Math.random() * 4) + 's';
-                } else {
-                    column.style.animationDuration = (3 + Math.random() * 3) + 's';
-                }
-                
-                // 随机位置
-                column.style.left = Math.random() * window.innerWidth + 'px';
-                
-                // 生成字符
-                const charCount = 15 + Math.floor(Math.random() * 20);
-                for (let i = 0; i < charCount; i++) {
-                    const char = document.createElement('span');
-                    char.className = 'matrix-char';
-                    char.textContent = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                    
-                    // 设置字符亮度
-                    if (i < 3) {
-                        char.classList.add('bright');
-                    } else if (i < 8) {
-                        char.classList.add('normal');
-                    } else if (i < 15) {
-                        char.classList.add('dim');
-                    } else {
-                        char.classList.add('fade');
-                    }
-                    
-                    column.appendChild(char);
-                }
-                
-                return column;
-            }
-            
-            // 创建初始列
-            for (let i = 0; i < numColumns; i++) {
-                setTimeout(() => {
-                    const column = createMatrixColumn();
-                    matrixBg.appendChild(column);
-                    
-                    // 字符变化动画
-                    setInterval(() => {
-                        const chars = column.querySelectorAll('.matrix-char');
-                        chars.forEach(char => {
-                            if (Math.random() < 0.1) {
-                                char.textContent = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                            }
-                        });
-                    }, 100);
-                    
-                    // 删除列并创建新列
-                    setTimeout(() => {
-                        if (column.parentNode) {
-                            column.parentNode.removeChild(column);
-                        }
-                        const newColumn = createMatrixColumn();
-                        matrixBg.appendChild(newColumn);
-                    }, parseInt(column.style.animationDuration) * 1000);
-                    
-                }, i * 200);
-            }
-            
-            // 持续创建新列
-            setInterval(() => {
-                if (matrixBg.children.length < numColumns * 1.5) {
-                    const column = createMatrixColumn();
-                    matrixBg.appendChild(column);
-                    
-                    // 字符变化
-                    setInterval(() => {
-                        const chars = column.querySelectorAll('.matrix-char');
-                        chars.forEach(char => {
-                            if (Math.random() < 0.1) {
-                                char.textContent = matrixChars[Math.floor(Math.random() * matrixChars.length)];
-                            }
-                        });
-                    }, 100);
-                    
-                    // 清理旧列
-                    setTimeout(() => {
-                        if (column.parentNode) {
-                            column.parentNode.removeChild(column);
-                        }
-                    }, parseInt(column.style.animationDuration) * 1000);
-                }
-            }, 500);
-        }
-
-        // 页面加载完成后启动Matrix效果
-        document.addEventListener('DOMContentLoaded', function() {
-            initMatrixRain();
-        });
         function exportToPDF() {
             // 显示导出进度
             const exportBtn = document.querySelector('.action-btn.btn-primary-custom');

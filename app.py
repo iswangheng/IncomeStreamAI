@@ -240,6 +240,7 @@ def _internal_check_analysis_status():
             db.session.commit()
             
             # 更新session状态
+            session['analysis_form_data'] = form_data  # 保存form_data
             session['analysis_status'] = 'completed'
             session['analysis_result_id'] = fallback_id
             session['analysis_result'] = fallback_result
@@ -319,7 +320,8 @@ def _handle_analysis_execution(form_data, session):
                 # 如果数据库存储失败，回退到session存储
                 session['analysis_result'] = suggestions
             
-            # 在session中只存储结果ID
+            # 在session中存储必要的数据
+            session['analysis_form_data'] = form_data  # 关键！必须保存form_data
             session['analysis_result_id'] = result_id
             session['analysis_status'] = 'completed'
             session['analysis_progress'] = 100
@@ -378,6 +380,7 @@ def _handle_analysis_execution(form_data, session):
                 db.session.commit()
                 
                 # 更新session状态为完成
+                session['analysis_form_data'] = form_data  # 保存form_data
                 session['analysis_status'] = 'completed'
                 session['analysis_result_id'] = fallback_id
                 session['analysis_result'] = fallback_result
@@ -617,6 +620,7 @@ def results():
                     db.session.commit()
                     
                     # 更新session
+                    session['analysis_form_data'] = form_data  # 保存form_data
                     session['analysis_status'] = 'completed'
                     session['analysis_result_id'] = emergency_id
                     session['analysis_result'] = fallback_result

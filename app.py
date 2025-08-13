@@ -265,26 +265,48 @@ def _handle_analysis_execution(form_data, session):
 
 @app.route('/results')
 def results():
-    """Display AI analysis result page"""
+    """Display AI analysis result page with dynamic loading"""
     try:
         from flask import session
-        # Get form data and result from session
+        
+        # Get form data and analysis status from session
         form_data = session.get('analysis_form_data')
+        status = session.get('analysis_status', 'not_started')
         suggestions = session.get('analysis_result')
         
-        if not form_data or not suggestions:
-            app.logger.warning("No analysis data found in session for result page")
+        app.logger.info(f"Results page - Status: {status}, Form data exists: {form_data is not None}, Result exists: {suggestions is not None}")
+        
+        # 如果没有表单数据，说明会话过期或直接访问
+        if not form_data:
+            app.logger.warning("No form data found in session for result page")
             flash('会话已过期，请重新提交表单', 'error')
             return redirect(url_for('index'))
         
-        # Clear the session data after use
-        session.pop('analysis_form_data', None)
-        session.pop('analysis_result', None)
+        # 根据分析状态决定显示内容
+        if status == 'completed' and suggestions:
+            # 分析已完成，显示完整结果
+            app.logger.info("Analysis completed - showing full results")
+            return render_template('result_apple_redesigned.html', 
+                                 form_data=form_data, 
+                                 result=suggestions,
+                                 status='completed')
         
-        # Return the result page HTML
-        return render_template('result_apple_redesigned.html', 
-                             form_data=form_data, 
-                             result=suggestions)
+        elif status == 'error':
+            # 分析出错，显示错误信息
+            error_msg = session.get('analysis_error', '分析过程中发生未知错误')
+            app.logger.info(f"Analysis error - showing error page: {error_msg}")
+            return render_template('result_apple_redesigned.html',
+                                 form_data=form_data,
+                                 status='error',
+                                 error_message=error_msg)
+        
+        else:
+            # 分析未开始或正在进行，显示骨架屏
+            app.logger.info("Analysis not completed - showing loading skeleton")
+            return render_template('result_apple_redesigned.html',
+                                 form_data=form_data,
+                                 status='loading',
+                                 current_status=status)
     
     except Exception as e:
         app.logger.error(f"Error displaying results: {str(e)}")
@@ -359,8 +381,8 @@ def generate():
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully")
         
-        # 立即跳转到thinking页面，AI分析将在后台异步进行
-        return redirect(url_for('thinking_process'))
+        # 直接跳转到结果页面，在那里显示加载过程和结果
+        return redirect(url_for('results'))
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")

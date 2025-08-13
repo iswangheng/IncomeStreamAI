@@ -461,9 +461,9 @@ def generate_ai_suggestions(form_data):
         raise TimeoutError("AI分析超时")
     
     try:
-        # 设置35秒超时，给OpenAI客户端留足够时间
+        # 设置45秒超时，给重试机制留足够时间
         signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(35)
+        signal.alarm(45)
         
         from openai_service import AngelaAI
         

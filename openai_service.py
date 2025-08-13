@@ -8,9 +8,12 @@ from typing import Dict, List, Any, Optional
 # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
 # do not change this unless explicitly requested by the user
 import httpx
+import time
+
+# 创建带重试机制的客户端
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
-    timeout=httpx.Timeout(25.0)  # 设置25秒超时，留5秒给app.py的signal处理
+    timeout=httpx.Timeout(20.0, connect=10.0)  # 连接超时10秒，读取超时20秒
 )
 
 logger = logging.getLogger(__name__)
@@ -21,6 +24,26 @@ class AngelaAI:
     def __init__(self):
         self.model = "gpt-4o-2024-11-20"  # 使用最新的稳定版本
         self.max_tokens = 4000
+    
+    def _call_openai_with_retry(self, **kwargs):
+        """调用OpenAI API，带简单重试机制"""
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                logger.info(f"正在调用OpenAI API (尝试 {attempt + 1}/{max_retries})...")
+                return client.chat.completions.create(**kwargs)
+            except (httpx.TimeoutException, httpx.ConnectError, ConnectionError) as e:
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt  # 指数退避: 1s, 2s, 4s
+                    logger.warning(f"OpenAI API调用失败 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    logger.error(f"OpenAI API调用失败，已重试{max_retries}次: {str(e)}")
+                    raise
+            except Exception as e:
+                logger.error(f"OpenAI API调用遇到非网络错误: {str(e)}")
+                raise
         
     def format_make_happy(self, make_happy_data: List[str]) -> str:
         """格式化动机标签数据"""
@@ -281,8 +304,8 @@ class AngelaAI:
   * Angela模式：市场调研发现供需不匹配，整租转分租赚差价，1万启动成本，与房东签长约确保稳定，8年收入72万  
   * 楚楚模式：发现日常需求背后商机，整合4方资源（销路+林地+人力+技术），让每方都高兴，3个月搭建，年收入70万"""
             
-            # 调用OpenAI API
-            response = client.chat.completions.create(
+            # 调用OpenAI API，带重试机制
+            response = self._call_openai_with_retry(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},

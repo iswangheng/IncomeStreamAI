@@ -132,80 +132,136 @@ def thinking_process():
 
 @app.route('/check_analysis_status', methods=['GET'])
 def check_analysis_status():
-    """检查AI分析状态的AJAX端点"""
-    # 确保始终返回JSON响应
+    """检查AI分析状态的AJAX端点 - 确保始终返回JSON"""
+    
+    # 最外层错误捕获 - 确保永远不返回HTML
     try:
-        from flask import session
-        import traceback
-        
-        app.logger.info("=== Starting check_analysis_status ===")
-        
+        return _internal_check_analysis_status()
+    except Exception as fatal_error:
+        # 最后的保险 - 即使内部函数完全失败也返回JSON
+        try:
+            app.logger.error(f"FATAL: check_analysis_status crashed: {str(fatal_error)}")
+            return jsonify({
+                'status': 'error', 
+                'message': '系统遇到严重错误，请刷新页面重试',
+                'error_code': 'FATAL_ERROR'
+            })
+        except:
+            # 如果连jsonify都失败，手动构造JSON响应
+            from flask import Response
+            return Response(
+                '{"status": "error", "message": "系统严重错误，请刷新页面", "error_code": "JSONIFY_FAILED"}',
+                mimetype='application/json',
+                status=500
+            )
+
+def _internal_check_analysis_status():
+    """内部状态检查函数"""
+    from flask import session
+    import traceback
+    
+    app.logger.info("=== Starting check_analysis_status ===")
+    
+    # 检查session数据
+    try:
         form_data = session.get('analysis_form_data')
         status = session.get('analysis_status', 'not_started')
         result = session.get('analysis_result')
         
-        app.logger.info(f"Check analysis status: {status}")
-        app.logger.info(f"Form data exists: {form_data is not None}")
-        app.logger.info(f"Result exists: {result is not None}")
+        app.logger.info(f"Session check - Status: {status}, Form data: {form_data is not None}, Result: {result is not None}")
         
-        if not form_data:
-            app.logger.warning("No form data found in session")
-            return jsonify({'status': 'error', 'message': '没有找到分析数据'})
+    except Exception as session_error:
+        app.logger.error(f"Session access error: {str(session_error)}")
+        return jsonify({
+            'status': 'error', 
+            'message': '会话数据访问失败，请重新提交表单',
+            'error_code': 'SESSION_ERROR'
+        })
+    
+    # 验证必要数据
+    if not form_data:
+        app.logger.warning("No form data found in session")
+        return jsonify({
+            'status': 'error', 
+            'message': '没有找到分析数据，请重新提交表单',
+            'error_code': 'NO_FORM_DATA'
+        })
+    
+    # 处理已完成的分析
+    if status == 'completed' and result:
+        app.logger.info("Analysis already completed, returning result")
+        return jsonify({'status': 'completed', 'redirect_url': '/results'})
+    
+    # 处理错误状态
+    if status == 'error':
+        error_msg = session.get('analysis_error', '分析过程中发生未知错误')
+        app.logger.info(f"Analysis in error state: {error_msg}")
+        return jsonify({
+            'status': 'error', 
+            'message': error_msg,
+            'error_code': 'ANALYSIS_ERROR'
+        })
+    
+    # 处理需要开始或重试的分析
+    if status == 'not_started' or (status == 'processing' and result is None):
+        return _handle_analysis_execution(form_data, session)
+    
+    # 默认处理中状态
+    app.logger.info("Analysis in progress - returning processing status")
+    return jsonify({
+        'status': 'processing', 
+        'progress': 50,
+        'message': '分析正在进行中，请稍候...'
+    })
+
+def _handle_analysis_execution(form_data, session):
+    """处理AI分析执行"""
+    import traceback
+    
+    try:
+        # 设置状态为处理中
+        session['analysis_status'] = 'processing'
+        app.logger.info("Starting AI analysis in request context")
         
-        # 如果还没开始分析，直接在请求中执行分析
-        if status == 'not_started' or (status == 'processing' and result is None):
-            try:
-                # 设置状态为处理中
-                session['analysis_status'] = 'processing'
-                
-                app.logger.info("Starting AI analysis in request context")
-                suggestions = generate_ai_suggestions(form_data)
-                
-                if suggestions:
-                    # 直接在请求上下文中设置结果
-                    session['analysis_result'] = suggestions
-                    session['analysis_status'] = 'completed'
-                    
-                    app.logger.info("AI analysis completed successfully")
-                    return jsonify({'status': 'completed', 'redirect_url': '/results'})
-                else:
-                    app.logger.error("AI analysis returned empty result")
-                    session['analysis_status'] = 'error'
-                    session['analysis_error'] = '分析结果为空'
-                    return jsonify({'status': 'error', 'message': '分析结果为空'})
-                
-            except Exception as e:
-                app.logger.error(f"Analysis error: {str(e)}")
-                app.logger.error(f"Analysis traceback: {traceback.format_exc()}")
-                session['analysis_status'] = 'error'
-                session['analysis_error'] = str(e)
-                return jsonify({'status': 'error', 'message': f'分析过程中发生错误: {str(e)}'})
+        # 执行AI分析
+        suggestions = generate_ai_suggestions(form_data)
         
-        elif status == 'completed' and result:
-            app.logger.info("Analysis already completed, returning result")
-            return jsonify({'status': 'completed', 'redirect_url': '/results'})
-        
-        elif status == 'error':
-            error_msg = session.get('analysis_error', '分析过程中发生未知错误')
-            app.logger.info(f"Analysis in error state: {error_msg}")
-            return jsonify({'status': 'error', 'message': error_msg})
-        
-        else:
-            # 应该不会到达这里，但提供一个默认响应
-            app.logger.info("Fallback case - returning processing status")
-            return jsonify({'status': 'processing', 'progress': 25})
+        if suggestions and isinstance(suggestions, dict):
+            # 分析成功
+            session['analysis_result'] = suggestions
+            session['analysis_status'] = 'completed'
             
-    except Exception as e:
-        app.logger.error(f"Fatal error in check_analysis_status: {str(e)}")
-        app.logger.error(f"Fatal traceback: {traceback.format_exc()}")
-        # 确保即使在严重错误时也返回JSON
-        try:
-            return jsonify({'status': 'error', 'message': f'系统错误: {str(e)}'})
-        except:
-            # 如果连jsonify都失败了，返回简单的JSON字符串
-            from flask import Response
-            return Response('{"status": "error", "message": "系统严重错误"}', 
-                          mimetype='application/json', status=500)
+            app.logger.info("AI analysis completed successfully")
+            return jsonify({
+                'status': 'completed', 
+                'redirect_url': '/results',
+                'message': '分析完成，正在跳转到结果页面...'
+            })
+        else:
+            # 分析结果无效
+            app.logger.error("AI analysis returned invalid result")
+            session['analysis_status'] = 'error'
+            session['analysis_error'] = '分析结果无效'
+            return jsonify({
+                'status': 'error', 
+                'message': '分析结果无效，请重试',
+                'error_code': 'INVALID_RESULT'
+            })
+            
+    except Exception as analysis_error:
+        # 分析执行错误
+        error_msg = str(analysis_error)
+        app.logger.error(f"Analysis execution error: {error_msg}")
+        app.logger.error(f"Analysis traceback: {traceback.format_exc()}")
+        
+        session['analysis_status'] = 'error'
+        session['analysis_error'] = error_msg
+        
+        return jsonify({
+            'status': 'error', 
+            'message': f'分析过程遇到问题: {error_msg}',
+            'error_code': 'EXECUTION_ERROR'
+        })
 
 @app.route('/results')
 def results():
@@ -312,8 +368,18 @@ def generate():
         return redirect(url_for('index'))
 
 def generate_ai_suggestions(form_data):
-    """Generate AI suggestions using OpenAI API"""
+    """Generate AI suggestions using OpenAI API with timeout and error handling"""
+    import signal
+    import time
+    
+    def timeout_handler(signum, frame):
+        raise TimeoutError("AI分析超时")
+    
     try:
+        # 设置30秒超时
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(30)
+        
         from openai_service import AngelaAI
         
         # 使用真正的AI服务生成方案
@@ -330,80 +396,137 @@ def generate_ai_suggestions(form_data):
         
         app.logger.info(f"Calling Angela AI with data: {json.dumps(converted_data, ensure_ascii=False)}")
         
+        start_time = time.time()
         # 调用AI生成服务
         ai_result = angela_ai.generate_income_paths(converted_data, db)
+        elapsed_time = time.time() - start_time
         
+        # 取消超时
+        signal.alarm(0)
+        
+        app.logger.info(f"AI analysis completed in {elapsed_time:.2f} seconds")
         app.logger.info(f"AI generated result: {json.dumps(ai_result, ensure_ascii=False)}")
         
         return ai_result
         
-    except Exception as e:
-        app.logger.error(f"Error generating AI suggestions: {str(e)}")
-        # 发生错误时返回默认结果
-        project_name = form_data.get('projectName', form_data.get('project_name', ''))
-        key_persons = form_data.get('keyPersons', form_data.get('key_persons', []))
+    except TimeoutError as e:
+        # 取消超时
+        signal.alarm(0)
+        app.logger.error(f"AI analysis timeout: {str(e)}")
+        return generate_fallback_result(form_data, "分析超时，为您提供基础建议")
         
-        # 备用数据结构，匹配新模板的格式
-        return {
-            "overview": f"基于{project_name}项目的资源分析，我们为您设计了以下非劳务收入路径方案。",
-            "situation_summary": "当前已掌握资源集中在关键人物的渠道和影响力，需要进一步整合变现路径。",
-            "capability_gaps": [
-                "市场推广渠道",
-                "资金周转能力", 
-                "标准化流程",
-                "客户获取机制"
+    except Exception as e:
+        # 取消超时
+        signal.alarm(0)
+        app.logger.error(f"Error generating AI suggestions: {str(e)}")
+        return generate_fallback_result(form_data, f"分析遇到问题，为您提供基础建议")
+
+def generate_fallback_result(form_data, reason=""):
+    """生成备用分析结果"""
+    project_name = form_data.get('projectName', form_data.get('project_name', '未命名项目'))
+    key_persons = form_data.get('keyPersons', form_data.get('key_persons', []))
+    
+    # 生成符合新模板格式的备用结果
+    return {
+        "overview": {
+            "situation": f"您的{project_name}项目拥有{len(key_persons)}位关键人物资源，具备基础的合作变现潜力。",
+            "gaps": [
+                "需要明确各方动机标签",
+                "缺少具体的市场渠道",
+                "需要补充财务规划角色",
+                "缺少风险评估机制"
             ],
-            "pathways": [
+            "suggested_roles_to_hunt": [
                 {
-                    "title": "收益分成合作模式",
-                    "scene": f"基于{project_name}建立多方收益分成机制",
-                    "who_moves_first": "项目负责人先行建立合作框架",
-                    "steps": [
-                        {
-                            "owner": "项目负责人",
-                            "action": "分析项目核心价值点，确定可分成的收益环节",
-                            "reason": "明确价值创造环节是制定分成机制的基础"
-                        },
-                        {
-                            "owner": "商务团队", 
-                            "action": "识别潜在合作伙伴，建立初步接触渠道",
-                            "reason": "扩展合作网络，降低单一风险"
-                        },
-                        {
-                            "owner": "财务团队",
-                            "action": "制定公平透明的收益分成比例方案",
-                            "reason": "确保各方利益平衡，维持长期合作"
-                        }
-                    ],
-                    "key_resources": [person.get("name", "") for person in key_persons[:2] if person.get("name")],
-                    "mvp_content": "先与1-2家核心合作伙伴试点，验证分成模式的可行性"
+                    "role": "市场推广专员",
+                    "why": "需要专业的推广渠道和营销策略支持",
+                    "where_to_find": "LinkedIn、行业社群、营销公司",
+                    "outreach_script": "您好，我们有个资源整合项目，需要市场推广方面的专业建议，可否简单交流？"
                 },
                 {
-                    "title": "知识产权授权模式", 
-                    "scene": f"将{project_name}的核心价值标准化授权",
-                    "who_moves_first": "技术团队主导知识产权梳理",
-                    "steps": [
-                        {
-                            "owner": "技术团队",
-                            "action": "梳理项目中的核心知识产权和可复制资产",
-                            "reason": "明确可授权的价值内容"
-                        },
-                        {
-                            "owner": "法务团队",
-                            "action": "建立知识产权保护和授权框架",
-                            "reason": "确保授权的合法性和可控性"
-                        },
-                        {
-                            "owner": "市场团队",
-                            "action": "寻找潜在授权客户和合作伙伴",
-                            "reason": "拓展授权市场，实现规模化收入"
-                        }
-                    ],
-                    "key_resources": [person.get("name", "") for person in key_persons if person.get("name")],
-                    "mvp_content": "先完成核心技术的标准化，向1家试点企业授权验证"
+                    "role": "财务顾问",
+                    "why": "需要专业的收益分配和风险评估建议",
+                    "where_to_find": "会计师事务所、商业顾问公司、创业孵化器",
+                    "outreach_script": "您好，我们在设计一个合作收益模式，希望获得财务结构方面的专业意见。"
                 }
             ]
-        }
+        },
+        "paths": [
+            {
+                "id": "path_1",
+                "name": "资源互换合作模式",
+                "scene": "基于现有人脉网络的资源交换平台",
+                "who_moves_first": "您先梳理各方资源清单",
+                "action_steps": [
+                    {
+                        "owner": "您",
+                        "step": "详细梳理每位关键人物的具体资源和可提供的支持类型",
+                        "why_it_works": "明确资源价值是建立公平交换机制的基础"
+                    },
+                    {
+                        "owner": "您",
+                        "step": "设计资源价值评估标准和交换规则",
+                        "why_it_works": "标准化流程降低合作摩擦，提高效率"
+                    },
+                    {
+                        "owner": "关键人物",
+                        "step": "根据各自优势承担相应的资源提供和协调角色",
+                        "why_it_works": "充分发挥各自专长，实现资源最优配置"
+                    }
+                ],
+                "use_key_person_resources": [person.get("name", f"关键人物{i+1}") for i, person in enumerate(key_persons[:3])],
+                "use_external_resources": [],
+                "revenue_trigger": "通过资源交换产生的价值差获得收益分成",
+                "mvp": "组织一次小型资源对接会，验证交换模式可行性，成功标准为至少达成2个资源对接意向",
+                "risks": [
+                    "资源价值评估困难",
+                    "各方参与积极性不均"
+                ],
+                "plan_b": "如果资源交换困难，改为按服务付费的简单合作模式",
+                "kpis": [
+                    "资源对接成功率（目标≥30%）",
+                    "参与方满意度评分（目标≥7分）"
+                ]
+            },
+            {
+                "id": "path_2", 
+                "name": "联合服务收费模式",
+                "scene": "整合各方专业能力对外提供付费服务",
+                "who_moves_first": "您先调研市场需求",
+                "action_steps": [
+                    {
+                        "owner": "您",
+                        "step": "调研目标市场对类似服务的需求和付费意愿",
+                        "why_it_works": "市场验证降低项目风险，确保服务有市场价值"
+                    },
+                    {
+                        "owner": "您",
+                        "step": "设计标准化的服务流程和定价策略",
+                        "why_it_works": "标准化提高服务效率和客户信任度"
+                    },
+                    {
+                        "owner": "关键人物",
+                        "step": "根据专业领域承担相应的服务交付责任",
+                        "why_it_works": "专业分工保证服务质量，提升客户满意度"
+                    }
+                ],
+                "use_key_person_resources": [person.get("name", f"关键人物{i+1}") for i, person in enumerate(key_persons)],
+                "use_external_resources": [],
+                "revenue_trigger": "服务费收入按贡献比例分成",
+                "mvp": "设计一个简化版服务包，找1-2个潜在客户试点，成功标准为获得正面反馈和付费意向",
+                "risks": [
+                    "服务质量难以标准化",
+                    "客户获取成本过高"
+                ],
+                "plan_b": "如果对外服务困难，先为内部项目提供增值服务，积累经验和案例",
+                "kpis": [
+                    "客户试点转化率（目标≥20%）",
+                    "服务交付及时率（目标≥90%）"
+                ]
+            }
+        ],
+        "notes": f"由于{reason}，以上为基础建议。建议您完善关键人物的动机信息后重新分析，可获得更精准的个性化方案。"
+    }
 
 # Helper functions
 def allowed_file(filename):

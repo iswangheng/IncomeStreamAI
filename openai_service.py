@@ -45,12 +45,18 @@ class AngelaAI:
                 logger.error(f"OpenAI API调用遇到非网络错误: {str(e)}")
                 raise
         
-    def format_make_happy(self, make_happy_data: List[str]) -> str:
+    def format_make_happy(self, make_happy_data) -> str:
         """格式化动机标签数据"""
         if not make_happy_data:
             return "未指定"
         
-        # 映射值到显示文本
+        # 如果是字符串，先分割成列表
+        if isinstance(make_happy_data, str):
+            make_happy_list = make_happy_data.split(',')
+        else:
+            make_happy_list = make_happy_data
+        
+        # 映射值到显示文本（包含新的实际标签）
         label_map = {
             'recognition': '获得认可/名声',
             'learning': '学习新知识/技能',
@@ -60,10 +66,16 @@ class AngelaAI:
             'money': '获得金钱/经济收益',
             'power': '获得权力/影响力',
             'creation': '创造作品/表达自我',
-            'growth': '个人成长/突破挑战'
+            'growth': '个人成长/突破挑战',
+            # 新增实际使用的标签
+            'bring_leads': '带来客户/引流',
+            'recurring_income': '获得持续收入',
+            'no_conflict_current_partner': '不冲突现有合作',
+            'brand_exposure': '品牌曝光',
+            'expand_network': '拓展网络/人脉'
         }
         
-        return "、".join([label_map.get(item, item) for item in make_happy_data])
+        return "、".join([label_map.get(item.strip(), item.strip()) for item in make_happy_list])
     
     def format_external_resources(self, resources_data: List[str]) -> str:
         """格式化外部资源数据"""
@@ -231,13 +243,13 @@ class AngelaAI:
             
             for i, person in enumerate(key_persons):
                 name = person.get('name', f'人物{i+1}')
-                roles = person.get('roles', [])
+                role = person.get('role', '')  # 修正：使用role而不是roles
                 resources = person.get('resources', [])
-                make_happy = person.get('makeHappy', [])
+                make_happy = person.get('make_happy', '')  # 修正：使用make_happy而不是makeHappy
                 notes = person.get('notes', '')
                 
                 user_content += f"""
-- 人物：{name}｜角色：{", ".join(roles) if roles else "未指定"}
+- 人物：{name}｜角色：{role if role else "未指定"}
   资源：{", ".join(resources) if resources else "无"}
   动机标签（如何让TA高兴）：{self.format_make_happy(make_happy)}
   备注：{notes if notes else "无"}"""

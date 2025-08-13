@@ -22,112 +22,51 @@
             height: 100vh;
         }
         
-        /* Enhanced Matrix Rain Effect */
+        /* Sci-Fi Background Effect */
         .matrix-bg {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 300px;
-            background: linear-gradient(180deg, #000000 0%, #001100 50%, #000500 100%);
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at center, rgba(0, 255, 65, 0.08) 0%, transparent 50%),
+                linear-gradient(45deg, #000000 25%, #001100 25%, #001100 50%, #000000 50%, #000000 75%, #001100 75%),
+                linear-gradient(180deg, #000000 0%, #002200 50%, #000500 100%);
+            background-size: 300px 300px, 60px 60px, 100% 100%;
+            animation: bg-shift 25s ease-in-out infinite;
             pointer-events: none;
-            z-index: 1;
-            overflow: hidden;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            z-index: 5;
         }
         
-        .matrix-column {
+        .matrix-bg::before {
+            content: '';
             position: absolute;
-            top: -50px;
-            writing-mode: vertical-lr;
-            font-family: 'Courier New', 'Consolas', monospace;
-            font-size: 14px;
-            line-height: 1.2;
-            letter-spacing: 0px;
-            white-space: nowrap;
-            animation: matrix-fall linear infinite;
-            pointer-events: none;
-            color: #00ff41;
-            opacity: 1;
-            text-shadow: 0 0 10px #00ff41;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 65, 0.02) 50%, transparent 100%);
+            animation: scan-sweep 12s linear infinite;
         }
         
-        .matrix-column.fast {
-            animation-duration: 2s !important;
-            font-size: 12px;
-        }
+
         
-        .matrix-column.slow {
-            animation-duration: 8s !important;
-            font-size: 16px;
-        }
-        
-        .matrix-column.glitch {
-            animation: matrix-fall linear infinite, matrix-glitch 0.5s ease-in-out infinite;
-        }
-        
-        .matrix-char {
-            display: block;
-            transition: all 0.1s ease;
-        }
-        
-        .matrix-char.bright {
-            color: #ffffff;
-            text-shadow: 0 0 20px #00ff41, 0 0 30px #00ff41, 0 0 40px #00ff41;
-            font-weight: bold;
-        }
-        
-        .matrix-char.normal {
-            color: #00ff41;
-            text-shadow: 0 0 10px #00ff41, 0 0 15px #00ff41;
-        }
-        
-        .matrix-char.dim {
-            color: #008f11;
-            text-shadow: 0 0 5px #008f11;
-            opacity: 0.8;
-        }
-        
-        .matrix-char.fade {
-            color: #003311;
-            text-shadow: 0 0 2px #003311;
-            opacity: 0.4;
-        }
-        
-        @keyframes matrix-fall {
-            0% {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(calc(100vh + 50px));
-                opacity: 0;
-            }
-        }
-        
-        @keyframes matrix-glitch {
+        @keyframes bg-shift {
             0%, 100% {
-                transform: translateX(0) translateY(var(--fall-y, 0));
-                filter: blur(0px);
-            }
-            25% {
-                transform: translateX(-2px) translateY(var(--fall-y, 0));
-                filter: blur(1px);
+                background-position: 0px 0px, 0px 0px, 0% 0%;
             }
             50% {
-                transform: translateX(2px) translateY(var(--fall-y, 0));
-                filter: blur(0px);
+                background-position: 60px 60px, 30px 30px, 0% 0%;
             }
-            75% {
-                transform: translateX(-1px) translateY(var(--fall-y, 0));
-                filter: blur(0.5px);
+        }
+        
+        @keyframes scan-sweep {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
             }
         }
         
@@ -486,32 +425,15 @@
     </div>
 
     <script>
-        // Enhanced Matrix Rain Effect
-        function createMatrixRain() {
+        // Simple Sci-Fi Background Effect  
+        function createSciFiBackground() {
             const matrixBg = document.getElementById('matrixBg');
             if (!matrixBg) {
-                console.error('Matrix background element not found!');
+                console.error('Background element not found!');
                 return;
             }
             
-            // Extended character sets for more authentic Matrix look
-            const matrixChars = [
-                // Basic Latin numbers and letters
-                '0123456789',
-                'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                'abcdefghijklmnopqrstuvwxyz',
-                // Katakana (Japanese characters like in the movie)
-                'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン',
-                // Special symbols
-                '!@#$%^&*()_+-=[]{}|;:,.<>?',
-                // Chinese characters related to income
-                '非劳务收入管道设计分析',
-                // Binary and hex
-                '01',
-                'ABCDEF'
-            ].join('');
-            
-            console.log('Matrix rain initialized with', matrixChars.length, 'characters');
+            console.log('Sci-fi background initialized');
             
             function getRandomChar() {
                 return matrixChars[Math.floor(Math.random() * matrixChars.length)];
@@ -802,10 +724,10 @@
         
         // Initialize everything with synchronized analysis
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, initializing Matrix rain and thinking process...');
+            console.log('Page loaded, initializing sci-fi background and thinking process...');
             
-            // Initialize Matrix rain first
-            createMatrixRain();
+            // Initialize simple sci-fi background
+            createSciFiBackground();
             
             // Start thinking process immediately
             setTimeout(() => {

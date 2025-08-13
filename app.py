@@ -427,37 +427,46 @@ def results():
             return redirect(url_for('index'))
         
         # 根据分析状态决定显示内容
-        if status == 'completed' and result_id:
-            # 从数据库读取分析结果
-            try:
-                from models import AnalysisResult
-                import json
-                
-                analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
-                
-                if analysis_record and analysis_record.result_data:
-                    suggestions = json.loads(analysis_record.result_data)
-                    app.logger.info(f"Analysis completed - showing full results from database for ID: {result_id}")
-                    return render_template('result_apple_redesigned.html', 
-                                         form_data=form_data, 
-                                         result=suggestions,
-                                         status='completed')
-                else:
-                    app.logger.warning(f"Analysis result not found in database: {result_id}")
-                    suggestions = None
-            except Exception as e:
-                app.logger.error(f"Error reading analysis result from database: {str(e)}, traceback: {traceback.format_exc()}")
-                suggestions = None
+        if status == 'completed':
+            suggestions = None
             
-            # 如果数据库读取失败，继续尝试从session读取（兼容性）
+            # 优先从数据库读取分析结果（如果有result_id）
+            if result_id:
+                try:
+                    from models import AnalysisResult
+                    import json
+                    
+                    analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
+                    
+                    if analysis_record and analysis_record.result_data:
+                        suggestions = json.loads(analysis_record.result_data)
+                        app.logger.info(f"Analysis completed - showing full results from database for ID: {result_id}")
+                    else:
+                        app.logger.warning(f"Analysis result not found in database: {result_id}")
+                except Exception as e:
+                    app.logger.error(f"Error reading analysis result from database: {str(e)}, traceback: {traceback.format_exc()}")
+            
+            # 如果数据库读取失败或没有result_id，从session读取（兼容性）
             if not suggestions:
                 suggestions = session.get('analysis_result')
                 if suggestions:
                     app.logger.info("Analysis completed - showing full results from session")
-                    return render_template('result_apple_redesigned.html', 
-                                         form_data=form_data, 
-                                         result=suggestions,
-                                         status='completed')
+                else:
+                    app.logger.warning("Analysis marked as completed but no result data found")
+            
+            # 如果有任何结果数据，显示结果页面
+            if suggestions:
+                return render_template('result_apple_redesigned.html', 
+                                     form_data=form_data, 
+                                     result=suggestions,
+                                     status='completed')
+            else:
+                # 分析标记为完成但没有结果数据，显示错误状态
+                app.logger.error("Analysis completed but no result data available")
+                return render_template('result_apple_redesigned.html',
+                                     form_data=form_data,
+                                     status='error',
+                                     error_message='分析完成但结果数据丢失，请重新分析')
         
         elif status == 'error' or status == 'timeout':
             # 分析出错或超时，显示错误信息或备用方案

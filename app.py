@@ -133,17 +133,23 @@ def thinking_process():
 @app.route('/check_analysis_status', methods=['GET'])
 def check_analysis_status():
     """检查AI分析状态的AJAX端点"""
+    # 确保始终返回JSON响应
     try:
-        from flask import session, jsonify
-        import time
+        from flask import session
+        import traceback
+        
+        app.logger.info("=== Starting check_analysis_status ===")
         
         form_data = session.get('analysis_form_data')
         status = session.get('analysis_status', 'not_started')
         result = session.get('analysis_result')
         
         app.logger.info(f"Check analysis status: {status}")
+        app.logger.info(f"Form data exists: {form_data is not None}")
+        app.logger.info(f"Result exists: {result is not None}")
         
         if not form_data:
+            app.logger.warning("No form data found in session")
             return jsonify({'status': 'error', 'message': '没有找到分析数据'})
         
         # 如果还没开始分析，直接在请求中执行分析
@@ -155,33 +161,51 @@ def check_analysis_status():
                 app.logger.info("Starting AI analysis in request context")
                 suggestions = generate_ai_suggestions(form_data)
                 
-                # 直接在请求上下文中设置结果
-                session['analysis_result'] = suggestions
-                session['analysis_status'] = 'completed'
-                
-                app.logger.info("AI analysis completed successfully")
-                return jsonify({'status': 'completed', 'redirect_url': '/results'})
+                if suggestions:
+                    # 直接在请求上下文中设置结果
+                    session['analysis_result'] = suggestions
+                    session['analysis_status'] = 'completed'
+                    
+                    app.logger.info("AI analysis completed successfully")
+                    return jsonify({'status': 'completed', 'redirect_url': '/results'})
+                else:
+                    app.logger.error("AI analysis returned empty result")
+                    session['analysis_status'] = 'error'
+                    session['analysis_error'] = '分析结果为空'
+                    return jsonify({'status': 'error', 'message': '分析结果为空'})
                 
             except Exception as e:
                 app.logger.error(f"Analysis error: {str(e)}")
+                app.logger.error(f"Analysis traceback: {traceback.format_exc()}")
                 session['analysis_status'] = 'error'
                 session['analysis_error'] = str(e)
-                return jsonify({'status': 'error', 'message': str(e)})
+                return jsonify({'status': 'error', 'message': f'分析过程中发生错误: {str(e)}'})
         
         elif status == 'completed' and result:
+            app.logger.info("Analysis already completed, returning result")
             return jsonify({'status': 'completed', 'redirect_url': '/results'})
         
         elif status == 'error':
             error_msg = session.get('analysis_error', '分析过程中发生未知错误')
+            app.logger.info(f"Analysis in error state: {error_msg}")
             return jsonify({'status': 'error', 'message': error_msg})
         
         else:
             # 应该不会到达这里，但提供一个默认响应
+            app.logger.info("Fallback case - returning processing status")
             return jsonify({'status': 'processing', 'progress': 25})
             
     except Exception as e:
-        app.logger.error(f"Error checking analysis status: {str(e)}")
-        return jsonify({'status': 'error', 'message': '检查分析状态时发生错误'})
+        app.logger.error(f"Fatal error in check_analysis_status: {str(e)}")
+        app.logger.error(f"Fatal traceback: {traceback.format_exc()}")
+        # 确保即使在严重错误时也返回JSON
+        try:
+            return jsonify({'status': 'error', 'message': f'系统错误: {str(e)}'})
+        except:
+            # 如果连jsonify都失败了，返回简单的JSON字符串
+            from flask import Response
+            return Response('{"status": "error", "message": "系统严重错误"}', 
+                          mimetype='application/json', status=500)
 
 @app.route('/results')
 def results():
@@ -696,7 +720,7 @@ def generate_paths():
         return jsonify(result)
         
     except Exception as e:
-        logger.error(f"Path generation error: {e}")
+        app.logger.error(f"Path generation error: {e}")
         return jsonify({
             'error': '路径生成失败',
             'message': str(e)
@@ -724,7 +748,7 @@ def refine_path():
         return jsonify(result)
         
     except Exception as e:
-        logger.error(f"Path refinement error: {e}")
+        app.logger.error(f"Path refinement error: {e}")
         return jsonify({
             'error': '路径细化失败',
             'message': str(e)

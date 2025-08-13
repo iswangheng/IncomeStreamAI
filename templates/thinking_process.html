@@ -553,26 +553,20 @@
                         console.log('Real analysis status:', data);
                         
                         if (data.status === 'completed' && data.redirect_url) {
-                            // 后端分析完成，立即开始完成流程
+                            // 后端分析完成，立即处理跳转
                             realAnalysisCompleted = true;
-                            
-                            // 快速完成剩余的思考步骤显示
-                            while (currentStep < genericThinkingSteps.length) {
-                                const step = genericThinkingSteps[currentStep];
-                                addThinkingLine(step.text, step.type);
-                                currentStep++;
-                            }
+                            console.log('分析完成，准备跳转到:', data.redirect_url);
                             
                             addThinkingLine('>>> ✅ 分析完成！检测到专业收入管道方案', 'conclusion');
-                            addThinkingLine('>>> 🎯 正在整合最终报告...', 'system');
                             updateStatusDisplay(100);
                             
+                            addThinkingLine('>>> 🚀 正在跳转到结果页面...', 'system');
+                            console.log('执行跳转...');
+                            
+                            // 直接跳转，减少延迟
                             setTimeout(() => {
-                                addThinkingLine('>>> 🚀 跳转到结果页面...', 'system');
-                                setTimeout(() => {
-                                    window.location.href = data.redirect_url;
-                                }, 800); // 缩短跳转延迟
-                            }, 500); // 缩短整体延迟
+                                window.location.href = data.redirect_url;
+                            }, 1000);
                             
                         } else if (data.status === 'error') {
                             realAnalysisCompleted = true;

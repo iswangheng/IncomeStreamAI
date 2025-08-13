@@ -1408,10 +1408,12 @@
             
             if (projectNameEl) {
                 projectNameEl.value = caseData.projectName || '';
+                projectNameEl.setAttribute('value', caseData.projectName || '');
                 console.log('Project name set to:', projectNameEl.value);
             }
             if (projectDescEl) {
                 projectDescEl.value = caseData.projectDescription || '';
+                projectDescEl.textContent = caseData.projectDescription || '';
                 console.log('Project desc set to:', projectDescEl.value.substring(0, 50) + '...');
             }
             if (projectStageEl) {
@@ -1440,6 +1442,7 @@
                     console.log('Setting name for person:', person.name, 'Input found:', !!nameInput);
                     if (nameInput) {
                         nameInput.value = person.name || '';
+                        nameInput.setAttribute('value', person.name || '');
                         console.log('Name input value set to:', nameInput.value);
                     } else {
                         console.error('Name input not found in card:', currentCard);
@@ -1532,7 +1535,18 @@
                         behavior: 'smooth', 
                         block: 'start' 
                     });
-                }, 800);  // 确保所有数据加载完成后再滚动
+                    // 强制重新渲染表单以确保内容显示
+                    setTimeout(() => {
+                        // 触发重绘
+                        const inputs = formElement.querySelectorAll('input, textarea, select');
+                        inputs.forEach(input => {
+                            if (input.value) {
+                                input.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                        });
+                        console.log('Form redrawn, inputs refreshed');
+                    }, 500);
+                }, 800);
             }
         }
 

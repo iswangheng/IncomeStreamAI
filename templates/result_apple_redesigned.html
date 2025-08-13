@@ -296,6 +296,7 @@
             font-weight: var(--font-semibold);
             color: var(--color-primary);
             margin-right: var(--space-4);
+            flex-shrink: 0;
         }
 
         .step-content {
@@ -440,12 +441,32 @@
                 padding: 0 var(--space-3);
             }
             
+            .navbar-left {
+                flex: 1;
+                min-width: 0;
+            }
+            
+            .navbar-right {
+                flex-shrink: 0;
+                gap: var(--space-2);
+            }
+            
+            .navbar-action {
+                padding: var(--space-2);
+                font-size: 12px;
+            }
+            
             .navbar-brand {
                 font-size: var(--text-base);
             }
             
+            .back-btn span {
+                display: none; /* 隐藏文字只显示图标 */
+            }
+            
             .glass-card {
-                padding: var(--space-6);
+                padding: var(--space-5);
+                margin: var(--space-4) 0;
             }
             
             .path-header {
@@ -456,6 +477,90 @@
             
             .path-title {
                 margin-left: 0;
+                font-size: var(--text-xl);
+            }
+            
+            .hero-title {
+                font-size: var(--text-3xl);
+            }
+            
+            .hero-subtitle {
+                font-size: var(--text-base);
+            }
+            
+            /* 操作按钮移动端优化 */
+            .action-buttons {
+                flex-direction: column;
+                gap: var(--space-3);
+                margin-top: var(--space-8);
+            }
+            
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+                padding: var(--space-4) var(--space-6);
+                font-size: var(--text-base);
+            }
+            
+            /* 步骤项移动端优化 */
+            .step-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-2);
+            }
+            
+            .step-owner {
+                align-self: flex-start;
+                margin-bottom: var(--space-2);
+            }
+            
+            .step-content {
+                width: 100%;
+            }
+            
+            /* 资源和风险移动端优化 */
+            .resources-risks {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+            
+            .mvp-section {
+                margin: var(--space-4) 0;
+            }
+        }
+        
+        /* 超小屏幕优化 */
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0 var(--space-2);
+            }
+            
+            .result-page-container {
+                padding: calc(60px + var(--space-3)) var(--space-2) var(--space-3);
+            }
+            
+            .glass-card {
+                padding: var(--space-4);
+                margin: var(--space-3) 0;
+            }
+            
+            .hero-title {
+                font-size: var(--text-2xl);
+            }
+            
+            .path-number {
+                width: 32px;
+                height: 32px;
+                font-size: var(--text-base);
+            }
+            
+            .navbar-right {
+                gap: var(--space-1);
+            }
+            
+            .navbar-action {
+                padding: var(--space-1) var(--space-2);
+                font-size: 11px;
             }
         }
 

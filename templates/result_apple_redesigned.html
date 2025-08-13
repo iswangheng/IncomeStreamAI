@@ -304,15 +304,10 @@
         .step-action {
             font-size: var(--text-base);
             color: var(--color-text-primary);
-            margin-bottom: var(--space-2);
             line-height: 1.6;
         }
 
-        .step-reason {
-            font-size: var(--text-sm);
-            color: var(--color-text-secondary);
-            font-style: italic;
-        }
+
 
         /* MVP区域 */
         .mvp-section {
@@ -1478,7 +1473,6 @@
                     stepItems.forEach((step, stepIndex) => {
                         const owner = step.querySelector('.step-owner')?.textContent || '';
                         const action = step.querySelector('.step-action')?.textContent || '';
-                        const reason = step.querySelector('.step-reason')?.textContent || '';
                         
                         doc.setFontSize(10);
                         doc.setTextColor(0, 122, 255);
@@ -1489,15 +1483,7 @@
                         doc.setTextColor(60, 60, 60);
                         const actionText = doc.splitTextToSize(action, contentWidth - 10);
                         doc.text(actionText, margin + 10, yPos);
-                        yPos += actionText.length * 4;
-                        
-                        if (reason) {
-                            doc.setFontSize(9);
-                            doc.setTextColor(109, 109, 112);
-                            const reasonText = doc.splitTextToSize(reason, contentWidth - 10);
-                            doc.text(reasonText, margin + 10, yPos);
-                            yPos += reasonText.length * 3 + 3;
-                        }
+                        yPos += actionText.length * 4 + 2;
                     });
                     
                     // MVP验证

@@ -137,6 +137,7 @@ def thinking_process():
         }
         session['analysis_form_data'] = form_data
         session['analysis_status'] = 'not_started'
+        session['analysis_result'] = None  # 重置结果，强制重新分析
     
     return render_template('thinking_process.html')
 

@@ -1429,12 +1429,12 @@
             if (caseData.persons && caseData.persons.length > 0) {
                 console.log('Adding persons:', caseData.persons.length);
                 caseData.persons.forEach((person, index) => {
-                    setTimeout(() => {
-                        console.log('Adding person:', index, person.name);
-                        addPerson();
-                        const personCards = document.querySelectorAll('.person-card');
-                        const currentCard = personCards[personCards.length - 1];
-                        console.log('Current card found:', !!currentCard);
+                    // 移除setTimeout，直接同步执行
+                    console.log('Adding person:', index, person.name);
+                    addPerson();
+                    const personCards = document.querySelectorAll('.person-card');
+                    const currentCard = personCards[personCards.length - 1];
+                    console.log('Current card found:', !!currentCard);
                         
                         if (!currentCard) {
                             console.error('No person card found after addPerson()');
@@ -1484,20 +1484,17 @@
                         const notesTextarea = currentCard.querySelector('textarea[name="person_notes[]"]');
                         if (notesTextarea) notesTextarea.value = person.notes || '';
                         
-                        // 在最后一个人物加载完成后更新编号
-                        if (index === caseData.persons.length - 1) {
-                            setTimeout(() => {
-                                updatePersonNumbers();
-                            }, 100);
-                        }
-                        
-                    }, index * 200);
+                    // 在最后一个人物加载完成后更新编号
+                    if (index === caseData.persons.length - 1) {
+                        updatePersonNumbers();
+                    }
                 });
             }
             
-            // 填充外部资源
+            // 填充外部资源（延迟一点让DOM更新完成）
             setTimeout(() => {
                 if (caseData.externalResources) {
+                    console.log('Loading external resources:', caseData.externalResources);
                     caseData.externalResources.forEach(resource => {
                         const allCheckboxes = document.querySelectorAll('input[name="external_resources"]');
                         allCheckboxes.forEach(checkbox => {
@@ -1507,7 +1504,7 @@
                         });
                     });
                 }
-            }, (caseData.persons?.length || 0) * 200 + 300);
+            }, 500);
         }
 
         // 清空表单

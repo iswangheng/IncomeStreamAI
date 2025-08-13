@@ -112,7 +112,7 @@ class AngelaAI:
                                   external_resources: List[str], db_session) -> str:
         """从知识库中检索相关片段"""
         try:
-            from app import KnowledgeItem
+            from models import KnowledgeItem
             
             # 获取活跃状态的知识库条目
             knowledge_items = db_session.query(KnowledgeItem).filter(

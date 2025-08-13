@@ -123,10 +123,20 @@ def thinking_process():
     # Get form data from session
     form_data = session.get('analysis_form_data')
     app.logger.info(f"Thinking page - session data: {form_data}")
+    
+    # 即使没有session数据也显示thinking页面（用于演示Matrix效果）
     if not form_data:
-        app.logger.warning("No form data found in session for thinking page")
-        flash('会话已过期，请重新提交表单', 'error')
-        return redirect(url_for('index'))
+        app.logger.warning("No form data found in session for thinking page - showing demo")
+        # 创建演示用的默认数据
+        form_data = {
+            "projectName": "演示项目",
+            "projectDescription": "Matrix代码雨效果演示",
+            "projectStage": "planning",
+            "keyPersons": [{"name": "演示用户", "role": "测试员", "resources": ["测试资源"], "make_happy": "看到Matrix效果"}],
+            "externalResources": ["Matrix特效"]
+        }
+        session['analysis_form_data'] = form_data
+        session['analysis_status'] = 'not_started'
     
     return render_template('thinking_process.html')
 

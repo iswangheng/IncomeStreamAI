@@ -326,10 +326,8 @@
         
         // 添加人物卡片
         function addPerson() {
-            console.log('addPerson() called, current count:', personCount);
             personCount++;
             const container = document.getElementById('personsContainer');
-            console.log('Container found:', !!container);
             
             const personCard = document.createElement('div');
             personCard.className = 'person-card slide-up';
@@ -671,7 +669,6 @@
             `;
             
             container.appendChild(personCard);
-            console.log('Person card added successfully, total cards now:', document.querySelectorAll('.person-card').length);
             updateEmptyState();
             
             // 初始化角色提示功能
@@ -1371,13 +1368,10 @@
         // 处理测试案例选择
         function handleDemoCaseSelection() {
             const caseCards = document.querySelectorAll('.demo-case-card');
-            console.log('Found case cards:', caseCards.length);
             
             caseCards.forEach(card => {
                 card.addEventListener('click', function() {
                     const caseType = this.dataset.case;
-                    console.log('Clicked case type:', caseType);
-                    console.log('Case data exists:', !!demoTestCases[caseType]);
                     
                     // 移除其他卡片的选中状态
                     caseCards.forEach(c => c.classList.remove('selected'));
@@ -1390,14 +1384,11 @@
                     } else if (demoTestCases[caseType]) {
                         // 选择测试案例 - 填充表单
                         this.classList.add('selected');
-                        console.log('Loading test case:', demoTestCases[caseType]);
                         loadTestCase(demoTestCases[caseType]);
                         scrollToForm();
                         
                         // 显示成功提示
-                        showNotification('示例案例已加载完成！您可以直接提交分析，或根据需要修改参数', 'success');
-                    } else {
-                        console.error('Case type not found:', caseType);
+                        showNotification('✅ 示例案例已加载完成！向下滚动查看表单内容，可直接提交分析或修改参数', 'success');
                     }
                 });
             });
@@ -1405,8 +1396,6 @@
 
         // 加载测试案例数据到表单
         function loadTestCase(caseData) {
-            console.log('Loading case data:', caseData);
-            
             // 填充项目基础信息
             const projectNameEl = document.getElementById('project_name');
             const projectDescEl = document.getElementById('project_description');
@@ -1416,74 +1405,60 @@
             if (projectDescEl) projectDescEl.value = caseData.projectDescription || '';
             if (projectStageEl) projectStageEl.value = caseData.projectStage || '';
             
-            console.log('Basic info filled');
-            
-            // 清空现有人物卡片
+            // 清空现有人物卡片并重置计数器
             const personsContainer = document.getElementById('personsContainer');
             if (personsContainer) {
                 personsContainer.innerHTML = '';
-                console.log('Cleared persons container');
+                personCount = 0; // 重置人物计数器
             }
             
             // 添加测试案例中的人物
             if (caseData.persons && caseData.persons.length > 0) {
-                console.log('Adding persons:', caseData.persons.length);
                 caseData.persons.forEach((person, index) => {
-                    // 移除setTimeout，直接同步执行
-                    console.log('Adding person:', index, person.name);
                     addPerson();
                     const personCards = document.querySelectorAll('.person-card');
                     const currentCard = personCards[personCards.length - 1];
-                    console.log('Current card found:', !!currentCard);
                         
-                        if (!currentCard) {
-                            console.error('No person card found after addPerson()');
-                            return;
-                        }
+                    if (!currentCard) return;
                         
-                        // 填充人物信息
-                        const nameInput = currentCard.querySelector('input[name="person_name[]"]');
-                        if (nameInput) {
-                            nameInput.value = person.name || '';
-                            console.log('Name set:', person.name);
-                        } else {
-                            console.error('Name input not found');
-                        }
+                    // 填充人物信息
+                    const nameInput = currentCard.querySelector('input[name="person_name[]"]');
+                    if (nameInput) nameInput.value = person.name || '';
                         
-                        // 选择角色
-                        if (person.roles) {
-                            person.roles.forEach(role => {
-                                const roleCheckbox = currentCard.querySelector(`input[name="person_role[]"][value="${role}"]`);
-                                if (roleCheckbox) {
-                                    roleCheckbox.checked = true;
-                                }
-                            });
-                            updateRolesSummary(currentCard);
-                            updateResourceSuggestions(currentCard);
-                        }
-                        
-                        // 添加资源
-                        if (person.resources) {
-                            person.resources.forEach(resource => {
-                                const personId = currentCard.querySelector('.resource-input').dataset.personId;
-                                addSelectedResource(resource, personId);
-                            });
-                        }
-                        
-                        // 选择需求选项
-                        if (person.makeHappy) {
-                            person.makeHappy.forEach(need => {
-                                const needCheckbox = currentCard.querySelector(`input[name="person_needs[]"][value="${need}"]`);
-                                if (needCheckbox) {
-                                    needCheckbox.checked = true;
-                                }
-                            });
-                        }
-                        
-                        // 填充备注
-                        const notesTextarea = currentCard.querySelector('textarea[name="person_notes[]"]');
-                        if (notesTextarea) notesTextarea.value = person.notes || '';
-                        
+                    // 选择角色
+                    if (person.roles) {
+                        person.roles.forEach(role => {
+                            const roleCheckbox = currentCard.querySelector(`input[name="person_role[]"][value="${role}"]`);
+                            if (roleCheckbox) {
+                                roleCheckbox.checked = true;
+                            }
+                        });
+                        updateRolesSummary(currentCard);
+                        updateResourceSuggestions(currentCard);
+                    }
+                    
+                    // 添加资源
+                    if (person.resources) {
+                        person.resources.forEach(resource => {
+                            const personId = currentCard.querySelector('.resource-input').dataset.personId;
+                            addSelectedResource(resource, personId);
+                        });
+                    }
+                    
+                    // 选择需求选项
+                    if (person.makeHappy) {
+                        person.makeHappy.forEach(need => {
+                            const needCheckbox = currentCard.querySelector(`input[name="person_needs[]"][value="${need}"]`);
+                            if (needCheckbox) {
+                                needCheckbox.checked = true;
+                            }
+                        });
+                    }
+                    
+                    // 填充备注
+                    const notesTextarea = currentCard.querySelector('textarea[name="person_notes[]"]');
+                    if (notesTextarea) notesTextarea.value = person.notes || '';
+                    
                     // 在最后一个人物加载完成后更新编号
                     if (index === caseData.persons.length - 1) {
                         updatePersonNumbers();
@@ -1494,7 +1469,6 @@
             // 填充外部资源（延迟一点让DOM更新完成）
             setTimeout(() => {
                 if (caseData.externalResources) {
-                    console.log('Loading external resources:', caseData.externalResources);
                     caseData.externalResources.forEach(resource => {
                         const allCheckboxes = document.querySelectorAll('input[name="external_resources"]');
                         allCheckboxes.forEach(checkbox => {
@@ -1504,7 +1478,7 @@
                         });
                     });
                 }
-            }, 500);
+            }, 300);
         }
 
         // 清空表单
@@ -1514,6 +1488,7 @@
             document.getElementById('project_stage').value = '';
             
             document.getElementById('personsContainer').innerHTML = '';
+            personCount = 0; // 重置计数器
             addPerson();
             
             document.querySelectorAll('input[name="external_resources"]').forEach(cb => {
@@ -1530,7 +1505,7 @@
                         behavior: 'smooth', 
                         block: 'start' 
                     });
-                }, 100);  // 减少延迟时间，避免页面加载时的意外滚动
+                }, 800);  // 确保所有数据加载完成后再滚动
             }
         }
 

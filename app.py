@@ -346,16 +346,14 @@ def results():
         if status == 'completed' and result_id:
             # 从数据库读取分析结果
             try:
+                from models import AnalysisResult
                 import json
-                from sqlalchemy import text
                 
-                result = db.session.execute(text("""
-                    SELECT result_data FROM analysis_results WHERE id = :id
-                """), {'id': result_id}).fetchone()
+                analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
                 
-                if result:
-                    suggestions = json.loads(result[0])
-                    app.logger.info("Analysis completed - showing full results from database")
+                if analysis_record and analysis_record.result_data:
+                    suggestions = json.loads(analysis_record.result_data)
+                    app.logger.info(f"Analysis completed - showing full results from database for ID: {result_id}")
                     return render_template('result_apple_redesigned.html', 
                                          form_data=form_data, 
                                          result=suggestions,
@@ -364,7 +362,7 @@ def results():
                     app.logger.warning(f"Analysis result not found in database: {result_id}")
                     suggestions = None
             except Exception as e:
-                app.logger.error(f"Error reading analysis result from database: {str(e)}")
+                app.logger.error(f"Error reading analysis result from database: {str(e)}, traceback: {traceback.format_exc()}")
                 suggestions = None
             
             # 如果数据库读取失败，继续尝试从session读取（兼容性）

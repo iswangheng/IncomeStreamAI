@@ -326,8 +326,10 @@
         
         // 添加人物卡片
         function addPerson() {
+            console.log('addPerson() called, current count:', personCount);
             personCount++;
             const container = document.getElementById('personsContainer');
+            console.log('Container found:', !!container);
             
             const personCard = document.createElement('div');
             personCard.className = 'person-card slide-up';
@@ -669,6 +671,7 @@
             `;
             
             container.appendChild(personCard);
+            console.log('Person card added successfully, total cards now:', document.querySelectorAll('.person-card').length);
             updateEmptyState();
             
             // 初始化角色提示功能
@@ -1427,13 +1430,25 @@
                 console.log('Adding persons:', caseData.persons.length);
                 caseData.persons.forEach((person, index) => {
                     setTimeout(() => {
+                        console.log('Adding person:', index, person.name);
                         addPerson();
                         const personCards = document.querySelectorAll('.person-card');
                         const currentCard = personCards[personCards.length - 1];
+                        console.log('Current card found:', !!currentCard);
+                        
+                        if (!currentCard) {
+                            console.error('No person card found after addPerson()');
+                            return;
+                        }
                         
                         // 填充人物信息
                         const nameInput = currentCard.querySelector('input[name="person_name[]"]');
-                        if (nameInput) nameInput.value = person.name || '';
+                        if (nameInput) {
+                            nameInput.value = person.name || '';
+                            console.log('Name set:', person.name);
+                        } else {
+                            console.error('Name input not found');
+                        }
                         
                         // 选择角色
                         if (person.roles) {

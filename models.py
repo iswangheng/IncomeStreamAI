@@ -54,3 +54,16 @@ class KnowledgeItem(db.Model):
             return f"{self.file_size / 1024:.1f} KB"
         else:
             return f"{self.file_size / (1024 * 1024):.1f} MB"
+
+
+class AnalysisResult(db.Model):
+    """存储AI分析结果，避免session过大的问题"""
+    __tablename__ = 'analysis_results'
+    
+    id = db.Column(db.String(36), primary_key=True)  # UUID
+    form_data = db.Column(db.Text, nullable=False)  # JSON格式的表单数据
+    result_data = db.Column(db.Text, nullable=False)  # JSON格式的分析结果
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<AnalysisResult {self.id}>'

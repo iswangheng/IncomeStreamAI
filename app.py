@@ -193,7 +193,8 @@ def _internal_check_analysis_status():
         })
     
     # 处理已完成的分析
-    if status == 'completed' and result:
+    result_id = session.get('analysis_result_id')
+    if status == 'completed' and (result or result_id):
         app.logger.info("Analysis already completed, returning result")
         return jsonify({'status': 'completed', 'redirect_url': '/results'})
     
@@ -232,11 +233,38 @@ def _handle_analysis_execution(form_data, session):
         suggestions = generate_ai_suggestions(form_data)
         
         if suggestions and isinstance(suggestions, dict):
-            # 分析成功
-            session['analysis_result'] = suggestions
-            session['analysis_status'] = 'completed'
+            # 分析成功 - 将结果存储到数据库而不是session，避免session过大
+            import uuid
+            result_id = str(uuid.uuid4())
             
-            app.logger.info("AI analysis completed successfully")
+            # 直接使用SQL插入结果到数据库
+            try:
+                from sqlalchemy import text
+                form_data_json = json.dumps(form_data, ensure_ascii=False)
+                result_data_json = json.dumps(suggestions, ensure_ascii=False)
+                
+                db.session.execute(text("""
+                    INSERT INTO analysis_results (id, form_data, result_data, created_at)
+                    VALUES (:id, :form_data, :result_data, NOW())
+                """), {
+                    'id': result_id,
+                    'form_data': form_data_json,
+                    'result_data': result_data_json
+                })
+                db.session.commit()
+            except Exception as db_error:
+                app.logger.error(f"Failed to store result in database: {str(db_error)}")
+                # 如果数据库存储失败，回退到session存储
+                session['analysis_result'] = suggestions
+            
+            # 在session中只存储结果ID
+            session['analysis_result_id'] = result_id
+            session['analysis_status'] = 'completed'
+            # 清理session中的大数据
+            if 'analysis_result' in session:
+                del session['analysis_result']
+            
+            app.logger.info(f"AI analysis completed successfully, result stored with ID: {result_id}")
             return jsonify({
                 'status': 'completed', 
                 'redirect_url': '/results',
@@ -277,9 +305,9 @@ def results():
         # Get form data and analysis status from session
         form_data = session.get('analysis_form_data')
         status = session.get('analysis_status', 'not_started')
-        suggestions = session.get('analysis_result')
+        result_id = session.get('analysis_result_id')
         
-        app.logger.info(f"Results page - Status: {status}, Form data exists: {form_data is not None}, Result exists: {suggestions is not None}")
+        app.logger.info(f"Results page - Status: {status}, Form data exists: {form_data is not None}, Result ID: {result_id}")
         
         # 如果没有表单数据，说明会话过期或直接访问
         if not form_data:
@@ -288,13 +316,39 @@ def results():
             return redirect(url_for('index'))
         
         # 根据分析状态决定显示内容
-        if status == 'completed' and suggestions:
-            # 分析已完成，显示完整结果
-            app.logger.info("Analysis completed - showing full results")
-            return render_template('result_apple_redesigned.html', 
-                                 form_data=form_data, 
-                                 result=suggestions,
-                                 status='completed')
+        if status == 'completed' and result_id:
+            # 从数据库读取分析结果
+            try:
+                import json
+                from sqlalchemy import text
+                
+                result = db.session.execute(text("""
+                    SELECT result_data FROM analysis_results WHERE id = :id
+                """), {'id': result_id}).fetchone()
+                
+                if result:
+                    suggestions = json.loads(result[0])
+                    app.logger.info("Analysis completed - showing full results from database")
+                    return render_template('result_apple_redesigned.html', 
+                                         form_data=form_data, 
+                                         result=suggestions,
+                                         status='completed')
+                else:
+                    app.logger.warning(f"Analysis result not found in database: {result_id}")
+                    suggestions = None
+            except Exception as e:
+                app.logger.error(f"Error reading analysis result from database: {str(e)}")
+                suggestions = None
+            
+            # 如果数据库读取失败，继续尝试从session读取（兼容性）
+            if not suggestions:
+                suggestions = session.get('analysis_result')
+                if suggestions:
+                    app.logger.info("Analysis completed - showing full results from session")
+                    return render_template('result_apple_redesigned.html', 
+                                         form_data=form_data, 
+                                         result=suggestions,
+                                         status='completed')
         
         elif status == 'error':
             # 分析出错，显示错误信息

@@ -1368,10 +1368,13 @@
         // 处理测试案例选择
         function handleDemoCaseSelection() {
             const caseCards = document.querySelectorAll('.demo-case-card');
+            console.log('Found case cards:', caseCards.length);
             
             caseCards.forEach(card => {
                 card.addEventListener('click', function() {
                     const caseType = this.dataset.case;
+                    console.log('Clicked case type:', caseType);
+                    console.log('Case data exists:', !!demoTestCases[caseType]);
                     
                     // 移除其他卡片的选中状态
                     caseCards.forEach(c => c.classList.remove('selected'));
@@ -1384,11 +1387,14 @@
                     } else if (demoTestCases[caseType]) {
                         // 选择测试案例 - 填充表单
                         this.classList.add('selected');
+                        console.log('Loading test case:', demoTestCases[caseType]);
                         loadTestCase(demoTestCases[caseType]);
                         scrollToForm();
                         
                         // 显示成功提示
                         showNotification('示例案例已加载完成！您可以直接提交分析，或根据需要修改参数', 'success');
+                    } else {
+                        console.error('Case type not found:', caseType);
                     }
                 });
             });
@@ -1396,16 +1402,29 @@
 
         // 加载测试案例数据到表单
         function loadTestCase(caseData) {
+            console.log('Loading case data:', caseData);
+            
             // 填充项目基础信息
-            document.getElementById('project_name').value = caseData.projectName || '';
-            document.getElementById('project_description').value = caseData.projectDescription || '';
-            document.getElementById('project_stage').value = caseData.projectStage || '';
+            const projectNameEl = document.getElementById('project_name');
+            const projectDescEl = document.getElementById('project_description');
+            const projectStageEl = document.getElementById('project_stage');
+            
+            if (projectNameEl) projectNameEl.value = caseData.projectName || '';
+            if (projectDescEl) projectDescEl.value = caseData.projectDescription || '';
+            if (projectStageEl) projectStageEl.value = caseData.projectStage || '';
+            
+            console.log('Basic info filled');
             
             // 清空现有人物卡片
-            document.getElementById('personsContainer').innerHTML = '';
+            const personsContainer = document.getElementById('personsContainer');
+            if (personsContainer) {
+                personsContainer.innerHTML = '';
+                console.log('Cleared persons container');
+            }
             
             // 添加测试案例中的人物
             if (caseData.persons && caseData.persons.length > 0) {
+                console.log('Adding persons:', caseData.persons.length);
                 caseData.persons.forEach((person, index) => {
                     setTimeout(() => {
                         addPerson();

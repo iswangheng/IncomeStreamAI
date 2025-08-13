@@ -874,6 +874,12 @@
             <a href="/" class="navbar-brand">Angela AI</a>
         </div>
         <div class="navbar-right">
+            {% if not history_mode %}
+            <a href="{{ url_for('analysis_history') }}" class="navbar-action">
+                <i class="fas fa-history me-1"></i>
+                历史记录
+            </a>
+            {% endif %}
             <a href="/admin" class="navbar-action">
                 <i class="fas fa-cog me-1"></i>
                 管理后台
@@ -962,11 +968,22 @@
         <!-- 页面头部 -->
         <div class="result-hero fade-in-up">
             <div class="hero-badge">
+                {% if history_mode and record_info %}
+                <i class="fas fa-history me-2"></i>
+                历史记录 - {{ record_info.created_at }}
+                {% else %}
                 <i class="fas fa-magic me-2"></i>
                 AI智能分析完成
+                {% endif %}
             </div>
             <h1 class="hero-title">非劳务收入路径设计方案</h1>
-            <p class="hero-subtitle">基于您提供的项目信息和关键人物资源，我们为您生成了专业的收入管道设计方案</p>
+            <p class="hero-subtitle">
+                {% if history_mode %}
+                历史分析记录 - {{ record_info.analysis_type if record_info else '查看以往设计方案' }}
+                {% else %}
+                基于您提供的项目信息和关键人物资源，我们为您生成了专业的收入管道设计方案
+                {% endif %}
+            </p>
         </div>
 
         <!-- 概览卡片 -->

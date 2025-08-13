@@ -35,9 +35,16 @@
 <body class="preload">
     <!-- 清新优雅主标题区域 -->
     <div class="main-title fade-in-up">
-        <div class="container">
+        <div class="container position-relative">
             <h1><i class="fas fa-brain me-3"></i>Angela</h1>
             <p>非劳务收入管道设计师 · 智能创新解决方案</p>
+            
+            <!-- 历史记录链接 -->
+            <div class="position-absolute top-0 end-0 mt-3">
+                <a href="{{ url_for('analysis_history') }}" class="btn btn-outline-light btn-sm" style="border-radius: 20px; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);">
+                    <i class="fas fa-history me-2"></i>历史记录
+                </a>
+            </div>
         </div>
     </div>
 

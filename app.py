@@ -250,20 +250,24 @@ def _handle_analysis_execution(form_data, session):
             import uuid
             result_id = str(uuid.uuid4())
             
-            # 直接使用SQL插入结果到数据库
+            # 保存完整的分析结果到数据库
             try:
-                from sqlalchemy import text
-                form_data_json = json.dumps(form_data, ensure_ascii=False)
-                result_data_json = json.dumps(suggestions, ensure_ascii=False)
+                from models import AnalysisResult
+                import json
                 
-                db.session.execute(text("""
-                    INSERT INTO analysis_results (id, form_data, result_data, created_at)
-                    VALUES (:id, :form_data, :result_data, NOW())
-                """), {
-                    'id': result_id,
-                    'form_data': form_data_json,
-                    'result_data': result_data_json
-                })
+                # 创建AnalysisResult实例
+                analysis_result = AnalysisResult(
+                    id=result_id,
+                    form_data=json.dumps(form_data, ensure_ascii=False),
+                    result_data=json.dumps(suggestions, ensure_ascii=False),
+                    project_name=form_data.get('project_name', ''),
+                    project_description=form_data.get('project_description', ''),
+                    project_stage=form_data.get('project_stage', ''),
+                    team_size=len(form_data.get('people', [])),
+                    analysis_type='ai_analysis'
+                )
+                
+                db.session.add(analysis_result)
                 db.session.commit()
             except Exception as db_error:
                 app.logger.error(f"Failed to store result in database: {str(db_error)}")
@@ -382,6 +386,30 @@ def results():
             if status == 'timeout':
                 try:
                     fallback_result = generate_fallback_suggestions(form_data)
+                    
+                    # 将备用方案也保存到数据库
+                    try:
+                        from models import AnalysisResult
+                        import uuid
+                        fallback_id = str(uuid.uuid4())
+                        
+                        analysis_result = AnalysisResult(
+                            id=fallback_id,
+                            form_data=json.dumps(form_data, ensure_ascii=False),
+                            result_data=json.dumps(fallback_result, ensure_ascii=False),
+                            project_name=form_data.get('project_name', ''),
+                            project_description=form_data.get('project_description', ''),
+                            project_stage=form_data.get('project_stage', ''),
+                            team_size=len(form_data.get('people', [])),
+                            analysis_type='fallback'
+                        )
+                        
+                        db.session.add(analysis_result)
+                        db.session.commit()
+                        app.logger.info(f"Fallback result saved with ID: {fallback_id}")
+                    except Exception as db_error:
+                        app.logger.error(f"Failed to save fallback result: {str(db_error)}")
+                    
                     return render_template('result_apple_redesigned.html',
                                          form_data=form_data,
                                          result=fallback_result,
@@ -681,6 +709,60 @@ def get_file_size(file_obj):
     return 0
 
 # Knowledge Base Management Routes
+@app.route('/history')
+def analysis_history():
+    """历史分析记录页面"""
+    try:
+        from models import AnalysisResult
+        
+        # 获取所有分析记录，按创建时间倒序
+        analysis_records = AnalysisResult.query.order_by(AnalysisResult.created_at.desc()).all()
+        
+        app.logger.info(f"Found {len(analysis_records)} analysis records")
+        
+        return render_template('history_apple.html', analysis_records=analysis_records)
+    
+    except Exception as e:
+        app.logger.error(f"Error loading analysis history: {str(e)}")
+        flash('加载历史记录时发生错误', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/history/<record_id>')
+def view_analysis_record(record_id):
+    """查看特定的分析记录详情"""
+    try:
+        from models import AnalysisResult
+        import json
+        
+        # 获取指定的分析记录
+        record = AnalysisResult.query.filter_by(id=record_id).first()
+        
+        if not record:
+            flash('找不到指定的分析记录', 'error')
+            return redirect(url_for('analysis_history'))
+        
+        # 解析JSON数据
+        form_data = json.loads(record.form_data) if record.form_data else {}
+        result_data = json.loads(record.result_data) if record.result_data else {}
+        
+        app.logger.info(f"Viewing analysis record: {record_id}")
+        
+        return render_template('result_apple_redesigned.html',
+                             form_data=form_data,
+                             result=result_data,
+                             status='completed',
+                             history_mode=True,
+                             record_info={
+                                 'id': record.id,
+                                 'created_at': record.created_at_display,
+                                 'analysis_type': record.analysis_type_display
+                             })
+    
+    except Exception as e:
+        app.logger.error(f"Error viewing analysis record {record_id}: {str(e)}")
+        flash('查看分析记录时发生错误', 'error')
+        return redirect(url_for('analysis_history'))
+
 @app.route('/admin')
 def admin_dashboard():
     """后台管理主页 - 直接显示文件列表"""

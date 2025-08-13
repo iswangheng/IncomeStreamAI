@@ -73,7 +73,7 @@
         /* Main Container */
         .thinking-container {
             position: relative;
-            z-index: 10;
+            z-index: 10 !important;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -81,6 +81,7 @@
             min-height: 100vh;
             padding: 20px;
             background: transparent;
+            pointer-events: auto;
         }
         
         /* Header */
@@ -88,6 +89,8 @@
             text-align: center;
             margin-bottom: 40px;
             animation: glow-pulse 2s ease-in-out infinite alternate;
+            z-index: 15;
+            position: relative;
         }
         
         .ai-title {
@@ -123,6 +126,7 @@
             overflow: hidden;
             box-shadow: 0 0 50px rgba(0, 255, 65, 0.3);
             backdrop-filter: blur(2px);
+            z-index: 15;
         }
         
         .thinking-display::before {
@@ -383,10 +387,11 @@
     </style>
 </head>
 <body>
+    <!-- Background Layer -->
+    <div class="matrix-bg" id="matrixBg"></div>
+    
+    <!-- Content Layer -->
     <div class="thinking-container">
-        <!-- Matrix Rain Background - moved above terminal -->
-        <div class="matrix-bg" id="matrixBg"></div>
-        
         <!-- Header -->
         <div class="ai-header">
             <div class="brain-icon">

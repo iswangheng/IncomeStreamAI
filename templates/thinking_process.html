@@ -3,595 +3,643 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Angela AI正在思考中... - 智能分析进行中</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Angela AI正在思考中... - Matrix Analysis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/apple-design-system.css') }}" rel="stylesheet">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-            background: linear-gradient(135deg, 
-                var(--color-primary) 0%,
-                var(--color-secondary) 50%, 
-                var(--color-accent) 100%);
-            min-height: 100vh;
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500&display=swap');
+        
+        * {
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
+            box-sizing: border-box;
         }
-
-        .thinking-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: var(--space-8);
-            text-align: center;
-            position: relative;
-        }
-
-        .thinking-header {
-            margin-bottom: var(--space-8);
-            opacity: 0;
-            animation: fadeInUp 1s ease-out forwards;
-        }
-
-        .ai-icon {
-            font-size: 4rem;
-            color: white;
-            margin-bottom: var(--space-4);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .thinking-title {
-            font-size: var(--text-4xl);
-            font-weight: var(--font-bold);
-            color: white;
-            margin-bottom: var(--space-2);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .thinking-subtitle {
-            font-size: var(--text-lg);
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: var(--font-medium);
-            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .process-steps {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border-radius: var(--radius-2xl);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: var(--space-8);
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-            opacity: 0;
-            animation: fadeInUp 1s ease-out 0.5s forwards;
-        }
-
-        .step-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: var(--space-6);
-            padding: var(--space-4);
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.5s ease;
-            opacity: 0.5;
-            position: relative;
+        
+        body {
+            background: #000;
+            color: #00ff41;
+            font-family: 'Fira Code', 'Courier New', monospace;
             overflow: hidden;
+            height: 100vh;
         }
-
-        .step-item.active {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .step-item.active::before {
-            content: '';
-            position: absolute;
+        
+        /* Matrix Rain Effect */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
             left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: white;
-            animation: slideDown 0.5s ease-out;
-        }
-
-        .step-item.completed {
-            opacity: 0.8;
-            background: rgba(52, 199, 89, 0.2);
-            border-color: rgba(52, 199, 89, 0.3);
-        }
-
-        .step-icon {
-            font-size: 1.5rem;
-            color: white;
-            margin-right: var(--space-4);
-            min-width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-
-        .step-item.active .step-icon {
-            background: rgba(255, 255, 255, 0.2);
-            animation: bounce 0.6s ease-out;
-        }
-
-        .step-item.completed .step-icon {
-            background: rgba(52, 199, 89, 0.3);
-        }
-
-        .step-text {
-            flex: 1;
-            text-align: left;
-        }
-
-        .step-title {
-            font-size: var(--text-base);
-            font-weight: var(--font-semibold);
-            color: white;
-            margin-bottom: var(--space-1);
-        }
-
-        .step-description {
-            font-size: var(--text-sm);
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.4;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            margin-top: var(--space-6);
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, white, rgba(255, 255, 255, 0.8));
-            border-radius: 2px;
-            width: 0%;
-            transition: width 0.8s ease-out;
-            position: relative;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 20px;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, white);
-            animation: shimmer 2s ease-in-out infinite;
-        }
-
-        .estimated-time {
-            margin-top: var(--space-4);
-            font-size: var(--text-sm);
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: var(--font-medium);
-        }
-
-        .floating-dots {
-            position: absolute;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            overflow: hidden;
+            z-index: 1;
         }
-
-        .dot {
+        
+        .matrix-column {
             position: absolute;
-            width: 6px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
+            top: -100px;
+            white-space: nowrap;
+            font-size: 14px;
+            line-height: 14px;
+            text-shadow: 0 0 8px #00ff41;
+            animation: matrix-fall linear infinite;
         }
-
-        /* 动画效果 */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-        }
-
-        @keyframes bounce {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.2);
-            }
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: scaleY(0);
-            }
-            to {
-                transform: scaleY(1);
-            }
-        }
-
-        @keyframes shimmer {
-            0%, 100% {
-                transform: translateX(-20px);
-                opacity: 0;
-            }
-            50% {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes float {
+        
+        @keyframes matrix-fall {
             0% {
-                transform: translateY(100vh) translateX(0px) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
+                transform: translateY(-100px);
                 opacity: 1;
             }
             100% {
-                transform: translateY(-100px) translateX(200px) rotate(360deg);
+                transform: translateY(100vh);
                 opacity: 0;
             }
         }
-
-        /* 响应式设计 */
+        
+        /* Main Container */
+        .thinking-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        /* Header */
+        .ai-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+        
+        .ai-title {
+            font-size: 3.5rem;
+            font-weight: 500;
+            text-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+        
+        .ai-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+        
+        .brain-icon {
+            font-size: 4rem;
+            animation: brain-pulse 1.5s ease-in-out infinite;
+            text-shadow: 0 0 30px #00ff41;
+        }
+        
+        /* Thinking Process Display */
+        .thinking-display {
+            width: 90%;
+            max-width: 900px;
+            height: 500px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 255, 65, 0.3);
+        }
+        
+        .thinking-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            animation: scan-line 3s linear infinite;
+        }
+        
+        @keyframes scan-line {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+        
+        /* Terminal Header */
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #00ff41;
+        }
+        
+        .terminal-buttons {
+            display: flex;
+            gap: 8px;
+            margin-right: 15px;
+        }
+        
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff5f56;
+        }
+        
+        .terminal-button:nth-child(2) {
+            background: #ffbd2e;
+        }
+        
+        .terminal-button:nth-child(3) {
+            background: #27ca3f;
+        }
+        
+        .terminal-title {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        /* Thinking Content */
+        .thinking-content {
+            height: 400px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.4;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .thinking-line {
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: type-in 0.5s ease-out forwards;
+        }
+        
+        .thinking-line.system {
+            color: #00ff41;
+        }
+        
+        .thinking-line.process {
+            color: #40ff40;
+            margin-left: 20px;
+        }
+        
+        .thinking-line.analysis {
+            color: #80ff80;
+            margin-left: 40px;
+        }
+        
+        .thinking-line.conclusion {
+            color: #00ff41;
+            font-weight: 500;
+            margin-left: 20px;
+        }
+        
+        .cursor {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes type-in {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes blink {
+            0%, 50% {
+                opacity: 1;
+            }
+            51%, 100% {
+                opacity: 0;
+            }
+        }
+        
+        @keyframes glow-pulse {
+            0% {
+                text-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41;
+            }
+            100% {
+                text-shadow: 0 0 30px #00ff41, 0 0 60px #00ff41, 0 0 80px #00ff41;
+            }
+        }
+        
+        @keyframes brain-pulse {
+            0%, 100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% {
+                transform: scale(1.1);
+                filter: brightness(1.3);
+            }
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px 20px;
+            border: 1px solid #00ff41;
+            border-radius: 25px;
+            z-index: 20;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff41;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+        
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .thinking-container {
-                padding: var(--space-4);
+            .ai-title {
+                font-size: 2.5rem;
             }
             
-            .thinking-title {
-                font-size: var(--text-2xl);
+            .thinking-display {
+                width: 95%;
+                height: 400px;
+                padding: 15px;
             }
             
-            .thinking-subtitle {
-                font-size: var(--text-base);
-            }
-            
-            .process-steps {
-                padding: var(--space-4);
-            }
-            
-            .step-item {
-                flex-direction: column;
-                text-align: center;
-                margin-bottom: var(--space-4);
-            }
-            
-            .step-icon {
-                margin-right: 0;
-                margin-bottom: var(--space-2);
+            .thinking-content {
+                height: 320px;
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Matrix Rain Background -->
+    <div class="matrix-bg" id="matrixBg"></div>
+    
     <div class="thinking-container">
-        <!-- 浮动装饰点 -->
-        <div class="floating-dots" id="floatingDots"></div>
-
-        <!-- 头部 -->
-        <div class="thinking-header">
-            <div class="ai-icon">
+        <!-- Header -->
+        <div class="ai-header">
+            <div class="brain-icon">
                 <i class="fas fa-brain"></i>
             </div>
-            <h1 class="thinking-title">Angela AI正在思考中</h1>
-            <p class="thinking-subtitle">正在深度分析您的项目信息，生成个性化收入路径方案...</p>
+            <h1 class="ai-title">ANGELA AI</h1>
+            <p class="ai-subtitle">Neural Network Analysis In Progress...</p>
         </div>
-
-        <!-- 处理步骤 -->
-        <div class="process-steps">
-            <div class="step-item" id="step1">
-                <div class="step-icon">
-                    <i class="fas fa-search"></i>
+        
+        <!-- Main Thinking Display -->
+        <div class="thinking-display">
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <div class="terminal-button"></div>
+                    <div class="terminal-button"></div>
+                    <div class="terminal-button"></div>
                 </div>
-                <div class="step-text">
-                    <div class="step-title">分析项目信息</div>
-                    <div class="step-description">正在解析您的项目背景和目标设定</div>
-                </div>
-            </div>
-
-            <div class="step-item" id="step2">
-                <div class="step-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="step-text">
-                    <div class="step-title">评估关键人物资源</div>
-                    <div class="step-description">分析每位关键人物的资源和潜在贡献</div>
-                </div>
-            </div>
-
-            <div class="step-item" id="step3">
-                <div class="step-icon">
-                    <i class="fas fa-lightbulb"></i>
-                </div>
-                <div class="step-text">
-                    <div class="step-title">匹配收入模式</div>
-                    <div class="step-description">结合知识库寻找最适合的变现路径</div>
-                </div>
-            </div>
-
-            <div class="step-item" id="step4">
-                <div class="step-icon">
-                    <i class="fas fa-route"></i>
-                </div>
-                <div class="step-text">
-                    <div class="step-title">设计执行方案</div>
-                    <div class="step-description">制定详细的实施步骤和时间规划</div>
-                </div>
-            </div>
-
-            <div class="step-item" id="step5">
-                <div class="step-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="step-text">
-                    <div class="step-title">生成完整报告</div>
-                    <div class="step-description">整合分析结果，生成个性化方案</div>
-                </div>
-            </div>
-
-            <!-- 进度条 -->
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
+                <div class="terminal-title">angela_ai_core.py - Neural Analysis Terminal</div>
             </div>
             
-            <div class="estimated-time">
-                <span id="analysisStatus">AI正在智能分析</span>：<span id="timeRemaining">准备中...</span>
+            <div class="thinking-content" id="thinkingContent">
+                <!-- Thinking process will be inserted here dynamically -->
             </div>
-            
-            <!-- 实时状态显示 -->
-            <div class="real-time-status" style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(10px);">
-                <div id="currentStep" style="font-size: 14px; color: rgba(255,255,255,0.8); margin-bottom: 10px;">
-                    正在初始化分析引擎...
-                </div>
-                <div class="progress-detail" style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.6);">
-                    <span id="progressText">准备阶段</span>
-                    <span id="progressPercent">0%</span>
-                </div>
+        </div>
+        
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span id="statusText">Initializing Neural Network...</span>
+            </div>
+            <div class="status-indicator">
+                <span id="progressText">0%</span>
             </div>
         </div>
     </div>
 
     <script>
-        // 思考过程步骤和时间配置 - 快速过渡到AI分析
-        const steps = [
-            { id: 'step1', duration: 200, title: '分析项目信息', desc: '正在解析您的项目背景和目标设定' },
-            { id: 'step2', duration: 200, title: '评估关键人物资源', desc: '分析每位关键人物的资源和潜在贡献' },
-            { id: 'step3', duration: 200, title: '匹配收入模式', desc: '结合知识库寻找最适合的变现路径' },
-            { id: 'step4', duration: 200, title: '设计执行方案', desc: '制定详细的实施步骤和时间规划' },
-            { id: 'step5', duration: 200, title: '生成完整报告', desc: '整合分析结果，生成个性化方案' }
-        ];
-
-        let currentStep = 0;
-        let totalDuration = steps.reduce((sum, step) => sum + step.duration, 0); // 总共1秒
-        let elapsed = 0;
-        let startTime = Date.now();
-
-        // 创建浮动装饰点
-        function createFloatingDots() {
-            const container = document.getElementById('floatingDots');
-            for (let i = 0; i < 15; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                dot.style.left = Math.random() * 100 + '%';
-                dot.style.animationDelay = Math.random() * 6 + 's';
-                dot.style.animationDuration = (4 + Math.random() * 4) + 's';
-                container.appendChild(dot);
-            }
-        }
-
-        // 更新进度
-        function updateProgress() {
-            const progress = (elapsed / totalDuration) * 100;
-            document.getElementById('progressFill').style.width = Math.min(progress, 100) + '%';
+        // Matrix Rain Effect
+        function createMatrixRain() {
+            const matrixBg = document.getElementById('matrixBg');
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz非劳务收入管道设计';
             
-            // 更新实时状态显示
-            updateRealTimeStatus(progress);
+            function createColumn() {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = Math.random() * 100 + '%';
+                column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                column.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                
+                let text = '';
+                for (let i = 0; i < Math.random() * 20 + 10; i++) {
+                    text += chars[Math.floor(Math.random() * chars.length)] + '\n';
+                }
+                column.textContent = text;
+                
+                matrixBg.appendChild(column);
+                
+                // Remove column after animation
+                setTimeout(() => {
+                    if (column.parentNode) {
+                        column.parentNode.removeChild(column);
+                    }
+                }, parseFloat(column.style.animationDuration) * 1000);
+            }
+            
+            // Create initial columns
+            for (let i = 0; i < 50; i++) {
+                setTimeout(createColumn, Math.random() * 2000);
+            }
+            
+            // Continue creating columns
+            setInterval(createColumn, 200);
         }
         
-        // 更新实时状态显示
-        function updateRealTimeStatus(progress) {
-            const currentStepEl = document.getElementById('currentStep');
-            const progressTextEl = document.getElementById('progressText');
-            const progressPercentEl = document.getElementById('progressPercent');
-            const analysisStatusEl = document.getElementById('analysisStatus');
-            const timeRemainingEl = document.getElementById('timeRemaining');
+        // AI Thinking Process Simulation
+        const thinkingSteps = [
+            {
+                type: 'system',
+                text: '>>> 启动 Angela AI 神经网络分析引擎...',
+                delay: 500
+            },
+            {
+                type: 'system',
+                text: '>>> 加载非劳务收入知识库... [✓]',
+                delay: 800
+            },
+            {
+                type: 'system',
+                text: '>>> 初始化项目分析模块... [✓]',
+                delay: 1000
+            },
+            {
+                type: 'process',
+                text: 'def analyze_project_data():',
+                delay: 1200
+            },
+            {
+                type: 'analysis',
+                text: '# 解析项目背景：英语培训管道',
+                delay: 1400
+            },
+            {
+                type: 'analysis',
+                text: '# 识别关键词：升学规划师、英语机构、交付质量',
+                delay: 1600
+            },
+            {
+                type: 'analysis',
+                text: '# 检测到B2B连接模式机会...',
+                delay: 1800
+            },
+            {
+                type: 'process',
+                text: 'def evaluate_key_persons():',
+                delay: 2000
+            },
+            {
+                type: 'analysis',
+                text: '# 升学规划师朋友：拥有家长资源 ✓',
+                delay: 2200
+            },
+            {
+                type: 'analysis',
+                text: '# 英语培训机构：具备交付能力但质量有问题 ⚠️',
+                delay: 2400
+            },
+            {
+                type: 'analysis',
+                text: '# 资源匹配度评估：高潜力连接点',
+                delay: 2600
+            },
+            {
+                type: 'process',
+                text: 'def search_income_patterns():',
+                delay: 2800
+            },
+            {
+                type: 'analysis',
+                text: '# 查询知识库中的成功案例...',
+                delay: 3000
+            },
+            {
+                type: 'analysis',
+                text: '# 匹配收入类型：股份/红利 + 版权模式',
+                delay: 3200
+            },
+            {
+                type: 'analysis',
+                text: '# 核心insight：通过标准化产品解决交付问题',
+                delay: 3400
+            },
+            {
+                type: 'process',
+                text: 'def design_revenue_pipeline():',
+                delay: 3600
+            },
+            {
+                type: 'analysis',
+                text: '# 三方结构设计：你作为产品设计者+连接器',
+                delay: 3800
+            },
+            {
+                type: 'analysis',
+                text: '# 收入机制：每学员1000元抽成模式',
+                delay: 4000
+            },
+            {
+                type: 'analysis',
+                text: '# MVP验证：获得3名家长报名验证可行性',
+                delay: 4200
+            },
+            {
+                type: 'process',
+                text: 'def generate_action_plan():',
+                delay: 4400
+            },
+            {
+                type: 'analysis',
+                text: '# Step 1: 设计标准化课程体系',
+                delay: 4600
+            },
+            {
+                type: 'analysis',
+                text: '# Step 2: 升学规划师推广收集报名',
+                delay: 4800
+            },
+            {
+                type: 'analysis',
+                text: '# Step 3: 对接机构确保交付质量',
+                delay: 5000
+            },
+            {
+                type: 'conclusion',
+                text: '✓ 分析完成！检测到高价值收入管道机会',
+                delay: 5200
+            },
+            {
+                type: 'conclusion',
+                text: '✓ 预期收益：可扩展至多个规划师资源',
+                delay: 5400
+            },
+            {
+                type: 'system',
+                text: '>>> 生成详细报告中...',
+                delay: 5600
+            },
+            {
+                type: 'system',
+                text: '>>> 准备跳转到结果页面...',
+                delay: 5800
+            }
+        ];
+        
+        let currentStep = 0;
+        let startTime = Date.now();
+        
+        function addThinkingLine(text, type) {
+            const content = document.getElementById('thinkingContent');
+            const line = document.createElement('div');
+            line.className = `thinking-line ${type}`;
+            line.textContent = text;
+            content.appendChild(line);
+            
+            // Auto scroll to bottom
+            content.scrollTop = content.scrollHeight;
+            
+            // Add cursor effect to last line
+            const cursor = document.createElement('span');
+            cursor.className = 'cursor';
+            cursor.textContent = '█';
+            line.appendChild(cursor);
+            
+            // Remove cursor from previous line
+            const prevLines = content.querySelectorAll('.thinking-line');
+            if (prevLines.length > 1) {
+                const prevCursor = prevLines[prevLines.length - 2].querySelector('.cursor');
+                if (prevCursor) {
+                    prevCursor.remove();
+                }
+            }
+        }
+        
+        function updateStatus() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min((currentStep / thinkingSteps.length) * 100, 100);
+            
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
             
             if (progress < 20) {
-                currentStepEl.textContent = '正在收集项目基础信息和人物资源...';
-                progressTextEl.textContent = '数据预处理';
-                analysisStatusEl.textContent = 'AI正在初始化';
-                timeRemainingEl.textContent = '数据准备中...';
+                document.getElementById('statusText').textContent = 'Parsing project data...';
             } else if (progress < 40) {
-                currentStepEl.textContent = '正在分析关键人物的资源和需求匹配...';
-                progressTextEl.textContent = '资源映射';
-                analysisStatusEl.textContent = 'AI正在思考';
-                timeRemainingEl.textContent = '分析人物资源...';
+                document.getElementById('statusText').textContent = 'Analyzing key persons...';
             } else if (progress < 60) {
-                currentStepEl.textContent = '正在查询知识库，寻找最佳收入模式...';
-                progressTextEl.textContent = '模式匹配';
-                analysisStatusEl.textContent = 'AI正在决策';
-                timeRemainingEl.textContent = '设计收入路径...';
+                document.getElementById('statusText').textContent = 'Matching revenue patterns...';
             } else if (progress < 80) {
-                currentStepEl.textContent = '正在制定具体执行步骤和风险评估...';
-                progressTextEl.textContent = '方案设计';
-                analysisStatusEl.textContent = 'AI正在规划';
-                timeRemainingEl.textContent = '生成执行方案...';
+                document.getElementById('statusText').textContent = 'Designing pipeline...';
             } else if (progress < 100) {
-                currentStepEl.textContent = '正在整合分析结果，生成最终报告...';
-                progressTextEl.textContent = '结果生成';
-                analysisStatusEl.textContent = 'AI即将完成';
-                timeRemainingEl.textContent = '准备展示结果...';
+                document.getElementById('statusText').textContent = 'Generating report...';
             } else {
-                currentStepEl.textContent = '✅ 分析完成！正在跳转到结果页面...';
-                progressTextEl.textContent = '分析完成';
-                analysisStatusEl.textContent = '分析已完成';
-                timeRemainingEl.textContent = '即将跳转...';
-            }
-            
-            progressPercentEl.textContent = Math.round(progress) + '%';
-        }
-
-        // 激活步骤
-        function activateStep(stepIndex) {
-            // 完成之前的步骤
-            for (let i = 0; i < stepIndex; i++) {
-                const stepElement = document.getElementById(steps[i].id);
-                stepElement.classList.add('completed');
-                stepElement.classList.remove('active');
-            }
-            
-            // 激活当前步骤
-            if (stepIndex < steps.length) {
-                const currentStepElement = document.getElementById(steps[stepIndex].id);
-                currentStepElement.classList.add('active');
-                currentStepElement.classList.remove('completed');
-                
-                // 更新步骤描述
-                const description = currentStepElement.querySelector('.step-description');
-                description.textContent = steps[stepIndex].desc;
+                document.getElementById('statusText').textContent = 'Analysis complete!';
             }
         }
-
-        // 开始思考过程动画
-        function startThinkingProcess() {
-            let stepElapsed = 0;
-            
-            const timer = setInterval(() => {
-                elapsed += 100;
-                stepElapsed += 100;
+        
+        function simulateThinking() {
+            if (currentStep < thinkingSteps.length) {
+                const step = thinkingSteps[currentStep];
                 
-                updateProgress();
-                
-                // 检查是否需要切换到下一步
-                if (currentStep < steps.length && stepElapsed >= steps[currentStep].duration) {
+                setTimeout(() => {
+                    addThinkingLine(step.text, step.type);
+                    updateStatus();
                     currentStep++;
-                    stepElapsed = 0;
-                    if (currentStep < steps.length) {
-                        activateStep(currentStep);
-                    }
-                }
-                
-                // 完成所有步骤后跳转
-                if (elapsed >= totalDuration) {
-                    clearInterval(timer);
-                    // 完成最后一步
-                    if (currentStep <= steps.length) {
-                        for (let i = 0; i < steps.length; i++) {
-                            document.getElementById(steps[i].id).classList.add('completed');
-                            document.getElementById(steps[i].id).classList.remove('active');
-                        }
-                    }
-                    
-                    // 开始检查AI分析状态
-                    setTimeout(() => {
-                        checkAnalysisStatus();
-                    }, 800);
-                }
-            }, 100);
-        }
-
-        // AI分析状态检查
-        let analysisStarted = false;
-        let checkCount = 0;
-        
-        function checkAnalysisStatus() {
-            checkCount++;
-            console.log(`Checking analysis status, attempt: ${checkCount}`);
-            
-            fetch('/check_analysis_status')
-                .then(response => response.json())
-                .then(data => {
-                    console.log(`Analysis status response:`, data);
-                    
-                    if (data.status === 'completed') {
-                        // 分析完成，跳转到结果页面
-                        document.getElementById('currentStep').textContent = '✅ 分析完成！正在跳转...';
-                        document.getElementById('analysisStatus').textContent = '分析已完成';
-                        setTimeout(() => {
-                            window.location.href = '/results';
-                        }, 1000);
-                    } else if (data.status === 'error') {
-                        // 分析出错
-                        document.getElementById('currentStep').textContent = '❌ 分析出错：' + data.message;
-                        document.getElementById('analysisStatus').textContent = '分析出错';
-                    } else if (data.status === 'processing') {
-                        // 分析进行中，继续检查
-                        const progress = data.progress || 50;
-                        updateProgressDisplay(progress);
-                        setTimeout(checkAnalysisStatus, 2000); // 2秒后再次检查
-                    }
-                })
-                .catch(error => {
-                    console.error('Analysis status check failed:', error);
-                    setTimeout(checkAnalysisStatus, 3000); // 出错时3秒后重试
-                });
-        }
-        
-        function updateProgressDisplay(progress) {
-            document.getElementById('progressFill').style.width = progress + '%';
-            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
-            
-            // 根据进度更新状态文本
-            if (progress < 30) {
-                document.getElementById('currentStep').textContent = '正在初始化AI分析引擎...';
-                document.getElementById('analysisStatus').textContent = 'AI正在启动';
-            } else if (progress < 60) {
-                document.getElementById('currentStep').textContent = '正在分析项目资源和人物关系...';
-                document.getElementById('analysisStatus').textContent = 'AI正在思考';
-            } else if (progress < 90) {
-                document.getElementById('currentStep').textContent = '正在生成收入路径方案...';
-                document.getElementById('analysisStatus').textContent = 'AI正在设计';
+                    simulateThinking();
+                }, step.delay);
             } else {
-                document.getElementById('currentStep').textContent = '正在整理分析结果...';
-                document.getElementById('analysisStatus').textContent = 'AI即将完成';
+                // Start polling for actual analysis completion
+                setTimeout(startPolling, 1000);
             }
         }
-
-        // 页面加载完成后开始
+        
+        // Polling for actual analysis completion
+        function startPolling() {
+            let pollCount = 0;
+            const maxPolls = 60; // Maximum 1 minute polling
+            
+            function poll() {
+                pollCount++;
+                console.log(`Polling analysis status, attempt: ${pollCount}`);
+                
+                fetch('/analysis_status')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Analysis status response:', data);
+                        
+                        if (data.status === 'completed' && data.redirect_url) {
+                            addThinkingLine('>>> 🎉 Real analysis completed! Redirecting...', 'system');
+                            setTimeout(() => {
+                                window.location.href = data.redirect_url;
+                            }, 1500);
+                        } else if (data.status === 'error') {
+                            addThinkingLine('>>> ❌ Analysis error occurred', 'system');
+                        } else if (pollCount < maxPolls) {
+                            // Continue polling
+                            setTimeout(poll, 1000);
+                        } else {
+                            addThinkingLine('>>> ⏰ Polling timeout, redirecting anyway...', 'system');
+                            setTimeout(() => {
+                                window.location.href = '/results';
+                            }, 2000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Polling error:', error);
+                        if (pollCount < maxPolls) {
+                            setTimeout(poll, 2000); // Longer delay on error
+                        } else {
+                            addThinkingLine('>>> ⏰ Connection timeout, redirecting...', 'system');
+                            setTimeout(() => {
+                                window.location.href = '/results';
+                            }, 2000);
+                        }
+                    });
+            }
+            
+            poll();
+        }
+        
+        // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
-            createFloatingDots();
-            activateStep(0); // 激活第一步
-            startThinkingProcess();
+            createMatrixRain();
+            simulateThinking();
         });
     </script>
 </body>

@@ -130,6 +130,11 @@ def thinking_process():
     
     return render_template('thinking_process.html')
 
+@app.route('/analysis_status', methods=['GET'])
+def analysis_status():
+    """检查AI分析状态的AJAX端点 - 确保始终返回JSON"""
+    return check_analysis_status()
+
 @app.route('/check_analysis_status', methods=['GET'])
 def check_analysis_status():
     """检查AI分析状态的AJAX端点 - 确保始终返回JSON"""
@@ -381,8 +386,8 @@ def generate():
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully")
         
-        # 直接跳转到结果页面，在那里显示加载过程和结果
-        return redirect(url_for('results'))
+        # 跳转到新的Matrix风格思考页面
+        return redirect(url_for('thinking_process'))
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")

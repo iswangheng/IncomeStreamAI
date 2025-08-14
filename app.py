@@ -1,10 +1,11 @@
 import os
 import json
 import logging
+import traceback
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, Response
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, Response, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
@@ -63,7 +64,6 @@ def index():
 @app.route('/thinking')
 def thinking_process():
     """AI thinking process visualization page"""
-    from flask import session, redirect, url_for, flash
     
     # Get form data from session
     form_data = session.get('analysis_form_data')
@@ -116,8 +116,6 @@ def check_analysis_status():
 
 def _internal_check_analysis_status():
     """内部状态检查函数"""
-    from flask import session
-    import traceback
     
     app.logger.info("=== Starting check_analysis_status ===")
     
@@ -223,7 +221,7 @@ def _internal_check_analysis_status():
         'message': stage
     })
 
-def _handle_analysis_execution(form_data, session):
+def _handle_analysis_execution(form_data, flask_session):
     """处理AI分析执行"""
     import traceback
     
@@ -362,8 +360,6 @@ def _handle_analysis_execution(form_data, session):
 def results():
     """Display AI analysis result page with dynamic loading"""
     try:
-        from flask import session
-        
         # 详细记录session状态
         app.logger.info(f"Results page accessed - Full session: {dict(session)}")
         app.logger.info(f"Results page - Session ID: {request.cookies.get('session', 'No session cookie')}")
@@ -646,7 +642,10 @@ def generate():
         }
         
         # Store form data in session 
-        from flask import session
+        # 先设置session为永久性，确保数据能持久化
+        session.permanent = True  
+        
+        # 存储表单数据
         session['analysis_form_data'] = form_data
         
         # 设置分析状态为未开始，等待thinking页面触发
@@ -655,11 +654,12 @@ def generate():
         session['analysis_progress'] = 0
         session['analysis_stage'] = '准备开始分析...'
         
+        # 强制标记session为已修改，确保保存
+        session.modified = True
+        
         # 详细调试session存储
-        app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")
-        session.permanent = True  # 设置session为永久性
-        app.logger.info(f"Generate route - After storing - Full session: {dict(session)}")
-        app.logger.info(f"Generate route - Session modified: {session.modified}")
+        app.logger.info(f"Generate route - Session data stored: {session.get('analysis_form_data') is not None}")
+        app.logger.info(f"Generate route - Session ID: {request.cookies.get('session', 'No cookie')}")
         
         # Log the received data
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")

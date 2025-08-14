@@ -321,6 +321,112 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/future-enhanced-interactions.js') }}"></script>
     <script>
+        // 美观的提示框函数
+        function showBeautifulAlert(message, type = 'warning') {
+            // 移除旧的提示框
+            const oldAlert = document.querySelector('.custom-alert-overlay');
+            if (oldAlert) {
+                oldAlert.remove();
+            }
+            
+            // 创建提示框覆盖层
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-alert-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.2s ease;
+            `;
+            
+            // 创建提示框内容
+            const alertBox = document.createElement('div');
+            alertBox.className = 'custom-alert-box';
+            const iconMap = {
+                'warning': 'fas fa-exclamation-triangle',
+                'error': 'fas fa-times-circle',
+                'success': 'fas fa-check-circle',
+                'info': 'fas fa-info-circle'
+            };
+            const colorMap = {
+                'warning': '#f0ad4e',
+                'error': '#d9534f',
+                'success': '#5cb85c',
+                'info': '#007AFF'
+            };
+            
+            alertBox.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 16px;
+                    padding: 32px;
+                    max-width: 500px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    text-align: center;
+                    animation: slideDown 0.3s ease;
+                ">
+                    <i class="${iconMap[type]}" style="
+                        font-size: 48px;
+                        color: ${colorMap[type]};
+                        margin-bottom: 16px;
+                        display: block;
+                    "></i>
+                    <p style="
+                        font-size: 18px;
+                        color: #333;
+                        margin: 16px 0 24px 0;
+                        line-height: 1.5;
+                    ">${message}</p>
+                    <button onclick="this.closest('.custom-alert-overlay').remove()" style="
+                        background: ${colorMap[type]};
+                        color: white;
+                        border: none;
+                        padding: 12px 32px;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                        知道了
+                    </button>
+                </div>
+            `;
+            
+            overlay.appendChild(alertBox);
+            document.body.appendChild(overlay);
+            
+            // 添加动画样式
+            if (!document.querySelector('#custom-alert-styles')) {
+                const style = document.createElement('style');
+                style.id = 'custom-alert-styles';
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    @keyframes slideDown {
+                        from { transform: translateY(-20px); opacity: 0; }
+                        to { transform: translateY(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // 点击覆盖层关闭
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
+        }
+        
         // 人物计数器
         let personCount = 0;
         
@@ -1195,7 +1301,7 @@
                 const projectDescription = document.getElementById('project_description').value.trim();
             
             if (!projectName || !projectDescription) {
-                alert('请填写项目名称和背景描述');
+                showBeautifulAlert('请填写项目名称和背景描述', 'warning');
                 return;
             }
             
@@ -1214,6 +1320,7 @@
             };
             
             // 收集关键人物数据
+            let hasInvalidPerson = false;
             document.querySelectorAll('.person-card').forEach(card => {
                 const nameInput = card.querySelector('input[name="person_name[]"]');
                 const name = nameInput ? nameInput.value.trim() : '';
@@ -1226,6 +1333,25 @@
                         notes: ''
                     };
                     
+                    // 检查是否选择了"如何让此人高兴"
+                    if (person.makeHappy.length === 0) {
+                        // 检查是否有备注
+                        const notesInput = card.querySelector('textarea[name="person_needs_extra[]"]');
+                        const notes = notesInput ? notesInput.value.trim() : '';
+                        if (!notes) {
+                            hasInvalidPerson = true;
+                            // 高亮显示这个人物卡片
+                            card.style.border = '2px solid #f0ad4e';
+                            card.style.borderRadius = '8px';
+                            card.style.animation = 'shake 0.5s';
+                        } else {
+                            person.notes = notes;
+                            // 清除高亮
+                            card.style.border = '';
+                            card.style.animation = '';
+                        }
+                    }
+                    
                     // 收集个人资源（从已选资源标签中获取）
                     const resourceTags = card.querySelectorAll('.selected-resource-tag');
                     if (resourceTags.length > 0) {
@@ -1233,14 +1359,49 @@
                     }
                     
                     // 收集备注（从其他自定义输入获取）
-                    const notesInput = card.querySelector('textarea[name="person_needs_extra[]"]');
-                    if (notesInput) {
-                        person.notes = notesInput.value.trim();
+                    if (!person.notes) {
+                        const notesInput = card.querySelector('textarea[name="person_needs_extra[]"]');
+                        if (notesInput) {
+                            person.notes = notesInput.value.trim();
+                        }
                     }
                     
                     formData.keyPersons.push(person);
                 }
             });
+            
+            // 验证关键人物
+            if (formData.keyPersons.length === 0) {
+                showBeautifulAlert('请至少添加一个关键人物', 'warning');
+                // 恢复按钮状态
+                const submitBtn = document.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-magic me-2"></i>开始AI智能分析';
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            // 如果有人物没有选择"如何让此人高兴"
+            if (hasInvalidPerson) {
+                showBeautifulAlert('请为每个关键人物选择"如何让他们高兴"选项，或在备注中填写其他需求', 'warning');
+                // 恢复按钮状态
+                const submitBtn = document.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-magic me-2"></i>开始AI智能分析';
+                submitBtn.disabled = false;
+                // 添加抖动动画样式
+                if (!document.querySelector('#shake-animation')) {
+                    const style = document.createElement('style');
+                    style.id = 'shake-animation';
+                    style.textContent = `
+                        @keyframes shake {
+                            0%, 100% { transform: translateX(0); }
+                            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                            20%, 40%, 60%, 80% { transform: translateX(5px); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                return;
+            }
             
             // 收集外部资源（从复选框）
             const checkedResources = document.querySelectorAll('input[name="external_resources"]:checked');
@@ -1302,7 +1463,7 @@
                 // 恢复按钮状态
                 const submitBtn = document.querySelector('button[type="submit"]');
                 if (submitBtn) {
-                    submitBtn.innerHTML = '<i class="fas fa-lightbulb me-2"></i>AI智能分析';
+                    submitBtn.innerHTML = '<i class="fas fa-magic me-2"></i>开始AI智能分析';
                     submitBtn.disabled = false;
                 }
             }

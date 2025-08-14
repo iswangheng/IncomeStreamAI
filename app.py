@@ -489,7 +489,11 @@ def results():
             flash('会话已过期，请重新提交表单', 'error')
             return redirect(url_for('index'))
         
-        # 根据分析状态决定显示内容
+        # 根据分析状态决定显示内容（注意：status可能已在上面的恢复逻辑中被更新）
+        # 重新检查session状态，确保获取最新的
+        status = session.get('analysis_status', status)
+        result_id = session.get('analysis_result_id', result_id) 
+        
         if status == 'completed':
             suggestions = None
             

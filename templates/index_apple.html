@@ -1368,20 +1368,12 @@
             // 验证关键人物
             if (formData.keyPersons.length === 0) {
                 showBeautifulAlert('请至少添加一个关键人物', 'warning');
-                // 恢复按钮状态
-                const submitBtn = document.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = '<i class="fas fa-magic me-2"></i>开始AI智能分析';
-                submitBtn.disabled = false;
                 return;
             }
             
             // 如果有人物没有选择"如何让此人高兴"
             if (hasInvalidPerson) {
                 showBeautifulAlert('请为每个关键人物选择"如何让他们高兴"选项，或在备注中填写其他需求', 'warning');
-                // 恢复按钮状态
-                const submitBtn = document.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = '<i class="fas fa-magic me-2"></i>开始AI智能分析';
-                submitBtn.disabled = false;
                 // 添加抖动动画样式
                 if (!document.querySelector('#shake-animation')) {
                     const style = document.createElement('style');

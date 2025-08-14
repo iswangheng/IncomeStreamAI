@@ -665,6 +665,7 @@ def generate():
         # 详细调试session存储
         app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")
         session.permanent = True  # 设置session为永久性
+        session.modified = True  # 强制标记session已修改
         app.logger.info(f"Generate route - After storing - Full session: {dict(session)}")
         app.logger.info(f"Generate route - Session modified: {session.modified}")
         

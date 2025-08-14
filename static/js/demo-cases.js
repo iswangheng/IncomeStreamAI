@@ -166,29 +166,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * 清空人物卡片 - 强力清理版本
+     * 清空人物卡片 - 终极清理版本
      */
     function clearPersonCards() {
+        console.log('开始清空人物卡片');
+        
         const personsContainer = document.getElementById('personsContainer');
-        if (personsContainer) {
-            // 强制清空所有内容
-            personsContainer.innerHTML = '';
-            
-            // 确保移除所有可能的动态添加元素
-            const existingCards = document.querySelectorAll('.person-card');
-            existingCards.forEach(card => {
-                if (card.parentNode) {
-                    card.parentNode.removeChild(card);
-                }
-            });
+        if (!personsContainer) {
+            console.error('找不到personsContainer');
+            return;
         }
         
-        // 重置所有可能的计数器
-        if (window.personCounter !== undefined) {
+        // 方法1：强制清空容器内容
+        personsContainer.innerHTML = '';
+        
+        // 方法2：确保移除页面上所有的person-card，不管在哪个容器里
+        const existingCards = document.querySelectorAll('.person-card');
+        existingCards.forEach((card, index) => {
+            console.log(`移除第${index + 1}个残留卡片`);
+            if (card.parentNode) {
+                card.parentNode.removeChild(card);
+            }
+        });
+        
+        // 方法3：重置form.js中的计数器
+        if (typeof window !== 'undefined') {
+            // 重置所有可能的全局计数器
             window.personCounter = 0;
-        }
-        if (window.personCount !== undefined) {
             window.personCount = 0;
+            
+            // 如果有全局的addPersonCard函数，阻止其自动运行
+            const originalAddPersonCard = window.addPersonCard;
+            if (originalAddPersonCard) {
+                window.addPersonCard = function() {
+                    console.log('addPersonCard被阻止执行，由demo-cases接管');
+                };
+            }
         }
         
         // 显示空状态消息
@@ -197,14 +210,15 @@ document.addEventListener('DOMContentLoaded', function() {
             noPersonsMsg.style.display = 'block';
         }
         
-        console.log('人物卡片已完全清空');
+        console.log('人物卡片已完全清空，当前容器内容：', personsContainer.innerHTML);
     }
 
     /**
-     * 添加带数据的人物卡片
+     * 添加带数据的人物卡片 - 修复重复问题
      */
     function addPersonCardWithData(personData, shouldFocus = false) {
-        // 直接使用优化后的备用方案，避免空卡片
+        // 完全避免调用其他可能导致重复的函数
+        // 直接在这里创建卡片，不调用任何外部函数
         createBasicPersonCard(personData);
     }
 
@@ -260,6 +274,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (emptyState) {
             emptyState.style.display = 'none';
         }
+        
+        console.log(`人物卡片创建完成: ${name}, 容器内现有卡片数量: ${container.children.length}`);
     }
 
     /**

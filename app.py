@@ -210,7 +210,6 @@ def _internal_check_analysis_status():
     
     # 处理需要开始或重试的分析
     if status == 'not_started' or (status == 'processing' and result is None and not result_id):
-        app.logger.info(f"Triggering analysis execution - Status: {status}, Result: {result is not None}, Result ID: {result_id}")
         return _handle_analysis_execution(form_data, session)
     
     # 默认处理中状态 - 返回真实进度
@@ -233,16 +232,12 @@ def _handle_analysis_execution(form_data, session):
         session['analysis_status'] = 'processing'
         session['analysis_progress'] = 10
         session['analysis_stage'] = '开始AI分析...'
-        session.modified = True  # 确保session被标记为已修改
         app.logger.info("Starting AI analysis in request context")
         
         # 执行AI分析，设置进度追踪
         session['analysis_progress'] = 30
         session['analysis_stage'] = '正在分析项目数据...'
-        session.modified = True
-        app.logger.info(f"About to call generate_ai_suggestions with form_data: {form_data}")
         suggestions = generate_ai_suggestions(form_data, session)
-        app.logger.info(f"generate_ai_suggestions returned: {suggestions is not None}")
         
         if suggestions and isinstance(suggestions, dict):
             # 分析成功 - 将结果存储到数据库而不是session，避免session过大
@@ -368,8 +363,6 @@ def results():
     """Display AI analysis result page with dynamic loading"""
     try:
         from flask import session
-        import json
-        import traceback
         
         # 详细记录session状态
         app.logger.info(f"Results page accessed - Full session: {dict(session)}")

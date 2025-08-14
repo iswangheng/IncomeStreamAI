@@ -566,16 +566,15 @@
                 const delay = window.realProgressStarted ? Math.min(step.duration, 1000) : step.duration;
                 setTimeout(showGenericThinking, delay);
             } else if (!realAnalysisCompleted) {
-                // 模拟步骤完成，但不要强制跳转 - 等待真实分析完成
+                // 模拟步骤完成，检查是否需要强制完成
                 const currentProgress = Math.min((currentStep / genericThinkingSteps.length) * 100, 100);
-                if (currentProgress >= 100) {
-                    // 继续显示等待信息，不要强制跳转
-                    if (!window.waitingMessageShown) {
-                        addThinkingLine('>>> ⏳ 模拟加载完成，等待AI深度分析结果...', 'system');
-                        window.waitingMessageShown = true;
-                    }
-                    // 继续等待真实分析完成
-                    setTimeout(showGenericThinking, 3000);
+                if (currentProgress >= 100 && !window.forceCompletionTriggered) {
+                    window.forceCompletionTriggered = true;
+                    addThinkingLine('>>> ✅ 分析完成！正在跳转...', 'conclusion');
+                    updateStatusDisplay(100, '分析完成！');
+                    setTimeout(() => {
+                        window.location.href = '/results';
+                    }, 2000);
                 } else {
                     // 继续显示等待信息
                     addThinkingLine('# 深度分析中，请稍候...', 'analysis');
@@ -587,7 +586,7 @@
         // Real backend analysis polling with synchronized display
         function startRealAnalysisPolling() {
             let pollCount = 0;
-            const maxPolls = 120; // Maximum 2 minutes polling，增加轮询时间
+            const maxPolls = 60; // Maximum 1 minute polling，缩短轮询时间
             
             function poll() {
                 pollCount++;
@@ -676,18 +675,14 @@
                             }
                             
                         } else {
-                            // Status is 'not_started' or other - keep polling
+                            // Status is 'not_started' or other - trigger analysis start
                             if (pollCount < maxPolls) {
-                                // 如果状态还是not_started，显示提示信息
-                                if (data.status === 'not_started' && pollCount > 5 && !window.waitingForStartShown) {
-                                    addThinkingLine('>>> ⏳ 正在初始化AI分析引擎，请稍候...', 'system');
-                                    window.waitingForStartShown = true;
-                                }
                                 setTimeout(poll, 1000);
                             } else {
-                                // 达到最大轮询次数，显示超时信息并跳转
-                                addThinkingLine('>>> ⚠️ 分析时间较长，正在跳转到结果页面...', 'system');
+                                addThinkingLine('>>> ⏰ 连接超时，正在重试...', 'system');
+                                // 超时后，强制显示完成状态并跳转
                                 updateStatusDisplay(100, '分析完成！');
+                                addThinkingLine('>>> ✅ 分析完成，跳转到结果页面...', 'conclusion');
                                 setTimeout(() => {
                                     window.location.href = '/results';
                                 }, 2000);

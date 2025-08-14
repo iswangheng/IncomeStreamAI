@@ -1543,7 +1543,7 @@
             
             document.getElementById('personsContainer').innerHTML = '';
             personCount = 0; // 重置计数器
-            addPerson();
+            // addPerson(); // 由demo-cases.js接管，不自动添加
             
             document.querySelectorAll('input[name="external_resources"]').forEach(cb => {
                 cb.checked = false;

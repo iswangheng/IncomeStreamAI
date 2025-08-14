@@ -113,10 +113,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     /**
-     * 填充表单数据 - 优化版本，防止重复
+     * 填充表单数据 - 最终修复版本
      */
     function fillFormWithCaseData(caseData) {
         console.log('开始填充表单数据:', caseData);
+        
+        // 设置标记防止其他脚本干扰
+        window.demoCasesActive = true;
         
         // 填充基本项目信息
         const projectNameInput = document.getElementById('project_name');
@@ -127,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (projectDescInput) projectDescInput.value = caseData.projectDescription;
         if (projectStageSelect) projectStageSelect.value = caseData.projectStage;
         
-        // 强力清空现有的人物卡片，等待DOM更新
+        // 彻底清空现有的人物卡片
         clearPersonCards();
         
         // 等待清空完成后再添加新的人物卡片
@@ -135,18 +138,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (caseData.keyPersons && caseData.keyPersons.length > 0) {
                 console.log('准备添加', caseData.keyPersons.length, '个关键人物');
                 
-                // 使用同步方式添加，避免异步导致的重复问题
+                // 直接创建所有卡片，不使用任何可能冲突的函数
                 caseData.keyPersons.forEach((person, index) => {
                     console.log(`添加第${index + 1}个人物:`, person.name);
-                    addPersonCardWithData(person, false);
+                    createBasicPersonCard(person);
                 });
             }
-        }, 100); // 短暂延时确保DOM清空完成
+            
+            // 完成后取消标记
+            window.demoCasesActive = false;
+        }, 200);
         
         // 填充外部资源
         setTimeout(() => {
             fillExternalResources(caseData.externalResources);
-        }, 500);
+        }, 600);
     }
 
     /**
@@ -214,11 +220,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * 添加带数据的人物卡片 - 修复重复问题
+     * 添加带数据的人物卡片 - 已废弃，直接调用createBasicPersonCard
      */
     function addPersonCardWithData(personData, shouldFocus = false) {
-        // 完全避免调用其他可能导致重复的函数
-        // 直接在这里创建卡片，不调用任何外部函数
+        console.log('addPersonCardWithData被调用，重定向到createBasicPersonCard');
         createBasicPersonCard(personData);
     }
 

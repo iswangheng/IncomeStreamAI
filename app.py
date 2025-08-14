@@ -151,13 +151,36 @@ def _internal_check_analysis_status():
     
     app.logger.info("=== Starting check_analysis_status ===")
     
+    # 确保session持久化
+    session.permanent = True
+    
+    # 尝试从临时ID恢复数据（如果session为空）
+    temp_id = session.get('temp_id') or request.args.get('tid')
+    form_data = session.get('analysis_form_data')
+    
+    # 如果session中没有数据，尝试从数据库恢复
+    if not form_data and temp_id:
+        try:
+            temp_record = AnalysisResult.query.filter_by(id=temp_id).first()
+            if temp_record and temp_record.form_data:
+                form_data = json.loads(temp_record.form_data)
+                # 恢复到session
+                session['analysis_form_data'] = form_data
+                session['analysis_status'] = 'not_started'
+                session['analysis_result'] = None
+                session['analysis_progress'] = 0
+                session['analysis_stage'] = '准备开始分析...'
+                session['temp_id'] = temp_id
+                app.logger.info(f"Recovered form data from temp ID in status check: {temp_id}")
+        except Exception as e:
+            app.logger.error(f"Failed to recover from temp ID in status check: {str(e)}")
+    
     # 检查session数据
     try:
-        form_data = session.get('analysis_form_data')
         status = session.get('analysis_status', 'not_started')
         result = session.get('analysis_result')
         
-        app.logger.info(f"Session check - Status: {status}, Form data: {form_data is not None}, Result: {result is not None}")
+        app.logger.info(f"Session check - Status: {status}, Form data: {form_data is not None}, Result: {result is not None}, Temp ID: {temp_id}")
         
     except Exception as session_error:
         app.logger.error(f"Session access error: {str(session_error)}")
@@ -169,7 +192,7 @@ def _internal_check_analysis_status():
     
     # 验证必要数据
     if not form_data:
-        app.logger.warning("No form data found in session")
+        app.logger.warning(f"No form data found in session or database, temp_id: {temp_id}")
         return jsonify({
             'status': 'error', 
             'message': '没有找到分析数据，请重新提交表单',

@@ -429,6 +429,12 @@
     </div>
 
     <script>
+        // 从URL获取临时ID
+        function getTempIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('tid');
+        }
+        
         // Simple Sci-Fi Background Effect  
         function createSciFiBackground() {
             const matrixBg = document.getElementById('matrixBg');
@@ -592,7 +598,11 @@
                 pollCount++;
                 console.log(`Polling real analysis status, attempt: ${pollCount}`);
                 
-                fetch('/check_analysis_status')
+                // 获取临时ID并传递给后端
+                const tempId = getTempIdFromUrl();
+                const url = tempId ? `/check_analysis_status?tid=${tempId}` : '/check_analysis_status';
+                
+                fetch(url)
                     .then(response => response.json())
                     .then(data => {
                         console.log('Real analysis status:', data);
@@ -627,11 +637,17 @@
                                     }, 1000);
                                 }, 2000);
                             } else if (data.error_code === 'NO_FORM_DATA') {
-                                addThinkingLine('>>> 🔄 检测到会话中断，重新初始化...', 'system');
-                                // 如果是NO_FORM_DATA错误，返回首页重新开始
-                                setTimeout(() => {
-                                    window.location.href = '/';
-                                }, 2000);
+                                // 如果没有找到数据，不要立即跳转，继续尝试几次
+                                if (pollCount < 3) {
+                                    addThinkingLine('>>> 🔄 正在重新连接...', 'system');
+                                    setTimeout(poll, 2000);
+                                } else {
+                                    addThinkingLine('>>> 🔄 检测到会话中断，重新初始化...', 'system');
+                                    // 如果多次尝试失败，返回首页重新开始
+                                    setTimeout(() => {
+                                        window.location.href = '/';
+                                    }, 2000);
+                                }
                                 return;
                             } else {
                                 addThinkingLine('>>> ❌ 分析过程遇到问题', 'system');

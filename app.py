@@ -162,6 +162,7 @@ def _internal_check_analysis_status():
     if not form_data and temp_id:
         try:
             from models import AnalysisResult
+            import json
             temp_record = AnalysisResult.query.filter_by(id=temp_id).first()
             if temp_record and temp_record.form_data:
                 form_data = json.loads(temp_record.form_data)

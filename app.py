@@ -65,11 +65,6 @@ def thinking_process():
     """AI thinking process visualization page"""
     from flask import session, redirect, url_for, flash
     
-    # 详细调试session状态
-    app.logger.info(f"Thinking route accessed - Full session: {dict(session)}")
-    app.logger.info(f"Thinking route - Session ID: {request.cookies.get('session', 'No session cookie')}")
-    app.logger.info(f"Thinking route - Test flag: {session.get('test_flag', 'NOT FOUND')}")
-    
     # Get form data from session
     form_data = session.get('analysis_form_data')
     app.logger.info(f"Thinking page - session data exists: {form_data is not None}")
@@ -670,11 +665,6 @@ def generate():
         # 详细调试session存储
         app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")
         session.permanent = True  # 设置session为永久性
-        session.modified = True  # 强制标记session已修改
-        
-        # 在重定向前，再次确保数据在session中
-        session['test_flag'] = 'from_generate'  # 添加测试标记
-        
         app.logger.info(f"Generate route - After storing - Full session: {dict(session)}")
         app.logger.info(f"Generate route - Session modified: {session.modified}")
         
@@ -682,14 +672,8 @@ def generate():
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully")
         
-        # 创建响应对象并显式设置session cookie
-        response = redirect(url_for('thinking_process'))
-        
-        # 强制Flask保存session
-        from flask import make_response
-        response = make_response(response)
-        
-        return response
+        # 跳转到新的Matrix风格思考页面
+        return redirect(url_for('thinking_process'))
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")

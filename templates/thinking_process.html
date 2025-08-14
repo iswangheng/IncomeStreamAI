@@ -443,30 +443,29 @@
 
         
         // AI Thinking Process with Real Backend Sync
-        // 优化后的时间：总时长约11秒，匹配真实AI分析时间
         const genericThinkingSteps = [
-            { type: 'system', text: '>>> 启动 Angela AI 神经网络分析引擎...', duration: 500 },
-            { type: 'system', text: '>>> 加载非劳务收入知识库... [✓]', duration: 400 },
-            { type: 'system', text: '>>> 初始化项目分析模块... [✓]', duration: 400 },
-            { type: 'process', text: 'def analyze_project_data():', duration: 300 },
-            { type: 'analysis', text: '# 解析项目背景和核心问题...', duration: 600 },
-            { type: 'analysis', text: '# 识别关键利益相关方...', duration: 500 },
-            { type: 'analysis', text: '# 检测潜在商业机会...', duration: 500 },
-            { type: 'process', text: 'def evaluate_key_persons():', duration: 300 },
-            { type: 'analysis', text: '# 分析关键人物资源配置...', duration: 600 },
-            { type: 'analysis', text: '# 评估资源匹配度和协同潜力...', duration: 500 },
-            { type: 'process', text: 'def search_income_patterns():', duration: 300 },
-            { type: 'analysis', text: '# 查询知识库中的成功案例...', duration: 700 },
-            { type: 'analysis', text: '# 匹配适合的收入模式类型...', duration: 600 },
-            { type: 'analysis', text: '# 识别核心价值创造机制...', duration: 500 },
-            { type: 'process', text: 'def design_revenue_pipeline():', duration: 300 },
-            { type: 'analysis', text: '# 设计三方及以上闭环结构...', duration: 800 },
-            { type: 'analysis', text: '# 制定具体收入触发机制...', duration: 600 },
-            { type: 'analysis', text: '# 设计MVP验证方案...', duration: 500 },
-            { type: 'process', text: 'def generate_action_plan():', duration: 300 },
-            { type: 'analysis', text: '# 制定详细执行步骤...', duration: 700 },
-            { type: 'analysis', text: '# 设计风险防控措施...', duration: 500 },
-            { type: 'analysis', text: '# 评估规模化扩展潜力...', duration: 500 }
+            { type: 'system', text: '>>> 启动 Angela AI 神经网络分析引擎...', duration: 800 },
+            { type: 'system', text: '>>> 加载非劳务收入知识库... [✓]', duration: 600 },
+            { type: 'system', text: '>>> 初始化项目分析模块... [✓]', duration: 500 },
+            { type: 'process', text: 'def analyze_project_data():', duration: 400 },
+            { type: 'analysis', text: '# 解析项目背景和核心问题...', duration: 800 },
+            { type: 'analysis', text: '# 识别关键利益相关方...', duration: 700 },
+            { type: 'analysis', text: '# 检测潜在商业机会...', duration: 600 },
+            { type: 'process', text: 'def evaluate_key_persons():', duration: 400 },
+            { type: 'analysis', text: '# 分析关键人物资源配置...', duration: 900 },
+            { type: 'analysis', text: '# 评估资源匹配度和协同潜力...', duration: 800 },
+            { type: 'process', text: 'def search_income_patterns():', duration: 400 },
+            { type: 'analysis', text: '# 查询知识库中的成功案例...', duration: 1000 },
+            { type: 'analysis', text: '# 匹配适合的收入模式类型...', duration: 900 },
+            { type: 'analysis', text: '# 识别核心价值创造机制...', duration: 700 },
+            { type: 'process', text: 'def design_revenue_pipeline():', duration: 400 },
+            { type: 'analysis', text: '# 设计三方及以上闭环结构...', duration: 1200 },
+            { type: 'analysis', text: '# 制定具体收入触发机制...', duration: 800 },
+            { type: 'analysis', text: '# 设计MVP验证方案...', duration: 600 },
+            { type: 'process', text: 'def generate_action_plan():', duration: 400 },
+            { type: 'analysis', text: '# 制定详细执行步骤...', duration: 1000 },
+            { type: 'analysis', text: '# 设计风险防控措施...', duration: 700 },
+            { type: 'analysis', text: '# 评估规模化扩展潜力...', duration: 600 }
         ];
         
         let currentStep = 0;
@@ -552,11 +551,6 @@
         }
         
         function showGenericThinking() {
-            // 如果真实分析已完成或停止标记已设置，停止模拟
-            if (window.stopSimulation || realAnalysisCompleted) {
-                return;
-            }
-            
             if (currentStep < genericThinkingSteps.length && !realAnalysisCompleted) {
                 const step = genericThinkingSteps[currentStep];
                 
@@ -609,19 +603,16 @@
                             realAnalysisCompleted = true;
                             console.log('分析完成，准备跳转到:', data.redirect_url);
                             
-                            // 立即停止模拟动画
-                            window.stopSimulation = true;
-                            
-                            addThinkingLine('>>> ✅ AI分析完成！已生成专业收入管道方案', 'conclusion');
-                            updateStatusDisplay(100, '分析完成！');
+                            addThinkingLine('>>> ✅ 分析完成！检测到专业收入管道方案', 'conclusion');
+                            updateStatusDisplay(100);
                             
                             addThinkingLine('>>> 🚀 正在跳转到结果页面...', 'system');
                             console.log('执行跳转...');
                             
-                            // 快速跳转，减少等待时间
+                            // 直接跳转，减少延迟
                             setTimeout(() => {
                                 window.location.href = data.redirect_url;
-                            }, 500);
+                            }, 1000);
                             
                         } else if (data.status === 'error' || data.status === 'timeout') {
                             realAnalysisCompleted = true;

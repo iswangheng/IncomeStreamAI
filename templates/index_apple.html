@@ -321,112 +321,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/future-enhanced-interactions.js') }}"></script>
     <script>
-        // 美观的提示框函数
-        function showBeautifulAlert(message, type = 'warning') {
-            // 移除旧的提示框
-            const oldAlert = document.querySelector('.custom-alert-overlay');
-            if (oldAlert) {
-                oldAlert.remove();
-            }
-            
-            // 创建提示框覆盖层
-            const overlay = document.createElement('div');
-            overlay.className = 'custom-alert-overlay';
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 99999;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                animation: fadeIn 0.2s ease;
-            `;
-            
-            // 创建提示框内容
-            const alertBox = document.createElement('div');
-            alertBox.className = 'custom-alert-box';
-            const iconMap = {
-                'warning': 'fas fa-exclamation-triangle',
-                'error': 'fas fa-times-circle',
-                'success': 'fas fa-check-circle',
-                'info': 'fas fa-info-circle'
-            };
-            const colorMap = {
-                'warning': '#f0ad4e',
-                'error': '#d9534f',
-                'success': '#5cb85c',
-                'info': '#007AFF'
-            };
-            
-            alertBox.innerHTML = `
-                <div style="
-                    background: white;
-                    border-radius: 16px;
-                    padding: 32px;
-                    max-width: 500px;
-                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-                    text-align: center;
-                    animation: slideDown 0.3s ease;
-                ">
-                    <i class="${iconMap[type]}" style="
-                        font-size: 48px;
-                        color: ${colorMap[type]};
-                        margin-bottom: 16px;
-                        display: block;
-                    "></i>
-                    <p style="
-                        font-size: 18px;
-                        color: #333;
-                        margin: 16px 0 24px 0;
-                        line-height: 1.5;
-                    ">${message}</p>
-                    <button onclick="this.closest('.custom-alert-overlay').remove()" style="
-                        background: ${colorMap[type]};
-                        color: white;
-                        border: none;
-                        padding: 12px 32px;
-                        border-radius: 8px;
-                        font-size: 16px;
-                        cursor: pointer;
-                        transition: all 0.3s ease;
-                    " onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                        知道了
-                    </button>
-                </div>
-            `;
-            
-            overlay.appendChild(alertBox);
-            document.body.appendChild(overlay);
-            
-            // 添加动画样式
-            if (!document.querySelector('#custom-alert-styles')) {
-                const style = document.createElement('style');
-                style.id = 'custom-alert-styles';
-                style.textContent = `
-                    @keyframes fadeIn {
-                        from { opacity: 0; }
-                        to { opacity: 1; }
-                    }
-                    @keyframes slideDown {
-                        from { transform: translateY(-20px); opacity: 0; }
-                        to { transform: translateY(0); opacity: 1; }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            
-            // 点击覆盖层关闭
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) {
-                    overlay.remove();
-                }
-            });
-        }
-        
         // 人物计数器
         let personCount = 0;
         
@@ -1296,16 +1190,20 @@
         document.getElementById('mainForm').addEventListener('submit', function(e) {
             e.preventDefault(); // 阻止默认表单提交
             
-            try {
-                const projectName = document.getElementById('project_name').value.trim();
-                const projectDescription = document.getElementById('project_description').value.trim();
+            const projectName = document.getElementById('project_name').value.trim();
+            const projectDescription = document.getElementById('project_description').value.trim();
             
             if (!projectName || !projectDescription) {
-                showBeautifulAlert('请填写项目名称和背景描述', 'warning');
+                alert('请填写项目名称和背景描述');
                 return;
             }
             
-            // 先收集表单数据，不要显示加载动画
+            // 添加提交动画
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在分析...';
+            submitBtn.disabled = true;
+            
+            // 收集表单数据
             const formData = {
                 projectName: projectName,
                 projectDescription: projectDescription,
@@ -1327,11 +1225,6 @@
                         notes: ''
                     };
                     
-                    // "如何让此人高兴"改为可选项，不再强制要求
-                    // 清除任何之前的高亮样式
-                    card.style.border = '';
-                    card.style.animation = '';
-                    
                     // 收集个人资源（从已选资源标签中获取）
                     const resourceTags = card.querySelectorAll('.selected-resource-tag');
                     if (resourceTags.length > 0) {
@@ -1348,23 +1241,16 @@
                 }
             });
             
-            // 验证关键人物
-            if (formData.keyPersons.length === 0) {
-                showBeautifulAlert('请至少添加一个关键人物', 'warning');
-                return;
-            }
-            
-            // 收集外部资源（从复选框）
-            const checkedResources = document.querySelectorAll('input[name="external_resources"]:checked');
-            checkedResources.forEach(checkbox => {
-                formData.externalResources.push(checkbox.value);
-            });
-            
-            // 收集其他资源输入
-            const otherResourceCheckbox = document.getElementById('other_resource_checkbox');
-            const otherResourceText = document.getElementById('other_resource_text');
-            if (otherResourceCheckbox && otherResourceCheckbox.checked && otherResourceText && otherResourceText.value.trim()) {
-                formData.externalResources.push(otherResourceText.value.trim());
+            // 收集外部资源（从外部资源区域）
+            const externalResourcesSection = document.getElementById('external-resources-section');
+            if (externalResourcesSection) {
+                const resourceChips = externalResourcesSection.querySelectorAll('.resource-chip');
+                resourceChips.forEach(chip => {
+                    const resourceText = chip.textContent.replace('×', '').trim();
+                    if (resourceText) {
+                        formData.externalResources.push(resourceText);
+                    }
+                });
             }
             
             // 如果没有外部资源，添加一个默认值
@@ -1372,17 +1258,11 @@
                 formData.externalResources = ['暂无明确外部资源'];
             }
             
-            // 使用现有的表单元素而不是创建新表单
-            // 这样可以确保cookie正确传递
-            const form = document.getElementById('mainForm');
-            
-            // 清空现有的表单内容
-            while (form.firstChild) {
-                form.removeChild(form.firstChild);
-            }
-            
+            // 发送数据到后端Flask而不是sessionStorage
+            const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/generate';
+            form.style.display = 'none';
             
             // 添加项目基础信息
             const addInput = (name, value) => {
@@ -1400,10 +1280,9 @@
             // 添加关键人物数据
             formData.keyPersons.forEach((person, index) => {
                 addInput('person_name[]', person.name);
-                // 修复：确保数组存在且正确格式化
-                addInput('person_role[]', person.roles && person.roles.length > 0 ? person.roles.join(',') : '');
-                addInput('person_resources[]', person.resources && person.resources.length > 0 ? person.resources.join(',') : '');
-                addInput('person_needs[]', person.makeHappy && person.makeHappy.length > 0 ? person.makeHappy.join(',') : '');
+                addInput('person_role[]', person.roles.join(','));
+                addInput('person_resources[]', person.resources.join(','));
+                addInput('person_needs[]', person.makeHappy.join(','));
             });
             
             // 添加外部资源数据
@@ -1411,12 +1290,9 @@
                 addInput('external_resources', resource);
             });
             
-            // 直接提交表单（不需要appendChild因为使用现有表单）
+            // 提交表单
+            document.body.appendChild(form);
             form.submit();
-            } catch (error) {
-                console.error('Form submission error:', error);
-                showBeautifulAlert('提交时发生错误，请重试。错误信息：' + error.message, 'error');
-            }
         });
         
         // 测试案例数据

@@ -290,94 +290,94 @@ function initLoadingAnimations() {
         element.style.animationDelay = (index * 0.1) + 's';
     });
     
-    // 移除自动加载效果，让表单直接提交
-    // const forms = document.querySelectorAll('form');
-    // forms.forEach(form => {
-    //     form.addEventListener('submit', function() {
-    //         showLoadingOverlay();
-    //     });
-    // });
+    // 为表单提交添加加载效果
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            showLoadingOverlay();
+        });
+    });
 }
 
 /**
- * 显示加载覆盖层 - 已禁用，表单直接提交
+ * 显示加载覆盖层
  */
-// function showLoadingOverlay() {
-//     const overlay = document.createElement('div');
-//     overlay.className = 'loading-overlay';
-//     overlay.innerHTML = `
-//         <div class="loading-content">
-//             <div class="loading-spinner"></div>
-//             <div class="loading-text">
-//                 <h3>AI正在智能分析</h3>
-//                 <p>请稍候，正在生成专业的收入管道方案...</p>
-//             </div>
-//         </div>
-//     `;
-//     
-//     overlay.style.cssText = `
-//         position: fixed;
-//         top: 0;
-//         left: 0;
-//         width: 100vw;
-//         height: 100vh;
-//         background: rgba(0, 0, 0, 0.8);
-//         backdrop-filter: blur(10px);
-//         z-index: 9999;
-//         display: flex;
-//         align-items: center;
-//         justify-content: center;
-//         opacity: 0;
-//         animation: fadeIn 0.5s ease-out forwards;
-//     `;
-//     
-//     // 添加加载动画样式
-//     if (!document.getElementById('loading-styles')) {
-//         const style = document.createElement('style');
-//         style.id = 'loading-styles';
-//         style.textContent = `
-//             .loading-content {
-//                 text-align: center;
-//                 color: white;
-//             }
-//             
-//             .loading-spinner {
-//                 width: 60px;
-//                 height: 60px;
-//                 border: 3px solid rgba(255, 255, 255, 0.1);
-//                 border-radius: 50%;
-//                 border-top: 3px solid #667eea;
-//                 animation: spin 1s linear infinite;
-//                 margin: 0 auto 2rem;
-//             }
-//             
-//             .loading-text h3 {
-//                 font-size: 1.5rem;
-//                 margin-bottom: 0.5rem;
-//                 background: linear-gradient(135deg, #667eea, #f093fb);
-//                 -webkit-background-clip: text;
-//                 -webkit-text-fill-color: transparent;
-//             }
-//             
-//             .loading-text p {
-//                 opacity: 0.8;
-//                 font-size: 1rem;
-//             }
-//             
-//             @keyframes spin {
-//                 0% { transform: rotate(0deg); }
-//                 100% { transform: rotate(360deg); }
-//             }
-//             
-//             @keyframes fadeIn {
-//                 to { opacity: 1; }
-//             }
-//         `;
-//         document.head.appendChild(style);
-//     }
-//     
-//     document.body.appendChild(overlay);
-// }
+function showLoadingOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.innerHTML = `
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">
+                <h3>AI正在智能分析</h3>
+                <p>请稍候，正在生成专业的收入管道方案...</p>
+            </div>
+        </div>
+    `;
+    
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        animation: fadeIn 0.5s ease-out forwards;
+    `;
+    
+    // 添加加载动画样式
+    if (!document.getElementById('loading-styles')) {
+        const style = document.createElement('style');
+        style.id = 'loading-styles';
+        style.textContent = `
+            .loading-content {
+                text-align: center;
+                color: white;
+            }
+            
+            .loading-spinner {
+                width: 60px;
+                height: 60px;
+                border: 3px solid rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                border-top: 3px solid #667eea;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 2rem;
+            }
+            
+            .loading-text h3 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+                background: linear-gradient(135deg, #667eea, #f093fb);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            
+            .loading-text p {
+                opacity: 0.8;
+                font-size: 1rem;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            @keyframes fadeIn {
+                to { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(overlay);
+}
 
 // 鼠标跟随光标效果已移除，使用普通鼠标样式
 

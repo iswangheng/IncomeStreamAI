@@ -113,9 +113,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     /**
-     * 填充表单数据
+     * 填充表单数据 - 优化版本，防止重复
      */
     function fillFormWithCaseData(caseData) {
+        console.log('开始填充表单数据:', caseData);
+        
         // 填充基本项目信息
         const projectNameInput = document.getElementById('project_name');
         const projectDescInput = document.getElementById('project_description');
@@ -125,22 +127,26 @@ document.addEventListener('DOMContentLoaded', function() {
         if (projectDescInput) projectDescInput.value = caseData.projectDescription;
         if (projectStageSelect) projectStageSelect.value = caseData.projectStage;
         
-        // 清空现有的人物卡片
+        // 强力清空现有的人物卡片，等待DOM更新
         clearPersonCards();
         
-        // 添加关键人物
-        if (caseData.keyPersons && caseData.keyPersons.length > 0) {
-            caseData.keyPersons.forEach((person, index) => {
-                setTimeout(() => {
-                    addPersonCardWithData(person, false); // false表示不聚焦
-                }, index * 200); // 延时添加，避免DOM操作冲突
-            });
-        }
+        // 等待清空完成后再添加新的人物卡片
+        setTimeout(() => {
+            if (caseData.keyPersons && caseData.keyPersons.length > 0) {
+                console.log('准备添加', caseData.keyPersons.length, '个关键人物');
+                
+                // 使用同步方式添加，避免异步导致的重复问题
+                caseData.keyPersons.forEach((person, index) => {
+                    console.log(`添加第${index + 1}个人物:`, person.name);
+                    addPersonCardWithData(person, false);
+                });
+            }
+        }, 100); // 短暂延时确保DOM清空完成
         
         // 填充外部资源
         setTimeout(() => {
             fillExternalResources(caseData.externalResources);
-        }, caseData.keyPersons.length * 200 + 300);
+        }, 500);
     }
 
     /**
@@ -160,17 +166,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * 清空人物卡片
+     * 清空人物卡片 - 强力清理版本
      */
     function clearPersonCards() {
         const personsContainer = document.getElementById('personsContainer');
         if (personsContainer) {
+            // 强制清空所有内容
             personsContainer.innerHTML = '';
+            
+            // 确保移除所有可能的动态添加元素
+            const existingCards = document.querySelectorAll('.person-card');
+            existingCards.forEach(card => {
+                if (card.parentNode) {
+                    card.parentNode.removeChild(card);
+                }
+            });
         }
         
-        // 重置人物计数器
+        // 重置所有可能的计数器
         if (window.personCounter !== undefined) {
             window.personCounter = 0;
+        }
+        if (window.personCount !== undefined) {
+            window.personCount = 0;
         }
         
         // 显示空状态消息
@@ -178,6 +196,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (noPersonsMsg) {
             noPersonsMsg.style.display = 'block';
         }
+        
+        console.log('人物卡片已完全清空');
     }
 
     /**
@@ -193,28 +213,42 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function createBasicPersonCard(personData) {
         const container = document.getElementById('personsContainer');
-        if (!container) return;
+        if (!container) {
+            console.error('找不到personsContainer容器');
+            return;
+        }
         
-        // 优化性能：使用更轻量的卡片结构
+        console.log('正在创建人物卡片:', personData.name);
+        
+        // 确保数据完整性
+        const name = personData.name || '';
+        const resources = personData.resources ? personData.resources.join(', ') : '';
+        const makeHappy = personData.make_happy || '';
+        
+        // 计算卡片编号
+        const existingCards = container.querySelectorAll('.person-card');
+        const cardNumber = existingCards.length + 1;
+        
+        // 创建简化的卡片结构，避免复杂交互导致重复
         const cardHtml = `
             <div class="person-card gpu-accelerated" style="margin-bottom: var(--space-4);">
                 <div class="person-card-header">
-                    <div class="person-number">${container.children.length + 1}</div>
+                    <div class="person-number">${cardNumber}</div>
                     <button type="button" class="remove-person-btn" onclick="removePerson(this)">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="form-group">
                     <label class="form-label">人物代号/姓名</label>
-                    <input type="text" class="form-control" name="person_name[]" value="${personData.name || ''}" required>
+                    <input type="text" class="form-control" name="person_name[]" value="${name}" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">掌握的资源</label>
-                    <textarea class="form-control" name="person_resources[]" placeholder="请描述具体资源" rows="2">${personData.resources ? personData.resources.join(',') : ''}</textarea>
+                    <textarea class="form-control" name="person_resources[]" placeholder="请描述具体资源" rows="2">${resources}</textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label">动机需求</label>
-                    <input type="text" class="form-control" name="person_needs[]" value="${personData.make_happy || ''}">
+                    <input type="text" class="form-control" name="person_needs[]" value="${makeHappy}">
                 </div>
             </div>
         `;

@@ -202,8 +202,9 @@
             align-items: center;
             gap: var(--space-2);
             padding: var(--space-2) var(--space-4);
-            background: linear-gradient(45deg, var(--color-success), var(--color-success-light));
-            color: white;
+            background: linear-gradient(45deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
+            color: var(--color-success);
+            border: 1px solid rgba(40, 167, 69, 0.3);
             border-radius: var(--radius-full);
             font-size: var(--text-sm);
             font-weight: var(--font-medium);
@@ -212,15 +213,16 @@
 
         /* 缺失角色建议卡片 */
         .roles-suggestion {
-            background: rgba(255, 193, 7, 0.1);
-            border: 1px solid rgba(255, 193, 7, 0.3);
+            background: rgba(255, 248, 220, 0.8);
+            border: 1px solid rgba(255, 193, 7, 0.4);
             border-radius: var(--radius-3);
             padding: var(--space-6);
             margin-bottom: var(--space-6);
+            backdrop-filter: blur(10px);
         }
 
         .roles-suggestion h4 {
-            color: var(--color-warning);
+            color: #cc8800;
             font-size: var(--text-lg);
             font-weight: var(--font-semibold);
             margin-bottom: var(--space-4);
@@ -321,8 +323,9 @@
             align-items: center;
             gap: var(--space-2);
             padding: var(--space-2) var(--space-4);
-            background: linear-gradient(45deg, var(--color-primary), var(--color-primary-light));
-            color: white;
+            background: linear-gradient(45deg, rgba(0, 122, 255, 0.1), rgba(88, 86, 214, 0.1));
+            color: var(--color-primary);
+            border: 1px solid rgba(0, 122, 255, 0.3);
             border-radius: var(--radius-full);
             font-size: var(--text-sm);
             font-weight: var(--font-medium);
@@ -364,7 +367,8 @@
 
         .party-box.your-role {
             border-color: var(--color-primary);
-            background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(88, 86, 214, 0.1));
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(88, 86, 214, 0.15));
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
         }
 
         .party-arrow {
@@ -443,7 +447,7 @@
 
         .step-happiness {
             font-size: var(--text-sm);
-            color: var(--color-success);
+            color: #0d6834;
             background: rgba(40, 167, 69, 0.1);
             padding: var(--space-2) var(--space-3);
             border-radius: var(--radius-2);
@@ -498,11 +502,13 @@
         .mvp-highlight {
             background: linear-gradient(45deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
             border-left-color: var(--color-success);
+            border: 1px solid rgba(40, 167, 69, 0.2);
         }
 
         .revenue-highlight {
             background: linear-gradient(45deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
             border-left-color: var(--color-warning);
+            border: 1px solid rgba(255, 193, 7, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -527,8 +533,8 @@
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: var(--radius-full);
             padding: var(--space-2) var(--space-4);
             margin-bottom: var(--space-4);
@@ -536,6 +542,7 @@
             font-size: var(--text-sm);
             font-weight: var(--font-medium);
             color: var(--color-primary);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .hero-title {
@@ -544,17 +551,18 @@
             color: white;
             margin-bottom: var(--space-3);
             line-height: 1.2;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
         }
 
         .hero-subtitle {
             font-size: var(--text-xl);
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             margin-bottom: var(--space-8);
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
             line-height: 1.6;
+            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
         }
 
         /* 卡片系统 */
@@ -574,11 +582,11 @@
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
         }
 
-        /* 概览卡片 */
+        /* 概览卡片 - 修改为浅色背景提高可读性 */
         .overview-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--color-text-primary);
+            border: 1px solid rgba(0, 122, 255, 0.2);
         }
 
         .overview-title {
@@ -587,13 +595,14 @@
             font-size: var(--text-2xl);
             font-weight: var(--font-bold);
             margin-bottom: var(--space-6);
-            color: white;
+            color: var(--color-text-primary);
         }
 
         .overview-title i {
             margin-right: var(--space-3);
             padding: var(--space-2);
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--color-primary);
             border-radius: var(--radius-lg);
         }
 
@@ -601,7 +610,7 @@
             font-size: var(--text-lg);
             line-height: 1.7;
             margin-bottom: var(--space-6);
-            color: rgba(255, 255, 255, 0.95);
+            color: var(--color-text-primary);
         }
 
         /* 差距标签 */
@@ -613,7 +622,7 @@
             font-size: var(--text-lg);
             font-weight: var(--font-semibold);
             margin-bottom: var(--space-4);
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--color-text-primary);
         }
 
         .gap-tags {
@@ -625,17 +634,15 @@
         .gap-tag {
             display: inline-block;
             padding: var(--space-2) var(--space-3);
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 193, 7, 0.15);
             border-radius: var(--radius-full);
             font-size: var(--text-sm);
             font-weight: var(--font-medium);
             margin-right: var(--space-2);
             margin-bottom: var(--space-2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 193, 7, 0.4);
+            color: #b8860b;
         }
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: var(--space-2) var(--space-4);
             border-radius: var(--radius-full);
             font-size: var(--text-sm);
             font-weight: var(--font-medium);

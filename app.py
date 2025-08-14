@@ -232,11 +232,14 @@ def _handle_analysis_execution(form_data, session):
         session['analysis_status'] = 'processing'
         session['analysis_progress'] = 10
         session['analysis_stage'] = '开始AI分析...'
+        session.modified = True  # 确保session被保存
         app.logger.info("Starting AI analysis in request context")
+        app.logger.info(f"Form data for analysis: {json.dumps(form_data, ensure_ascii=False)[:200]}")
         
         # 执行AI分析，设置进度追踪
         session['analysis_progress'] = 30
         session['analysis_stage'] = '正在分析项目数据...'
+        session.modified = True  # 确保session被保存
         suggestions = generate_ai_suggestions(form_data, session)
         
         if suggestions and isinstance(suggestions, dict):
@@ -797,6 +800,9 @@ def generate_ai_suggestions(form_data, session=None):
         # 取消超时
         signal.alarm(0)
         app.logger.error(f"Error generating AI suggestions: {str(e)}")
+        app.logger.error(f"Error type: {type(e).__name__}")
+        import traceback
+        app.logger.error(f"Traceback: {traceback.format_exc()}")
         # 设置错误状态到session
         from flask import session
         session['analysis_status'] = 'error'
@@ -1417,8 +1423,9 @@ def ai_chat():
 
 def generate_fallback_suggestions(form_data):
     """当AI服务不可用时生成基础建议"""
-    project_name = form_data.get('project_name', '您的项目')
-    people = form_data.get('people', [])
+    # 修复字段名：使用正确的驼峰命名
+    project_name = form_data.get('projectName', form_data.get('project_name', '您的项目'))
+    people = form_data.get('keyPersons', form_data.get('key_persons', []))
     
     # 基于表单数据生成基础建议
     fallback_suggestions = {

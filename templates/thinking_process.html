@@ -429,12 +429,6 @@
     </div>
 
     <script>
-        // 从URL获取临时ID
-        function getTempIdFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('tid');
-        }
-        
         // Simple Sci-Fi Background Effect  
         function createSciFiBackground() {
             const matrixBg = document.getElementById('matrixBg');
@@ -578,13 +572,8 @@
                     window.forceCompletionTriggered = true;
                     addThinkingLine('>>> ✅ 分析完成！正在跳转...', 'conclusion');
                     updateStatusDisplay(100, '分析完成！');
-                    
-                    // 获取临时ID并附加到跳转URL
-                    const tempId = getTempIdFromUrl();
-                    const redirectUrl = tempId ? `/results?tid=${tempId}` : '/results';
-                    
                     setTimeout(() => {
-                        window.location.href = redirectUrl;
+                        window.location.href = '/results';
                     }, 2000);
                 } else {
                     // 继续显示等待信息
@@ -603,11 +592,7 @@
                 pollCount++;
                 console.log(`Polling real analysis status, attempt: ${pollCount}`);
                 
-                // 获取临时ID并传递给后端
-                const tempId = getTempIdFromUrl();
-                const url = tempId ? `/check_analysis_status?tid=${tempId}` : '/check_analysis_status';
-                
-                fetch(url)
+                fetch('/check_analysis_status')
                     .then(response => response.json())
                     .then(data => {
                         console.log('Real analysis status:', data);
@@ -623,13 +608,9 @@
                             addThinkingLine('>>> 🚀 正在跳转到结果页面...', 'system');
                             console.log('执行跳转...');
                             
-                            // 获取临时ID并附加到跳转URL
-                            const tempId = getTempIdFromUrl();
-                            const redirectUrl = tempId ? `${data.redirect_url}?tid=${tempId}` : data.redirect_url;
-                            
                             // 直接跳转，减少延迟
                             setTimeout(() => {
-                                window.location.href = redirectUrl;
+                                window.location.href = data.redirect_url;
                             }, 1000);
                             
                         } else if (data.status === 'error' || data.status === 'timeout') {
@@ -646,17 +627,11 @@
                                     }, 1000);
                                 }, 2000);
                             } else if (data.error_code === 'NO_FORM_DATA') {
-                                // 如果没有找到数据，不要立即跳转，继续尝试几次
-                                if (pollCount < 3) {
-                                    addThinkingLine('>>> 🔄 正在重新连接...', 'system');
-                                    setTimeout(poll, 2000);
-                                } else {
-                                    addThinkingLine('>>> 🔄 检测到会话中断，重新初始化...', 'system');
-                                    // 如果多次尝试失败，返回首页重新开始
-                                    setTimeout(() => {
-                                        window.location.href = '/';
-                                    }, 2000);
-                                }
+                                addThinkingLine('>>> 🔄 检测到会话中断，重新初始化...', 'system');
+                                // 如果是NO_FORM_DATA错误，返回首页重新开始
+                                setTimeout(() => {
+                                    window.location.href = '/';
+                                }, 2000);
                                 return;
                             } else {
                                 addThinkingLine('>>> ❌ 分析过程遇到问题', 'system');

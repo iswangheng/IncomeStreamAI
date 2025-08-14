@@ -1,11 +1,10 @@
 import os
 import json
 import logging
-import traceback
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, Response, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
@@ -18,8 +17,7 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 app = Flask(__name__)
-# 使用固定的密钥确保session工作正常
-app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key_angela_ai_2025")
+app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key_change_in_production")
 
 # Database configuration
 database_url = os.environ.get("DATABASE_URL")
@@ -34,12 +32,10 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 }
 
 # 修复Session配置 - 确保session正常工作
-app.config['SESSION_COOKIE_NAME'] = 'angela_session'
 app.config['SESSION_COOKIE_SECURE'] = False  # 开发环境允许HTTP
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # session 1小时过期
-app.config['SESSION_COOKIE_PATH'] = '/'  # 确保cookie在所有路径可用
 
 # File upload configuration
 UPLOAD_FOLDER = 'uploads/knowledge'
@@ -67,43 +63,15 @@ def index():
 @app.route('/thinking')
 def thinking_process():
     """AI thinking process visualization page"""
-    # 确保session持久化
-    session.permanent = True
+    from flask import session, redirect, url_for, flash
     
-    # 调试信息
-    app.logger.info(f"Thinking page - Session cookie: {request.cookies.get('angela_session', 'No cookie')}")
-    app.logger.info(f"Thinking page - Session keys: {list(session.keys())}")
+    # Get form data from session
+    form_data = session.get('analysis_form_data')
+    app.logger.info(f"Thinking page - session data exists: {form_data is not None}")
     
-    # 尝试从URL参数获取临时ID
-    temp_id = request.args.get('tid')
-    form_data = None
-    
-    # 优先从临时ID恢复数据
-    if temp_id:
-        try:
-            temp_record = AnalysisResult.query.filter_by(id=temp_id).first()
-            if temp_record and temp_record.form_data:
-                form_data = json.loads(temp_record.form_data)
-                # 恢复到session
-                session['analysis_form_data'] = form_data
-                session['analysis_status'] = 'not_started'
-                session['analysis_result'] = None
-                session['analysis_progress'] = 0
-                session['analysis_stage'] = '准备开始分析...'
-                session['temp_id'] = temp_id  # 保存临时ID供后续使用
-                app.logger.info(f"Recovered form data from temp ID: {temp_id}")
-        except Exception as e:
-            app.logger.error(f"Failed to recover from temp ID: {str(e)}")
-    
-    # 如果没有从临时ID恢复，尝试从session获取
+    # 如果没有表单数据，重定向到首页
     if not form_data:
-        form_data = session.get('analysis_form_data')
-    
-    app.logger.info(f"Thinking page - form data exists: {form_data is not None}")
-    
-    # 如果没有表单数据，重定向到首页  
-    if not form_data:
-        app.logger.warning("No form data found for thinking page - redirecting to home")
+        app.logger.warning("No form data found in session for thinking page - redirecting to home")
         flash('请先填写项目信息', 'info')
         return redirect(url_for('index'))
     
@@ -148,41 +116,18 @@ def check_analysis_status():
 
 def _internal_check_analysis_status():
     """内部状态检查函数"""
+    from flask import session
+    import traceback
     
     app.logger.info("=== Starting check_analysis_status ===")
     
-    # 确保session持久化
-    session.permanent = True
-    
-    # 尝试从临时ID恢复数据（如果session为空）
-    temp_id = session.get('temp_id') or request.args.get('tid')
-    form_data = session.get('analysis_form_data')
-    
-    # 如果session中没有数据，尝试从数据库恢复
-    if not form_data and temp_id:
-        try:
-            from models import AnalysisResult
-            import json
-            temp_record = AnalysisResult.query.filter_by(id=temp_id).first()
-            if temp_record and temp_record.form_data:
-                form_data = json.loads(temp_record.form_data)
-                # 恢复到session
-                session['analysis_form_data'] = form_data
-                session['analysis_status'] = 'not_started'
-                session['analysis_result'] = None
-                session['analysis_progress'] = 0
-                session['analysis_stage'] = '准备开始分析...'
-                session['temp_id'] = temp_id
-                app.logger.info(f"Recovered form data from temp ID in status check: {temp_id}")
-        except Exception as e:
-            app.logger.error(f"Failed to recover from temp ID in status check: {str(e)}")
-    
     # 检查session数据
     try:
+        form_data = session.get('analysis_form_data')
         status = session.get('analysis_status', 'not_started')
         result = session.get('analysis_result')
         
-        app.logger.info(f"Session check - Status: {status}, Form data: {form_data is not None}, Result: {result is not None}, Temp ID: {temp_id}")
+        app.logger.info(f"Session check - Status: {status}, Form data: {form_data is not None}, Result: {result is not None}")
         
     except Exception as session_error:
         app.logger.error(f"Session access error: {str(session_error)}")
@@ -194,7 +139,7 @@ def _internal_check_analysis_status():
     
     # 验证必要数据
     if not form_data:
-        app.logger.warning(f"No form data found in session or database, temp_id: {temp_id}")
+        app.logger.warning("No form data found in session")
         return jsonify({
             'status': 'error', 
             'message': '没有找到分析数据，请重新提交表单',
@@ -278,7 +223,7 @@ def _internal_check_analysis_status():
         'message': stage
     })
 
-def _handle_analysis_execution(form_data, flask_session):
+def _handle_analysis_execution(form_data, session):
     """处理AI分析执行"""
     import traceback
     
@@ -417,43 +362,17 @@ def _handle_analysis_execution(form_data, flask_session):
 def results():
     """Display AI analysis result page with dynamic loading"""
     try:
-        # 确保session持久化
-        session.permanent = True
+        from flask import session
         
         # 详细记录session状态
         app.logger.info(f"Results page accessed - Full session: {dict(session)}")
-        app.logger.info(f"Results page - Session ID: {request.cookies.get('angela_session', 'No session cookie')}")
-        
-        # 尝试从URL参数获取临时ID
-        temp_id = request.args.get('tid') or session.get('temp_id')
+        app.logger.info(f"Results page - Session ID: {request.cookies.get('session', 'No session cookie')}")
         
         # Get form data and analysis status from session
         form_data = session.get('analysis_form_data')
         status = session.get('analysis_status', 'not_started')
-        result_id = session.get('analysis_result_id') or temp_id
+        result_id = session.get('analysis_result_id')
         result_data = session.get('analysis_result')
-        
-        # 如果session中没有数据但有temp_id，从数据库恢复
-        if not form_data and temp_id:
-            try:
-                from models import AnalysisResult
-                import json
-                
-                temp_record = AnalysisResult.query.filter_by(id=temp_id).first()
-                if temp_record:
-                    if temp_record.form_data:
-                        form_data = json.loads(temp_record.form_data)
-                        session['analysis_form_data'] = form_data
-                    if temp_record.result_data:
-                        result_data = json.loads(temp_record.result_data)
-                        session['analysis_result'] = result_data
-                        session['analysis_status'] = 'completed'
-                        status = 'completed'
-                    session['temp_id'] = temp_id
-                    result_id = temp_id
-                    app.logger.info(f"Results page: Recovered data from temp ID: {temp_id}")
-            except Exception as e:
-                app.logger.error(f"Failed to recover from temp ID in results: {str(e)}")
         
         app.logger.info(f"Results page - Status: {status}, Form data exists: {form_data is not None}, Result ID: {result_id}, Result data exists: {result_data is not None}")
         
@@ -680,14 +599,9 @@ def results():
 def generate():
     """Process form data and redirect to thinking page"""
     try:
-        # 立即设置session为永久性，确保cookie被创建
-        session.permanent = True
-        
         app.logger.info(f"Generate route accessed - Request method: {request.method}")
         app.logger.info(f"Generate route - Form data keys: {list(request.form.keys())}")
         app.logger.info(f"Generate route - Content type: {request.content_type}")
-        app.logger.info(f"Generate route - Session cookie before: {request.cookies.get('session', 'No cookie')}")
-        
         # Get form data
         project_name = request.form.get('project_name', '').strip()
         project_description = request.form.get('project_description', '').strip()
@@ -732,7 +646,7 @@ def generate():
         }
         
         # Store form data in session 
-        # 存储表单数据
+        from flask import session
         session['analysis_form_data'] = form_data
         
         # 设置分析状态为未开始，等待thinking页面触发
@@ -741,45 +655,18 @@ def generate():
         session['analysis_progress'] = 0
         session['analysis_stage'] = '准备开始分析...'
         
-        # 强制标记session为已修改，确保保存
-        session.modified = True
-        
         # 详细调试session存储
-        app.logger.info(f"Generate route - Session data stored: {session.get('analysis_form_data') is not None}")
-        app.logger.info(f"Generate route - Session will be saved with permanent flag: {session.permanent}")
+        app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")
+        session.permanent = True  # 设置session为永久性
+        app.logger.info(f"Generate route - After storing - Full session: {dict(session)}")
+        app.logger.info(f"Generate route - Session modified: {session.modified}")
         
         # Log the received data
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
-        
-        # 将数据临时存储到数据库，避免session问题
-        import uuid
-        temp_id = str(uuid.uuid4())[:8]  # 短ID用于URL
-        
-        try:
-            # 创建临时记录
-            temp_record = AnalysisResult(
-                id=temp_id,
-                form_data=json.dumps(form_data, ensure_ascii=False),
-                result_data=json.dumps({"status": "pending"}, ensure_ascii=False),
-                project_name=form_data.get('projectName', ''),
-                project_description=form_data.get('projectDescription', ''),
-                project_stage=form_data.get('projectStage', ''),
-                team_size=len(form_data.get('keyPersons', [])),
-                analysis_type='pending'
-            )
-            db.session.add(temp_record)
-            db.session.commit()
-            app.logger.info(f"Temporary record created with ID: {temp_id}")
-        except Exception as e:
-            app.logger.error(f"Failed to create temp record: {str(e)}")
-            # 如果数据库失败，仍然尝试使用session
-            pass
-        
         app.logger.info(f"Session data stored successfully")
-        app.logger.info(f"Session keys before redirect: {list(session.keys())}")
         
-        # 传递临时ID到thinking页面
-        return redirect(url_for('thinking_process', tid=temp_id))
+        # 跳转到新的Matrix风格思考页面
+        return redirect(url_for('thinking_process'))
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")
@@ -1612,11 +1499,6 @@ def generate_fallback_suggestions(form_data):
         fallback_suggestions["income_paths"] = [path1]
     
     return fallback_suggestions
-
-@app.route('/debug_test')
-def debug_test():
-    """Debug test page to verify JavaScript functionality"""
-    return render_template('debug_test.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

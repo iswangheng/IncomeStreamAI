@@ -1423,8 +1423,7 @@ body::after {
 }
 
 .checkbox-item input[type="checkbox"] {
-    /* 移除appearance: none以保留checkbox的默认功能 */
-    /* appearance: none; */
+    appearance: none;
     width: 20px;
     height: 20px;
     border: 2px solid rgba(102, 126, 234, 0.3);
@@ -1432,8 +1431,6 @@ body::after {
     margin-right: var(--space-3);
     position: relative;
     transition: all var(--transition-enhanced);
-    cursor: pointer;
-    flex-shrink: 0;
 }
 
 .checkbox-item input[type="checkbox"]:checked {

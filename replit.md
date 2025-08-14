@@ -79,13 +79,26 @@ Angela is a Flask-based web application designed to help users generate non-labo
 
 ## Recent Enhancements (2025-08-14)
 
+### Session Persistence Improvements
+- **Fixed Critical Bug**: Session data not properly persisting, causing analysis_status to show as 'not_started' even after completion
+- **Root Cause**: Missing `session.permanent = True` and `session.modified = True` flags in multiple critical locations
+- **Solution Implemented**:
+  - Added proper session persistence flags in all session modification points
+  - Fixed `/generate` route: Added both permanent and modified flags after clearing old data
+  - Fixed `_handle_analysis_execution`: Ensured session persistence when storing analysis results
+  - Fixed data recovery logic: Added persistence flags when recovering from database
+  - Fixed data validation: Added persistence when switching between analysis records
+  - Removed duplicate code: Eliminated redundant `analysis_stage` setting
+  - Improved exception handling: Replaced bare except with proper exception catching
+- **Impact**: Session data now reliably persists across requests, preventing lost analysis results
+
 ### Session Management Fix
 - **Fixed Critical Bug**: Result pages showing wrong project analysis due to stale session data
 - **Root Cause**: `/generate` route wasn't clearing old `analysis_result_id` when processing new projects
 - **Solution Implemented**:
   - Added complete session cleanup in `/generate` route, including `analysis_result_id` reset
   - Enhanced data consistency validation in `/results` route
-  - Added automatic redirect to re-analysis when project mismatch detected
+  - Modified validation logic to preserve `analysis_status` instead of resetting it
 - **Impact**: Each new project submission now gets fresh analysis without contamination from previous sessions
 
 ### AI Analysis Trigger Fix

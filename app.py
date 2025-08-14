@@ -401,12 +401,16 @@ def results():
                     if analysis_record.form_data and not form_data:
                         form_data = json.loads(analysis_record.form_data)
                         session['analysis_form_data'] = form_data
+                        session.permanent = True
+                        session.modified = True
                         app.logger.info(f"Recovered form data from database for result ID: {result_id}")
                     
                     if analysis_record.result_data:
                         result_data = json.loads(analysis_record.result_data)
                         session['analysis_result'] = result_data
                         session['analysis_status'] = 'completed'
+                        session.permanent = True
+                        session.modified = True
                         status = 'completed'  # 更新本地状态变量
                         app.logger.info(f"Recovered analysis status and result data for ID: {result_id}")
                 else:
@@ -435,6 +439,7 @@ def results():
                         session['analysis_status'] = 'completed'
                         result_data = json.loads(latest_ai_result.result_data)
                         session['analysis_result'] = result_data
+                        session.permanent = True  # 添加permanent确保持久化
                         session.modified = True
                         status = 'completed'
                     
@@ -475,13 +480,16 @@ def results():
                                 if key_words in record_description or record_description[:50] in project_description:
                                     matching_record = record
                                     break
-                            except:
+                            except Exception as e:
+                                app.logger.debug(f"Failed to parse record form data: {str(e)}")
                                 continue
                         
                         if matching_record:
                             result_data = json.loads(matching_record.result_data)
                             session['analysis_result'] = result_data
                             session['analysis_result_id'] = matching_record.id
+                            session.permanent = True
+                            session.modified = True
                             result_id = matching_record.id
                             app.logger.info(f"Switched from fallback to matching AI analysis result: {matching_record.id}")
                         else:
@@ -531,12 +539,16 @@ def results():
                                     analysis_record = correct_records[0]
                                     result_id = analysis_record.id
                                     session['analysis_result_id'] = result_id
+                                    session.permanent = True
+                                    session.modified = True
                                     app.logger.info(f"Found correct analysis record: {result_id} for project: {session_project_name}")
                                 else:
                                     app.logger.warning(f"No matching analysis found for project: {session_project_name}, but keeping current status: {status}")
                                     # 数据不匹配但不要重置status，保持原状态
                                     # 只清理错误的result_id
                                     session['analysis_result_id'] = None
+                                    session.permanent = True
+                                    session.modified = True
                                     # 不要重置analysis_status！保持原有状态
                                     # 如果status是completed，说明分析已完成，只是result_id有问题
                                     app.logger.info(f"Keeping analysis_status as: {status}, will attempt to use session data")
@@ -766,13 +778,13 @@ def generate():
         session['analysis_progress'] = 0
         session['analysis_stage'] = '准备开始分析...'
         session.pop('analysis_error', None)  # 清理可能存在的错误信息
-        session['analysis_stage'] = '准备开始分析...'
         
         # 详细调试session存储
         app.logger.info(f"Generate route - Before storing - Full session: {dict(session)}")
         session.permanent = True  # 设置session为永久性
+        session.modified = True  # 确保session修改被保存
         app.logger.info(f"Generate route - After storing - Full session: {dict(session)}")
-        app.logger.info(f"Generate route - Session modified: {session.modified}")
+        app.logger.info(f"Generate route - Session permanent: {session.permanent}, Modified: {session.modified}")
         
         # Log the received data
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")

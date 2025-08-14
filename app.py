@@ -412,72 +412,49 @@ def results():
                 if current_record and current_record.analysis_type == 'emergency_fallback':
                     app.logger.warning(f"Current result_id {result_id} points to emergency fallback, searching for real AI analysis")
                     
-                    # 根据表单数据找最新的AI分析结果
+                    # 根据表单数据的详细内容找匹配的AI分析结果
                     project_name = form_data.get('projectName', '')
-                    if project_name:
-                        # 查找同项目的真正AI分析结果
+                    project_description = form_data.get('projectDescription', '')
+                    
+                    if project_name and project_description:
+                        # 查找匹配项目名称和描述关键词的AI分析结果
                         ai_records = AnalysisResult.query.filter(
                             AnalysisResult.analysis_type == 'ai_analysis',
                             AnalysisResult.form_data.contains(f'"{project_name}"')
                         ).order_by(AnalysisResult.created_at.desc()).all()
                         
-                        if ai_records:
-                            best_record = ai_records[0]  # 取最新的AI分析结果
-                            result_data = json.loads(best_record.result_data)
+                        # 进一步验证：检查描述中的关键词匹配
+                        matching_record = None
+                        key_words = project_description[:50]  # 取描述前50字符作为关键特征
+                        
+                        for record in ai_records:
+                            try:
+                                record_form_data = json.loads(record.form_data)
+                                record_description = record_form_data.get('projectDescription', '')
+                                # 检查描述是否包含相同的关键词
+                                if key_words in record_description or record_description[:50] in project_description:
+                                    matching_record = record
+                                    break
+                            except:
+                                continue
+                        
+                        if matching_record:
+                            result_data = json.loads(matching_record.result_data)
                             session['analysis_result'] = result_data
-                            session['analysis_result_id'] = best_record.id
-                            result_id = best_record.id
-                            app.logger.info(f"Switched from fallback to real AI analysis result: {best_record.id}")
+                            session['analysis_result_id'] = matching_record.id
+                            result_id = matching_record.id
+                            app.logger.info(f"Switched from fallback to matching AI analysis result: {matching_record.id}")
+                        else:
+                            app.logger.warning(f"No matching AI analysis found for project: {project_name}")
                         
             except Exception as switch_error:
                 app.logger.error(f"Failed to switch from fallback to AI result: {str(switch_error)}")
 
-        # 如果没有表单数据，尝试从最近的AI分析结果中恢复
+        # 如果没有表单数据，不要随意从其他记录中恢复，应该重定向到首页
         if not form_data:
-            app.logger.warning("No form data found in session, trying to recover from latest AI analysis record")
-            
-            try:
-                from models import AnalysisResult
-                import json
-                
-                # 优先查找AI分析结果，而不是备用方案
-                latest_ai_record = AnalysisResult.query.filter_by(analysis_type='ai_analysis').order_by(AnalysisResult.created_at.desc()).first()
-                if latest_ai_record and latest_ai_record.form_data:
-                    form_data = json.loads(latest_ai_record.form_data)
-                    # 同时恢复其他session数据
-                    if latest_ai_record.result_data:
-                        result_data = json.loads(latest_ai_record.result_data)
-                        session['analysis_result'] = result_data
-                    session['analysis_form_data'] = form_data
-                    session['analysis_status'] = 'completed'
-                    session['analysis_result_id'] = latest_ai_record.id
-                    status = 'completed'  # 更新本地状态变量
-                    result_id = latest_ai_record.id
-                    app.logger.info(f"Recovered form data from latest AI analysis record: {latest_ai_record.id}")
-                else:
-                    # 如果没有AI分析记录，才从所有记录中恢复
-                    latest_record = AnalysisResult.query.order_by(AnalysisResult.created_at.desc()).first()
-                    if latest_record and latest_record.form_data:
-                        form_data = json.loads(latest_record.form_data)
-                        if latest_record.result_data:
-                            result_data = json.loads(latest_record.result_data)
-                            session['analysis_result'] = result_data
-                        session['analysis_form_data'] = form_data
-                        session['analysis_status'] = 'completed'
-                        session['analysis_result_id'] = latest_record.id
-                        status = 'completed'
-                        result_id = latest_record.id
-                        app.logger.info(f"Recovered from latest record (any type): {latest_record.id}")
-                    else:
-                        app.logger.warning("No recent analysis records found in database")
-            except Exception as recovery_error:
-                app.logger.error(f"Failed to recover from latest record: {str(recovery_error)}")
-            
-            # 如果仍然无法恢复，重定向到首页
-            if not form_data:
-                app.logger.warning("Complete session recovery failed - redirecting to home")
-                flash('会话已过期，请重新提交表单', 'error')
-                return redirect(url_for('index'))
+            app.logger.warning("No form data found in session - should not recover random records")
+            flash('会话已过期，请重新提交表单', 'error')
+            return redirect(url_for('index'))
         
         # 根据分析状态决定显示内容
         if status == 'completed':
@@ -492,8 +469,35 @@ def results():
                     analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
                     
                     if analysis_record and analysis_record.result_data:
-                        suggestions = json.loads(analysis_record.result_data)
-                        app.logger.info(f"Analysis completed - showing full results from database for ID: {result_id}")
+                        # 额外验证：检查数据库记录的表单数据与session中的表单数据是否匹配
+                        try:
+                            db_form_data = json.loads(analysis_record.form_data)
+                            session_project_name = form_data.get('projectName', '')
+                            db_project_name = db_form_data.get('projectName', '')
+                            
+                            if session_project_name and db_project_name and session_project_name != db_project_name:
+                                app.logger.error(f"Data mismatch: session project '{session_project_name}' != database project '{db_project_name}' for result_id {result_id}")
+                                # 数据不匹配，尝试找正确的记录
+                                correct_records = AnalysisResult.query.filter(
+                                    AnalysisResult.analysis_type == 'ai_analysis',
+                                    AnalysisResult.form_data.contains(f'"{session_project_name}"')
+                                ).order_by(AnalysisResult.created_at.desc()).all()
+                                
+                                if correct_records:
+                                    analysis_record = correct_records[0]
+                                    result_id = analysis_record.id
+                                    session['analysis_result_id'] = result_id
+                                    app.logger.info(f"Found correct analysis record: {result_id} for project: {session_project_name}")
+                                else:
+                                    app.logger.warning(f"No matching analysis found for project: {session_project_name}")
+                                    suggestions = None
+                                    
+                        except Exception as validate_error:
+                            app.logger.error(f"Failed to validate data consistency: {str(validate_error)}")
+                        
+                        if analysis_record and analysis_record.result_data:
+                            suggestions = json.loads(analysis_record.result_data)
+                            app.logger.info(f"Analysis completed - showing full results from database for ID: {result_id}")
                     else:
                         app.logger.warning(f"Analysis result not found in database: {result_id}")
                 except Exception as e:

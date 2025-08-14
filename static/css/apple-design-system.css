@@ -445,6 +445,8 @@ textarea.form-control {
     cursor: pointer;
     transition: var(--transition-fast);
     user-select: none;
+    position: relative;
+    z-index: 1;
 }
 
 .checkbox-item:hover {
@@ -457,6 +459,9 @@ textarea.form-control {
     height: 18px;
     margin-right: var(--space-3);
     accent-color: var(--color-primary);
+    cursor: pointer;
+    z-index: 2;
+    position: relative;
 }
 
 .checkbox-item input[type="checkbox"]:checked + label {
@@ -580,7 +585,8 @@ textarea.form-control {
     font-size: var(--text-xs);
     line-height: 1.2;
     user-select: none;
-    position: relative; /* 添加relative定位，让内部的absolute checkbox能正确定位 */
+    position: relative;
+    z-index: 1; /* 确保可以被点击 */
 }
 
 .checkbox-tag:hover {

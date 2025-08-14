@@ -71,16 +71,39 @@ def thinking_process():
     session.permanent = True
     
     # 调试信息
-    app.logger.info(f"Thinking page - Session cookie: {request.cookies.get('session', 'No cookie')}")
+    app.logger.info(f"Thinking page - Session cookie: {request.cookies.get('angela_session', 'No cookie')}")
     app.logger.info(f"Thinking page - Session keys: {list(session.keys())}")
     
-    # Get form data from session
-    form_data = session.get('analysis_form_data')
-    app.logger.info(f"Thinking page - session data exists: {form_data is not None}")
+    # 尝试从URL参数获取临时ID
+    temp_id = request.args.get('tid')
+    form_data = None
     
-    # 如果没有表单数据，重定向到首页
+    # 优先从临时ID恢复数据
+    if temp_id:
+        try:
+            temp_record = AnalysisResult.query.filter_by(id=temp_id).first()
+            if temp_record and temp_record.form_data:
+                form_data = json.loads(temp_record.form_data)
+                # 恢复到session
+                session['analysis_form_data'] = form_data
+                session['analysis_status'] = 'not_started'
+                session['analysis_result'] = None
+                session['analysis_progress'] = 0
+                session['analysis_stage'] = '准备开始分析...'
+                session['temp_id'] = temp_id  # 保存临时ID供后续使用
+                app.logger.info(f"Recovered form data from temp ID: {temp_id}")
+        except Exception as e:
+            app.logger.error(f"Failed to recover from temp ID: {str(e)}")
+    
+    # 如果没有从临时ID恢复，尝试从session获取
     if not form_data:
-        app.logger.warning("No form data found in session for thinking page - redirecting to home")
+        form_data = session.get('analysis_form_data')
+    
+    app.logger.info(f"Thinking page - form data exists: {form_data is not None}")
+    
+    # 如果没有表单数据，重定向到首页  
+    if not form_data:
+        app.logger.warning("No form data found for thinking page - redirecting to home")
         flash('请先填写项目信息', 'info')
         return redirect(url_for('index'))
     
@@ -674,12 +697,36 @@ def generate():
         
         # Log the received data
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
+        
+        # 将数据临时存储到数据库，避免session问题
+        import uuid
+        temp_id = str(uuid.uuid4())[:8]  # 短ID用于URL
+        
+        try:
+            # 创建临时记录
+            temp_record = AnalysisResult(
+                id=temp_id,
+                form_data=json.dumps(form_data, ensure_ascii=False),
+                result_data=json.dumps({"status": "pending"}, ensure_ascii=False),
+                project_name=form_data.get('projectName', ''),
+                project_description=form_data.get('projectDescription', ''),
+                project_stage=form_data.get('projectStage', ''),
+                team_size=len(form_data.get('keyPersons', [])),
+                analysis_type='pending'
+            )
+            db.session.add(temp_record)
+            db.session.commit()
+            app.logger.info(f"Temporary record created with ID: {temp_id}")
+        except Exception as e:
+            app.logger.error(f"Failed to create temp record: {str(e)}")
+            # 如果数据库失败，仍然尝试使用session
+            pass
+        
         app.logger.info(f"Session data stored successfully")
         app.logger.info(f"Session keys before redirect: {list(session.keys())}")
         
-        # 创建响应对象并显式设置cookie
-        response = redirect(url_for('thinking_process'))
-        return response
+        # 传递临时ID到thinking页面
+        return redirect(url_for('thinking_process', tid=temp_id))
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")

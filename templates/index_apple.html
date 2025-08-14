@@ -1408,12 +1408,7 @@
                 formData.externalResources = ['暂无明确外部资源'];
             }
             
-            // 所有验证通过后，才显示加载动画
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在分析...';
-            submitBtn.disabled = true;
-            
-            // 发送数据到后端Flask而不是sessionStorage
+            // 直接发送数据到后端Flask而不是sessionStorage
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/generate';
@@ -1451,13 +1446,7 @@
             form.submit();
             } catch (error) {
                 console.error('Form submission error:', error);
-                alert('提交时发生错误，请重试。错误信息：' + error.message);
-                // 恢复按钮状态
-                const submitBtn = document.querySelector('button[type="submit"]');
-                if (submitBtn) {
-                    submitBtn.innerHTML = '<i class="fas fa-magic me-2"></i>开始AI智能分析';
-                    submitBtn.disabled = false;
-                }
+                showBeautifulAlert('提交时发生错误，请重试。错误信息：' + error.message, 'error');
             }
         });
         

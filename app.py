@@ -192,6 +192,8 @@ def _internal_check_analysis_status():
             session['analysis_status'] = 'completed'
             session['analysis_result_id'] = fallback_id
             session['analysis_result'] = fallback_result
+            session.permanent = True  # 确保session为永久性
+            session.modified = True  # 确保session被保存
             
             app.logger.info(f"Fallback solution generated and saved with ID: {fallback_id}")
             return jsonify({
@@ -233,6 +235,7 @@ def _handle_analysis_execution(form_data, session):
         session['analysis_status'] = 'processing'
         session['analysis_progress'] = 10
         session['analysis_stage'] = '开始AI分析...'
+        session.permanent = True  # 确保session为永久性
         session.modified = True  # 确保session被保存
         app.logger.info("Starting AI analysis in request context")
         app.logger.info(f"Form data for analysis: {json.dumps(form_data, ensure_ascii=False)[:200]}")
@@ -280,10 +283,12 @@ def _handle_analysis_execution(form_data, session):
             session['analysis_stage'] = '分析完成！'
             # 保留一份备份在session中以防数据库读取失败
             session['analysis_result'] = suggestions
+            session.permanent = True  # 确保session为永久性
             session.modified = True  # 关键！确保session被持久化
             
             app.logger.info(f"AI analysis completed successfully, result stored with ID: {result_id}")
             app.logger.info(f"Session updated - Status: {session.get('analysis_status')}, Result ID: {session.get('analysis_result_id')}")
+            app.logger.info(f"Session state after update - Permanent: {session.permanent}, Modified: {session.modified}")
             return jsonify({
                 'status': 'completed', 
                 'redirect_url': '/results',
@@ -338,6 +343,8 @@ def _handle_analysis_execution(form_data, session):
                 session['analysis_status'] = 'completed'
                 session['analysis_result_id'] = fallback_id
                 session['analysis_result'] = fallback_result
+                session.permanent = True  # 确保session为永久性
+                session.modified = True  # 确保session被保存
                 
                 app.logger.info(f"Fallback generated immediately due to timeout, ID: {fallback_id}")
                 return jsonify({
@@ -513,7 +520,7 @@ def results():
                             db_project_name = db_form_data.get('projectName', '')
                             
                             if session_project_name and db_project_name and session_project_name != db_project_name:
-                                app.logger.error(f"Data mismatch: session project '{session_project_name}' != database project '{db_project_name}' for result_id {result_id}")
+                                app.logger.warning(f"Data mismatch: session project '{session_project_name}' != database project '{db_project_name}' for result_id {result_id}")
                                 # 数据不匹配，尝试找正确的记录
                                 correct_records = AnalysisResult.query.filter(
                                     AnalysisResult.analysis_type == 'ai_analysis',
@@ -526,13 +533,13 @@ def results():
                                     session['analysis_result_id'] = result_id
                                     app.logger.info(f"Found correct analysis record: {result_id} for project: {session_project_name}")
                                 else:
-                                    app.logger.warning(f"No matching analysis found for project: {session_project_name}")
-                                    # 数据不匹配且没有找到正确的分析结果，应该清理错误的result_id
+                                    app.logger.warning(f"No matching analysis found for project: {session_project_name}, but keeping current status: {status}")
+                                    # 数据不匹配但不要重置status，保持原状态
+                                    # 只清理错误的result_id
                                     session['analysis_result_id'] = None
-                                    session['analysis_status'] = 'not_started'
-                                    # 重定向到thinking页面重新分析
-                                    app.logger.info(f"Redirecting to thinking page for re-analysis of project: {session_project_name}")
-                                    return redirect(url_for('thinking_process'))
+                                    # 不要重置analysis_status！保持原有状态
+                                    # 如果status是completed，说明分析已完成，只是result_id有问题
+                                    app.logger.info(f"Keeping analysis_status as: {status}, will attempt to use session data")
                                     
                         except Exception as validate_error:
                             app.logger.error(f"Failed to validate data consistency: {str(validate_error)}")

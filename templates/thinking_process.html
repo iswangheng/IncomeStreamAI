@@ -18,8 +18,9 @@
             background: #000;
             color: #00ff41;
             font-family: 'Fira Code', 'Courier New', monospace;
-            overflow: hidden;
-            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            min-height: 100vh;
         }
         
         /* Sci-Fi Background Effect */
@@ -76,12 +77,13 @@
             z-index: 10 !important;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
             background: transparent;
             pointer-events: auto;
+            padding-top: 40px;
         }
         
         /* Header */
@@ -118,7 +120,8 @@
         .thinking-display {
             width: 90%;
             max-width: 900px;
-            height: 550px;
+            height: 60vh;
+            min-height: 400px;
             background: rgba(0, 0, 0, 0.95);
             border: 2px solid #00ff41;
             border-radius: 10px;
@@ -128,6 +131,7 @@
             box-shadow: 0 0 50px rgba(0, 255, 65, 0.3);
             backdrop-filter: blur(2px);
             z-index: 15;
+            margin-bottom: 40px;
         }
         
         .thinking-display::before {
@@ -187,7 +191,8 @@
         
         /* Thinking Content */
         .thinking-content {
-            height: 450px;
+            height: calc(60vh - 120px);
+            min-height: 320px;
             overflow-y: auto;
             font-size: 13px;
             line-height: 1.4;

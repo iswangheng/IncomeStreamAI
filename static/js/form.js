@@ -292,8 +292,10 @@ function loadExample(caseType) {
             }, 300);
             
             // 选择外部资源
-            document.getElementById('resource1').checked = true; // 微信群渠道
-            document.getElementById('resource3').checked = true; // 教育类公众号
+            const resource1 = document.getElementById('resource1');
+            const resource3 = document.getElementById('resource3');
+            if (resource1) resource1.checked = true; // 自媒体资源
+            if (resource3) resource3.checked = true; // 渠道入口
             break;
             
         case 'angela':
@@ -324,8 +326,10 @@ function loadExample(caseType) {
             }, 300);
             
             // 选择外部资源
-            document.getElementById('resource2').checked = true; // 本地商会资源
-            document.getElementById('resource4').checked = true; // 装修团队
+            const resource2 = document.getElementById('resource2');
+            const resource4 = document.getElementById('resource4');
+            if (resource2) resource2.checked = true; // 合作方产品
+            if (resource4) resource4.checked = true; // 顾问背书
             break;
             
         case 'chuchu':
@@ -366,7 +370,8 @@ function loadExample(caseType) {
             }, 300);
             
             // 选择外部资源
-            document.getElementById('resource5').checked = true; // 农业补贴政策
+            const resource5 = document.getElementById('resource5');
+            if (resource5) resource5.checked = true; // 内容产能
             break;
     }
     

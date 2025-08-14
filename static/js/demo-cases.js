@@ -184,24 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
      * 添加带数据的人物卡片
      */
     function addPersonCardWithData(personData, shouldFocus = false) {
-        // 调用模板中的全局addPerson函数
-        if (typeof window.addPerson === 'function') {
-            window.addPerson();
-        } else {
-            // 备用：手动创建基础的人物卡片
-            createBasicPersonCard(personData);
-            return;
-        }
-        
-        // 等待DOM更新后填充数据
-        setTimeout(() => {
-            const personCards = document.querySelectorAll('.person-card');
-            const latestCard = personCards[personCards.length - 1];
-            
-            if (latestCard) {
-                fillPersonCardData(latestCard, personData);
-            }
-        }, 300);
+        // 直接使用优化后的备用方案，避免空卡片
+        createBasicPersonCard(personData);
     }
 
     /**
@@ -211,8 +195,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('personsContainer');
         if (!container) return;
         
+        // 优化性能：使用更轻量的卡片结构
         const cardHtml = `
-            <div class="person-card">
+            <div class="person-card gpu-accelerated" style="margin-bottom: var(--space-4);">
                 <div class="person-card-header">
                     <div class="person-number">${container.children.length + 1}</div>
                     <button type="button" class="remove-person-btn" onclick="removePerson(this)">
@@ -221,11 +206,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="form-group">
                     <label class="form-label">人物代号/姓名</label>
-                    <input type="text" class="form-control" name="person_name[]" value="${personData.name || ''}">
+                    <input type="text" class="form-control" name="person_name[]" value="${personData.name || ''}" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">掌握的资源</label>
-                    <textarea class="form-control" name="person_resources[]" placeholder="请描述具体资源">${personData.resources ? personData.resources.join(',') : ''}</textarea>
+                    <textarea class="form-control" name="person_resources[]" placeholder="请描述具体资源" rows="2">${personData.resources ? personData.resources.join(',') : ''}</textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label">动机需求</label>

@@ -115,17 +115,9 @@ class AngelaAI:
             from models import KnowledgeItem
             
             # 获取活跃状态的知识库条目
-            # 修复: db_session可能是模块而不是session对象
-            from sqlalchemy.orm import Session
-            if isinstance(db_session, Session):
-                knowledge_items = db_session.query(KnowledgeItem).filter(
-                    KnowledgeItem.status == 'active'
-                ).all()
-            else:
-                # 如果db_session不是session对象，使用session方法
-                knowledge_items = db_session.session.query(KnowledgeItem).filter(
-                    KnowledgeItem.status == 'active'
-                ).all()
+            knowledge_items = db_session.query(KnowledgeItem).filter(
+                KnowledgeItem.status == 'active'
+            ).all()
             
             if not knowledge_items:
                 return self.get_core_knowledge_fallback()

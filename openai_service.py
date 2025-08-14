@@ -13,7 +13,7 @@ import time
 # 创建带重试机制的客户端
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
-    timeout=httpx.Timeout(20.0, connect=10.0)  # 连接超时10秒，读取超时20秒
+    timeout=httpx.Timeout(60.0, connect=30.0)  # 增加超时时间：连接30秒，读取60秒
 )
 
 logger = logging.getLogger(__name__)
@@ -32,18 +32,20 @@ class AngelaAI:
             try:
                 logger.info(f"正在调用OpenAI API (尝试 {attempt + 1}/{max_retries})...")
                 return client.chat.completions.create(**kwargs)
-            except (httpx.TimeoutException, httpx.ConnectError, ConnectionError) as e:
+            except (httpx.TimeoutException, httpx.ConnectError, ConnectionError, httpx.ReadTimeout, httpx.ConnectTimeout) as e:
                 if attempt < max_retries - 1:
-                    wait_time = 2 ** attempt  # 指数退避: 1s, 2s, 4s
+                    wait_time = 3 * (attempt + 1)  # 线性退避: 3s, 6s, 9s
                     logger.warning(f"OpenAI API调用失败 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试...")
                     time.sleep(wait_time)
                     continue
                 else:
                     logger.error(f"OpenAI API调用失败，已重试{max_retries}次: {str(e)}")
-                    raise
+                    # 不要raise，返回None让调用方处理
+                    return None
             except Exception as e:
                 logger.error(f"OpenAI API调用遇到非网络错误: {str(e)}")
-                raise
+                # 对于其他错误也返回None
+                return None
         
     def format_make_happy(self, make_happy_data) -> str:
         """格式化动机标签数据"""
@@ -328,6 +330,11 @@ class AngelaAI:
                 temperature=0.7,
                 max_tokens=self.max_tokens
             )
+            
+            # 如果响应为None（网络错误），返回备用方案
+            if response is None:
+                logger.warning("OpenAI API返回None，使用备用方案")
+                return self._get_fallback_result(form_data)
             
             # 解析响应
             result_text = response.choices[0].message.content

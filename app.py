@@ -744,9 +744,9 @@ def generate_ai_suggestions(form_data, session=None):
         raise TimeoutError("AI分析超时")
     
     try:
-        # 设置45秒超时，给重试机制留足够时间
+        # 设置90秒超时，给重试机制和网络延迟留足够时间
         signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(45)
+        signal.alarm(90)
         
         from openai_service import AngelaAI
         
@@ -770,8 +770,16 @@ def generate_ai_suggestions(form_data, session=None):
             session['analysis_stage'] = '正在调用AI分析引擎...'
         
         start_time = time.time()
-        # 调用AI生成服务
-        ai_result = angela_ai.generate_income_paths(converted_data, db)
+        # 调用AI生成服务，添加SSL错误处理
+        try:
+            ai_result = angela_ai.generate_income_paths(converted_data, db)
+        except (ConnectionError, OSError) as ssl_error:
+            # SSL或网络连接错误
+            app.logger.error(f"SSL/Network error during AI call: {str(ssl_error)}")
+            # 取消超时
+            signal.alarm(0)
+            # 返回网络错误的备用方案
+            return generate_fallback_result(form_data, "网络连接问题，为您提供基础建议")
         
         # 更新进度：AI分析完成
         if session:

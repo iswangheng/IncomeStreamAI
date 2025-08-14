@@ -339,7 +339,7 @@
                 right: 0;
                 bottom: 0;
                 background: rgba(0, 0, 0, 0.5);
-                z-index: 9999;
+                z-index: 99999;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -1305,12 +1305,7 @@
                 return;
             }
             
-            // 添加提交动画
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在分析...';
-            submitBtn.disabled = true;
-            
-            // 收集表单数据
+            // 先收集表单数据，不要显示加载动画
             const formData = {
                 projectName: projectName,
                 projectDescription: projectDescription,
@@ -1420,6 +1415,11 @@
             if (formData.externalResources.length === 0) {
                 formData.externalResources = ['暂无明确外部资源'];
             }
+            
+            // 所有验证通过后，才显示加载动画
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在分析...';
+            submitBtn.disabled = true;
             
             // 发送数据到后端Flask而不是sessionStorage
             const form = document.createElement('form');

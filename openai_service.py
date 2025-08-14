@@ -325,6 +325,21 @@ class AngelaAI:
   * Angela模式：市场调研发现供需不匹配，整租转分租赚差价，1万启动成本，与房东签长约确保稳定，8年收入72万  
   * 楚楚模式：发现日常需求背后商机，整合4方资源（销路+林地+人力+技术），让每方都高兴，3个月搭建，年收入70万"""
             
+            # 打印prompt长度信息
+            total_prompt = system_prompt + user_content + assistant_prompt
+            logger.info(f"===== OpenAI API Request Info =====")
+            logger.info(f"Model: {self.model}")
+            logger.info(f"Max tokens: {self.max_tokens}")
+            logger.info(f"System prompt length: {len(system_prompt)} chars")
+            logger.info(f"User content length: {len(user_content)} chars")
+            logger.info(f"Assistant prompt length: {len(assistant_prompt)} chars")
+            logger.info(f"Total prompt length: {len(total_prompt)} chars")
+            logger.info(f"===== Full Prompt Content =====")
+            logger.info(f"System: {system_prompt[:500]}..." if len(system_prompt) > 500 else f"System: {system_prompt}")
+            logger.info(f"User: {user_content[:500]}..." if len(user_content) > 500 else f"User: {user_content}")
+            logger.info(f"Assistant: {assistant_prompt[:500]}..." if len(assistant_prompt) > 500 else f"Assistant: {assistant_prompt}")
+            logger.info(f"================================")
+            
             # 调用OpenAI API，带重试机制
             response = self._call_openai_with_retry(
                 model=self.model,

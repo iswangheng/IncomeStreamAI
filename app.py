@@ -401,29 +401,75 @@ def results():
             except Exception as db_error:
                 app.logger.error(f"Failed to recover from database: {str(db_error)}")
 
-        # 如果没有表单数据，尝试从最近的分析结果中恢复
+        # 如果有表单数据但result_id指向的是备用方案，尝试找到真正的AI分析结果
+        if form_data and result_id:
+            try:
+                from models import AnalysisResult
+                import json
+                
+                # 检查当前result_id对应的记录类型
+                current_record = AnalysisResult.query.filter_by(id=result_id).first()
+                if current_record and current_record.analysis_type == 'emergency_fallback':
+                    app.logger.warning(f"Current result_id {result_id} points to emergency fallback, searching for real AI analysis")
+                    
+                    # 根据表单数据找最新的AI分析结果
+                    project_name = form_data.get('projectName', '')
+                    if project_name:
+                        # 查找同项目的真正AI分析结果
+                        ai_records = AnalysisResult.query.filter(
+                            AnalysisResult.analysis_type == 'ai_analysis',
+                            AnalysisResult.form_data.contains(f'"{project_name}"')
+                        ).order_by(AnalysisResult.created_at.desc()).all()
+                        
+                        if ai_records:
+                            best_record = ai_records[0]  # 取最新的AI分析结果
+                            result_data = json.loads(best_record.result_data)
+                            session['analysis_result'] = result_data
+                            session['analysis_result_id'] = best_record.id
+                            result_id = best_record.id
+                            app.logger.info(f"Switched from fallback to real AI analysis result: {best_record.id}")
+                        
+            except Exception as switch_error:
+                app.logger.error(f"Failed to switch from fallback to AI result: {str(switch_error)}")
+
+        # 如果没有表单数据，尝试从最近的AI分析结果中恢复
         if not form_data:
-            app.logger.warning("No form data found in session, trying to recover from latest database record")
+            app.logger.warning("No form data found in session, trying to recover from latest AI analysis record")
             
             try:
                 from models import AnalysisResult
                 import json
                 
-                latest_record = AnalysisResult.query.order_by(AnalysisResult.id.desc()).first()
-                if latest_record and latest_record.form_data:
-                    form_data = json.loads(latest_record.form_data)
+                # 优先查找AI分析结果，而不是备用方案
+                latest_ai_record = AnalysisResult.query.filter_by(analysis_type='ai_analysis').order_by(AnalysisResult.created_at.desc()).first()
+                if latest_ai_record and latest_ai_record.form_data:
+                    form_data = json.loads(latest_ai_record.form_data)
                     # 同时恢复其他session数据
-                    if latest_record.result_data:
-                        result_data = json.loads(latest_record.result_data)
+                    if latest_ai_record.result_data:
+                        result_data = json.loads(latest_ai_record.result_data)
                         session['analysis_result'] = result_data
                     session['analysis_form_data'] = form_data
                     session['analysis_status'] = 'completed'
-                    session['analysis_result_id'] = latest_record.id
+                    session['analysis_result_id'] = latest_ai_record.id
                     status = 'completed'  # 更新本地状态变量
-                    result_id = latest_record.id
-                    app.logger.info(f"Recovered form data from latest database record: {latest_record.id}")
+                    result_id = latest_ai_record.id
+                    app.logger.info(f"Recovered form data from latest AI analysis record: {latest_ai_record.id}")
                 else:
-                    app.logger.warning("No recent analysis records found in database")
+                    # 如果没有AI分析记录，才从所有记录中恢复
+                    latest_record = AnalysisResult.query.order_by(AnalysisResult.created_at.desc()).first()
+                    if latest_record and latest_record.form_data:
+                        form_data = json.loads(latest_record.form_data)
+                        if latest_record.result_data:
+                            result_data = json.loads(latest_record.result_data)
+                            session['analysis_result'] = result_data
+                        session['analysis_form_data'] = form_data
+                        session['analysis_status'] = 'completed'
+                        session['analysis_result_id'] = latest_record.id
+                        status = 'completed'
+                        result_id = latest_record.id
+                        app.logger.info(f"Recovered from latest record (any type): {latest_record.id}")
+                    else:
+                        app.logger.warning("No recent analysis records found in database")
             except Exception as recovery_error:
                 app.logger.error(f"Failed to recover from latest record: {str(recovery_error)}")
             

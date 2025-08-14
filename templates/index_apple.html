@@ -1190,8 +1190,9 @@
         document.getElementById('mainForm').addEventListener('submit', function(e) {
             e.preventDefault(); // 阻止默认表单提交
             
-            const projectName = document.getElementById('project_name').value.trim();
-            const projectDescription = document.getElementById('project_description').value.trim();
+            try {
+                const projectName = document.getElementById('project_name').value.trim();
+                const projectDescription = document.getElementById('project_description').value.trim();
             
             if (!projectName || !projectDescription) {
                 alert('请填写项目名称和背景描述');
@@ -1281,9 +1282,10 @@
             // 添加关键人物数据
             formData.keyPersons.forEach((person, index) => {
                 addInput('person_name[]', person.name);
-                addInput('person_role[]', person.roles.join(','));
-                addInput('person_resources[]', person.resources.join(','));
-                addInput('person_needs[]', person.makeHappy.join(','));
+                // 修复：确保数组存在且正确格式化
+                addInput('person_role[]', person.roles && person.roles.length > 0 ? person.roles.join(',') : '');
+                addInput('person_resources[]', person.resources && person.resources.length > 0 ? person.resources.join(',') : '');
+                addInput('person_needs[]', person.makeHappy && person.makeHappy.length > 0 ? person.makeHappy.join(',') : '');
             });
             
             // 添加外部资源数据
@@ -1294,6 +1296,16 @@
             // 提交表单
             document.body.appendChild(form);
             form.submit();
+            } catch (error) {
+                console.error('Form submission error:', error);
+                alert('提交时发生错误，请重试。错误信息：' + error.message);
+                // 恢复按钮状态
+                const submitBtn = document.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-lightbulb me-2"></i>AI智能分析';
+                    submitBtn.disabled = false;
+                }
+            }
         });
         
         // 测试案例数据

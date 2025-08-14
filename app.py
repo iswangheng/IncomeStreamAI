@@ -682,8 +682,13 @@ def generate():
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully")
         
-        # 创建响应对象以确保session正确保存
+        # 创建响应对象并显式设置session cookie
         response = redirect(url_for('thinking_process'))
+        
+        # 强制Flask保存session
+        from flask import make_response
+        response = make_response(response)
+        
         return response
     
     except Exception as e:

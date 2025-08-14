@@ -1372,11 +1372,17 @@
                 formData.externalResources = ['暂无明确外部资源'];
             }
             
-            // 直接发送数据到后端Flask而不是sessionStorage
-            const form = document.createElement('form');
+            // 使用现有的表单元素而不是创建新表单
+            // 这样可以确保cookie正确传递
+            const form = document.getElementById('mainForm');
+            
+            // 清空现有的表单内容
+            while (form.firstChild) {
+                form.removeChild(form.firstChild);
+            }
+            
             form.method = 'POST';
             form.action = '/generate';
-            form.style.display = 'none';
             
             // 添加项目基础信息
             const addInput = (name, value) => {
@@ -1405,8 +1411,7 @@
                 addInput('external_resources', resource);
             });
             
-            // 提交表单
-            document.body.appendChild(form);
+            // 直接提交表单（不需要appendChild因为使用现有表单）
             form.submit();
             } catch (error) {
                 console.error('Form submission error:', error);

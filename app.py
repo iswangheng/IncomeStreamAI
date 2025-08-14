@@ -1613,5 +1613,10 @@ def generate_fallback_suggestions(form_data):
     
     return fallback_suggestions
 
+@app.route('/debug_test')
+def debug_test():
+    """Debug test page to verify JavaScript functionality"""
+    return render_template('debug_test.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

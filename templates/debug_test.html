@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>调试测试页面</title>
+    <style>
+        body { padding: 20px; font-family: Arial; }
+        .test-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        button { padding: 10px; margin: 5px; }
+        label { display: block; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>JavaScript功能测试</h1>
+    
+    <div class="test-section">
+        <h2>基础测试</h2>
+        <button onclick="alert('内联onclick工作正常！')">测试内联onclick</button>
+        <button id="test-btn">测试addEventListener</button>
+        <label>
+            <input type="checkbox" onchange="alert('Checkbox改变: ' + this.checked)">
+            测试Checkbox
+        </label>
+    </div>
+    
+    <div class="test-section">
+        <h2>主页面函数测试</h2>
+        <button onclick="testMainFunctions()">测试主页面函数</button>
+        <div id="results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>动态添加测试</h2>
+        <button id="dynamic-test">动态添加元素</button>
+        <div id="container"></div>
+    </div>
+    
+    <script>
+        console.log('Script开始执行');
+        
+        // 测试addEventListener
+        document.getElementById('test-btn').addEventListener('click', function() {
+            alert('addEventListener工作正常！');
+        });
+        
+        // 测试动态添加
+        document.getElementById('dynamic-test').addEventListener('click', function() {
+            const container = document.getElementById('container');
+            const div = document.createElement('div');
+            div.innerHTML = '<button onclick="alert(\'动态按钮工作！\')">动态添加的按钮</button>';
+            container.appendChild(div);
+        });
+        
+        // 测试主页面函数
+        function testMainFunctions() {
+            const results = document.getElementById('results');
+            let html = '<h3>函数检查结果：</h3>';
+            
+            // 检查关键函数是否存在
+            const functions = ['addPerson', 'removePerson', 'updateEmptyState', 'setRandomPlaceholder'];
+            
+            functions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    html += '<p style="color:green;">✓ ' + funcName + ' 已定义</p>';
+                } else {
+                    html += '<p style="color:red;">✗ ' + funcName + ' 未定义</p>';
+                }
+            });
+            
+            results.innerHTML = html;
+        }
+        
+        // DOMContentLoaded测试
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded事件触发');
+            document.body.style.backgroundColor = '#f0f0f0';
+        });
+        
+        console.log('Script执行完成');
+    </script>
+</body>
+</html>

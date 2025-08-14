@@ -1241,16 +1241,17 @@
                 }
             });
             
-            // 收集外部资源（从外部资源区域）
-            const externalResourcesSection = document.getElementById('external-resources-section');
-            if (externalResourcesSection) {
-                const resourceChips = externalResourcesSection.querySelectorAll('.resource-chip');
-                resourceChips.forEach(chip => {
-                    const resourceText = chip.textContent.replace('×', '').trim();
-                    if (resourceText) {
-                        formData.externalResources.push(resourceText);
-                    }
-                });
+            // 收集外部资源（从复选框）
+            const checkedResources = document.querySelectorAll('input[name="external_resources"]:checked');
+            checkedResources.forEach(checkbox => {
+                formData.externalResources.push(checkbox.value);
+            });
+            
+            // 收集其他资源输入
+            const otherResourceCheckbox = document.getElementById('other_resource_checkbox');
+            const otherResourceText = document.getElementById('other_resource_text');
+            if (otherResourceCheckbox && otherResourceCheckbox.checked && otherResourceText && otherResourceText.value.trim()) {
+                formData.externalResources.push(otherResourceText.value.trim());
             }
             
             // 如果没有外部资源，添加一个默认值

@@ -22,8 +22,8 @@ class AngelaAI:
     """Angela - 非劳务收入路径设计AI服务"""
     
     def __init__(self):
-        self.model = "gpt-4o-2024-11-20"  # 使用最新的稳定版本
-        self.max_tokens = 4000
+        self.model = "gpt-4o-mini"  # 使用更快的mini版本，响应速度更快
+        self.max_tokens = 2500  # 减少token数量，加快响应
     
     def _call_openai_with_retry(self, **kwargs):
         """调用OpenAI API，带简单重试机制"""
@@ -203,10 +203,17 @@ class AngelaAI:
             key_persons = form_data.get('keyPersons', [])
             external_resources = form_data.get('externalResources', [])
             
-            # 获取知识库片段
-            kb_snippets = self.get_knowledge_base_snippets(
-                project_description, key_persons, external_resources, db_session
-            )
+            # 获取知识库片段 - 简化以减少prompt长度
+            try:
+                kb_snippets = self.get_knowledge_base_snippets(
+                    project_description, key_persons, external_resources, db_session
+                )
+                # 限制知识库内容长度
+                if len(kb_snippets) > 500:
+                    kb_snippets = kb_snippets[:500] + "..."
+            except Exception as kb_error:
+                logger.warning(f"Knowledge base retrieval failed: {kb_error}")
+                kb_snippets = self.get_core_knowledge_fallback()
             
             # 构造系统提示
             system_prompt = """你是"Angela"，专精"非劳务收入管道设计"的高级策略顾问，掌握成熟的造物法则。
@@ -328,7 +335,8 @@ class AngelaAI:
                 ],
                 response_format={"type": "json_object"},
                 temperature=0.7,
-                max_tokens=self.max_tokens
+                max_tokens=self.max_tokens,
+                timeout=45  # 添加明确的请求级超时
             )
             
             # 如果响应为None（网络错误），返回备用方案

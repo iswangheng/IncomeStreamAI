@@ -18,7 +18,8 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key_change_in_production")
+# 使用固定的密钥确保session工作正常
+app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key_angela_ai_2025")
 
 # Database configuration
 database_url = os.environ.get("DATABASE_URL")
@@ -33,10 +34,12 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 }
 
 # 修复Session配置 - 确保session正常工作
+app.config['SESSION_COOKIE_NAME'] = 'angela_session'
 app.config['SESSION_COOKIE_SECURE'] = False  # 开发环境允许HTTP
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # session 1小时过期
+app.config['SESSION_COOKIE_PATH'] = '/'  # 确保cookie在所有路径可用
 
 # File upload configuration
 UPLOAD_FOLDER = 'uploads/knowledge'
@@ -64,6 +67,12 @@ def index():
 @app.route('/thinking')
 def thinking_process():
     """AI thinking process visualization page"""
+    # 确保session持久化
+    session.permanent = True
+    
+    # 调试信息
+    app.logger.info(f"Thinking page - Session cookie: {request.cookies.get('session', 'No cookie')}")
+    app.logger.info(f"Thinking page - Session keys: {list(session.keys())}")
     
     # Get form data from session
     form_data = session.get('analysis_form_data')
@@ -595,9 +604,14 @@ def results():
 def generate():
     """Process form data and redirect to thinking page"""
     try:
+        # 立即设置session为永久性，确保cookie被创建
+        session.permanent = True
+        
         app.logger.info(f"Generate route accessed - Request method: {request.method}")
         app.logger.info(f"Generate route - Form data keys: {list(request.form.keys())}")
         app.logger.info(f"Generate route - Content type: {request.content_type}")
+        app.logger.info(f"Generate route - Session cookie before: {request.cookies.get('session', 'No cookie')}")
+        
         # Get form data
         project_name = request.form.get('project_name', '').strip()
         project_description = request.form.get('project_description', '').strip()
@@ -642,9 +656,6 @@ def generate():
         }
         
         # Store form data in session 
-        # 先设置session为永久性，确保数据能持久化
-        session.permanent = True  
-        
         # 存储表单数据
         session['analysis_form_data'] = form_data
         
@@ -659,14 +670,16 @@ def generate():
         
         # 详细调试session存储
         app.logger.info(f"Generate route - Session data stored: {session.get('analysis_form_data') is not None}")
-        app.logger.info(f"Generate route - Session ID: {request.cookies.get('session', 'No cookie')}")
+        app.logger.info(f"Generate route - Session will be saved with permanent flag: {session.permanent}")
         
         # Log the received data
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully")
+        app.logger.info(f"Session keys before redirect: {list(session.keys())}")
         
-        # 跳转到新的Matrix风格思考页面
-        return redirect(url_for('thinking_process'))
+        # 创建响应对象并显式设置cookie
+        response = redirect(url_for('thinking_process'))
+        return response
     
     except Exception as e:
         app.logger.error(f"Error processing form: {str(e)}")

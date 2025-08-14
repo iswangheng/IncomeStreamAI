@@ -614,8 +614,18 @@ def results():
                                  error_message=error_msg)
         
         else:
-            # 如果没有完成的结果，强制生成备用方案或从数据库恢复
-            app.logger.warning(f"Results page accessed with non-completed status: {status}, forcing completion")
+            # 处理未完成的状态
+            app.logger.warning(f"Results page accessed with non-completed status: {status}")
+            
+            # 如果是not_started状态，重定向到thinking页面
+            if status == 'not_started':
+                app.logger.info("Status is not_started, redirecting to thinking page")
+                return redirect(url_for('thinking'))
+            
+            # 如果是processing状态但没有结果，也重定向到thinking页面
+            elif status == 'processing':
+                app.logger.info("Status is processing without result, redirecting to thinking page")
+                return redirect(url_for('thinking'))
             
             # 尝试从数据库获取任何存在的结果
             if result_id:
@@ -634,8 +644,9 @@ def results():
                 except Exception as e:
                     app.logger.error(f"Failed to load result from database: {str(e)}")
             
-            # 如果还是没有结果，生成紧急备用方案
-            app.logger.info("Generating emergency fallback solution")
+            # 只有在确实没有其他选择时才生成紧急备用方案
+            # 比如session数据损坏或数据库读取失败
+            app.logger.info("Unusual state detected, generating emergency fallback solution")
             try:
                 fallback_result = generate_fallback_suggestions(form_data)
                 

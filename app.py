@@ -226,6 +226,7 @@ def _internal_check_analysis_status():
 def _handle_analysis_execution(form_data, session):
     """处理AI分析执行"""
     import traceback
+    import json
     
     try:
         # 设置状态为处理中

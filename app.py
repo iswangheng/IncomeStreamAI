@@ -490,7 +490,12 @@ def results():
                                     app.logger.info(f"Found correct analysis record: {result_id} for project: {session_project_name}")
                                 else:
                                     app.logger.warning(f"No matching analysis found for project: {session_project_name}")
-                                    suggestions = None
+                                    # 数据不匹配且没有找到正确的分析结果，应该清理错误的result_id
+                                    session['analysis_result_id'] = None
+                                    session['analysis_status'] = 'not_started'
+                                    # 重定向到thinking页面重新分析
+                                    app.logger.info(f"Redirecting to thinking page for re-analysis of project: {session_project_name}")
+                                    return redirect(url_for('thinking_process'))
                                     
                         except Exception as validate_error:
                             app.logger.error(f"Failed to validate data consistency: {str(validate_error)}")
@@ -699,10 +704,13 @@ def generate():
         from flask import session
         session['analysis_form_data'] = form_data
         
-        # 设置分析状态为未开始，等待thinking页面触发
+        # 清理所有旧的分析相关数据，确保新项目不会使用旧的result_id
         session['analysis_status'] = 'not_started'
         session['analysis_result'] = None
+        session['analysis_result_id'] = None  # 关键修复：清理旧的result_id
         session['analysis_progress'] = 0
+        session['analysis_stage'] = '准备开始分析...'
+        session.pop('analysis_error', None)  # 清理可能存在的错误信息
         session['analysis_stage'] = '准备开始分析...'
         
         # 详细调试session存储

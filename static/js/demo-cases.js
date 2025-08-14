@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // 示例案例数据
+    // 示例案例数据 - 修复版本，确保数据结构正确
     const demoData = {
         'english-training': {
             projectName: 'Bonnie英语培训管道',
@@ -16,36 +16,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     name: '升学规划师朋友',
                     role: 'channel',
                     resources: ['家长客户资源', '升学规划服务信任度', '教育圈人脉'],
-                    make_happy: 'bring_leads,recurring_income,no_conflict_current_partner'
+                    make_happy: '带来客户/用户'
                 },
                 {
                     name: '英语培训机构',
-                    role: 'product,delivery', 
+                    role: 'product',
                     resources: ['英语课程产品', '师资助教团队', '线上教学系统'],
-                    make_happy: 'bring_leads,brand_exposure,expand_network'
+                    make_happy: '能长期持续赚钱'
                 }
             ],
-            externalResources: ['暂无明确外部资源']
+            externalResources: []
         },
         'rental-business': {
-            projectName: '商铺租赁管道',
-            projectDescription: '通过1万元启动资金，采用二房东模式，寻找位置好但房租便宜的商铺进行转租，利用信息差和包装能力获得租金差价收益，8年内累计实现72万收益。',
-            projectStage: 'planning',
+            projectName: 'Angela临街商铺二房东管道',
+            projectDescription: '我打了20多个电话调研发现一个房东有临街双层商铺，挂了两三个月都租不出去，因为房东要求整租，很多人想分开租上下层。更重要的是，这个铺子没有煤气不能做热菜，所以餐饮做不了。但通过市场调研我发现一楼可以做便利店、水果店，二楼可以做美容SPA、理发店。房东还是个社恐，太好了！',
+            projectStage: 'testing',
             keyPersons: [
                 {
-                    name: '房东',
-                    role: 'product',
-                    resources: ['商铺产权', '租赁决策权', '区域房产信息'],
-                    make_happy: 'stable_income,reliable_tenant,property_maintenance'
+                    name: '社恐房东',
+                    role: 'investor',
+                    resources: ['临街双层商铺', '5年长期租约意愿', '稳定现金流需求'],
+                    make_happy: '能长期持续赚钱'
                 },
                 {
                     name: '承租商户',
-                    role: 'buyer',
+                    role: 'product',
                     resources: ['经营资金', '客流需求', '商业运营能力'],
-                    make_happy: 'good_location,reasonable_rent,flexible_lease'
+                    make_happy: '不公开露脸'
                 }
             ],
-            externalResources: ['房产中介平台', '商圈调研数据']
+            externalResources: ['商圈调研数据']
         },
         'cicada-farming': {
             projectName: '知了猴养殖管道',
@@ -56,19 +56,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     name: '农村合作社',
                     role: 'delivery',
                     resources: ['养殖场地', '养殖技术', '农村劳动力'],
-                    make_happy: 'employment_opportunities,technical_support,stable_orders'
+                    make_happy: '提供就业机会'
                 },
                 {
                     name: '餐厅采购经理',
                     role: 'buyer',
                     resources: ['采购预算', '餐厅客户群', '菜品研发能力'],
-                    make_happy: 'quality_supply,competitive_price,reliable_delivery'
+                    make_happy: '优质供应稳定交付'
                 },
                 {
                     name: '批发商',
                     role: 'channel',
                     resources: ['批发渠道', '仓储物流', '客户网络'],
-                    make_happy: 'consistent_supply,good_margins,market_exclusivity'
+                    make_happy: '稳定供应好利润'
                 }
             ],
             externalResources: ['农业补贴政策', '电商销售平台', '冷链物流网络']

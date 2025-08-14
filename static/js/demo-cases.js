@@ -107,8 +107,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // 滚动到表单区域
             scrollToForm();
             
-            // 3秒后自动提交（给用户时间查看）
-            showAutoSubmitCountdown(3000);
+            // 显示填充完成提示，但不自动提交
+            showDataFilledNotification();
         });
     });
 
@@ -389,63 +389,77 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * 显示自动提交倒计时
+     * 显示数据填充完成提示
      */
-    function showAutoSubmitCountdown(delay) {
-        const countdownDiv = document.createElement('div');
-        countdownDiv.className = 'auto-submit-countdown';
-        countdownDiv.style.cssText = `
+    function showDataFilledNotification() {
+        const notification = document.createElement('div');
+        notification.className = 'data-filled-notification';
+        notification.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
             padding: 15px 20px;
             border-radius: 10px;
             z-index: 1000;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             font-weight: 500;
+            animation: slideInFromRight 0.5s ease;
         `;
         
-        let seconds = Math.floor(delay / 1000);
-        countdownDiv.innerHTML = `
+        notification.innerHTML = `
             <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-magic" style="color: #ffd700;"></i>
-                <span>数据已填充完成，${seconds}秒后自动开始分析...</span>
+                <i class="fas fa-check-circle" style="color: #ffd700;"></i>
+                <span>示例数据已填充完成！您可以修改后点击"开始AI智能分析"</span>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        style="background: none; border: none; color: white; margin-left: 10px; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         `;
         
-        document.body.appendChild(countdownDiv);
+        document.body.appendChild(notification);
         
-        const countdownInterval = setInterval(() => {
-            seconds--;
-            if (seconds > 0) {
-                countdownDiv.querySelector('span').textContent = `数据已填充完成，${seconds}秒后自动开始分析...`;
-            } else {
-                clearInterval(countdownInterval);
-                countdownDiv.remove();
-                
-                // 自动提交表单
-                const form = document.getElementById('mainForm');
-                if (form) {
-                    form.submit();
-                }
-            }
-        }, 1000);
-        
-        // 点击可以取消自动提交
-        countdownDiv.addEventListener('click', () => {
-            clearInterval(countdownInterval);
-            countdownDiv.remove();
-        });
-        
-        // 5秒后自动移除倒计时
+        // 6秒后自动消失
         setTimeout(() => {
-            if (document.body.contains(countdownDiv)) {
-                clearInterval(countdownInterval);
-                countdownDiv.remove();
+            if (document.body.contains(notification)) {
+                notification.style.animation = 'slideOutToRight 0.5s ease';
+                setTimeout(() => notification.remove(), 500);
             }
-        }, delay + 1000);
+        }, 6000);
+        
+        // 高亮显示"开始AI智能分析"按钮
+        highlightSubmitButton();
+    }
+
+    /**
+     * 高亮显示提交按钮
+     */
+    function highlightSubmitButton() {
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.style.animation = 'pulse-highlight 2s ease-in-out 3';
+            
+            // 添加脉冲动画样式
+            if (!document.getElementById('highlight-styles')) {
+                const style = document.createElement('style');
+                style.id = 'highlight-styles';
+                style.textContent = `
+                    @keyframes pulse-highlight {
+                        0% { transform: scale(1); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+                        50% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5); }
+                        100% { transform: scale(1); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // 6秒后移除动画
+            setTimeout(() => {
+                submitBtn.style.animation = '';
+            }, 6000);
+        }
     }
 
     // 添加CSS样式
@@ -493,13 +507,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 100% { transform: scale(1); }
             }
             
-            .auto-submit-countdown {
+            .data-filled-notification {
                 animation: slideInFromRight 0.5s ease;
             }
             
             @keyframes slideInFromRight {
                 from { transform: translateX(100%); opacity: 0; }
                 to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOutToRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
             }
         `;
         document.head.appendChild(style);

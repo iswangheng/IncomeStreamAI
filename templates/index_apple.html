@@ -1315,7 +1315,6 @@
             };
             
             // 收集关键人物数据
-            let hasInvalidPerson = false;
             document.querySelectorAll('.person-card').forEach(card => {
                 const nameInput = card.querySelector('input[name="person_name[]"]');
                 const name = nameInput ? nameInput.value.trim() : '';
@@ -1328,24 +1327,10 @@
                         notes: ''
                     };
                     
-                    // 检查是否选择了"如何让此人高兴"
-                    if (person.makeHappy.length === 0) {
-                        // 检查是否有备注
-                        const notesInput = card.querySelector('textarea[name="person_needs_extra[]"]');
-                        const notes = notesInput ? notesInput.value.trim() : '';
-                        if (!notes) {
-                            hasInvalidPerson = true;
-                            // 高亮显示这个人物卡片
-                            card.style.border = '2px solid #f0ad4e';
-                            card.style.borderRadius = '8px';
-                            card.style.animation = 'shake 0.5s';
-                        } else {
-                            person.notes = notes;
-                            // 清除高亮
-                            card.style.border = '';
-                            card.style.animation = '';
-                        }
-                    }
+                    // "如何让此人高兴"改为可选项，不再强制要求
+                    // 清除任何之前的高亮样式
+                    card.style.border = '';
+                    card.style.animation = '';
                     
                     // 收集个人资源（从已选资源标签中获取）
                     const resourceTags = card.querySelectorAll('.selected-resource-tag');
@@ -1354,11 +1339,9 @@
                     }
                     
                     // 收集备注（从其他自定义输入获取）
-                    if (!person.notes) {
-                        const notesInput = card.querySelector('textarea[name="person_needs_extra[]"]');
-                        if (notesInput) {
-                            person.notes = notesInput.value.trim();
-                        }
+                    const notesInput = card.querySelector('textarea[name="person_needs_extra[]"]');
+                    if (notesInput) {
+                        person.notes = notesInput.value.trim();
                     }
                     
                     formData.keyPersons.push(person);
@@ -1368,25 +1351,6 @@
             // 验证关键人物
             if (formData.keyPersons.length === 0) {
                 showBeautifulAlert('请至少添加一个关键人物', 'warning');
-                return;
-            }
-            
-            // 如果有人物没有选择"如何让此人高兴"
-            if (hasInvalidPerson) {
-                showBeautifulAlert('请为每个关键人物选择"如何让他们高兴"选项，或在备注中填写其他需求', 'warning');
-                // 添加抖动动画样式
-                if (!document.querySelector('#shake-animation')) {
-                    const style = document.createElement('style');
-                    style.id = 'shake-animation';
-                    style.textContent = `
-                        @keyframes shake {
-                            0%, 100% { transform: translateX(0); }
-                            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                            20%, 40%, 60%, 80% { transform: translateX(5px); }
-                        }
-                    `;
-                    document.head.appendChild(style);
-                }
                 return;
             }
             

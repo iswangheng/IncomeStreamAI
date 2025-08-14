@@ -578,8 +578,13 @@
                     window.forceCompletionTriggered = true;
                     addThinkingLine('>>> ✅ 分析完成！正在跳转...', 'conclusion');
                     updateStatusDisplay(100, '分析完成！');
+                    
+                    // 获取临时ID并附加到跳转URL
+                    const tempId = getTempIdFromUrl();
+                    const redirectUrl = tempId ? `/results?tid=${tempId}` : '/results';
+                    
                     setTimeout(() => {
-                        window.location.href = '/results';
+                        window.location.href = redirectUrl;
                     }, 2000);
                 } else {
                     // 继续显示等待信息
@@ -618,9 +623,13 @@
                             addThinkingLine('>>> 🚀 正在跳转到结果页面...', 'system');
                             console.log('执行跳转...');
                             
+                            // 获取临时ID并附加到跳转URL
+                            const tempId = getTempIdFromUrl();
+                            const redirectUrl = tempId ? `${data.redirect_url}?tid=${tempId}` : data.redirect_url;
+                            
                             // 直接跳转，减少延迟
                             setTimeout(() => {
-                                window.location.href = data.redirect_url;
+                                window.location.href = redirectUrl;
                             }, 1000);
                             
                         } else if (data.status === 'error' || data.status === 'timeout') {

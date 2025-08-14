@@ -417,15 +417,43 @@ def _handle_analysis_execution(form_data, flask_session):
 def results():
     """Display AI analysis result page with dynamic loading"""
     try:
+        # 确保session持久化
+        session.permanent = True
+        
         # 详细记录session状态
         app.logger.info(f"Results page accessed - Full session: {dict(session)}")
-        app.logger.info(f"Results page - Session ID: {request.cookies.get('session', 'No session cookie')}")
+        app.logger.info(f"Results page - Session ID: {request.cookies.get('angela_session', 'No session cookie')}")
+        
+        # 尝试从URL参数获取临时ID
+        temp_id = request.args.get('tid') or session.get('temp_id')
         
         # Get form data and analysis status from session
         form_data = session.get('analysis_form_data')
         status = session.get('analysis_status', 'not_started')
-        result_id = session.get('analysis_result_id')
+        result_id = session.get('analysis_result_id') or temp_id
         result_data = session.get('analysis_result')
+        
+        # 如果session中没有数据但有temp_id，从数据库恢复
+        if not form_data and temp_id:
+            try:
+                from models import AnalysisResult
+                import json
+                
+                temp_record = AnalysisResult.query.filter_by(id=temp_id).first()
+                if temp_record:
+                    if temp_record.form_data:
+                        form_data = json.loads(temp_record.form_data)
+                        session['analysis_form_data'] = form_data
+                    if temp_record.result_data:
+                        result_data = json.loads(temp_record.result_data)
+                        session['analysis_result'] = result_data
+                        session['analysis_status'] = 'completed'
+                        status = 'completed'
+                    session['temp_id'] = temp_id
+                    result_id = temp_id
+                    app.logger.info(f"Results page: Recovered data from temp ID: {temp_id}")
+            except Exception as e:
+                app.logger.error(f"Failed to recover from temp ID in results: {str(e)}")
         
         app.logger.info(f"Results page - Status: {status}, Form data exists: {form_data is not None}, Result ID: {result_id}, Result data exists: {result_data is not None}")
         

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>功能测试页面</title>
+</head>
+<body>
+    <h1>测试页面</h1>
+    <button onclick="alert('按钮工作正常')">测试按钮</button>
+    <br><br>
+    <label>
+        <input type="checkbox" onchange="alert('Checkbox工作正常: ' + this.checked)">
+        测试Checkbox
+    </label>
+    <br><br>
+    <button onclick="testAddPerson()">测试添加人物</button>
+    <div id="test-container"></div>
+    
+    <script>
+        function testAddPerson() {
+            try {
+                alert('addPerson函数开始执行');
+                const container = document.getElementById('test-container');
+                const div = document.createElement('div');
+                div.innerHTML = '新增的人物卡片';
+                container.appendChild(div);
+                alert('成功添加元素');
+            } catch(e) {
+                alert('错误: ' + e.message);
+            }
+        }
+        
+        // 测试主页面的函数
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM加载完成');
+            
+            // 检查主页面的函数是否存在
+            if (typeof addPerson === 'undefined') {
+                console.error('addPerson函数未定义');
+            }
+            if (typeof removePerson === 'undefined') {
+                console.error('removePerson函数未定义');
+            }
+        });
+    </script>
+</body>
+</html>

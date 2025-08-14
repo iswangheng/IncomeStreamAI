@@ -1,0 +1,95 @@
+/* 紧急修复：确保所有交互元素可点击 */
+
+/* 修复所有按钮 */
+button, .btn {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+/* 修复所有checkbox */
+input[type="checkbox"] {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10 !important;
+    width: auto !important;
+    height: auto !important;
+    display: inline-block !important;
+    -webkit-appearance: checkbox !important;
+    appearance: checkbox !important;
+}
+
+/* 修复所有label */
+label {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 5 !important;
+}
+
+/* 修复checkbox-item */
+.checkbox-item {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 5 !important;
+}
+
+.checkbox-item input[type="checkbox"] {
+    display: inline-block !important;
+    opacity: 1 !important;
+    position: relative !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 8px !important;
+    cursor: pointer !important;
+    -webkit-appearance: checkbox !important;
+    appearance: checkbox !important;
+}
+
+/* 修复checkbox-tag */
+.checkbox-tag {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 5 !important;
+}
+
+.checkbox-tag input[type="checkbox"] {
+    display: inline-block !important;
+    opacity: 1 !important;
+    position: relative !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 8px !important;
+    cursor: pointer !important;
+    -webkit-appearance: checkbox !important;
+    appearance: checkbox !important;
+}
+
+/* 确保没有元素覆盖在按钮上 */
+.card-body, .form-group, .checkbox-group {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* 移除所有可能阻止点击的伪元素 */
+*::before, *::after {
+    pointer-events: none !important;
+}
+
+/* 确保表单元素可交互 */
+.form-control, select, textarea {
+    cursor: text !important;
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 5 !important;
+}
+
+/* 移除可能的覆盖层 */
+.overlay, .backdrop {
+    display: none !important;
+}

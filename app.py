@@ -60,6 +60,14 @@ def index():
     """Main form page for user input - Apple design"""
     return render_template('index_apple.html')
 
+def save_session_in_ajax():
+    """辅助函数：确保AJAX请求中session被正确保存"""
+    from flask import session
+    session.permanent = True
+    session.modified = True
+    # 这会强制Flask重新计算session并设置cookie
+    app.logger.debug(f"Forcing session save - Status: {session.get('analysis_status')}, Result ID: {session.get('analysis_result_id')}")
+
 @app.route('/thinking')
 def thinking_process():
     """AI thinking process visualization page"""
@@ -192,15 +200,23 @@ def _internal_check_analysis_status():
             session['analysis_status'] = 'completed'
             session['analysis_result_id'] = fallback_id
             session['analysis_result'] = fallback_result
-            session.permanent = True  # 确保session为永久性
-            session.modified = True  # 确保session被保存
+            
+            # 使用辅助函数确保session在AJAX中被保存
+            save_session_in_ajax()
             
             app.logger.info(f"Fallback solution generated and saved with ID: {fallback_id}")
-            return jsonify({
+            
+            # 创建response并确保session被保存
+            response = jsonify({
                 'status': 'completed', 
                 'redirect_url': '/results',
                 'message': '已生成备用方案，正在跳转...'
             })
+            
+            from flask import make_response
+            response = make_response(response)
+            
+            return response
             
         except Exception as fallback_error:
             app.logger.error(f"Failed to generate fallback solution: {str(fallback_error)}")
@@ -235,15 +251,14 @@ def _handle_analysis_execution(form_data, session):
         session['analysis_status'] = 'processing'
         session['analysis_progress'] = 10
         session['analysis_stage'] = '开始AI分析...'
-        session.permanent = True  # 确保session为永久性
-        session.modified = True  # 确保session被保存
+        save_session_in_ajax()  # 使用辅助函数确保session被保存
         app.logger.info("Starting AI analysis in request context")
         app.logger.info(f"Form data for analysis: {json.dumps(form_data, ensure_ascii=False)[:200]}")
         
         # 执行AI分析，设置进度追踪
         session['analysis_progress'] = 30
         session['analysis_stage'] = '正在分析项目数据...'
-        session.modified = True  # 确保session被保存
+        save_session_in_ajax()  # 使用辅助函数确保session被保存
         suggestions = generate_ai_suggestions(form_data, session)
         
         if suggestions and isinstance(suggestions, dict):
@@ -283,17 +298,26 @@ def _handle_analysis_execution(form_data, session):
             session['analysis_stage'] = '分析完成！'
             # 保留一份备份在session中以防数据库读取失败
             session['analysis_result'] = suggestions
-            session.permanent = True  # 确保session为永久性
-            session.modified = True  # 关键！确保session被持久化
+            
+            # 使用辅助函数确保session在AJAX中被保存
+            save_session_in_ajax()
             
             app.logger.info(f"AI analysis completed successfully, result stored with ID: {result_id}")
             app.logger.info(f"Session updated - Status: {session.get('analysis_status')}, Result ID: {session.get('analysis_result_id')}")
             app.logger.info(f"Session state after update - Permanent: {session.permanent}, Modified: {session.modified}")
-            return jsonify({
+            
+            # 创建response并确保session被保存
+            response = jsonify({
                 'status': 'completed', 
                 'redirect_url': '/results',
                 'message': '分析完成，正在跳转到结果页面...'
             })
+            
+            # 确保会话cookie被正确设置
+            from flask import make_response
+            response = make_response(response)
+            
+            return response
         else:
             # 分析结果无效
             app.logger.error("AI analysis returned invalid result")
@@ -343,15 +367,23 @@ def _handle_analysis_execution(form_data, session):
                 session['analysis_status'] = 'completed'
                 session['analysis_result_id'] = fallback_id
                 session['analysis_result'] = fallback_result
-                session.permanent = True  # 确保session为永久性
-                session.modified = True  # 确保session被保存
+                
+                # 使用辅助函数确保session在AJAX中被保存
+                save_session_in_ajax()
                 
                 app.logger.info(f"Fallback generated immediately due to timeout, ID: {fallback_id}")
-                return jsonify({
+                
+                # 创建response并确保session被保存
+                response = jsonify({
                     'status': 'completed', 
                     'redirect_url': '/results',
                     'message': '网络不稳定，已生成备用方案...'
                 })
+                
+                from flask import make_response
+                response = make_response(response)
+                
+                return response
                 
             except Exception as fallback_error:
                 app.logger.error(f"Fallback generation failed: {str(fallback_error)}")
@@ -639,12 +671,12 @@ def results():
             # 如果是not_started状态，重定向到thinking页面
             if status == 'not_started':
                 app.logger.info("Status is not_started, redirecting to thinking page")
-                return redirect(url_for('thinking'))
+                return redirect(url_for('thinking_process'))
             
             # 如果是processing状态但没有结果，也重定向到thinking页面
             elif status == 'processing':
                 app.logger.info("Status is processing without result, redirecting to thinking page")
-                return redirect(url_for('thinking'))
+                return redirect(url_for('thinking_process'))
             
             # 尝试从数据库获取任何存在的结果
             if result_id:

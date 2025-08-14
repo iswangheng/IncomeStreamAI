@@ -280,8 +280,10 @@ def _handle_analysis_execution(form_data, session):
             session['analysis_stage'] = '分析完成！'
             # 保留一份备份在session中以防数据库读取失败
             session['analysis_result'] = suggestions
+            session.modified = True  # 关键！确保session被持久化
             
             app.logger.info(f"AI analysis completed successfully, result stored with ID: {result_id}")
+            app.logger.info(f"Session updated - Status: {session.get('analysis_status')}, Result ID: {session.get('analysis_result_id')}")
             return jsonify({
                 'status': 'completed', 
                 'redirect_url': '/results',
@@ -405,6 +407,33 @@ def results():
             except Exception as db_error:
                 app.logger.error(f"Failed to recover from database: {str(db_error)}")
 
+        # 如果没有result_id但有form_data，尝试从数据库找最新的AI分析结果
+        if form_data and not result_id:
+            try:
+                from models import AnalysisResult
+                import json
+                
+                project_name = form_data.get('projectName', '')
+                if project_name:
+                    # 查找最新的AI分析结果
+                    latest_ai_result = AnalysisResult.query.filter_by(
+                        project_name=project_name,
+                        analysis_type='ai_analysis'
+                    ).order_by(AnalysisResult.created_at.desc()).first()
+                    
+                    if latest_ai_result:
+                        app.logger.info(f"Found AI analysis result for project: {project_name}, ID: {latest_ai_result.id}")
+                        result_id = latest_ai_result.id
+                        session['analysis_result_id'] = result_id
+                        session['analysis_status'] = 'completed'
+                        result_data = json.loads(latest_ai_result.result_data)
+                        session['analysis_result'] = result_data
+                        session.modified = True
+                        status = 'completed'
+                    
+            except Exception as e:
+                app.logger.error(f"Failed to find AI analysis result: {str(e)}")
+        
         # 如果有表单数据但result_id指向的是备用方案，尝试找到真正的AI分析结果
         if form_data and result_id:
             try:

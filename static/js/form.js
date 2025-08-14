@@ -225,10 +225,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 默认添加一个人物卡片但不聚焦 - 改善用户体验
-    setTimeout(() => {
-        addPersonCard(false);
-    }, 100);
+    // 不自动添加人物卡片 - 由demo-cases.js控制
+    // setTimeout(() => {
+    //     addPersonCard(false);
+    // }, 100);
 
     // 处理其他资源输入框的显示隐藏
     const otherResourceCheckbox = document.getElementById('resource8');

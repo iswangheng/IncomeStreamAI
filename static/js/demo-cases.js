@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // 示例案例数据
+    // 示例案例数据 - 修复版本，确保数据结构正确
     const demoData = {
         'english-training': {
             projectName: 'Bonnie英语培训管道',
@@ -16,36 +16,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     name: '升学规划师朋友',
                     role: 'channel',
                     resources: ['家长客户资源', '升学规划服务信任度', '教育圈人脉'],
-                    make_happy: 'bring_leads,recurring_income,no_conflict_current_partner'
+                    make_happy: '带来客户/用户'
                 },
                 {
                     name: '英语培训机构',
-                    role: 'product,delivery', 
+                    role: 'product',
                     resources: ['英语课程产品', '师资助教团队', '线上教学系统'],
-                    make_happy: 'bring_leads,brand_exposure,expand_network'
+                    make_happy: '能长期持续赚钱'
                 }
             ],
-            externalResources: ['暂无明确外部资源']
+            externalResources: []
         },
         'rental-business': {
-            projectName: '商铺租赁管道',
-            projectDescription: '通过1万元启动资金，采用二房东模式，寻找位置好但房租便宜的商铺进行转租，利用信息差和包装能力获得租金差价收益，8年内累计实现72万收益。',
-            projectStage: 'planning',
+            projectName: 'Angela临街商铺二房东管道',
+            projectDescription: '我打了20多个电话调研发现一个房东有临街双层商铺，挂了两三个月都租不出去，因为房东要求整租，很多人想分开租上下层。更重要的是，这个铺子没有煤气不能做热菜，所以餐饮做不了。但通过市场调研我发现一楼可以做便利店、水果店，二楼可以做美容SPA、理发店。房东还是个社恐，太好了！',
+            projectStage: 'testing',
             keyPersons: [
                 {
-                    name: '房东',
-                    role: 'product',
-                    resources: ['商铺产权', '租赁决策权', '区域房产信息'],
-                    make_happy: 'stable_income,reliable_tenant,property_maintenance'
+                    name: '社恐房东',
+                    role: 'investor',
+                    resources: ['临街双层商铺', '5年长期租约意愿', '稳定现金流需求'],
+                    make_happy: '能长期持续赚钱'
                 },
                 {
                     name: '承租商户',
-                    role: 'buyer',
+                    role: 'product',
                     resources: ['经营资金', '客流需求', '商业运营能力'],
-                    make_happy: 'good_location,reasonable_rent,flexible_lease'
+                    make_happy: '不公开露脸'
                 }
             ],
-            externalResources: ['房产中介平台', '商圈调研数据']
+            externalResources: ['商圈调研数据']
         },
         'cicada-farming': {
             projectName: '知了猴养殖管道',
@@ -56,19 +56,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     name: '农村合作社',
                     role: 'delivery',
                     resources: ['养殖场地', '养殖技术', '农村劳动力'],
-                    make_happy: 'employment_opportunities,technical_support,stable_orders'
+                    make_happy: '提供就业机会'
                 },
                 {
                     name: '餐厅采购经理',
                     role: 'buyer',
                     resources: ['采购预算', '餐厅客户群', '菜品研发能力'],
-                    make_happy: 'quality_supply,competitive_price,reliable_delivery'
+                    make_happy: '优质供应稳定交付'
                 },
                 {
                     name: '批发商',
                     role: 'channel',
                     resources: ['批发渠道', '仓储物流', '客户网络'],
-                    make_happy: 'consistent_supply,good_margins,market_exclusivity'
+                    make_happy: '稳定供应好利润'
                 }
             ],
             externalResources: ['农业补贴政策', '电商销售平台', '冷链物流网络']
@@ -108,14 +108,19 @@ document.addEventListener('DOMContentLoaded', function() {
             scrollToForm();
             
             // 显示填充完成提示，但不自动提交
-            showDataFilledNotification();
+            showFillCompletedNotification();
         });
     });
 
     /**
-     * 填充表单数据
+     * 填充表单数据 - 最终修复版本
      */
     function fillFormWithCaseData(caseData) {
+        console.log('开始填充表单数据:', caseData);
+        
+        // 设置标记防止其他脚本干扰
+        window.demoCasesActive = true;
+        
         // 填充基本项目信息
         const projectNameInput = document.getElementById('project_name');
         const projectDescInput = document.getElementById('project_description');
@@ -125,22 +130,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (projectDescInput) projectDescInput.value = caseData.projectDescription;
         if (projectStageSelect) projectStageSelect.value = caseData.projectStage;
         
-        // 清空现有的人物卡片
+        // 彻底清空现有的人物卡片
         clearPersonCards();
         
-        // 添加关键人物
-        if (caseData.keyPersons && caseData.keyPersons.length > 0) {
-            caseData.keyPersons.forEach((person, index) => {
-                setTimeout(() => {
-                    addPersonCardWithData(person, false); // false表示不聚焦
-                }, index * 200); // 延时添加，避免DOM操作冲突
-            });
-        }
+        // 等待清空完成后再添加新的人物卡片
+        setTimeout(() => {
+            if (caseData.keyPersons && caseData.keyPersons.length > 0) {
+                console.log('准备添加', caseData.keyPersons.length, '个关键人物');
+                
+                // 直接创建所有卡片，不使用任何可能冲突的函数
+                caseData.keyPersons.forEach((person, index) => {
+                    console.log(`添加第${index + 1}个人物:`, person.name);
+                    createBasicPersonCard(person);
+                });
+            }
+            
+            // 完成后取消标记
+            window.demoCasesActive = false;
+        }, 200);
         
         // 填充外部资源
         setTimeout(() => {
             fillExternalResources(caseData.externalResources);
-        }, caseData.keyPersons.length * 200 + 300);
+        }, 600);
     }
 
     /**
@@ -160,17 +172,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * 清空人物卡片
+     * 清空人物卡片 - 终极清理版本
      */
     function clearPersonCards() {
+        console.log('开始清空人物卡片');
+        
         const personsContainer = document.getElementById('personsContainer');
-        if (personsContainer) {
-            personsContainer.innerHTML = '';
+        if (!personsContainer) {
+            console.error('找不到personsContainer');
+            return;
         }
         
-        // 重置人物计数器
-        if (window.personCounter !== undefined) {
+        // 方法1：强制清空容器内容
+        personsContainer.innerHTML = '';
+        
+        // 方法2：确保移除页面上所有的person-card，不管在哪个容器里
+        const existingCards = document.querySelectorAll('.person-card');
+        existingCards.forEach((card, index) => {
+            console.log(`移除第${index + 1}个残留卡片`);
+            if (card.parentNode) {
+                card.parentNode.removeChild(card);
+            }
+        });
+        
+        // 方法3：重置form.js中的计数器
+        if (typeof window !== 'undefined') {
+            // 重置所有可能的全局计数器
             window.personCounter = 0;
+            window.personCount = 0;
+            
+            // 如果有全局的addPersonCard函数，阻止其自动运行
+            const originalAddPersonCard = window.addPersonCard;
+            if (originalAddPersonCard) {
+                window.addPersonCard = function() {
+                    console.log('addPersonCard被阻止执行，由demo-cases接管');
+                };
+            }
         }
         
         // 显示空状态消息
@@ -178,30 +215,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (noPersonsMsg) {
             noPersonsMsg.style.display = 'block';
         }
+        
+        console.log('人物卡片已完全清空，当前容器内容：', personsContainer.innerHTML);
     }
 
     /**
-     * 添加带数据的人物卡片
+     * 添加带数据的人物卡片 - 已废弃，直接调用createBasicPersonCard
      */
     function addPersonCardWithData(personData, shouldFocus = false) {
-        // 调用模板中的全局addPerson函数
-        if (typeof window.addPerson === 'function') {
-            window.addPerson();
-        } else {
-            // 备用：手动创建基础的人物卡片
-            createBasicPersonCard(personData);
-            return;
-        }
-        
-        // 等待DOM更新后填充数据
-        setTimeout(() => {
-            const personCards = document.querySelectorAll('.person-card');
-            const latestCard = personCards[personCards.length - 1];
-            
-            if (latestCard) {
-                fillPersonCardData(latestCard, personData);
-            }
-        }, 300);
+        console.log('addPersonCardWithData被调用，重定向到createBasicPersonCard');
+        createBasicPersonCard(personData);
     }
 
     /**
@@ -209,27 +232,42 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     function createBasicPersonCard(personData) {
         const container = document.getElementById('personsContainer');
-        if (!container) return;
+        if (!container) {
+            console.error('找不到personsContainer容器');
+            return;
+        }
         
+        console.log('正在创建人物卡片:', personData.name);
+        
+        // 确保数据完整性
+        const name = personData.name || '';
+        const resources = personData.resources ? personData.resources.join(', ') : '';
+        const makeHappy = personData.make_happy || '';
+        
+        // 计算卡片编号
+        const existingCards = container.querySelectorAll('.person-card');
+        const cardNumber = existingCards.length + 1;
+        
+        // 创建简化的卡片结构，避免复杂交互导致重复
         const cardHtml = `
-            <div class="person-card">
+            <div class="person-card gpu-accelerated" style="margin-bottom: var(--space-4);">
                 <div class="person-card-header">
-                    <div class="person-number">${container.children.length + 1}</div>
+                    <div class="person-number">${cardNumber}</div>
                     <button type="button" class="remove-person-btn" onclick="removePerson(this)">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="form-group">
                     <label class="form-label">人物代号/姓名</label>
-                    <input type="text" class="form-control" name="person_name[]" value="${personData.name || ''}">
+                    <input type="text" class="form-control" name="person_name[]" value="${name}" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">掌握的资源</label>
-                    <textarea class="form-control" name="person_resources[]" placeholder="请描述具体资源">${personData.resources ? personData.resources.join(',') : ''}</textarea>
+                    <textarea class="form-control" name="person_resources[]" placeholder="请描述具体资源" rows="2">${resources}</textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label">动机需求</label>
-                    <input type="text" class="form-control" name="person_needs[]" value="${personData.make_happy || ''}">
+                    <input type="text" class="form-control" name="person_needs[]" value="${makeHappy}">
                 </div>
             </div>
         `;
@@ -241,6 +279,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (emptyState) {
             emptyState.style.display = 'none';
         }
+        
+        console.log(`人物卡片创建完成: ${name}, 容器内现有卡片数量: ${container.children.length}`);
     }
 
     /**
@@ -389,11 +429,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
-     * 显示数据填充完成提示
+     * 显示填充完成提示（不自动提交）
      */
-    function showDataFilledNotification() {
+    function showFillCompletedNotification() {
         const notification = document.createElement('div');
-        notification.className = 'data-filled-notification';
+        notification.className = 'fill-completed-notification';
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -403,62 +443,52 @@ document.addEventListener('DOMContentLoaded', function() {
             padding: 15px 20px;
             border-radius: 10px;
             z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             font-weight: 500;
             animation: slideInFromRight 0.5s ease;
         `;
         
         notification.innerHTML = `
             <div style="display: flex; align-items: center; gap: 10px;">
-                <i class="fas fa-check-circle" style="color: #ffd700;"></i>
-                <span>示例数据已填充完成！您可以修改后点击"开始AI智能分析"</span>
-                <button onclick="this.parentElement.parentElement.remove()" 
-                        style="background: none; border: none; color: white; margin-left: 10px; cursor: pointer;">
-                    <i class="fas fa-times"></i>
-                </button>
+                <i class="fas fa-check-circle" style="color: #fff;"></i>
+                <span>示例数据已填充完成！请检查并修改后点击"开始AI智能分析"</span>
+                <button onclick="this.parentElement.parentElement.remove()" style="
+                    background: none; 
+                    border: none; 
+                    color: white; 
+                    font-size: 18px; 
+                    cursor: pointer;
+                    margin-left: 10px;
+                    padding: 0;
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">×</button>
             </div>
         `;
         
         document.body.appendChild(notification);
         
-        // 6秒后自动消失
+        // 6秒后自动移除提示
         setTimeout(() => {
             if (document.body.contains(notification)) {
-                notification.style.animation = 'slideOutToRight 0.5s ease';
-                setTimeout(() => notification.remove(), 500);
+                notification.remove();
             }
         }, 6000);
         
-        // 高亮显示"开始AI智能分析"按钮
-        highlightSubmitButton();
-    }
-
-    /**
-     * 高亮显示提交按钮
-     */
-    function highlightSubmitButton() {
-        const submitBtn = document.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.style.animation = 'pulse-highlight 2s ease-in-out 3';
+        // 高亮分析按钮提醒用户
+        const analyzeButton = document.querySelector('button[type="submit"]');
+        if (analyzeButton) {
+            analyzeButton.style.animation = 'pulse 2s infinite';
+            analyzeButton.style.boxShadow = '0 0 0 4px rgba(0, 122, 255, 0.3)';
             
-            // 添加脉冲动画样式
-            if (!document.getElementById('highlight-styles')) {
-                const style = document.createElement('style');
-                style.id = 'highlight-styles';
-                style.textContent = `
-                    @keyframes pulse-highlight {
-                        0% { transform: scale(1); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
-                        50% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5); }
-                        100% { transform: scale(1); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            
-            // 6秒后移除动画
+            // 3秒后移除高亮效果
             setTimeout(() => {
-                submitBtn.style.animation = '';
-            }, 6000);
+                analyzeButton.style.animation = '';
+                analyzeButton.style.boxShadow = '';
+            }, 3000);
         }
     }
 
@@ -507,7 +537,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 100% { transform: scale(1); }
             }
             
-            .data-filled-notification {
+            .fill-completed-notification {
                 animation: slideInFromRight 0.5s ease;
             }
             
@@ -516,9 +546,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 to { transform: translateX(0); opacity: 1; }
             }
             
-            @keyframes slideOutToRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
             }
         `;
         document.head.appendChild(style);

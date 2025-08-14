@@ -983,92 +983,16 @@
         </div>
         {% endfor %}
         {% else %}
-        <!-- 示例数据展示 -->
+        <!-- 无分析结果时的提示 -->
         <div class="glass-card path-card fade-in-up animate-delay-2">
-            <div class="path-header">
-                <div style="display: flex; align-items: center;">
-                    <div class="path-number">1</div>
-                    <h3 class="path-title">视频号带货分成</h3>
-                </div>
-                <div class="path-scene">
-                    <i class="fas fa-map-marker-alt me-2"></i>
-                    通过张三的视频号进行商品推广
-                </div>
-            </div>
-
-            <div style="margin-bottom: var(--space-6);">
-                <div style="display: flex; align-items: center; margin-bottom: var(--space-3);">
-                    <i class="fas fa-play-circle" style="color: var(--color-primary); margin-right: var(--space-2);"></i>
-                    <strong>启动策略：</strong>
-                </div>
-                <div style="color: var(--color-text-secondary); font-size: var(--text-lg);">
-                    你先与张三对接分成模式
-                </div>
-            </div>
-
-            <div class="action-steps">
-                <h4 style="display: flex; align-items: center; margin-bottom: var(--space-4);">
-                    <i class="fas fa-list-ol me-2"></i>
-                    执行步骤
-                </h4>
-                <div class="step-item">
-                    <div class="step-owner">你</div>
-                    <div class="step-content">
-                        <div class="step-action">联系张三，商讨视频号推广分成模式，确定商品类型和分成比例</div>
-                    </div>
-                </div>
-                <div class="step-item">
-                    <div class="step-owner">张三</div>
-                    <div class="step-content">
-                        <div class="step-action">发布带货视频内容（每周2条），并在视频中附带商品购买链接</div>
-                    </div>
-                </div>
-                <div class="step-item">
-                    <div class="step-owner">你</div>
-                    <div class="step-content">
-                        <div class="step-action">通过电商平台联系小商家，获取试用品或样品以备推广</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mvp-section">
-                <div class="mvp-title">
-                    <i class="fas fa-rocket"></i>
-                    最小可验证原型 (MVP)
-                </div>
-                <div>联系3个商家，成功完成至少1个商品推广视频并获得首批订单（目标≥10单）</div>
-            </div>
-
-            <div class="resources-risks">
-                <div class="info-section">
-                    <div class="info-title">
-                        <i class="fas fa-users me-2"></i>
-                        关键人物资源
-                    </div>
-                    <ul class="info-list">
-                        <li>张三的视频号粉丝5万</li>
-                        <li>张三的3个微信群</li>
-                    </ul>
-                </div>
-                <div class="info-section">
-                    <div class="info-title">
-                        <i class="fas fa-shield-alt me-2"></i>
-                        风险与应对
-                    </div>
-                    <ul class="info-list">
-                        <li>商品质量不佳导致负面评价</li>
-                        <li>视频号带货效果不理想</li>
-                        <li><strong>备选方案：</strong>若商品效果不佳，改为推广虚拟商品或服务，如课程或会员卡</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div style="background: linear-gradient(135deg, var(--color-accent), #ff7043); color: white; padding: var(--space-4); border-radius: var(--radius-lg); margin-top: var(--space-4);">
-                <div style="display: flex; align-items: center; font-weight: var(--font-semibold);">
-                    <i class="fas fa-coins me-2"></i>
-                    收益触发点
-                </div>
-                <div style="margin-top: var(--space-2);">通过视频号带货产生销售分成</div>
+            <div class="text-center" style="padding: var(--space-8);">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--color-warning); margin-bottom: var(--space-4);"></i>
+                <h3 style="color: var(--color-text-primary); margin-bottom: var(--space-3);">分析结果暂未生成</h3>
+                <p style="color: var(--color-text-secondary); margin-bottom: var(--space-6);">请确保您已完整填写了项目信息并成功提交分析请求。</p>
+                <a href="/" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    返回重新分析
+                </a>
             </div>
         </div>
         {% endif %}

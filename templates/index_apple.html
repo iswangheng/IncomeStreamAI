@@ -427,31 +427,7 @@
 
                         <!-- 展开时显示的其他分类 -->
                         <div class="needs-expandable-section" style="display: none;">
-                            <!-- 主导控制 -->
-                            <div class="tag-group" style="margin-bottom: var(--space-3);">
-                                <h6 style="color: var(--color-warning); margin-bottom: var(--space-1); font-size: var(--text-sm); font-weight: var(--font-semibold);">
-                                    <span style="background: var(--color-warning); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🟡</span>想主导项目 / 有话语权
-                                </h6>
-                                <p style="color: var(--color-gray-600); font-size: var(--text-xs); margin-bottom: var(--space-2); font-style: italic; padding-left: 20px;">他要掌控节奏、方向和人选，不想被当工具。</p>
-                                <div class="checkbox-group">
-                                    <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="control_pace">
-                                        <span>自己定节奏</span>
-                                    </label>
-                                    <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="choose_partners">
-                                        <span>决定和谁合作</span>
-                                    </label>
-                                    <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="decide_content">
-                                        <span>决定内容/产品怎么做</span>
-                                    </label>
-                                    <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="own_planning">
-                                        <span>有发起权/策划权</span>
-                                    </label>
-                                </div>
-                            </div>
+
 
                             <!-- 风险规避 -->
                             <div class="tag-group" style="margin-bottom: var(--space-3);">
@@ -509,35 +485,7 @@
                                 </div>
                             </div>
 
-                            <!-- 人脉情绪 -->
-                            <div class="tag-group" style="margin-bottom: var(--space-3);">
-                                <h6 style="color: var(--color-gray-700); margin-bottom: var(--space-1); font-size: var(--text-sm); font-weight: var(--font-semibold);">
-                                    <span style="background: var(--color-gray-700); color: white; padding: 2px 6px; border-radius: var(--radius-sm); margin-right: var(--space-1); font-size: 10px;">🟣</span>在乎人脉 / 感受
-                                </h6>
-                                <p style="color: var(--color-gray-600); font-size: var(--text-xs); margin-bottom: var(--space-2); font-style: italic; padding-left: 20px;">他为关系、体验、参与感而来。</p>
-                                <div class="checkbox-group">
-                                    <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="expand_network">
-                                        <span>拓展人脉</span>
-                                    </label>
-                                    <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="sense_of_participation">
-                                        <span>有参与感/成就感</span>
-                                    </label>
-                                    <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="talk_value">
-                                        <span>项目能当作谈资</span>
-                                    </label>
-                                    <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="feel_invited">
-                                        <span>有被邀请的感觉</span>
-                                    </label>
-                                    <label class="checkbox-tag">
-                                        <input type="checkbox" name="person_needs[]" value="learn_info">
-                                        <span>能接触到新信息/学到东西</span>
-                                    </label>
-                                </div>
-                            </div>
+
 
                             <!-- 其他自定义 -->
                             <div class="tag-group">
@@ -1163,7 +1111,7 @@
                         name: '英语培训机构',
                         roles: ['product', 'delivery'],
                         resources: ['英语课程产品', '师资助教团队', '线上教学系统'],
-                        makeHappy: ['bring_leads', 'brand_exposure', 'expand_network'],
+                        makeHappy: ['bring_leads', 'brand_exposure'],
                         notes: '想转型线上，有流量焦虑，交付成本高'
                     }
                 ]
@@ -1205,7 +1153,7 @@
                         name: '劳务市场大爷大妈',
                         roles: ['delivery'],
                         resources: ['蝉卵采集能力', '山区熟悉度', '时间充裕'],
-                        makeHappy: ['recurring_income', 'control_pace', 'be_recognized'],
+                        makeHappy: ['recurring_income', 'be_recognized'],
                         notes: '以件计价不设打卡，干得开心效率更高'
                     },
                     {

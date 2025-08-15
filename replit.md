@@ -77,6 +77,21 @@ Angela is a Flask-based web application designed to help users generate non-labo
 - **Advanced Prompt Engineering**: Incorporates core non-labor income formula (意识+能量+能力=结果), seven income types, and proven success methodologies.
 - **Knowledge Base Management System**: Admin interface at `/admin` for managing knowledge files (upload, enable/disable, search/filter).
 
+## Recent Enhancements (2025-08-15)
+
+### UI Simplification
+- **External Resources Module Removal**: Completely removed the "外部资源与合作" module from the main form
+  - Cleaned up HTML structure by removing the external resources card and all related input fields
+  - Updated backend `/generate` route to remove external_resources processing logic
+  - Removed JavaScript handling for external resource input toggles and validation
+  - Updated demo case data to remove external resources references
+  - **Impact**: Simplified user experience by focusing only on project info and key personnel
+- **Key Personnel Options Reduction**: Removed two categories from "如何让此人高兴" section
+  - Removed "想主导项目 / 有话语权" category (control_pace, choose_partners, decide_content, own_planning options)
+  - Removed "在乎人脉 / 感受" category (expand_network, sense_of_participation, talk_value, feel_invited, learn_info options)
+  - Updated demo case data to remove references to deleted options
+  - **Impact**: Streamlined the person needs selection to focus on most essential categories
+
 ## Recent Enhancements (2025-08-14)
 
 ### Session Persistence Improvements

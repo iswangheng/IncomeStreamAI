@@ -782,21 +782,12 @@ def generate():
                     "make_happy": person_needs[i].strip() if i < len(person_needs) else ""
                 })
         
-        # Process external resources
-        external_resources = request.form.getlist('external_resources')
-        
-        # Handle other resource input
-        other_resource_text = request.form.get('other_resource_text', '').strip()
-        if other_resource_text and request.form.get('other_resource_checkbox'):
-            external_resources.append(other_resource_text)
-        
         # Create JSON structure as per PRD
         form_data = {
             "projectName": project_name,
             "projectDescription": project_description,
             "projectStage": project_stage,
-            "keyPersons": key_persons,
-            "externalResources": external_resources
+            "keyPersons": key_persons
         }
         
         # Store form data in session 

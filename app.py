@@ -4,8 +4,9 @@ import logging
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, Response
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, Response, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from sqlalchemy.orm import DeclarativeBase
 
 # Configure logging
@@ -46,19 +47,86 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 # Initialize database
 db.init_app(app)
 
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'  # type: ignore
+login_manager.login_message = '请先登录以访问该页面'
+login_manager.login_message_category = 'info'
+
 # Create upload folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # 导入所有模型
-from models import KnowledgeItem, AnalysisResult
+from models import User, KnowledgeItem, AnalysisResult
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Flask-Login用户加载回调"""
+    return User.query.get(int(user_id))
 
 with app.app_context():
     db.create_all()
+    
+    # 创建默认登录账号
+    default_user = User.query.filter_by(phone='18302196515').first()
+    if not default_user:
+        default_user = User(phone='18302196515', name='默认用户')
+        default_user.set_password('aibenzong9264')
+        db.session.add(default_user)
+        db.session.commit()
+        print("已创建默认登录账号: 18302196515 / aibenzong9264")
 
 @app.route('/')
+@login_required
 def index():
     """Main form page for user input - Apple design"""
     return render_template('index_apple.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """用户登录页面"""
+    # 如果用户已登录，重定向到首页
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    
+    if request.method == 'POST':
+        phone = request.form.get('phone', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        # 验证输入
+        if not phone or not password:
+            flash('请输入手机号和密码', 'error')
+            return render_template('login.html')
+        
+        # 查找用户
+        user = User.query.filter_by(phone=phone).first()
+        
+        if user and user.check_password(password) and user.active:
+            # 登录成功
+            login_user(user, remember=True)
+            user.update_last_login()
+            db.session.commit()
+            
+            flash(f'欢迎回来，{user.name or user.phone}！', 'success')
+            
+            # 重定向到用户原本要访问的页面，或首页
+            next_page = request.args.get('next')
+            if next_page:
+                return redirect(next_page)
+            return redirect(url_for('index'))
+        else:
+            flash('手机号或密码错误，请重试', 'error')
+    
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    """用户登出"""
+    logout_user()
+    flash('您已成功登出', 'success')
+    return redirect(url_for('login'))
 
 def save_session_in_ajax():
     """辅助函数：确保AJAX请求中session被正确保存"""
@@ -69,6 +137,7 @@ def save_session_in_ajax():
     app.logger.debug(f"Forcing session save - Status: {session.get('analysis_status')}, Result ID: {session.get('analysis_result_id')}")
 
 @app.route('/thinking')
+@login_required
 def thinking_process():
     """AI thinking process visualization page"""
     from flask import session, redirect, url_for, flash
@@ -93,11 +162,13 @@ def thinking_process():
     return render_template('thinking_process.html')
 
 @app.route('/analysis_status', methods=['GET'])
+@login_required
 def analysis_status():
     """检查AI分析状态的AJAX端点 - 确保始终返回JSON"""
     return check_analysis_status()
 
 @app.route('/check_analysis_status', methods=['GET'])
+@login_required
 def check_analysis_status():
     """检查AI分析状态的AJAX端点 - 确保始终返回JSON"""
     
@@ -404,6 +475,7 @@ def _handle_analysis_execution(form_data, session):
             })
 
 @app.route('/results')
+@login_required
 def results():
     """Display AI analysis result page with dynamic loading"""
     try:
@@ -750,6 +822,7 @@ def results():
         return redirect(url_for('index'))
 
 @app.route('/generate', methods=['POST'])
+@login_required
 def generate():
     """Process form data and redirect to thinking page"""
     try:
@@ -1028,6 +1101,7 @@ def get_file_size(file_obj):
 
 # Knowledge Base Management Routes
 @app.route('/history')
+@login_required
 def analysis_history():
     """历史分析记录页面"""
     try:
@@ -1046,6 +1120,7 @@ def analysis_history():
         return redirect(url_for('index'))
 
 @app.route('/history/<record_id>')
+@login_required
 def view_analysis_record(record_id):
     """查看特定的分析记录详情"""
     try:
@@ -1082,6 +1157,7 @@ def view_analysis_record(record_id):
         return redirect(url_for('analysis_history'))
 
 @app.route('/admin')
+@login_required
 def admin_dashboard():
     """后台管理主页 - 直接显示文件列表"""
     # 查询条件
@@ -1107,6 +1183,7 @@ def admin_dashboard():
 
 
 @app.route('/admin/knowledge/upload', methods=['POST'])
+@login_required
 def upload_knowledge():
     """上传知识库文件"""
     if 'file' not in request.files:
@@ -1159,6 +1236,7 @@ def upload_knowledge():
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/knowledge/upload-multiple', methods=['POST'])
+@login_required
 def upload_knowledge_multiple():
     """批量上传知识库文件"""
     files = request.files.getlist('files')
@@ -1224,6 +1302,7 @@ def upload_knowledge_multiple():
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/knowledge/create-text', methods=['POST'])
+@login_required
 def create_text_knowledge():
     """创建文本知识条目"""
     title = request.form.get('title', '').strip()
@@ -1274,6 +1353,7 @@ def create_text_knowledge():
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/knowledge/<int:item_id>/edit', methods=['POST'])
+@login_required
 def edit_text_knowledge(item_id):
     """编辑文本知识条目"""
     item = KnowledgeItem.query.get_or_404(item_id)
@@ -1311,6 +1391,7 @@ def edit_text_knowledge(item_id):
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/knowledge/<int:item_id>/toggle-status', methods=['POST'])
+@login_required
 def toggle_knowledge_status(item_id):
     """切换知识库条目状态"""
     item = KnowledgeItem.query.get_or_404(item_id)
@@ -1330,6 +1411,7 @@ def toggle_knowledge_status(item_id):
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/knowledge/<int:item_id>/delete', methods=['POST'])
+@login_required
 def delete_knowledge(item_id):
     """删除知识库条目"""
     item = KnowledgeItem.query.get_or_404(item_id)
@@ -1353,6 +1435,7 @@ def delete_knowledge(item_id):
 # ============= 非劳务收入路径生成 API =============
 
 @app.route('/generate-paths', methods=['POST'])
+@login_required
 def generate_paths():
     """生成非劳务收入路径"""
     try:
@@ -1387,6 +1470,7 @@ def generate_paths():
         }), 500
 
 @app.route('/refine-path', methods=['POST'])
+@login_required
 def refine_path():
     """细化指定路径"""
     try:
@@ -1415,6 +1499,7 @@ def refine_path():
         }), 500
 
 @app.route('/result-preview')
+@login_required
 def result_preview():
     """重定向到正确的结果页面，避免用户看到模拟数据"""
     from flask import flash, redirect, url_for
@@ -1424,6 +1509,7 @@ def result_preview():
 
 
 @app.route('/admin/ai-chat', methods=['POST'])
+@login_required
 def ai_chat():
     """AI对话测试接口"""
     try:

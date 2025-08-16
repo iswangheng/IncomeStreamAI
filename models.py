@@ -1,5 +1,36 @@
 from datetime import datetime
 from app import db
+from flask_login import UserMixin
+from werkzeug.security import check_password_hash, generate_password_hash
+
+
+class User(UserMixin, db.Model):
+    """用户登录模型"""
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    phone = db.Column(db.String(11), unique=True, nullable=False, comment='手机号')
+    password_hash = db.Column(db.String(256), nullable=False, comment='密码哈希')
+    name = db.Column(db.String(100), nullable=True, comment='用户姓名')
+    active = db.Column(db.Boolean, default=True, comment='账户是否激活')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, comment='创建时间')
+    last_login = db.Column(db.DateTime, comment='最后登录时间')
+    
+    def set_password(self, password):
+        """设置密码"""
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """验证密码"""
+        return check_password_hash(self.password_hash, password)
+    
+    def update_last_login(self):
+        """更新最后登录时间"""
+        self.last_login = datetime.utcnow()
+    
+    def __repr__(self):
+        return f'<User {self.phone}>'
+
 
 class KnowledgeItem(db.Model):
     """AI知识库条目模型"""

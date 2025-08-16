@@ -1,0 +1,50 @@
+/* 用户菜单样式 */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-secondary);
+    font: var(--font-callout);
+    font-weight: 500;
+}
+
+.user-info i {
+    font-size: 18px;
+    color: var(--color-primary);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .nav-actions {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .user-menu {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .user-info {
+        font-size: 14px;
+    }
+}
+
+/* 登出按钮特殊样式 */
+.btn-outline {
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-gray-300);
+}
+
+.btn-outline:hover {
+    background: var(--color-gray-100);
+    color: var(--color-text-primary);
+    border-color: var(--color-gray-400);
+}

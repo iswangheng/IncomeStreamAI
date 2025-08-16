@@ -376,6 +376,7 @@ body::after {
 
 /* ==== 导航栏增强 ==== */
 .navigation-bar {
+    position: relative !important;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: var(--backdrop-blur);
     -webkit-backdrop-filter: var(--backdrop-blur);

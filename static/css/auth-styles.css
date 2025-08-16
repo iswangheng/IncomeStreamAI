@@ -24,6 +24,7 @@
     /* 导航栏容器调整 */
     .navigation-bar {
         padding: var(--space-2) 0;
+        position: relative !important;
     }
     
     .nav-content {

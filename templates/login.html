@@ -251,38 +251,7 @@
             border-color: rgba(0, 122, 255, 0.2);
         }
         
-        /* Demo Account Info */
-        .demo-info {
-            background: var(--color-gray-50);
-            border: 1px solid var(--color-gray-200);
-            border-radius: var(--radius-md);
-            padding: var(--space-5);
-            margin-bottom: var(--space-6);
-        }
-        
-        .demo-title {
-            font: var(--font-callout);
-            font-weight: 600;
-            color: var(--color-text-primary);
-            margin-bottom: var(--space-3);
-            display: flex;
-            align-items: center;
-        }
-        
-        .demo-title::before {
-            content: "🔑";
-            margin-right: var(--space-2);
-        }
-        
-        .demo-account {
-            font: var(--font-callout);
-            color: var(--color-text-secondary);
-            line-height: 1.5;
-        }
-        
-        .demo-account strong {
-            color: var(--color-primary);
-        }
+
         
         /* Footer */
         .login-footer {
@@ -338,14 +307,7 @@
             {% endif %}
         {% endwith %}
         
-        <!-- Demo Account Info -->
-        <div class="demo-info">
-            <div class="demo-title">演示账户</div>
-            <div class="demo-account">
-                <strong>手机号：</strong>18302196515<br>
-                <strong>密码：</strong>aibenzong9264
-            </div>
-        </div>
+
         
         <!-- Login Form -->
         <form method="POST" class="login-form">
@@ -406,11 +368,7 @@
             submitBtn.textContent = '登录中...';
         });
         
-        // 自动填充演示账户功能
-        document.querySelector('.demo-info').addEventListener('click', function() {
-            document.getElementById('phone').value = '18302196515';
-            document.getElementById('password').value = 'aibenzong9264';
-        });
+
     </script>
 </body>
 </html>

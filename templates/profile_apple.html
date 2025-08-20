@@ -143,9 +143,77 @@
         }
         
         .main-content {
-            padding-top: 80px;
+            padding-top: 84px;
             min-height: 100vh;
             background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg-tertiary) 100%);
+        }
+        
+        /* 强制导航栏修复样式 */
+        .navigation-bar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 1000 !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(20px) !important;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.08) !important;
+            min-height: 64px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        
+        .nav-content {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 24px !important;
+            box-sizing: border-box !important;
+        }
+        
+        .nav-actions {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .nav-actions .btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            padding: 8px 16px !important;
+            border-radius: 12px !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            text-decoration: none !important;
+            white-space: nowrap !important;
+            border: 1px solid transparent !important;
+            flex-shrink: 0 !important;
+            box-sizing: border-box !important;
+        }
+        
+        .nav-actions .btn-primary {
+            background: #007AFF !important;
+            color: white !important;
+        }
+        
+        .nav-actions .btn-secondary {
+            background: rgba(174, 174, 178, 0.1) !important;
+            color: #1d1d1f !important;
+            border: 1px solid rgba(209, 209, 214, 0.5) !important;
+        }
+        
+        .user-menu {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            padding-left: 12px !important;
+            border-left: 1px solid rgba(209, 209, 214, 0.4) !important;
+            margin-left: 8px !important;
+            flex-shrink: 0 !important;
         }
         
         .profile-stats {

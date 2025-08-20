@@ -128,6 +128,54 @@ def logout():
     flash('您已成功登出', 'success')
     return redirect(url_for('login'))
 
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    """修改密码页面"""
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '').strip()
+        new_password = request.form.get('new_password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
+        
+        # 验证输入
+        if not current_password or not new_password or not confirm_password:
+            flash('请填写所有密码字段', 'error')
+            return render_template('change_password.html')
+        
+        # 验证当前密码
+        if not current_user.check_password(current_password):
+            flash('当前密码错误，请重新输入', 'error')
+            return render_template('change_password.html')
+        
+        # 验证新密码长度
+        if len(new_password) < 6:
+            flash('新密码长度至少为6位', 'error')
+            return render_template('change_password.html')
+        
+        # 验证新密码与确认密码一致
+        if new_password != confirm_password:
+            flash('两次输入的新密码不一致，请重新输入', 'error')
+            return render_template('change_password.html')
+        
+        # 验证新密码与当前密码不同
+        if current_user.check_password(new_password):
+            flash('新密码不能与当前密码相同', 'error')
+            return render_template('change_password.html')
+        
+        # 更新密码
+        try:
+            current_user.set_password(new_password)
+            db.session.commit()
+            flash('密码修改成功！', 'success')
+            return redirect(url_for('index'))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Password change error for user {current_user.id}: {str(e)}")
+            flash('密码修改失败，请稍后重试', 'error')
+            return render_template('change_password.html')
+    
+    return render_template('change_password.html')
+
 def save_session_in_ajax():
     """辅助函数：确保AJAX请求中session被正确保存"""
     from flask import session

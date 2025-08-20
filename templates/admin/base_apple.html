@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-apple-design.css') }}">
     <!-- 未来科幻增强版设计系统 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/future-enhanced-apple.css') }}">
+    <!-- 世界一流导航设计 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation-redesign.css') }}">
     
     <!-- SEO优化 -->
     <meta name="description" content="Angela AI 智能管理中心 - Apple级别的管理界面">
@@ -27,20 +29,29 @@
 <body class="admin-layout">
     <!-- 主要内容区域 -->
     <main class="admin-main-full">
-        <!-- 简化的顶部区域 -->
-        <div class="admin-header">
-            <div class="admin-header-content">
-                <div class="admin-brand-inline">
+        <!-- 世界一流导航栏 -->
+        <nav class="navigation-bar">
+            <div class="nav-content">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-brand">
                     <i class="fas fa-brain"></i>
-                    <h1>Angela AI</h1>
-                    <span class="admin-subtitle">管理中心</span>
-                </div>
-                <a href="{{ url_for('index') }}" class="btn btn-outline">
-                    <i class="fas fa-home me-2"></i>
-                    返回前台
+                    Angela AI - 管理中心
                 </a>
+                <div class="nav-actions">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-home"></i>返回前台
+                    </a>
+                    <div class="user-menu">
+                        <span class="user-info">
+                            <i class="fas fa-user-shield"></i>
+                            <span>管理员</span>
+                        </span>
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline">
+                            <i class="fas fa-sign-out-alt"></i>登出
+                        </a>
+                    </div>
+                </div>
             </div>
-        </div>
+        </nav>
 
         <!-- Flash消息 -->
         {% with messages = get_flashed_messages(with_categories=true) %}

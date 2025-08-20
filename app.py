@@ -176,6 +176,46 @@ def change_password():
     
     return render_template('change_password.html')
 
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    """编辑个人资料页面"""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        
+        # 验证输入
+        if not phone:
+            flash('手机号不能为空', 'error')
+            return render_template('profile.html')
+        
+        # 验证手机号格式（简单验证）
+        if len(phone) != 11 or not phone.isdigit():
+            flash('请输入有效的11位手机号', 'error')
+            return render_template('profile.html')
+        
+        # 检查手机号是否被其他用户使用
+        if phone != current_user.phone:
+            existing_user = User.query.filter_by(phone=phone).first()
+            if existing_user:
+                flash('该手机号已被其他用户使用', 'error')
+                return render_template('profile.html')
+        
+        # 更新用户信息
+        try:
+            current_user.name = name if name else None
+            current_user.phone = phone
+            db.session.commit()
+            flash('个人资料更新成功！', 'success')
+            return redirect(url_for('index'))
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Profile update error for user {current_user.id}: {str(e)}")
+            flash('个人资料更新失败，请稍后重试', 'error')
+            return render_template('profile.html')
+    
+    return render_template('profile.html')
+
 def save_session_in_ajax():
     """辅助函数：确保AJAX请求中session被正确保存"""
     from flask import session

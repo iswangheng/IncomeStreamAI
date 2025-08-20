@@ -31,7 +31,7 @@ Angela is a Flask-based web application designed to help users generate non-labo
     - **Typography**: Apple system font stack (-apple-system, SF Pro Display style).
     - **Animations**: Apple-level micro-interactions, elastic transitions, parallax scrolling effects.
     - **Styling**: Apple-level CSS design system with a complete design token library, responsive grid, accessibility optimization, and Bootstrap 5 integration.
-- **JavaScript**: Vanilla JavaScript for dynamic form interactions (e.g., adding/removing person cards).
+- **JavaScript**: Vanilla JavaScript for dynamic form interactions.
 - **Icons**: Font Awesome 6.
 - **Language**: Chinese (zh-CN) interface with a warm, friendly tone.
 
@@ -44,6 +44,7 @@ Angela is a Flask-based web application designed to help users generate non-labo
 - **Error Handling**: Flash messaging system for user feedback.
 - **File Management**: Supports knowledge base file uploads in various formats (txt, pdf, doc, docx, xlsx, csv, md, json).
 - **Form Processing System**: JavaScript-powered dynamic forms with client-side and server-side validation, multi-step data collection, and JSON serialization.
+- **Authentication**: Flask-Login based authentication with phone number and password, featuring secure password hashing.
 
 ### File Organization
 - **Static Assets**: Separate CSS and JavaScript files.
@@ -55,7 +56,7 @@ Angela is a Flask-based web application designed to help users generate non-labo
 
 ### Result Display and Sharing
 - Redesigned results page (`result_apple_redesigned.html`) with frosted glass effects, gradient backgrounds, and a refined card system.
-- Includes professional social media sharing (copy link, WeChat QR, Weibo, QQ) and PDF export functionality (using jsPDF).
+- Includes professional social media sharing (copy link, WeChat QR, Weibo, QQ) and PDF export functionality.
 
 ## External Dependencies
 
@@ -68,138 +69,11 @@ Angela is a Flask-based web application designed to help users generate non-labo
 - **Flask**: Core web framework.
 - **Flask-SQLAlchemy**: ORM for database integration.
 - **PostgreSQL**: Production database with `psycopg2-binary` driver.
-- **Werkzeug**: For file upload security utilities.
+- **Werkzeug**: For file upload security utilities and password hashing.
 - **Python Standard Library**: JSON, logging, and OS modules.
+- **Flask-Login**: For user authentication.
 
 ### AI Integration Points
 - **OpenAI API**: For real-time AI conversation and income pathway generation (supports models like `gpt-4o-2024-11-20`).
-- **Enhanced Knowledge Base System**: Intelligent knowledge retrieval with priority for non-labor income content, supports 800-character detailed snippets for richer context.
-- **Advanced Prompt Engineering**: Incorporates core non-labor income formula (意识+能量+能力=结果), seven income types, and proven success methodologies.
+- **Enhanced Knowledge Base System**: Intelligent knowledge retrieval with priority for non-labor income content, supports 800-character detailed snippets for richer context. Integrates core non-labor income formula (意识+能量+能力=结果), seven income types, and proven success methodologies.
 - **Knowledge Base Management System**: Admin interface at `/admin` for managing knowledge files (upload, enable/disable, search/filter).
-
-## Recent Enhancements (2025-08-20)
-
-### World-Class Navigation System Redesign
-- **Complete Navigation Overhaul**: Redesigned top-right UI navigation following world-class design standards
-  - Created comprehensive `navigation-redesign.css` with Apple HIG-compliant design system
-  - Implemented sticky navigation with backdrop blur and smooth scroll effects
-  - Added premium button interactions with ripple effects and micro-animations
-  - Built responsive mobile-first design with progressive enhancement
-  - Enhanced accessibility with focus states, high contrast, and reduced motion support
-  - Added dark mode support and system theme detection
-- **Cross-Platform Optimization**: 
-  - Desktop: Horizontal layout with proper spacing and visual hierarchy
-  - Tablet: Adaptive button sizing and optimized touch targets
-  - Mobile: Vertical stacking with full-width buttons and collapsible user menu
-  - Small mobile: Single-column layout with enhanced touch interactions
-- **Enhanced User Experience**:
-  - Smooth transitions and GPU-accelerated animations
-  - Loading states and interactive feedback
-  - Keyboard navigation support (Ctrl/Cmd+K for search)
-  - Professional button styling with semantic color coding
-  - Consistent navigation across all pages (main, admin, history)
-- **Technical Implementation**:
-  - CSS Grid and Flexbox for responsive layouts
-  - CSS Custom Properties for consistent theming
-  - JavaScript enhancements for scroll effects and interactions
-  - Cross-browser compatibility with vendor prefixes
-  - Performance optimized with minimal reflows and repaints
-- **Impact**: Eliminated navigation UI issues on both PC and mobile, providing world-class user experience that matches top-tier applications
-
-## Recent Enhancements (2025-08-16)
-
-### Authentication System Implementation
-- **Complete Login System**: Added Flask-Login based authentication with phone number and password
-  - Created User model with secure password hashing using Werkzeug
-  - Implemented login/logout routes with session management
-  - Applied @login_required decorator to all protected routes (index, thinking, analysis_status, results, admin, history, generate, etc.)
-  - Built Apple-style login interface with responsive design and accessibility features
-- **Default Demo Account**: Created built-in login account (18302196515 / aibenzong9264) for immediate testing
-- **Navigation Updates**: Added user menu with current user display and logout functionality
-- **Security Measures**: 
-  - Session-based authentication with remember me functionality
-  - Password hashing with industry-standard Werkzeug security
-  - All sensitive routes protected behind login requirement
-  - Proper redirect handling for unauthorized access attempts
-- **UI/UX Enhancements**: 
-  - Apple-level design system login page with gradient background and frosted glass effects
-  - User info display in navigation bar
-  - Responsive design for mobile and desktop
-  - Demo account quick-fill functionality
-- **Impact**: Complete security implementation - all application features now require authentication
-
-## Recent Enhancements (2025-08-15)
-
-### UI Simplification
-- **External Resources Module Removal**: Completely removed the "外部资源与合作" module from the main form
-  - Cleaned up HTML structure by removing the external resources card and all related input fields
-  - Updated backend `/generate` route to remove external_resources processing logic
-  - Removed JavaScript handling for external resource input toggles and validation
-  - Updated demo case data to remove external resources references
-  - **Impact**: Simplified user experience by focusing only on project info and key personnel
-- **Key Personnel Options Reduction**: Removed two categories from "如何让此人高兴" section
-  - Removed "想主导项目 / 有话语权" category (control_pace, choose_partners, decide_content, own_planning options)
-  - Removed "在乎人脉 / 感受" category (expand_network, sense_of_participation, talk_value, feel_invited, learn_info options)
-  - Updated demo case data to remove references to deleted options
-  - **Impact**: Streamlined the person needs selection to focus on most essential categories
-
-## Recent Enhancements (2025-08-14)
-
-### Session Persistence Improvements
-- **Fixed Critical Bug**: Session data not properly persisting, causing analysis_status to show as 'not_started' even after completion
-- **Root Cause**: Missing `session.permanent = True` and `session.modified = True` flags in multiple critical locations
-- **Solution Implemented**:
-  - Added proper session persistence flags in all session modification points
-  - Fixed `/generate` route: Added both permanent and modified flags after clearing old data
-  - Fixed `_handle_analysis_execution`: Ensured session persistence when storing analysis results
-  - Fixed data recovery logic: Added persistence flags when recovering from database
-  - Fixed data validation: Added persistence when switching between analysis records
-  - Removed duplicate code: Eliminated redundant `analysis_stage` setting
-  - Improved exception handling: Replaced bare except with proper exception catching
-- **Impact**: Session data now reliably persists across requests, preventing lost analysis results
-
-### Session Management Fix
-- **Fixed Critical Bug**: Result pages showing wrong project analysis due to stale session data
-- **Root Cause**: `/generate` route wasn't clearing old `analysis_result_id` when processing new projects
-- **Solution Implemented**:
-  - Added complete session cleanup in `/generate` route, including `analysis_result_id` reset
-  - Enhanced data consistency validation in `/results` route
-  - Modified validation logic to preserve `analysis_status` instead of resetting it
-- **Impact**: Each new project submission now gets fresh analysis without contamination from previous sessions
-
-### AI Analysis Trigger Fix
-- **Fixed Issue**: AI analysis not being triggered properly from thinking page
-- **Root Cause**: Session state management and error handling issues
-- **Solution Implemented**:
-  - Fixed fallback function field names (projectName vs project_name)
-  - Enhanced error logging in AI analysis pipeline
-  - Added session.modified flags to ensure state persistence
-  - Improved data consistency checks between form data and database
-- **Impact**: AI analysis now properly triggers when thinking page loads, reducing emergency_fallback generation
-
-## Recent Enhancements (2025-08-13)
-
-### Non-Labor Income Pipeline Generation Improvements
-- **Knowledge Base Integration**: Deep study and extraction of non-labor income core theories from knowledge base
-- **Core Formula Implementation**: Integrated "意识+能量+能力（行动）=结果" formula into AI analysis logic
-- **Seven Income Types Framework**: Added support for 租金、利息、股份/红利、版权、专利、企业连锁、团队收益
-- **Three-Step Success Methodology**: Implemented "盘资源→搭管道→动真格" framework in prompt design
-- **Enhanced Knowledge Retrieval**: 
-  - Prioritizes non-labor income related content from knowledge base
-  - Increased snippet length from 200 to 800 characters for richer context
-  - Added intelligent fallback with core knowledge when database retrieval fails
-- **Improved AI Prompts**:
-  - System prompt now includes proven methodologies and success patterns
-  - Assistant prompt requires three-party structure analysis for sustainable income streams
-  - Added "make_who_happy" analysis framework for each action step
-  - Enhanced MVP validation requirements (24-hour testable actions)
-- **Professional Analysis Structure**: New output format includes income mechanisms, scaling potential, and bypass-prevention measures
-
-### Performance & Reliability Fixes
-- **Network Error Handling**: Enhanced network timeout detection including SSL connection errors
-- **Immediate Fallback Generation**: When AI services fail due to network issues, system immediately generates backup solutions instead of getting stuck in loading state
-- **Mobile Responsive Design**: Fixed button clustering issues on mobile devices with proper vertical stacking layout
-- **Error Recovery System**: Complete fault tolerance with automatic database storage of fallback solutions
-- **User Experience Optimization**: Eliminated loading state hang-ups and provided smooth fallback transitions
-
-These enhancements make the non-labor income pathway generation significantly more professional and reliable, based on proven successful cases and methodologies, while ensuring consistent availability even during network instability.

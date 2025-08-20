@@ -21,6 +21,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/future-enhanced-apple.css') }}">
     <!-- 世界一流导航设计 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation-redesign.css') }}">
+    <!-- 用户菜单下拉设计 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user-menu-dropdown.css') }}">
     
     <!-- SEO优化 -->
     <meta name="description" content="Angela AI 智能管理中心 - Apple级别的管理界面">
@@ -41,13 +43,36 @@
                         <i class="fas fa-home"></i>返回前台
                     </a>
                     <div class="user-menu">
-                        <span class="user-info">
-                            <i class="fas fa-user-shield"></i>
-                            <span>管理员</span>
-                        </span>
-                        <a href="{{ url_for('logout') }}" class="btn btn-outline">
-                            <i class="fas fa-sign-out-alt"></i>登出
-                        </a>
+                        <div class="user-trigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
+                            <div class="user-info">
+                                <i class="fas fa-user-shield"></i>
+                                <span class="user-name">{{ current_user.name or '管理员' }}</span>
+                            </div>
+                            <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        </div>
+                        <div class="user-dropdown" role="menu">
+                            <div class="dropdown-header">
+                                <div class="user-profile">
+                                    <div class="user-avatar"></div>
+                                    <div class="user-details">
+                                        <h4>{{ current_user.name or '管理员' }}</h4>
+                                        <p>{{ current_user.phone }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('change_password') }}" class="dropdown-item" role="menuitem">
+                                <i class="fas fa-key"></i>
+                                修改密码
+                            </a>
+                            <a href="{{ url_for('edit_profile') }}" class="dropdown-item" role="menuitem">
+                                <i class="fas fa-user-edit"></i>
+                                个人资料
+                            </a>
+                            <a href="{{ url_for('logout') }}" class="dropdown-item logout" role="menuitem">
+                                <i class="fas fa-sign-out-alt"></i>
+                                退出登录
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -74,6 +99,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/future-enhanced-interactions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-menu.js') }}"></script>
     
     <!-- 管理后台通用脚本 -->
     <script>

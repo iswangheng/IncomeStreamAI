@@ -244,13 +244,21 @@
         }
         
         .stat-value {
-            font: var(--font-title-3);
+            font-size: 16px;
+            font-weight: 600;
             color: var(--color-primary);
-            margin-bottom: var(--space-1);
+            margin-bottom: 4px;
+        }
+        
+        .stat-time {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            margin-bottom: 8px;
         }
         
         .stat-label {
-            font: var(--font-footnote);
+            font-size: 12px;
             color: var(--color-text-secondary);
         }
     </style>
@@ -314,11 +322,13 @@
             <!-- 用户统计 -->
             <div class="profile-stats">
                 <div class="stat-card">
-                    <div class="stat-value">{{ current_user.created_at.strftime('%Y年%m月') if current_user.created_at else '2025年' }}</div>
+                    <div class="stat-value">{{ current_user.created_at.strftime('%Y年%m月%d日') if current_user.created_at else '2025年08月20日' }}</div>
+                    <div class="stat-time">{{ current_user.created_at.strftime('%H:%M') if current_user.created_at else '15:00' }}</div>
                     <div class="stat-label">加入时间</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ current_user.last_login.strftime('%m月%d日') if current_user.last_login else '今天' }}</div>
+                    <div class="stat-value">{{ current_user.last_login.strftime('%Y年%m月%d日') if current_user.last_login else '2025年08月20日' }}</div>
+                    <div class="stat-time">{{ current_user.last_login.strftime('%H:%M') if current_user.last_login else '15:26' }}</div>
                     <div class="stat-label">最近登录</div>
                 </div>
             </div>

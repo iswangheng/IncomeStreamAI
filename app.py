@@ -140,27 +140,27 @@ def change_password():
         # 验证输入
         if not current_password or not new_password or not confirm_password:
             flash('请填写所有密码字段', 'error')
-            return render_template('change_password.html')
+            return render_template('change_password_apple.html')
         
         # 验证当前密码
         if not current_user.check_password(current_password):
             flash('当前密码错误，请重新输入', 'error')
-            return render_template('change_password.html')
+            return render_template('change_password_apple.html')
         
         # 验证新密码长度
         if len(new_password) < 6:
             flash('新密码长度至少为6位', 'error')
-            return render_template('change_password.html')
+            return render_template('change_password_apple.html')
         
         # 验证新密码与确认密码一致
         if new_password != confirm_password:
             flash('两次输入的新密码不一致，请重新输入', 'error')
-            return render_template('change_password.html')
+            return render_template('change_password_apple.html')
         
         # 验证新密码与当前密码不同
         if current_user.check_password(new_password):
             flash('新密码不能与当前密码相同', 'error')
-            return render_template('change_password.html')
+            return render_template('change_password_apple.html')
         
         # 更新密码
         try:
@@ -172,9 +172,9 @@ def change_password():
             db.session.rollback()
             app.logger.error(f"Password change error for user {current_user.id}: {str(e)}")
             flash('密码修改失败，请稍后重试', 'error')
-            return render_template('change_password.html')
+            return render_template('change_password_apple.html')
     
-    return render_template('change_password.html')
+    return render_template('change_password_apple.html')
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -187,19 +187,19 @@ def edit_profile():
         # 验证输入
         if not phone:
             flash('手机号不能为空', 'error')
-            return render_template('profile.html')
+            return render_template('profile_apple.html')
         
         # 验证手机号格式（简单验证）
         if len(phone) != 11 or not phone.isdigit():
             flash('请输入有效的11位手机号', 'error')
-            return render_template('profile.html')
+            return render_template('profile_apple.html')
         
         # 检查手机号是否被其他用户使用
         if phone != current_user.phone:
             existing_user = User.query.filter_by(phone=phone).first()
             if existing_user:
                 flash('该手机号已被其他用户使用', 'error')
-                return render_template('profile.html')
+                return render_template('profile_apple.html')
         
         # 更新用户信息
         try:
@@ -212,9 +212,9 @@ def edit_profile():
             db.session.rollback()
             app.logger.error(f"Profile update error for user {current_user.id}: {str(e)}")
             flash('个人资料更新失败，请稍后重试', 'error')
-            return render_template('profile.html')
+            return render_template('profile_apple.html')
     
-    return render_template('profile.html')
+    return render_template('profile_apple.html')
 
 def save_session_in_ajax():
     """辅助函数：确保AJAX请求中session被正确保存"""

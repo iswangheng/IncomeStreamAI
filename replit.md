@@ -58,6 +58,12 @@ Angela is a Flask-based web application designed to help users generate non-labo
 - Redesigned results page (`result_apple_redesigned.html`) with frosted glass effects, gradient backgrounds, and a refined card system.
 - Includes professional social media sharing (copy link, WeChat QR, Weibo, QQ) and PDF export functionality.
 
+### User Profile and Authentication Pages
+- Created Apple-level redesigned authentication pages (`change_password_apple.html`, `profile_apple.html`) with consistent design language.
+- Integrated world-class navigation system with dropdown user menus across all pages.
+- Enhanced user experience with real-time form validation and Apple-style micro-interactions.
+- Unified design system ensuring visual consistency throughout the application.
+
 ## External Dependencies
 
 ### Frontend Libraries

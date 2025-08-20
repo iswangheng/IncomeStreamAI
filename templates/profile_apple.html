@@ -98,6 +98,18 @@
             transform: scale(1.02);
         }
         
+        .form-control:disabled {
+            background-color: #f5f5f7 !important;
+            color: #8e8e93 !important;
+            border-color: #d1d1d6 !important;
+            cursor: not-allowed !important;
+        }
+        
+        .form-text {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+        
         .btn-primary {
             width: 100%;
             padding: var(--space-4) var(--space-6);
@@ -347,8 +359,13 @@
                            name="phone" 
                            class="form-control"
                            value="{{ current_user.phone }}"
-                           placeholder="请输入11位手机号"
-                           required>
+                           placeholder="手机号不可修改"
+                           readonly
+                           disabled>
+                    <small class="form-text text-muted mt-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        手机号是您的登录凭证，不支持修改
+                    </small>
                 </div>
                 
                 <button type="submit" class="btn-primary">

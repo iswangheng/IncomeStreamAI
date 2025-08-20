@@ -184,22 +184,8 @@ def edit_profile():
         name = request.form.get('name', '').strip()
         phone = request.form.get('phone', '').strip()
         
-        # 验证输入
-        if not phone:
-            flash('手机号不能为空', 'error')
-            return render_template('profile_apple.html')
-        
-        # 验证手机号格式（简单验证）
-        if len(phone) != 11 or not phone.isdigit():
-            flash('请输入有效的11位手机号', 'error')
-            return render_template('profile_apple.html')
-        
-        # 检查手机号是否被其他用户使用
-        if phone != current_user.phone:
-            existing_user = User.query.filter_by(phone=phone).first()
-            if existing_user:
-                flash('该手机号已被其他用户使用', 'error')
-                return render_template('profile_apple.html')
+        # 手机号不允许修改，强制使用当前用户的手机号
+        phone = current_user.phone
         
         # 更新用户信息
         try:

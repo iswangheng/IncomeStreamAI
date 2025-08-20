@@ -294,7 +294,13 @@ function initLoadingAnimations() {
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
         form.addEventListener('submit', function() {
-            showLoadingOverlay();
+            // 检查是否是个人资料或修改密码页面的表单
+            if (window.location.pathname.includes('/profile') || 
+                window.location.pathname.includes('/change_password')) {
+                showSimpleLoadingOverlay();
+            } else {
+                showLoadingOverlay();
+            }
         });
     });
 }
@@ -362,6 +368,65 @@ function showLoadingOverlay() {
             .loading-text p {
                 opacity: 0.8;
                 font-size: 1rem;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            @keyframes fadeIn {
+                to { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(overlay);
+}
+
+// 简单的加载状态，用于个人资料等非AI分析场景
+function showSimpleLoadingOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = 'simple-loading-overlay';
+    overlay.innerHTML = `
+        <div class="simple-loading-content">
+            <div class="simple-loading-spinner"></div>
+        </div>
+    `;
+    
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        animation: fadeIn 0.3s ease-out forwards;
+    `;
+    
+    // 添加简单加载动画样式
+    if (!document.getElementById('simple-loading-styles')) {
+        const style = document.createElement('style');
+        style.id = 'simple-loading-styles';
+        style.textContent = `
+            .simple-loading-content {
+                text-align: center;
+            }
+            
+            .simple-loading-spinner {
+                width: 40px;
+                height: 40px;
+                border: 3px solid rgba(255, 255, 255, 0.2);
+                border-radius: 50%;
+                border-top: 3px solid #007AFF;
+                animation: spin 1s linear infinite;
             }
             
             @keyframes spin {

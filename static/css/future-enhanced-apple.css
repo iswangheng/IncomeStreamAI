@@ -1155,6 +1155,38 @@ body::after {
         opacity: 0.8;
     }
 
+    /* 姓名编辑输入框样式 */
+    .name-edit-input {
+        animation: editFocusIn 0.2s ease-out;
+    }
+
+    @keyframes editFocusIn {
+        from {
+            transform: scale(0.95);
+            opacity: 0.7;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* 快速提示样式 */
+    .quick-toast {
+        animation: toastSlideIn 0.3s ease-out;
+    }
+
+    @keyframes toastSlideIn {
+        from {
+            transform: translateX(100%) scale(0.9);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0) scale(1);
+            opacity: 1;
+        }
+    }
+
     .mobile-field-content.empty {
         color: #999;
         font-style: italic;

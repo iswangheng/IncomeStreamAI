@@ -421,25 +421,6 @@
             "企业客户名单200条、招商会场地、投委会路演名额、供应链工厂档期、施工队2组"
         ];
 
-        // 动态提示语数据
-        const inspirationTexts = [
-            "老板刚批预算，需要尽快花掉",
-            "最近要冲 KPI / 冲业绩", 
-            "有闲置团队 / 场地 / 资源想利用",
-            "想测试一个新市场/新渠道的反应",
-            "需要快速刷一个案例 / 成功故事",
-            "刚拿到新产品，想找机会试水",
-            "需要应付上级/甲方的活动要求",
-            "希望年底前完成某个指标",
-            "想在圈子里制造一次话题",
-            "最近空档期，想找事做保持曝光",
-            "希望用项目换取长期合作关系",
-            "临时有媒体/活动曝光机会",
-            "需要短期内验证一个想法是否可行",
-            "想占个\"坑位\"避免竞争对手先做",
-            "最近资金或资源到期，不用就浪费"
-        ];
-
         // 随机设置提示语
         function setRandomPlaceholder() {
             const textareas = document.querySelectorAll('.dynamic-placeholder-textarea');
@@ -589,21 +570,21 @@
                         <div class="mobile-person-content">
                             <div class="mobile-field">
                                 <div class="mobile-field-label">身份角色</div>
-                                <div class="mobile-field-content row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer;" title="点击编辑身份角色">
+                                <div class="mobile-field-content row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s;" title="点击编辑身份角色">
                                     ${roleTagsHtml || '<span style="color: #999;">未选择 <small>(点击编辑)</small></span>'}
                                 </div>
                             </div>
 
                             <div class="mobile-field">
                                 <div class="mobile-field-label">掌握资源</div>
-                                <div class="mobile-field-content row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer;" title="点击编辑掌握资源">
+                                <div class="mobile-field-content row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s;" title="点击编辑掌握资源">
                                     ${resourcesSummary === '待添加' ? '<span style="color: #999;">待添加 <small>(点击编辑)</small></span>' : resourcesSummary}
                                 </div>
                             </div>
 
                             <div class="mobile-field">
                                 <div class="mobile-field-label">如何让TA高兴</div>
-                                <div class="mobile-field-content row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer;" title="点击编辑让TA高兴的方式">
+                                <div class="mobile-field-content row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s;" title="点击编辑让TA高兴的方式">
                                     ${needsSummary === '待补充' ? '<span style="color: #999;">待补充 <small>(点击编辑)</small></span>' : needsSummary}
                                 </div>
                             </div>
@@ -625,7 +606,7 @@
 
             // 查找姓名元素，支持移动端和桌面端布局
             let nameCell = document.querySelector(`[data-person-id="${personId}"] .row-name`);
-            
+
             // 如果没找到，可能是因为DOM结构问题，尝试其他选择器
             if (!nameCell) {
                 const personRow = document.querySelector(`[data-person-id="${personId}"]`);
@@ -633,7 +614,7 @@
                     nameCell = personRow.querySelector('.row-name');
                 }
             }
-            
+
             if (!nameCell) {
                 console.warn('未找到姓名元素:', personId);
                 return;
@@ -663,7 +644,7 @@
             // 清空内容并添加输入框
             nameCell.innerHTML = '';
             nameCell.appendChild(input);
-            
+
             // 聚焦并选中文本
             setTimeout(() => {
                 input.focus();
@@ -674,7 +655,7 @@
                 const newName = input.value.trim() || '未命名';
                 person.name = newName;
                 updatePersonnelTable();
-                
+
                 // 显示保存成功提示
                 showQuickToast('姓名已保存');
             };
@@ -717,14 +698,14 @@
                 transform: translateX(100%);
                 transition: transform 0.3s ease;
             `;
-            
+
             document.body.appendChild(toast);
-            
+
             // 滑入动画
             setTimeout(() => {
                 toast.style.transform = 'translateX(0)';
             }, 100);
-            
+
             // 自动消失
             setTimeout(() => {
                 toast.style.transform = 'translateX(100%)';
@@ -1369,7 +1350,7 @@
         // 修复移动端编辑功能 - 确保模态框中的资源推荐功能正常
         function updateModalResourceSuggestions(selectedRoles) {
             const suggestionsContainer = document.getElementById('modalResourceSuggestions');
-            
+
             if (!suggestionsContainer) {
                 console.warn('资源推荐容器未找到');
                 return;

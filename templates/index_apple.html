@@ -237,13 +237,57 @@
                 </div>
             </div>
 
+            <!-- 关键人物清单（概览表格） -->
+            <div class="card interactive-hover">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-list-alt"></i>
+                        关键人物清单
+                    </h3>
+                    <small class="text-muted">项目中所有关键人物的概览，支持快速添加和编辑</small>
+                </div>
+                <div class="card-body">
+                    <div class="personnel-overview-container">
+                        <!-- 表格头部 -->
+                        <div class="personnel-table-header">
+                            <div class="table-column col-number">#</div>
+                            <div class="table-column col-name">姓名/代号</div>
+                            <div class="table-column col-roles">身份角色</div>
+                            <div class="table-column col-resources">掌握资源</div>
+                            <div class="table-column col-needs">如何让TA高兴</div>
+                            <div class="table-column col-actions">操作</div>
+                        </div>
+                        
+                        <!-- 表格内容区域 -->
+                        <div class="personnel-table-body" id="personnelTableBody">
+                            <div class="empty-personnel-state">
+                                <div class="empty-state-content">
+                                    <i class="fas fa-users-slash"></i>
+                                    <h4>还没有添加关键人物</h4>
+                                    <p>点击下方按钮开始添加项目中的关键人物</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 快速添加按钮 -->
+                        <div class="personnel-quick-add">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addPersonnelQuick()">
+                                <i class="fas fa-plus"></i>
+                                快速添加人物
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 关键人物模块 -->
             <div class="card interactive-hover">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-users"></i>
-                        关键人物列表
+                        关键人物详细信息
                     </h3>
+                    <small class="text-muted">点击上方清单中的"编辑"按钮可在此处修改详细信息</small>
                 </div>
                 <div class="card-body">
                     <div id="personsContainer">
@@ -697,14 +741,36 @@
                 checkbox.addEventListener('change', () => {
                     updateResourceSuggestions(personCard);
                     updateRolesSummary(personCard);
+                    updatePersonnelOverview();
                 });
             });
+            
+            // 监听姓名和资源变化
+            const nameInput = personCard.querySelector('input[name="person_name[]"]');
+            const resourceInput = personCard.querySelector('.resources-data');
+            
+            if (nameInput) {
+                nameInput.addEventListener('input', () => {
+                    updatePersonnelOverview();
+                });
+            }
+            
+            if (resourceInput) {
+                // 使用MutationObserver监听隐藏字段变化
+                const observer = new MutationObserver(() => {
+                    updatePersonnelOverview();
+                });
+                observer.observe(resourceInput, { attributes: true, attributeFilter: ['value'] });
+            }
             
             // 初始化资源推荐（显示提示信息）
             updateResourceSuggestions(personCard);
             
             // 为新卡片设置随机提示语
             setRandomPlaceholder();
+            
+            // 更新人物清单表格
+            updatePersonnelOverview();
         }
         
         // 删除人物卡片
@@ -715,6 +781,7 @@
                 card.remove();
                 updatePersonNumbers();
                 updateEmptyState();
+                updatePersonnelOverview();
             }, 300);
         }
         
@@ -763,6 +830,9 @@
             
             // 初始化动态提示语
             setRandomPlaceholder();
+            
+            // 初始化人物清单表格
+            updatePersonnelOverview();
         });
         
 
@@ -960,6 +1030,180 @@
                 // 添加资源
                 addSelectedResource(resource, personId);
                 tagElement.classList.add('selected');
+            }
+        }
+        
+        // ==== 人物清单表格管理功能 ====
+        
+        // 快速添加人物（从清单表格）
+        function addPersonnelQuick() {
+            addPerson();
+            // 滚动到详细信息区域
+            document.querySelector('.card:has(#personsContainer)').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+        
+        // 更新人物清单表格
+        function updatePersonnelOverview() {
+            const tableBody = document.getElementById('personnelTableBody');
+            const personCards = document.querySelectorAll('.person-card');
+            
+            // 清空表格内容
+            tableBody.innerHTML = '';
+            
+            if (personCards.length === 0) {
+                // 显示空状态
+                tableBody.innerHTML = `
+                    <div class="empty-personnel-state">
+                        <div class="empty-state-content">
+                            <i class="fas fa-users-slash"></i>
+                            <h4>还没有添加关键人物</h4>
+                            <p>点击下方按钮开始添加项目中的关键人物</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 为每个人物卡片创建表格行
+            personCards.forEach((card, index) => {
+                const personData = extractPersonData(card);
+                const tableRow = createTableRow(index + 1, personData, card);
+                tableBody.appendChild(tableRow);
+            });
+        }
+        
+        // 从人物卡片提取数据
+        function extractPersonData(personCard) {
+            const nameInput = personCard.querySelector('input[name="person_name[]"]');
+            const roleCheckboxes = personCard.querySelectorAll('input[name="person_role[]"]:checked');
+            const resourcesData = personCard.querySelector('.resources-data');
+            
+            const name = nameInput ? nameInput.value.trim() : '';
+            
+            // 提取角色信息
+            const roles = [];
+            roleCheckboxes.forEach(checkbox => {
+                const roleItem = checkbox.closest('.role-item');
+                const roleText = roleItem.querySelector('span').textContent;
+                const roleValue = checkbox.value;
+                
+                // 确定角色类型
+                let roleType = 'other';
+                if (['enterprise_owner', 'store_owner', 'department_head', 'brand_manager'].includes(roleValue)) {
+                    roleType = 'demand';
+                } else if (['product_provider', 'service_provider', 'traffic_provider', 'other_provider'].includes(roleValue)) {
+                    roleType = 'delivery';
+                } else if (roleValue === 'funding_provider') {
+                    roleType = 'funding';
+                }
+                
+                roles.push({ text: roleText, type: roleType });
+            });
+            
+            // 提取资源信息
+            const resources = resourcesData && resourcesData.value ? 
+                resourcesData.value.split(',').filter(r => r.trim()) : [];
+            
+            // 提取需求信息（简化版本）
+            const needsCheckboxes = personCard.querySelectorAll('input[name="person_needs[]"]:checked');
+            const needs = Array.from(needsCheckboxes).slice(0, 2).map(cb => {
+                const label = cb.closest('label').querySelector('span');
+                return label ? label.textContent : cb.value;
+            });
+            
+            return {
+                name: name || '未命名',
+                roles: roles,
+                resources: resources,
+                needs: needs
+            };
+        }
+        
+        // 创建表格行
+        function createTableRow(number, data, personCard) {
+            const row = document.createElement('div');
+            row.className = 'personnel-table-row';
+            row.dataset.personId = personCard.dataset.personId || number;
+            
+            // 角色标签HTML
+            const roleTagsHtml = data.roles.map(role => 
+                `<span class="role-tag ${role.type}">${role.text}</span>`
+            ).join('');
+            
+            // 资源摘要
+            const resourcesSummary = data.resources.length > 0 ? 
+                data.resources.slice(0, 2).join('、') + (data.resources.length > 2 ? '...' : '') : 
+                '待添加';
+            
+            // 需求摘要
+            const needsSummary = data.needs.length > 0 ? 
+                data.needs.slice(0, 2).join('、') + (data.needs.length > 2 ? '...' : '') : 
+                '待补充';
+            
+            row.innerHTML = `
+                <div class="row-number">${number}</div>
+                <div class="row-name">${data.name}</div>
+                <div class="row-roles">${roleTagsHtml || '<span style="color: #999;">未选择</span>'}</div>
+                <div class="row-resources" title="${data.resources.join('、')}">${resourcesSummary}</div>
+                <div class="row-needs" title="${data.needs.join('、')}">${needsSummary}</div>
+                <div class="row-actions">
+                    <button class="action-btn edit" onclick="editPersonFromTable(${number})" title="编辑详细信息">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="deletePersonFromTable(${number})" title="删除此人物">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            return row;
+        }
+        
+        // 从表格编辑人物
+        function editPersonFromTable(personNumber) {
+            const personCards = document.querySelectorAll('.person-card');
+            const targetCard = personCards[personNumber - 1];
+            
+            if (targetCard) {
+                // 滚动到目标卡片
+                targetCard.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                // 高亮显示
+                targetCard.style.boxShadow = '0 0 20px rgba(102, 126, 234, 0.3)';
+                targetCard.style.border = '2px solid #667eea';
+                
+                // 移除高亮
+                setTimeout(() => {
+                    targetCard.style.boxShadow = '';
+                    targetCard.style.border = '';
+                }, 3000);
+                
+                // 聚焦到姓名输入框
+                const nameInput = targetCard.querySelector('input[name="person_name[]"]');
+                if (nameInput) {
+                    setTimeout(() => nameInput.focus(), 500);
+                }
+            }
+        }
+        
+        // 从表格删除人物
+        function deletePersonFromTable(personNumber) {
+            const personCards = document.querySelectorAll('.person-card');
+            const targetCard = personCards[personNumber - 1];
+            
+            if (targetCard) {
+                if (confirm('确定要删除这个关键人物吗？')) {
+                    const removeButton = targetCard.querySelector('.remove-person-btn');
+                    if (removeButton) {
+                        removeButton.click();
+                    }
+                }
             }
         }
         

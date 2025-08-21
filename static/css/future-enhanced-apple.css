@@ -730,6 +730,261 @@ body::after {
     margin-bottom: 5px;
 }
 
+/* ==== 关键人物清单表格样式 ==== */
+.personnel-overview-container {
+    background: #FAFAFA;
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 表格头部 */
+.personnel-table-header {
+    display: grid;
+    grid-template-columns: 40px 1fr 1.2fr 1.5fr 1.2fr 80px;
+    gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.table-column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 8px;
+}
+
+.col-number {
+    justify-content: center;
+}
+
+.col-name, .col-roles, .col-resources, .col-needs {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.col-actions {
+    justify-content: center;
+}
+
+/* 表格内容区域 */
+.personnel-table-body {
+    min-height: 120px;
+    background: white;
+}
+
+/* 空状态样式 */
+.empty-personnel-state {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.empty-state-content {
+    color: #666;
+}
+
+.empty-state-content i {
+    font-size: 48px;
+    color: #ddd;
+    margin-bottom: 16px;
+}
+
+.empty-state-content h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.empty-state-content p {
+    font-size: 14px;
+    color: #999;
+    margin: 0;
+}
+
+/* 表格行样式 */
+.personnel-table-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 1.2fr 1.5fr 1.2fr 80px;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.personnel-table-row:hover {
+    background: #f8f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+}
+
+.personnel-table-row:last-child {
+    border-bottom: none;
+}
+
+/* 行内容样式 */
+.row-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.row-name {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.row-roles {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.role-tag {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.role-tag.demand {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.role-tag.delivery {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.role-tag.funding {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.row-resources {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.4;
+}
+
+.row-needs {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.4;
+}
+
+.row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.action-btn.edit {
+    color: #1976d2;
+}
+
+.action-btn.edit:hover {
+    background: #e3f2fd;
+}
+
+.action-btn.delete {
+    color: #d32f2f;
+}
+
+.action-btn.delete:hover {
+    background: #ffebee;
+}
+
+/* 快速添加区域 */
+.personnel-quick-add {
+    padding: 16px 20px;
+    background: #f8f9ff;
+    border-top: 1px solid #f0f0f0;
+    text-align: center;
+}
+
+.personnel-quick-add .btn {
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+    .personnel-table-header,
+    .personnel-table-row {
+        grid-template-columns: 30px 1fr 80px;
+        gap: 8px;
+    }
+    
+    .col-roles,
+    .col-resources,
+    .col-needs,
+    .row-roles,
+    .row-resources,
+    .row-needs {
+        display: none;
+    }
+    
+    .table-column,
+    .row-name {
+        font-size: 12px;
+    }
+    
+    .personnel-table-header {
+        padding: 12px 16px;
+    }
+    
+    .personnel-table-row {
+        padding: 12px 16px;
+    }
+}
+}
+
 /* 其他输入容器 */
 .other-input-container {
     position: relative;

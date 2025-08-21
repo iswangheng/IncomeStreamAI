@@ -1589,17 +1589,7 @@
             }
         }
 
-        // 删除人物
-        function deletePerson(personId) {
-            const person = personnelData.find(p => p.id === personId);
-            if (!person) return;
-            
-            if (confirm(`确定要删除"${person.name}"吗？`)) {
-                personnelData = personnelData.filter(p => p.id !== personId);
-                updatePersonnelTable();
-                showQuickToast('人物已删除');
-            }
-        }
+
 
 
 

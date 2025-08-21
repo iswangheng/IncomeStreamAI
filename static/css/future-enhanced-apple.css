@@ -1380,11 +1380,15 @@ body::after {
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.9);
     color: white;
-    padding: 8px 12px;
+    padding: 10px 16px;
     border-radius: 8px;
     font-size: 12px;
     font-weight: 400;
-    white-space: nowrap;
+    white-space: normal;
+    max-width: 200px;
+    min-width: 120px;
+    text-align: center;
+    line-height: 1.4;
     z-index: 10000;
     opacity: 0;
     visibility: hidden;

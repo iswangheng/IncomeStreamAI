@@ -599,62 +599,119 @@
 
         // 编辑人物姓名（内联编辑）
         function editPersonName(personId) {
+            console.log('编辑人物姓名被调用，人物ID:', personId);
+            alert('编辑功能被触发！人物ID: ' + personId); // 临时调试
+            
             const person = personnelData.find(p => p.id === personId);
             if (!person) {
                 console.warn('未找到人物数据:', personId);
                 return;
             }
 
-            // 查找姓名元素，支持移动端和桌面端布局
-            let nameCell = document.querySelector(`[data-person-id="${personId}"] .row-name`);
-
-            // 如果没找到，可能是因为DOM结构问题，尝试其他选择器
-            if (!nameCell) {
-                const personRow = document.querySelector(`[data-person-id="${personId}"]`);
-                if (personRow) {
-                    nameCell = personRow.querySelector('.row-name');
-                }
+            // 检测当前是否为移动端
+            const isMobile = window.innerWidth <= 768;
+            console.log('是否为移动端:', isMobile);
+            
+            // 根据屏幕大小选择合适的元素
+            let nameCell;
+            const personRow = document.querySelector(`[data-person-id="${personId}"]`);
+            
+            if (!personRow) {
+                console.warn('未找到人物行元素:', personId);
+                return;
+            }
+            
+            if (isMobile) {
+                // 移动端：选择移动端布局中的姓名元素
+                nameCell = personRow.querySelector('.mobile-card-layout .row-name');
+                console.log('移动端姓名元素:', nameCell);
+            } else {
+                // 桌面端：选择桌面端布局中的姓名元素
+                nameCell = personRow.querySelector('.desktop-table-layout .row-name');
+                console.log('桌面端姓名元素:', nameCell);
             }
 
             if (!nameCell) {
-                console.warn('未找到姓名元素:', personId);
+                console.warn('未找到姓名元素，尝试备用方案');
+                nameCell = personRow.querySelector('.row-name');
+            }
+
+            if (!nameCell) {
+                console.warn('完全未找到姓名元素:', personId);
                 return;
             }
 
             // 防止重复编辑
             if (nameCell.querySelector('input')) {
+                console.log('已在编辑状态，跳过');
                 return;
             }
 
+            console.log('开始创建编辑输入框，当前姓名:', person.name);
+            
             const currentName = person.name;
             const input = document.createElement('input');
             input.type = 'text';
             input.value = currentName;
             input.className = 'form-control form-control-sm name-edit-input';
-            input.style.cssText = `
-                width: 100%;
-                border: 2px solid #007AFF;
-                border-radius: 6px;
-                padding: 8px;
-                font-size: 16px;
-                font-weight: 600;
-                background: white;
-                box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
-            `;
+            
+            // 移动端优化的样式
+            if (isMobile) {
+                input.style.cssText = `
+                    width: 100%;
+                    border: 2px solid #007AFF;
+                    border-radius: 8px;
+                    padding: 12px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    background: white;
+                    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+                    -webkit-appearance: none;
+                    -webkit-tap-highlight-color: transparent;
+                `;
+            } else {
+                input.style.cssText = `
+                    width: 100%;
+                    border: 2px solid #007AFF;
+                    border-radius: 6px;
+                    padding: 8px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    background: white;
+                    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
+                `;
+            }
 
+            // 先显示视觉反馈
+            nameCell.style.backgroundColor = '#f0f8ff';
+            nameCell.style.borderRadius = '8px';
+            nameCell.style.padding = '4px';
+            
+            console.log('正在替换内容为输入框');
+            
             // 清空内容并添加输入框
             nameCell.innerHTML = '';
             nameCell.appendChild(input);
 
+            console.log('输入框已添加，准备聚焦');
+            
             // 聚焦并选中文本
             setTimeout(() => {
                 input.focus();
                 input.select();
-            }, 50);
+                console.log('输入框已聚焦');
+            }, 100);
 
             const saveName = () => {
                 const newName = input.value.trim() || '未命名';
+                console.log('保存新姓名:', newName);
                 person.name = newName;
+                
+                // 恢复视觉状态
+                nameCell.style.backgroundColor = '';
+                nameCell.style.borderRadius = '';
+                nameCell.style.padding = '';
+                
                 updatePersonnelTable();
 
                 // 显示保存成功提示
@@ -662,6 +719,11 @@
             };
 
             const cancelEdit = () => {
+                console.log('取消编辑');
+                // 恢复视觉状态
+                nameCell.style.backgroundColor = '';
+                nameCell.style.borderRadius = '';
+                nameCell.style.padding = '';
                 updatePersonnelTable();
             };
 

@@ -271,10 +271,15 @@
                         
                         <!-- 快速添加按钮 -->
                         <div class="personnel-quick-add">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addPersonnelQuick()">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addNewPersonnel()">
                                 <i class="fas fa-plus"></i>
                                 快速添加人物
                             </button>
+                        </div>
+                        
+                        <!-- 隐藏的表单字段用于提交 -->
+                        <div style="display: none;" id="hiddenPersonnelData">
+                            <!-- 人物数据将动态添加到这里 -->
                         </div>
                     </div>
                 </div>
@@ -741,36 +746,14 @@
                 checkbox.addEventListener('change', () => {
                     updateResourceSuggestions(personCard);
                     updateRolesSummary(personCard);
-                    updatePersonnelOverview();
                 });
             });
-            
-            // 监听姓名和资源变化
-            const nameInput = personCard.querySelector('input[name="person_name[]"]');
-            const resourceInput = personCard.querySelector('.resources-data');
-            
-            if (nameInput) {
-                nameInput.addEventListener('input', () => {
-                    updatePersonnelOverview();
-                });
-            }
-            
-            if (resourceInput) {
-                // 使用MutationObserver监听隐藏字段变化
-                const observer = new MutationObserver(() => {
-                    updatePersonnelOverview();
-                });
-                observer.observe(resourceInput, { attributes: true, attributeFilter: ['value'] });
-            }
             
             // 初始化资源推荐（显示提示信息）
             updateResourceSuggestions(personCard);
             
             // 为新卡片设置随机提示语
             setRandomPlaceholder();
-            
-            // 更新人物清单表格
-            updatePersonnelOverview();
         }
         
         // 删除人物卡片
@@ -781,7 +764,6 @@
                 card.remove();
                 updatePersonNumbers();
                 updateEmptyState();
-                updatePersonnelOverview();
             }, 300);
         }
         
@@ -831,8 +813,8 @@
             // 初始化动态提示语
             setRandomPlaceholder();
             
-            // 初始化人物清单表格
-            updatePersonnelOverview();
+            // 初始化独立人物清单表格
+            updatePersonnelTable();
         });
         
 
@@ -1033,28 +1015,49 @@
             }
         }
         
-        // ==== 人物清单表格管理功能 ====
+        // ==== 独立人物清单表格管理功能 ====
         
-        // 快速添加人物（从清单表格）
-        function addPersonnelQuick() {
-            addPerson();
-            // 滚动到详细信息区域
-            document.querySelector('.card:has(#personsContainer)').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
+        // 存储人物数据的全局变量
+        let personnelData = [];
+        let currentEditingPersonId = null;
+        
+        // 角色映射
+        const roleMapping = {
+            'enterprise_owner': { text: '企业主', type: 'demand' },
+            'store_owner': { text: '实体店主', type: 'demand' },
+            'department_head': { text: '部门负责人', type: 'demand' },
+            'brand_manager': { text: '主理人', type: 'demand' },
+            'product_provider': { text: '产品', type: 'delivery' },
+            'service_provider': { text: '服务', type: 'delivery' },
+            'traffic_provider': { text: '流量', type: 'delivery' },
+            'other_provider': { text: '其他', type: 'delivery' },
+            'funding_provider': { text: '资金提供方', type: 'funding' }
+        };
+        
+        // 添加新人物到独立表格
+        function addNewPersonnel() {
+            const newPerson = {
+                id: Date.now(),
+                name: '未命名',
+                roles: [],
+                resources: [],
+                needs: []
+            };
+            
+            personnelData.push(newPerson);
+            updatePersonnelTable();
+            
+            // 立即编辑姓名
+            setTimeout(() => {
+                editPersonName(newPerson.id);
+            }, 100);
         }
         
         // 更新人物清单表格
-        function updatePersonnelOverview() {
+        function updatePersonnelTable() {
             const tableBody = document.getElementById('personnelTableBody');
-            const personCards = document.querySelectorAll('.person-card');
             
-            // 清空表格内容
-            tableBody.innerHTML = '';
-            
-            if (personCards.length === 0) {
-                // 显示空状态
+            if (personnelData.length === 0) {
                 tableBody.innerHTML = `
                     <div class="empty-personnel-state">
                         <div class="empty-state-content">
@@ -1067,93 +1070,54 @@
                 return;
             }
             
-            // 为每个人物卡片创建表格行
-            personCards.forEach((card, index) => {
-                const personData = extractPersonData(card);
-                const tableRow = createTableRow(index + 1, personData, card);
-                tableBody.appendChild(tableRow);
+            tableBody.innerHTML = '';
+            personnelData.forEach((person, index) => {
+                const row = createPersonnelRow(person, index + 1);
+                tableBody.appendChild(row);
             });
+            
+            // 更新隐藏表单数据
+            updateHiddenFormData();
         }
         
-        // 从人物卡片提取数据
-        function extractPersonData(personCard) {
-            const nameInput = personCard.querySelector('input[name="person_name[]"]');
-            const roleCheckboxes = personCard.querySelectorAll('input[name="person_role[]"]:checked');
-            const resourcesData = personCard.querySelector('.resources-data');
-            
-            const name = nameInput ? nameInput.value.trim() : '';
-            
-            // 提取角色信息
-            const roles = [];
-            roleCheckboxes.forEach(checkbox => {
-                const roleItem = checkbox.closest('.role-item');
-                const roleText = roleItem.querySelector('span').textContent;
-                const roleValue = checkbox.value;
-                
-                // 确定角色类型
-                let roleType = 'other';
-                if (['enterprise_owner', 'store_owner', 'department_head', 'brand_manager'].includes(roleValue)) {
-                    roleType = 'demand';
-                } else if (['product_provider', 'service_provider', 'traffic_provider', 'other_provider'].includes(roleValue)) {
-                    roleType = 'delivery';
-                } else if (roleValue === 'funding_provider') {
-                    roleType = 'funding';
-                }
-                
-                roles.push({ text: roleText, type: roleType });
-            });
-            
-            // 提取资源信息
-            const resources = resourcesData && resourcesData.value ? 
-                resourcesData.value.split(',').filter(r => r.trim()) : [];
-            
-            // 提取需求信息（简化版本）
-            const needsCheckboxes = personCard.querySelectorAll('input[name="person_needs[]"]:checked');
-            const needs = Array.from(needsCheckboxes).slice(0, 2).map(cb => {
-                const label = cb.closest('label').querySelector('span');
-                return label ? label.textContent : cb.value;
-            });
-            
-            return {
-                name: name || '未命名',
-                roles: roles,
-                resources: resources,
-                needs: needs
-            };
-        }
-        
-        // 创建表格行
-        function createTableRow(number, data, personCard) {
+        // 创建人物表格行
+        function createPersonnelRow(person, number) {
             const row = document.createElement('div');
             row.className = 'personnel-table-row';
-            row.dataset.personId = personCard.dataset.personId || number;
+            row.dataset.personId = person.id;
             
-            // 角色标签HTML
-            const roleTagsHtml = data.roles.map(role => 
-                `<span class="role-tag ${role.type}">${role.text}</span>`
-            ).join('');
+            // 角色标签
+            const roleTagsHtml = person.roles.map(roleValue => {
+                const roleInfo = roleMapping[roleValue];
+                return roleInfo ? `<span class="role-tag ${roleInfo.type}">${roleInfo.text}</span>` : '';
+            }).join('');
             
             // 资源摘要
-            const resourcesSummary = data.resources.length > 0 ? 
-                data.resources.slice(0, 2).join('、') + (data.resources.length > 2 ? '...' : '') : 
+            const resourcesSummary = person.resources.length > 0 ? 
+                person.resources.slice(0, 2).join('、') + (person.resources.length > 2 ? '...' : '') : 
                 '待添加';
             
             // 需求摘要
-            const needsSummary = data.needs.length > 0 ? 
-                data.needs.slice(0, 2).join('、') + (data.needs.length > 2 ? '...' : '') : 
+            const needsSummary = person.needs.length > 0 ? 
+                person.needs.slice(0, 2).join('、') + (person.needs.length > 2 ? '...' : '') : 
                 '待补充';
             
             row.innerHTML = `
                 <div class="row-number">${number}</div>
-                <div class="row-name">${data.name}</div>
-                <div class="row-roles">${roleTagsHtml || '<span style="color: #999;">未选择</span>'}</div>
-                <div class="row-resources" title="${data.resources.join('、')}">${resourcesSummary}</div>
-                <div class="row-needs" title="${data.needs.join('、')}">${needsSummary}</div>
+                <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;">
+                    ${person.name}
+                </div>
+                <div class="row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer;">
+                    ${roleTagsHtml || '<span style="color: #999;">未选择</span>'}
+                </div>
+                <div class="row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer;" title="${person.resources.join('、')}">
+                    ${resourcesSummary}
+                </div>
+                <div class="row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer;" title="${person.needs.join('、')}">
+                    ${needsSummary}
+                </div>
                 <div class="row-actions">
-                    <button class="action-btn edit" onclick="editPersonFromTable(${number})" title="编辑详细信息">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn delete" onclick="deletePersonFromTable(${number})" title="删除此人物">
+                    <button class="action-btn delete" onclick="deletePerson(${person.id})" title="删除此人物">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -1162,49 +1126,205 @@
             return row;
         }
         
-        // 从表格编辑人物
-        function editPersonFromTable(personNumber) {
-            const personCards = document.querySelectorAll('.person-card');
-            const targetCard = personCards[personNumber - 1];
+        // 编辑人物姓名（内联编辑）
+        function editPersonName(personId) {
+            const person = personnelData.find(p => p.id === personId);
+            if (!person) return;
             
-            if (targetCard) {
-                // 滚动到目标卡片
-                targetCard.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                });
-                
-                // 高亮显示
-                targetCard.style.boxShadow = '0 0 20px rgba(102, 126, 234, 0.3)';
-                targetCard.style.border = '2px solid #667eea';
-                
-                // 移除高亮
-                setTimeout(() => {
-                    targetCard.style.boxShadow = '';
-                    targetCard.style.border = '';
-                }, 3000);
-                
-                // 聚焦到姓名输入框
-                const nameInput = targetCard.querySelector('input[name="person_name[]"]');
-                if (nameInput) {
-                    setTimeout(() => nameInput.focus(), 500);
+            const nameCell = document.querySelector(`[data-person-id="${personId}"] .row-name`);
+            if (!nameCell) return;
+            
+            const currentName = person.name;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentName;
+            input.className = 'form-control form-control-sm';
+            input.style.width = '100%';
+            
+            nameCell.innerHTML = '';
+            nameCell.appendChild(input);
+            input.focus();
+            input.select();
+            
+            const saveName = () => {
+                const newName = input.value.trim() || '未命名';
+                person.name = newName;
+                updatePersonnelTable();
+            };
+            
+            input.addEventListener('blur', saveName);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveName();
                 }
+                if (e.key === 'Escape') {
+                    updatePersonnelTable();
+                }
+            });
+        }
+        
+        // 编辑人物角色
+        function editPersonRoles(personId) {
+            currentEditingPersonId = personId;
+            const person = personnelData.find(p => p.id === personId);
+            if (!person) return;
+            
+            // 清空模态框选择
+            document.querySelectorAll('#editRolesModal input[name="modal_person_role"]').forEach(checkbox => {
+                checkbox.checked = person.roles.includes(checkbox.value);
+            });
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('editRolesModal'));
+            modal.show();
+        }
+        
+        // 编辑人物资源
+        function editPersonResources(personId) {
+            currentEditingPersonId = personId;
+            const person = personnelData.find(p => p.id === personId);
+            if (!person) return;
+            
+            // 设置文本框内容
+            document.getElementById('resourcesTextArea').value = person.resources.join('\n');
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('editResourcesModal'));
+            modal.show();
+        }
+        
+        // 编辑人物需求
+        function editPersonNeeds(personId) {
+            currentEditingPersonId = personId;
+            const person = personnelData.find(p => p.id === personId);
+            if (!person) return;
+            
+            // 设置文本框内容
+            document.getElementById('needsTextArea').value = person.needs.join('\n');
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('editNeedsModal'));
+            modal.show();
+        }
+        
+        // 保存角色选择
+        function saveRoles() {
+            if (!currentEditingPersonId) return;
+            
+            const person = personnelData.find(p => p.id === currentEditingPersonId);
+            if (!person) return;
+            
+            const selectedRoles = [];
+            document.querySelectorAll('#editRolesModal input[name="modal_person_role"]:checked').forEach(checkbox => {
+                selectedRoles.push(checkbox.value);
+            });
+            
+            person.roles = selectedRoles;
+            updatePersonnelTable();
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editRolesModal'));
+            modal.hide();
+        }
+        
+        // 保存资源
+        function saveResources() {
+            if (!currentEditingPersonId) return;
+            
+            const person = personnelData.find(p => p.id === currentEditingPersonId);
+            if (!person) return;
+            
+            const resourcesText = document.getElementById('resourcesTextArea').value;
+            person.resources = resourcesText.split('\n').map(r => r.trim()).filter(r => r);
+            
+            updatePersonnelTable();
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editResourcesModal'));
+            modal.hide();
+        }
+        
+        // 保存需求
+        function saveNeeds() {
+            if (!currentEditingPersonId) return;
+            
+            const person = personnelData.find(p => p.id === currentEditingPersonId);
+            if (!person) return;
+            
+            const needsText = document.getElementById('needsTextArea').value;
+            person.needs = needsText.split('\n').map(n => n.trim()).filter(n => n);
+            
+            updatePersonnelTable();
+            
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editNeedsModal'));
+            modal.hide();
+        }
+        
+        // 添加资源建议
+        function addResourceSuggestion(resource) {
+            const textarea = document.getElementById('resourcesTextArea');
+            const currentValue = textarea.value;
+            if (currentValue) {
+                textarea.value = currentValue + (currentValue.endsWith('\n') ? '' : '\n') + resource;
+            } else {
+                textarea.value = resource;
+            }
+            textarea.focus();
+        }
+        
+        // 添加需求建议
+        function addNeedsSuggestion(need) {
+            const textarea = document.getElementById('needsTextArea');
+            const currentValue = textarea.value;
+            if (currentValue) {
+                textarea.value = currentValue + (currentValue.endsWith('\n') ? '' : '\n') + need;
+            } else {
+                textarea.value = need;
+            }
+            textarea.focus();
+        }
+        
+        // 删除人物
+        function deletePerson(personId) {
+            if (confirm('确定要删除这个关键人物吗？')) {
+                personnelData = personnelData.filter(p => p.id !== personId);
+                updatePersonnelTable();
             }
         }
         
-        // 从表格删除人物
-        function deletePersonFromTable(personNumber) {
-            const personCards = document.querySelectorAll('.person-card');
-            const targetCard = personCards[personNumber - 1];
+        // 更新隐藏表单数据
+        function updateHiddenFormData() {
+            const hiddenContainer = document.getElementById('hiddenPersonnelData');
+            hiddenContainer.innerHTML = '';
             
-            if (targetCard) {
-                if (confirm('确定要删除这个关键人物吗？')) {
-                    const removeButton = targetCard.querySelector('.remove-person-btn');
-                    if (removeButton) {
-                        removeButton.click();
-                    }
-                }
-            }
+            personnelData.forEach((person, index) => {
+                // 添加隐藏字段以便表单提交
+                const nameInput = document.createElement('input');
+                nameInput.type = 'hidden';
+                nameInput.name = 'person_name[]';
+                nameInput.value = person.name;
+                hiddenContainer.appendChild(nameInput);
+                
+                const rolesInput = document.createElement('input');
+                rolesInput.type = 'hidden';
+                rolesInput.name = 'person_role[]';
+                rolesInput.value = person.roles.join(',');
+                hiddenContainer.appendChild(rolesInput);
+                
+                const resourcesInput = document.createElement('input');
+                resourcesInput.type = 'hidden';
+                resourcesInput.name = 'person_resources[]';
+                resourcesInput.value = person.resources.join(',');
+                hiddenContainer.appendChild(resourcesInput);
+                
+                const needsInput = document.createElement('input');
+                needsInput.type = 'hidden';
+                needsInput.name = 'person_needs[]';
+                needsInput.value = person.needs.join(',');
+                hiddenContainer.appendChild(needsInput);
+            });
         }
         
         // 添加选中的资源
@@ -1487,34 +1607,14 @@
                 keyPersons: []
             };
             
-            // 收集关键人物数据
-            document.querySelectorAll('.person-card').forEach(card => {
-                const nameInput = card.querySelector('input[name="person_name[]"]');
-                const name = nameInput ? nameInput.value.trim() : '';
-                if (name) {
-                    const person = {
-                        name: name,
-                        roles: Array.from(card.querySelectorAll('input[name="person_role[]"]:checked')).map(cb => cb.value),
-                        resources: [],
-                        makeHappy: Array.from(card.querySelectorAll('input[name="person_needs[]"]:checked')).map(cb => cb.value),
-                        notes: ''
-                    };
-                    
-                    // 收集个人资源（从已选资源标签中获取）
-                    const resourceTags = card.querySelectorAll('.selected-resource-tag');
-                    if (resourceTags.length > 0) {
-                        person.resources = Array.from(resourceTags).map(tag => tag.dataset.resource);
-                    }
-                    
-                    // 收集备注（从其他自定义输入获取）
-                    const notesInput = card.querySelector('textarea[name="person_needs_extra[]"]');
-                    if (notesInput) {
-                        person.notes = notesInput.value.trim();
-                    }
-                    
-                    formData.keyPersons.push(person);
-                }
-            });
+            // 收集关键人物数据（从独立人物清单）
+            formData.keyPersons = personnelData.map(person => ({
+                name: person.name,
+                roles: person.roles,
+                resources: person.resources,
+                makeHappy: person.needs,
+                notes: ''
+            }));
             
 
             // 发送数据到后端Flask而不是sessionStorage
@@ -1894,5 +1994,170 @@
             });
         });
     </script>
+
+    <!-- 模态框：编辑身份角色 -->
+    <div class="modal fade" id="editRolesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑身份角色</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="role-categories">
+                        <div class="role-category" data-category="demand">
+                            <h6 class="role-category-title demand">
+                                <i class="fas fa-user-tie"></i>
+                                需求方
+                                <span class="help-icon" data-tooltip="项目需求的提出者、决策者">
+                                    <i class="fas fa-question-circle"></i>
+                                </span>
+                            </h6>
+                            <div class="role-options">
+                                <label class="role-item">
+                                    <input type="checkbox" name="modal_person_role" value="enterprise_owner">
+                                    <span>企业主</span>
+                                </label>
+                                <label class="role-item">
+                                    <input type="checkbox" name="modal_person_role" value="store_owner">
+                                    <span>实体店主</span>
+                                </label>
+                                <label class="role-item">
+                                    <input type="checkbox" name="modal_person_role" value="department_head">
+                                    <span>部门负责人</span>
+                                </label>
+                                <label class="role-item">
+                                    <input type="checkbox" name="modal_person_role" value="brand_manager">
+                                    <span>主理人</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="role-category" data-category="delivery">
+                            <h6 class="role-category-title delivery">
+                                <i class="fas fa-hands-helping"></i>
+                                交付方
+                                <span class="help-icon" data-tooltip="提供产品、服务或资源的执行者">
+                                    <i class="fas fa-question-circle"></i>
+                                </span>
+                            </h6>
+                            <div class="role-options">
+                                <label class="role-item">
+                                    <input type="checkbox" name="modal_person_role" value="product_provider">
+                                    <span>产品</span>
+                                </label>
+                                <label class="role-item">
+                                    <input type="checkbox" name="modal_person_role" value="service_provider">
+                                    <span>服务</span>
+                                </label>
+                                <label class="role-item">
+                                    <input type="checkbox" name="modal_person_role" value="traffic_provider">
+                                    <span>流量</span>
+                                </label>
+                                <label class="role-item">
+                                    <input type="checkbox" name="modal_person_role" value="other_provider">
+                                    <span>其他</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="role-category" data-category="funding">
+                            <h6 class="role-category-title funding">
+                                <i class="fas fa-coins"></i>
+                                资金方
+                                <span class="help-icon" data-tooltip="提供资金支持的投资者或资助方">
+                                    <i class="fas fa-question-circle"></i>
+                                </span>
+                            </h6>
+                            <div class="role-options">
+                                <label class="role-item">
+                                    <input type="checkbox" name="modal_person_role" value="funding_provider">
+                                    <span>资金提供方</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveRoles()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框：编辑掌握资源 -->
+    <div class="modal fade" id="editResourcesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑掌握资源</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">添加资源（一行一个）</label>
+                        <textarea class="form-control" id="resourcesTextArea" rows="8" placeholder="请输入此人掌握的资源，每个资源占一行&#10;例如：&#10;资金100万&#10;工厂生产线&#10;微信群5000人&#10;专业技术团队"></textarea>
+                    </div>
+                    <div class="resource-suggestions">
+                        <h6>常见资源类型（点击快速添加）：</h6>
+                        <div class="suggestion-tags">
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('资金投入')">资金投入</span>
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('人脉网络')">人脉网络</span>
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('技术团队')">技术团队</span>
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('营销渠道')">营销渠道</span>
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('办公场地')">办公场地</span>
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('设备设施')">设备设施</span>
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('品牌影响力')">品牌影响力</span>
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('客户资源')">客户资源</span>
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('供应链关系')">供应链关系</span>
+                            <span class="suggestion-tag" onclick="addResourceSuggestion('专业知识')">专业知识</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveResources()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框：编辑如何让TA高兴 -->
+    <div class="modal fade" id="editNeedsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">编辑如何让TA高兴</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">添加让TA高兴的方式（一行一个）</label>
+                        <textarea class="form-control" id="needsTextArea" rows="6" placeholder="请输入让这个人高兴的方式，每个方式占一行&#10;例如：&#10;获得更多利润&#10;提升品牌知名度&#10;节省运营成本&#10;获得认可和尊重"></textarea>
+                    </div>
+                    <div class="needs-suggestions">
+                        <h6>常见需求类型（点击快速添加）：</h6>
+                        <div class="suggestion-tags">
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('获得更多利润')">获得更多利润</span>
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('提升品牌知名度')">提升品牌知名度</span>
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('节省成本开支')">节省成本开支</span>
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('获得认可赞扬')">获得认可赞扬</span>
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('扩大影响力')">扩大影响力</span>
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('学习新知识')">学习新知识</span>
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('建立新关系')">建立新关系</span>
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('获得便利服务')">获得便利服务</span>
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('提升工作效率')">提升工作效率</span>
+                            <span class="suggestion-tag" onclick="addNeedsSuggestion('解决实际问题')">解决实际问题</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNeeds()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

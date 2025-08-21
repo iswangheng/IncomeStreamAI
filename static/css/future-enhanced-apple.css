@@ -1097,6 +1097,7 @@ body::after {
     max-height: 70vh;
     overflow-y: auto;
     overflow-x: visible;
+    position: relative;
 }
 
 .modal-body::-webkit-scrollbar {
@@ -1137,6 +1138,31 @@ body::after {
     background: rgba(255, 255, 255, 1);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+/* 需求建议内容区域 - 限制滚动高度 */
+.needs-suggestions {
+    max-height: calc(70vh - 200px);
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.needs-suggestions::-webkit-scrollbar {
+    width: 4px;
+}
+
+.needs-suggestions::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 2px;
+}
+
+.needs-suggestions::-webkit-scrollbar-thumb {
+    background: #dee2e6;
+    border-radius: 2px;
+}
+
+.needs-suggestions::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
 }
 
 /* 可点击行的悬停效果 */

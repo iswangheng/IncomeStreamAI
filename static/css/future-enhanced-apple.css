@@ -13,7 +13,7 @@
     --future-gradient-success: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
     --future-gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
     --future-gradient-danger: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
-    
+
     /* 霓虹色彩增强 */
     --neon-blue: #00d4ff;
     --neon-purple: #8b5cf6;
@@ -21,20 +21,20 @@
     --neon-green: #39ff14;
     --neon-orange: #ff8500;
     --neon-cyan: #00ffff;
-    
+
     /* 增强阴影系统 */
     --shadow-glow-blue: 0 0 20px rgba(102, 126, 234, 0.3), 0 0 40px rgba(102, 126, 234, 0.1);
     --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1);
     --shadow-glow-pink: 0 0 20px rgba(255, 0, 110, 0.3), 0 0 40px rgba(255, 0, 110, 0.1);
     --shadow-floating: 0 20px 40px rgba(0, 0, 0, 0.1), 0 10px 30px rgba(102, 126, 234, 0.15);
     --shadow-interactive: 0 8px 32px rgba(102, 126, 234, 0.25), 0 4px 16px rgba(102, 126, 234, 0.15);
-    
+
     /* 磨砂玻璃效果 */
     --glass-bg: rgba(255, 255, 255, 0.1);
     --glass-bg-dark: rgba(0, 0, 0, 0.1);
     --glass-border: rgba(255, 255, 255, 0.18);
     --backdrop-blur: blur(20px);
-    
+
     /* 动画时长 */
     --transition-ultra-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-enhanced: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -260,12 +260,12 @@ body::before {
         gap: var(--space-3);
         padding: 0 var(--space-2);
     }
-    
+
     .demo-cases-section {
         padding: var(--space-4) var(--space-3);
         margin: var(--space-6) 0;
     }
-    
+
     .demo-case-card {
         padding: var(--space-3);
         margin: 0;
@@ -275,25 +275,25 @@ body::before {
         align-items: flex-start;
         gap: var(--space-3);
     }
-    
+
     .case-content h4 {
         font-size: var(--text-lg);
         line-height: 1.4;
         margin-bottom: var(--space-2);
     }
-    
+
     .case-content p {
         font-size: var(--text-sm);
         line-height: 1.5;
         margin-bottom: var(--space-3);
     }
-    
+
     .case-tags {
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-1);
     }
-    
+
     .case-tags .tag {
         font-size: var(--text-xs);
         padding: var(--space-1) var(--space-2);
@@ -306,23 +306,23 @@ body::before {
         gap: var(--space-2);
         padding: 0;
     }
-    
+
     .demo-cases-section {
         padding: var(--space-3) var(--space-2);
         margin: var(--space-4) 0;
     }
-    
+
     .demo-cases-header h3 {
         font-size: var(--text-lg);
         flex-direction: column;
         gap: var(--space-1);
     }
-    
+
     .demo-cases-header p {
         font-size: var(--text-sm);
         line-height: 1.5;
     }
-    
+
     .demo-case-card {
         padding: var(--space-3);
         border-radius: var(--radius-lg);
@@ -330,22 +330,22 @@ body::before {
         align-items: flex-start;
         gap: var(--space-2);
     }
-    
+
     .case-icon {
         width: 40px;
         height: 40px;
         flex-shrink: 0;
     }
-    
+
     .case-icon i {
         font-size: 18px;
     }
-    
+
     .case-content h4 {
         font-size: var(--text-base);
         font-weight: var(--font-semibold);
     }
-    
+
     .case-content p {
         font-size: var(--text-xs);
         line-height: 1.4;
@@ -963,7 +963,7 @@ body::after {
         grid-template-columns: 30px 1fr 80px;
         gap: 8px;
     }
-    
+
     .col-roles,
     .col-resources,
     .col-needs,
@@ -972,16 +972,16 @@ body::after {
     .row-needs {
         display: none;
     }
-    
+
     .table-column,
     .row-name {
         font-size: 12px;
     }
-    
+
     .personnel-table-header {
         padding: 12px 16px;
     }
-    
+
     .personnel-table-row {
         padding: 12px 16px;
     }
@@ -1204,7 +1204,7 @@ body::after {
 .role-item:hover {
     border-color: #667eea;
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
 }
 
 .role-item:hover::before {
@@ -1433,23 +1433,23 @@ body::after {
     .role-options {
         grid-template-columns: 1fr;
     }
-    
+
     .role-category {
         padding: 16px;
     }
-    
+
     .role-item {
         padding: 12px 16px;
     }
-    
+
     .role-category-title {
         font-size: 14px;
     }
-    
+
     .role-item span {
         font-size: 13px;
     }
-    
+
     /* 移动端的提示框调整 */
     .role-tooltip {
         max-width: 160px;
@@ -1855,11 +1855,11 @@ body::after {
         flex-direction: column;
         gap: var(--space-1);
     }
-    
+
     .hint-item {
         font-size: 10px;
     }
-    
+
     .input-section-header {
         flex-direction: column;
         align-items: flex-start;
@@ -2431,11 +2431,11 @@ body::after {
     .page-title {
         font-size: var(--text-4xl);
     }
-    
+
     .card {
         margin-bottom: var(--space-6);
     }
-    
+
     /* 移动设备上禁用hover效果以提高滚动性能 */
     .card:hover,
     .btn:hover,
@@ -2445,17 +2445,17 @@ body::after {
         transform: none;
         box-shadow: none;
     }
-    
+
     /* 移动设备粒子效果优化 */
     .particle-container {
         display: none;
     }
-    
+
     /* 移动设备滚动优化 */
     * {
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .person-card {
         will-change: auto; /* 减少移动设备GPU使用 */
     }
@@ -2469,15 +2469,15 @@ body::after {
         --color-text-primary: #ffffff;
         --color-text-secondary: #a0a0a0;
     }
-    
+
     body {
         background: linear-gradient(135deg, #0f0f23 0%, #16213e 50%, #1a1a2e 100%);
     }
-    
+
     .card {
         background: rgba(26, 26, 46, 0.85);
     }
-    
+
     .navigation-bar {
         background: rgba(26, 26, 46, 0.8);
     }
@@ -2528,7 +2528,7 @@ body {
     .person-card-leaving {
         transition-duration: 0.15s;
     }
-    
+
     .needs-expandable-section {
         transition-duration: 0.15s;
     }

@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Angela · 非劳务收入管道设计师</title>
-    
+
     <!-- 预加载关键字体 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <!-- Apple级别设计系统 -->
     <link href="{{ url_for('static', filename='css/apple-design-system.css') }}" rel="stylesheet">
     <!-- 未来科幻增强版设计系统 -->
@@ -24,7 +24,7 @@
     <link href="{{ url_for('static', filename='css/navigation-redesign.css') }}" rel="stylesheet">
     <!-- 用户菜单下拉设计 -->
     <link href="{{ url_for('static', filename='css/user-menu-dropdown.css') }}" rel="stylesheet">
-    
+
     <!-- SEO优化 -->
     <meta name="description" content="Angela - Apple级别AI驱动的非劳务收入管道设计工具，世界一流的用户体验">
     <meta name="keywords" content="AI收入设计,非劳务收入,智能管道,商业策略,Apple设计">
@@ -44,12 +44,12 @@
                 <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
                     <i class="fas fa-cog"></i>管理中心
                 </a>
-                
+
                 <!-- 移动端汉堡菜单按钮 -->
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
                     <i class="fas fa-bars"></i>
                 </button>
-                
+
                 <!-- 移动端下拉菜单 -->
                 <div class="mobile-dropdown" id="mobileDropdown">
                     <div class="mobile-user-info">
@@ -61,7 +61,7 @@
                             <p>{{ current_user.phone }}</p>
                         </div>
                     </div>
-                    
+
                     <a href="{{ url_for('analysis_history') }}" class="dropdown-item">
                         <i class="fas fa-history"></i>
                         历史记录
@@ -83,7 +83,7 @@
                         退出登录
                     </a>
                 </div>
-                
+
                 <div class="user-menu">
                     <div class="user-trigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
                         <div class="user-info">
@@ -126,7 +126,7 @@
         <header class="page-header">
             <h1 class="page-title">非劳务收入管道设计师</h1>
             <p class="page-subtitle">根据您的项目和关键人物信息，生成个性化的非劳务收入管道方案</p>
-            
+
             <!-- 测试案例选择区域 -->
             <div class="demo-cases-section">
                 <div class="demo-cases-header">
@@ -150,7 +150,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="demo-case-card" data-case="rental-business">
                         <div class="case-icon">
                             <i class="fas fa-building"></i>
@@ -164,7 +164,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="demo-case-card" data-case="cicada-farming">
                         <div class="case-icon">
                             <i class="fas fa-seedling"></i>
@@ -178,7 +178,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="demo-case-card" data-case="custom">
                         <div class="case-icon">
                             <i class="fas fa-edit"></i>
@@ -211,7 +211,7 @@
 
         <!-- 主要表单 -->
         <form method="POST" action="{{ url_for('generate') }}" id="mainForm">
-            
+
             <!-- 项目基础信息模块 -->
             <div class="card interactive-hover">
                 <div class="card-header">
@@ -226,13 +226,24 @@
                         <input type="text" class="form-control" id="project_name" name="project_name" 
                                placeholder="请输入您的项目名称" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="project_description" class="form-label">项目背景描述</label>
                         <textarea class="form-control" id="project_description" name="project_description" 
                                   placeholder="详细描述您的项目背景、目标和现状..." required></textarea>
                     </div>
-                    
+
+                    <div class="form-group">
+                        <label for="project_stage" class="form-label">项目阶段</label>
+                        <select class="form-select" id="project_stage" name="project_stage">
+                            <option value="planning">规划中</option>
+                            <option value="execution">执行中</option>
+                            <option value="testing">测试/验证</option>
+                            <option value="growth">增长</option>
+                            <option value="maturity">成熟期</option>
+                            <option value="optimization">优化中</option>
+                        </select>
+                    </div>
 
                 </div>
             </div>
@@ -257,7 +268,7 @@
                             <div class="table-column col-needs">如何让TA高兴</div>
                             <div class="table-column col-actions">操作</div>
                         </div>
-                        
+
                         <!-- 表格内容区域 -->
                         <div class="personnel-table-body" id="personnelTableBody">
                             <div class="empty-personnel-state">
@@ -268,7 +279,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- 快速添加按钮 -->
                         <div class="personnel-quick-add">
                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="addNewPersonnel()">
@@ -276,7 +287,7 @@
                                 快速添加人物
                             </button>
                         </div>
-                        
+
                         <!-- 隐藏的表单字段用于提交 -->
                         <div style="display: none;" id="hiddenPersonnelData">
                             <!-- 人物数据将动态添加到这里 -->
@@ -298,7 +309,7 @@
                     <div id="personsContainer">
                         <!-- 初始人物卡片将由JavaScript动态生成 -->
                     </div>
-                    
+
                     <div class="text-center mt-4" id="emptyState">
                         <p class="text-muted">
                             <i class="fas fa-users-slash"></i>
@@ -321,7 +332,7 @@
                     <i class="fas fa-magic me-2"></i>
                     开始AI智能分析
                 </button>
-                <p style="margin-top: 16px; color: #666; font-size: 14px;">
+                <p style="margin-top: 16px; color: #667680; font-size: 14px;">
                     基于您提供的信息，AI将在几秒内生成专业的收入管道设计方案
                 </p>
             </div>
@@ -336,59 +347,59 @@
         // Navigation Enhancement Script
         document.addEventListener('DOMContentLoaded', function() {
             const navbar = document.querySelector('.navigation-bar');
-            
+
             // Add scroll effect to navigation
             let lastScrollTop = 0;
             window.addEventListener('scroll', function() {
                 const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                
+
                 if (scrollTop > 20) {
                     navbar.classList.add('scrolled');
                 } else {
                     navbar.classList.remove('scrolled');
                 }
-                
+
                 lastScrollTop = scrollTop;
             });
-            
+
             // Enhanced button interactions
             const navButtons = document.querySelectorAll('.nav-actions .btn');
             navButtons.forEach(button => {
                 button.addEventListener('mouseenter', function() {
                     this.style.transform = 'translateY(-1px)';
                 });
-                
+
                 button.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
                 });
-                
+
                 button.addEventListener('click', function(e) {
                     // Add ripple effect
                     const ripple = document.createElement('span');
                     ripple.classList.add('ripple');
-                    
+
                     const rect = this.getBoundingClientRect();
                     const size = Math.max(rect.width, rect.height);
                     const x = e.clientX - rect.left - size / 2;
                     const y = e.clientY - rect.top - size / 2;
-                    
+
                     ripple.style.width = ripple.style.height = size + 'px';
                     ripple.style.left = x + 'px';
                     ripple.style.top = y + 'px';
-                    
+
                     this.appendChild(ripple);
-                    
+
                     setTimeout(() => {
                         ripple.remove();
                     }, 600);
                 });
             });
-            
+
             // Mobile menu toggle for very small screens
             function handleResponsiveNavigation() {
                 const navActions = document.querySelector('.nav-actions');
                 const userMenu = document.querySelector('.user-menu');
-                
+
                 if (window.innerWidth <= 480) {
                     navActions.style.flexDirection = 'column';
                     userMenu.style.flexDirection = 'column';
@@ -397,7 +408,7 @@
                     userMenu.style.flexDirection = 'row';
                 }
             }
-            
+
             // Handle resize events
             window.addEventListener('resize', handleResponsiveNavigation);
             handleResponsiveNavigation(); // Initial call
@@ -406,12 +417,12 @@
     <script>
         // 人物计数器
         let personCount = 0;
-        
+
         // 添加人物卡片
         function addPerson() {
             personCount++;
             const container = document.getElementById('personsContainer');
-            
+
             const personCard = document.createElement('div');
             personCard.className = 'person-card';
             personCard.innerHTML = `
@@ -421,12 +432,12 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">人物代号/姓名</label>
                     <input type="text" class="form-control" name="person_name[]" placeholder="例如：A总">
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">
                         身份角色（必须至少选择一个）
@@ -435,7 +446,7 @@
                         </span>
                     </label>
                     <div class="role-selection-container">
-                        
+
                         <!-- 需求方 -->
                         <div class="role-category">
                             <h5 class="role-category-title">
@@ -513,17 +524,17 @@
                                 </label>
                             </div>
                         </div>
-                        
+
                         <div class="selected-roles-summary" id="selectedRoles_${personCount}">
                             <small class="text-muted">请在需求方和交付方中各选择至少一个角色</small>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">掌握的资源（必填 ≥ 1）</label>
                     <p class="resource-description">请描述他现在就能调动的具体资源，例如：预算金额、用户数量、平台权限等</p>
-                    
+
                     <!-- 智能推荐区域 -->
                     <div class="resource-smart-section">
                         <div class="resource-suggestions-header">
@@ -538,7 +549,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- 输入区域 -->
                     <div class="resource-input-section">
                         <div class="input-section-header">
@@ -556,7 +567,7 @@
                                    data-person-id="${personCount}">
                         </div>
                     </div>
-                    
+
                     <!-- 已选资源显示区 -->
                     <div class="selected-resources-section">
                         <div class="selected-header">
@@ -572,16 +583,16 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- 隐藏字段存储最终数据 -->
                     <input type="hidden" name="person_resources[]" class="resources-data">
-                    
+
                     <!-- 验证提示区域 -->
                     <div class="resource-validation" style="display: none;">
                         <!-- 验证提示信息 -->
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">如何让此人高兴（需求/痛点）</label>
                     <div class="needs-selection-container">
@@ -730,16 +741,16 @@
                     </div>
                 </div>
             `;
-            
+
             container.appendChild(personCard);
             updateEmptyState();
-            
+
             // 初始化角色提示功能
             initRoleTooltips(personCard);
-            
+
             // 初始化资源输入功能
             initResourceInput(personCard);
-            
+
             // 监听角色变化更新资源推荐和角色摘要
             const roleCheckboxes = personCard.querySelectorAll('input[name="person_role[]"]');
             roleCheckboxes.forEach(checkbox => {
@@ -748,14 +759,14 @@
                     updateRolesSummary(personCard);
                 });
             });
-            
+
             // 初始化资源推荐（显示提示信息）
             updateResourceSuggestions(personCard);
-            
+
             // 为新卡片设置随机提示语
             setRandomPlaceholder();
         }
-        
+
         // 删除人物卡片
         function removePerson(button) {
             const card = button.closest('.person-card');
@@ -766,7 +777,7 @@
                 updateEmptyState();
             }, 300);
         }
-        
+
         // 更新人物编号
         function updatePersonNumbers() {
             const cards = document.querySelectorAll('.person-card');
@@ -778,7 +789,7 @@
             });
             personCount = cards.length;
         }
-        
+
         // 更新空状态显示
         function updateEmptyState() {
             const emptyState = document.getElementById('emptyState');
@@ -787,13 +798,13 @@
                 emptyState.style.display = cards.length === 0 ? 'block' : 'none';
             }
         }
-        
+
         // 切换展开状态
         function toggleExpand(button) {
             const container = button.closest('.needs-selection-container');
             const expandableSection = container.querySelector('.needs-expandable-section');
             const icon = button.querySelector('i');
-            
+
             if (expandableSection.style.display === 'none') {
                 expandableSection.style.display = 'block';
                 icon.className = 'fas fa-angle-up me-1';
@@ -804,62 +815,62 @@
                 button.innerHTML = '<i class="fas fa-angle-down me-1"></i>展开更多选项';
             }
         }
-        
+
         // 初始化功能
         document.addEventListener('DOMContentLoaded', function() {
             // 初始化空状态
             updateEmptyState();
-            
+
             // 初始化动态提示语
             setRandomPlaceholder();
-            
+
             // 初始化独立人物清单表格
             updatePersonnelTable();
         });
-        
 
-        
+
+
         // 初始化角色提示功能
         function initRoleTooltips(personCard) {
             const roleItems = personCard.querySelectorAll('.role-item');
             const summaryContainer = personCard.querySelector('.selected-roles-summary');
-            
+
             roleItems.forEach(item => {
                 const checkbox = item.querySelector('input[type="checkbox"]');
-                
+
                 // 选择变化时更新摘要
                 checkbox.addEventListener('change', () => {
                     updateRolesSummary(personCard);
                 });
             });
-            
+
             // 初始更新摘要
             updateRolesSummary(personCard);
         }
-        
+
         // 更新已选角色摘要
         function updateRolesSummary(personCard) {
             const checkedItems = personCard.querySelectorAll('.role-item input[type="checkbox"]:checked');
             const summaryContainer = personCard.querySelector('.selected-roles-summary');
             const summaryText = summaryContainer.querySelector('small');
-            
+
             if (checkedItems.length === 0) {
                 summaryText.textContent = '请在需求方和交付方中各选择至少一个角色';
                 summaryContainer.classList.remove('has-selection');
                 summaryContainer.style.color = '#999';
                 return;
             }
-            
+
             // 检查选择的角色分布
             const selectedRoles = Array.from(checkedItems).map(cb => cb.value);
             const demandRoles = ['enterprise_owner', 'store_owner', 'department_head', 'brand_manager'];
             const deliveryRoles = ['product_provider', 'service_provider', 'traffic_provider', 'other_provider'];
             const fundingRoles = ['funding_provider'];
-            
+
             const selectedDemandRoles = selectedRoles.filter(role => demandRoles.includes(role));
             const selectedDeliveryRoles = selectedRoles.filter(role => deliveryRoles.includes(role));
             const selectedFundingRoles = selectedRoles.filter(role => fundingRoles.includes(role));
-            
+
             // 构建摘要文本
             let summaryParts = [];
             if (selectedDemandRoles.length > 0) {
@@ -869,7 +880,7 @@
                 });
                 summaryParts.push(`需求方: ${roleNames.join('、')}`);
             }
-            
+
             if (selectedDeliveryRoles.length > 0) {
                 const roleNames = selectedDeliveryRoles.map(role => {
                     const checkbox = personCard.querySelector(`input[value="${role}"]`);
@@ -877,14 +888,14 @@
                 });
                 summaryParts.push(`交付方: ${roleNames.join('、')}`);
             }
-            
+
             if (selectedFundingRoles.length > 0) {
                 summaryParts.push(`资金方`);
             }
-            
+
             // 检查是否满足要求（需求方或交付方至少选一个）
             const hasValidSelection = selectedDemandRoles.length > 0 || selectedDeliveryRoles.length > 0;
-            
+
             if (hasValidSelection) {
                 summaryText.textContent = `已选择：${summaryParts.join(' + ')}`;
                 summaryContainer.classList.add('has-selection');
@@ -895,7 +906,7 @@
                 summaryContainer.style.color = '#e74c3c';
             }
         }
-        
+
         // 角色到资源的映射
         const roleToResourceSuggestions = {
             // 需求方
@@ -903,31 +914,31 @@
             "store_owner": ["店铺空间", "客流量", "本地资源", "营业执照", "店面展示位", "顾客数据"],
             "department_head": ["部门预算", "团队人力", "内部协调权", "KPI指标", "汇报渠道", "资源分配权"],
             "brand_manager": ["品牌授权", "营销预算", "品牌露出机会", "用户社群", "品牌合作资源", "市场推广权"],
-            
+
             // 交付方
             "product_provider": ["产品试用名额", "样品/兑换码", "分销价权限", "售后支持", "产品授权", "库存资源"],
             "service_provider": ["专业技能", "执行团队", "服务时间", "工具平台", "交付方案", "质量保证"],
             "traffic_provider": ["用户粉丝", "媒体渠道", "社群资源", "推广位", "流量入口", "曝光机会"],
             "other_provider": ["特殊资质", "关系网络", "平台权限", "独特资源", "专业认证", "行业地位"],
-            
+
             // 资金方
             "funding_provider": ["投资资金", "赞助额度", "现金预算", "投后服务", "背书资源", "融资渠道"]
         };
-        
+
         // 资源示例模板
         const resourceExamples = [
             ["视频号8万粉", "社群2个", "品牌对接人：本地咖啡连锁"],
             ["SaaS试用名额100个", "API授权（14天）", "实施团队2人/2周"],
             ["赞助额度30万", "项目排期控制权", "合同模板/法务接口"]
         ];
-        
+
         // 资源输入随机提示语
         const resourcePlaceholders = [
             "微信社群5个、视频号10万粉、年度广告预算50万、产品试用码100个、活动场地一天、品牌对接人：XX",
             "电商渠道位3个、线下门店2家、KOL合作位2期、媒体采访资源、API授权、课程版权",
             "企业客户名单200条、招商会场地、投委会路演名额、供应链工厂档期、施工队2组"
         ];
-        
+
         // 动态提示语数据
         const inspirationTexts = [
             "老板刚批预算，需要尽快花掉",
@@ -946,7 +957,7 @@
             "想占个\"坑位\"避免竞争对手先做",
             "最近资金或资源到期，不用就浪费"
         ];
-        
+
         // 随机设置提示语
         function setRandomPlaceholder() {
             const textareas = document.querySelectorAll('.dynamic-placeholder-textarea');
@@ -954,7 +965,7 @@
                 const randomText = inspirationTexts[Math.floor(Math.random() * inspirationTexts.length)];
                 textarea.placeholder = `还有什么特别的点会让他愿意参与？比如：${randomText}`;
             });
-            
+
             // 设置资源输入的随机提示语
             const resourceInputs = document.querySelectorAll('.dynamic-placeholder-resource');
             resourceInputs.forEach(input => {
@@ -962,13 +973,13 @@
                 input.placeholder = randomPlaceholder;
             });
         }
-        
+
         // 更新资源候选标签
         function updateResourceSuggestions(personCard) {
             const personId = personCard.querySelector('.resource-input').dataset.personId;
             const roleCheckboxes = personCard.querySelectorAll('input[name="person_role[]"]:checked');
             const suggestionsContainer = personCard.querySelector('.resource-suggestions-scroll');
-            
+
             // 获取所有选中角色的候选资源（并集）
             const allSuggestions = new Set();
             roleCheckboxes.forEach(checkbox => {
@@ -977,10 +988,10 @@
                     roleToResourceSuggestions[role].forEach(resource => allSuggestions.add(resource));
                 }
             });
-            
+
             // 清空并重新生成候选标签
             suggestionsContainer.innerHTML = '';
-            
+
             if (allSuggestions.size > 0) {
                 allSuggestions.forEach(resource => {
                     const tag = document.createElement('div');
@@ -993,7 +1004,7 @@
                 suggestionsContainer.innerHTML = '<div class="no-role-selected"><i class="fas fa-arrow-up"></i>请先选择身份角色以获得智能推荐</div>';
             }
         }
-        
+
         // 更新资源计数
         function updateResourceCount(personCard) {
             const container = personCard.querySelector('.selected-resources-container');
@@ -1001,7 +1012,7 @@
             const tags = container.querySelectorAll('.selected-resource-tag');
             countElement.textContent = tags.length;
         }
-        
+
         // 切换资源候选标签
         function toggleResourceSuggestion(tagElement, resource, personId) {
             if (tagElement.classList.contains('selected')) {
@@ -1014,13 +1025,13 @@
                 tagElement.classList.add('selected');
             }
         }
-        
+
         // ==== 独立人物清单表格管理功能 ====
-        
+
         // 存储人物数据的全局变量
         let personnelData = [];
         let currentEditingPersonId = null;
-        
+
         // 角色映射
         const roleMapping = {
             'enterprise_owner': { text: '企业主', type: 'demand', displayText: '需求方-企业主' },
@@ -1033,7 +1044,7 @@
             'other_provider': { text: '其他', type: 'delivery', displayText: '交付方-其他' },
             'funding_provider': { text: '资金提供方', type: 'funding', displayText: '资金提供方' }
         };
-        
+
         // 添加新人物到独立表格
         function addNewPersonnel() {
             const newPerson = {
@@ -1043,20 +1054,20 @@
                 resources: [],
                 needs: []
             };
-            
+
             personnelData.push(newPerson);
             updatePersonnelTable();
-            
+
             // 立即编辑姓名
             setTimeout(() => {
                 editPersonName(newPerson.id);
             }, 100);
         }
-        
+
         // 更新人物清单表格
         function updatePersonnelTable() {
             const tableBody = document.getElementById('personnelTableBody');
-            
+
             if (personnelData.length === 0) {
                 tableBody.innerHTML = `
                     <div class="empty-personnel-state">
@@ -1069,39 +1080,39 @@
                 `;
                 return;
             }
-            
+
             tableBody.innerHTML = '';
             personnelData.forEach((person, index) => {
                 const row = createPersonnelRow(person, index + 1);
                 tableBody.appendChild(row);
             });
-            
+
             // 更新隐藏表单数据
             updateHiddenFormData();
         }
-        
+
         // 创建人物表格行
         function createPersonnelRow(person, number) {
             const row = document.createElement('div');
             row.className = 'personnel-table-row';
             row.dataset.personId = person.id;
-            
+
             // 角色标签
             const roleTagsHtml = person.roles.map(roleValue => {
                 const roleInfo = roleMapping[roleValue];
                 return roleInfo ? `<span class="role-tag ${roleInfo.type}">${roleInfo.displayText}</span>` : '';
             }).join('');
-            
+
             // 资源摘要
             const resourcesSummary = person.resources.length > 0 ? 
                 person.resources.slice(0, 2).join('、') + (person.resources.length > 2 ? '...' : '') : 
                 '待添加';
-            
+
             // 需求摘要
             const needsSummary = person.needs.length > 0 ? 
                 person.needs.slice(0, 2).join('、') + (person.needs.length > 2 ? '...' : '') : 
                 '待补充';
-            
+
             row.innerHTML = `
                 <div class="row-number">${number}</div>
                 <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;">
@@ -1122,36 +1133,36 @@
                     </button>
                 </div>
             `;
-            
+
             return row;
         }
-        
+
         // 编辑人物姓名（内联编辑）
         function editPersonName(personId) {
             const person = personnelData.find(p => p.id === personId);
             if (!person) return;
-            
+
             const nameCell = document.querySelector(`[data-person-id="${personId}"] .row-name`);
             if (!nameCell) return;
-            
+
             const currentName = person.name;
             const input = document.createElement('input');
             input.type = 'text';
             input.value = currentName;
             input.className = 'form-control form-control-sm';
             input.style.width = '100%';
-            
+
             nameCell.innerHTML = '';
             nameCell.appendChild(input);
             input.focus();
             input.select();
-            
+
             const saveName = () => {
                 const newName = input.value.trim() || '未命名';
                 person.name = newName;
                 updatePersonnelTable();
             };
-            
+
             input.addEventListener('blur', saveName);
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
@@ -1163,105 +1174,109 @@
                 }
             });
         }
-        
+
         // 编辑人物角色
         function editPersonRoles(personId) {
             currentEditingPersonId = personId;
             const person = personnelData.find(p => p.id === personId);
             if (!person) return;
-            
+
             // 清空模态框选择
             document.querySelectorAll('#editRolesModal input[name="modal_person_role"]').forEach(checkbox => {
                 checkbox.checked = person.roles.includes(checkbox.value);
             });
-            
+
             // 显示模态框
             const modal = new bootstrap.Modal(document.getElementById('editRolesModal'));
             modal.show();
         }
-        
+
         // 编辑人物资源
         function editPersonResources(personId) {
             currentEditingPersonId = personId;
             const person = personnelData.find(p => p.id === personId);
             if (!person) return;
-            
-            // 设置文本框内容
-            document.getElementById('resourcesTextArea').value = person.resources.join('\n');
-            
+
+            // 填充当前资源
+            const resourcesText = (person.resources || []).join('\n');
+            document.getElementById('resourcesTextArea').value = resourcesText;
+
+            // 根据已选择的角色生成智能推荐
+            generateResourceSuggestionsForModal(person.roles || []);
+
             // 显示模态框
             const modal = new bootstrap.Modal(document.getElementById('editResourcesModal'));
             modal.show();
         }
-        
+
         // 编辑人物需求
         function editPersonNeeds(personId) {
             currentEditingPersonId = personId;
             const person = personnelData.find(p => p.id === personId);
             if (!person) return;
-            
+
             // 设置文本框内容
             document.getElementById('needsTextArea').value = person.needs.join('\n');
-            
+
             // 显示模态框
             const modal = new bootstrap.Modal(document.getElementById('editNeedsModal'));
             modal.show();
         }
-        
+
         // 保存角色选择
         function saveRoles() {
             if (!currentEditingPersonId) return;
-            
+
             const person = personnelData.find(p => p.id === currentEditingPersonId);
             if (!person) return;
-            
+
             const selectedRoles = [];
             document.querySelectorAll('#editRolesModal input[name="modal_person_role"]:checked').forEach(checkbox => {
                 selectedRoles.push(checkbox.value);
             });
-            
+
             person.roles = selectedRoles;
             updatePersonnelTable();
-            
+
             // 关闭模态框
             const modal = bootstrap.Modal.getInstance(document.getElementById('editRolesModal'));
             modal.hide();
         }
-        
+
         // 保存资源
         function saveResources() {
             if (!currentEditingPersonId) return;
-            
+
             const person = personnelData.find(p => p.id === currentEditingPersonId);
             if (!person) return;
-            
+
             const resourcesText = document.getElementById('resourcesTextArea').value;
             person.resources = resourcesText.split('\n').map(r => r.trim()).filter(r => r);
-            
+
             updatePersonnelTable();
-            
+
             // 关闭模态框
             const modal = bootstrap.Modal.getInstance(document.getElementById('editResourcesModal'));
             modal.hide();
         }
-        
+
         // 保存需求
         function saveNeeds() {
             if (!currentEditingPersonId) return;
-            
+
             const person = personnelData.find(p => p.id === currentEditingPersonId);
             if (!person) return;
-            
+
             const needsText = document.getElementById('needsTextArea').value;
             person.needs = needsText.split('\n').map(n => n.trim()).filter(n => n);
-            
+
             updatePersonnelTable();
-            
+
             // 关闭模态框
             const modal = bootstrap.Modal.getInstance(document.getElementById('editNeedsModal'));
             modal.hide();
         }
-        
+
         // 添加资源建议
         function addResourceSuggestion(resource) {
             const textarea = document.getElementById('resourcesTextArea');
@@ -1273,7 +1288,7 @@
             }
             textarea.focus();
         }
-        
+
         // 添加需求建议
         function addNeedsSuggestion(need) {
             const textarea = document.getElementById('needsTextArea');
@@ -1285,7 +1300,7 @@
             }
             textarea.focus();
         }
-        
+
         // 删除人物
         function deletePerson(personId) {
             if (confirm('确定要删除这个关键人物吗？')) {
@@ -1293,12 +1308,12 @@
                 updatePersonnelTable();
             }
         }
-        
+
         // 更新隐藏表单数据
         function updateHiddenFormData() {
             const hiddenContainer = document.getElementById('hiddenPersonnelData');
             hiddenContainer.innerHTML = '';
-            
+
             personnelData.forEach((person, index) => {
                 // 添加隐藏字段以便表单提交
                 const nameInput = document.createElement('input');
@@ -1306,19 +1321,19 @@
                 nameInput.name = 'person_name[]';
                 nameInput.value = person.name;
                 hiddenContainer.appendChild(nameInput);
-                
+
                 const rolesInput = document.createElement('input');
                 rolesInput.type = 'hidden';
                 rolesInput.name = 'person_role[]';
                 rolesInput.value = person.roles.join(',');
                 hiddenContainer.appendChild(rolesInput);
-                
+
                 const resourcesInput = document.createElement('input');
                 resourcesInput.type = 'hidden';
                 resourcesInput.name = 'person_resources[]';
                 resourcesInput.value = person.resources.join(',');
                 hiddenContainer.appendChild(resourcesInput);
-                
+
                 const needsInput = document.createElement('input');
                 needsInput.type = 'hidden';
                 needsInput.name = 'person_needs[]';
@@ -1326,7 +1341,7 @@
                 hiddenContainer.appendChild(needsInput);
             });
         }
-        
+
         // 添加选中的资源
         function addSelectedResource(resource, personId) {
             // 使用更精确的选择器，通过resource-input类找到正确的人物卡片
@@ -1334,12 +1349,12 @@
             const targetCard = resourceInput.closest('.person-card');
             const container = targetCard.querySelector('.selected-resources-container');
             const existingTags = Array.from(container.querySelectorAll('.selected-resource-tag'));
-            
+
             // 检查是否已存在
             if (existingTags.some(tag => tag.dataset.resource === resource)) {
                 return;
             }
-            
+
             // 验证资源格式
             const validation = validateResource(resource);
             if (validation.type === 'error') {
@@ -1348,7 +1363,7 @@
             } else if (validation.type === 'warning') {
                 showResourceValidation(personId, validation.message, 'warning');
             }
-            
+
             // 创建标签
             const tag = document.createElement('div');
             tag.className = 'selected-resource-tag';
@@ -1357,14 +1372,14 @@
                 <span>${resource}</span>
                 <button type="button" class="remove-btn" onclick="removeSelectedResource('${resource.replace(/'/g, "\\'")}', '${personId}')">&times;</button>
             `;
-            
+
             container.appendChild(tag);
             container.classList.add('has-resources');
             container.classList.remove('empty');
             updateResourceCount(targetCard);
             updateResourcesData(personId);
         }
-        
+
         // 移除选中的资源
         function removeSelectedResource(resource, personId) {
             // 使用更精确的选择器，通过resource-input类找到正确的人物卡片
@@ -1375,13 +1390,13 @@
             if (tag) {
                 tag.remove();
             }
-            
+
             if (container.querySelectorAll('.selected-resource-tag').length === 0) {
                 container.classList.remove('has-resources');
                 container.classList.add('empty');
             }
             updateResourceCount(targetCard);
-            
+
             // 更新候选标签状态
             const currentCard = container.closest('.person-card');
             const suggestionTags = currentCard.querySelectorAll('.resource-suggestion-tag');
@@ -1390,10 +1405,10 @@
                     tag.classList.remove('selected');
                 }
             });
-            
+
             updateResourcesData(personId);
         }
-        
+
         // 验证资源格式
         function validateResource(resource) {
             // 长度检查
@@ -1403,7 +1418,7 @@
                     message: '请更精炼，保留关键信息（平台/数量/权限），单条不超过40字。'
                 };
             }
-            
+
             // 空泛词检查
             const vaguePattern = /(资源|人脉|渠道|预算|粉丝|关系|能力|团队)$/;
             if (vaguePattern.test(resource.trim())) {
@@ -1412,10 +1427,10 @@
                     message: '请具体到平台/数量/对象/权限，例如"视频号10万粉"而不是"粉丝"。'
                 };
             }
-            
+
             return { type: 'success' };
         }
-        
+
         // 显示资源验证提示
         function showResourceValidation(personId, message, type) {
             // 使用更精确的选择器，通过resource-input类找到正确的人物卡片
@@ -1425,7 +1440,7 @@
             validationElement.textContent = message;
             validationElement.className = `resource-validation ${type}`;
             validationElement.style.display = 'block';
-            
+
             // 3秒后自动隐藏警告
             if (type === 'warning') {
                 setTimeout(() => {
@@ -1433,7 +1448,7 @@
                 }, 3000);
             }
         }
-        
+
         // 格式化资源文本
         function formatResource(resource) {
             return resource
@@ -1444,7 +1459,7 @@
                 .replace(/粉(\d+)w/g, '粉丝$1万')  // 粉5w转粉丝5万
                 .trim();
         }
-        
+
         // 更新资源数据到隐藏字段
         function updateResourcesData(personId) {
             // 使用更精确的选择器，通过resource-input类找到正确的人物卡片
@@ -1453,16 +1468,16 @@
             const container = targetCard.querySelector('.selected-resources-container');
             const tags = container.querySelectorAll('.selected-resource-tag');
             const resources = Array.from(tags).map(tag => formatResource(tag.dataset.resource));
-            
+
             const hiddenInput = targetCard.querySelector('.resources-data');
             hiddenInput.value = JSON.stringify(resources);
         }
-        
+
         // 处理资源输入框
         function initResourceInput(personCard) {
             const input = personCard.querySelector('.resource-input');
             const personId = input.dataset.personId;
-            
+
             // 回车和逗号分隔
             input.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' || e.key === ',') {
@@ -1490,7 +1505,7 @@
                     }
                 }
             });
-            
+
             // 粘贴处理
             input.addEventListener('paste', function(e) {
                 e.preventDefault();
@@ -1504,9 +1519,9 @@
                 });
             });
         }
-        
 
-        
+
+
         // 初始化空状态显示
         function initResourceEmptyState() {
             const containers = document.querySelectorAll('.selected-resources-container');
@@ -1518,11 +1533,11 @@
                 }
             });
         }
-        
+
         // 显示灵感模态框
         function showInspirationModal(button) {
             const textarea = button.parentElement.querySelector('textarea');
-            
+
             // 创建模态框
             const modal = document.createElement('div');
             modal.className = 'inspiration-modal';
@@ -1537,15 +1552,15 @@
                     </div>
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
-            
+
             // 存储当前 textarea 引用
             modal.targetTextarea = textarea;
-            
+
             // 显示模态框
             setTimeout(() => modal.classList.add('show'), 10);
-            
+
             // 点击背景关闭
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
@@ -1553,7 +1568,7 @@
                 }
             });
         }
-        
+
         // 选择灵感文本
         function selectInspiration(item, text) {
             const modal = document.querySelector('.inspiration-modal');
@@ -1568,7 +1583,7 @@
             }
             closeInspirationModal();
         }
-        
+
         // 关闭灵感模态框
         function closeInspirationModal() {
             const modal = document.querySelector('.inspiration-modal');
@@ -1581,24 +1596,24 @@
                 }, 300);
             }
         }
-        
+
         // 表单提交前验证和处理
         document.getElementById('mainForm').addEventListener('submit', function(e) {
             e.preventDefault(); // 阻止默认表单提交
-            
+
             const projectName = document.getElementById('project_name').value.trim();
             const projectDescription = document.getElementById('project_description').value.trim();
-            
+
             if (!projectName || !projectDescription) {
                 alert('请填写项目名称和背景描述');
                 return;
             }
-            
+
             // 添加提交动画
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在分析...';
             submitBtn.disabled = true;
-            
+
             // 收集表单数据
             const formData = {
                 projectName: projectName,
@@ -1606,7 +1621,7 @@
                 projectStage: document.getElementById('project_stage').value,
                 keyPersons: []
             };
-            
+
             // 收集关键人物数据（从独立人物清单）
             formData.keyPersons = personnelData.map(person => ({
                 name: person.name,
@@ -1615,14 +1630,14 @@
                 makeHappy: person.needs,
                 notes: ''
             }));
-            
+
 
             // 发送数据到后端Flask而不是sessionStorage
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/generate';
             form.style.display = 'none';
-            
+
             // 添加项目基础信息
             const addInput = (name, value) => {
                 const input = document.createElement('input');
@@ -1631,11 +1646,11 @@
                 input.value = value;
                 form.appendChild(input);
             };
-            
+
             addInput('project_name', formData.projectName);
             addInput('project_description', formData.projectDescription);
             addInput('project_stage', formData.projectStage);
-            
+
             // 添加关键人物数据
             formData.keyPersons.forEach((person, index) => {
                 addInput('person_name[]', person.name);
@@ -1643,13 +1658,13 @@
                 addInput('person_resources[]', person.resources.join(','));
                 addInput('person_needs[]', person.makeHappy.join(','));
             });
-            
+
 
             // 提交表单
             document.body.appendChild(form);
             form.submit();
         });
-        
+
         // 测试案例数据
         const demoTestCases = {
             'english-training': {
@@ -1727,14 +1742,14 @@
         // 处理测试案例选择
         function handleDemoCaseSelection() {
             const caseCards = document.querySelectorAll('.demo-case-card');
-            
+
             caseCards.forEach(card => {
                 card.addEventListener('click', function() {
                     const caseType = this.dataset.case;
-                    
+
                     // 移除其他卡片的选中状态
                     caseCards.forEach(c => c.classList.remove('selected'));
-                    
+
                     if (caseType === 'custom') {
                         // 自定义项目 - 清空表单
                         this.classList.add('selected');
@@ -1745,7 +1760,7 @@
                         this.classList.add('selected');
                         loadTestCase(demoTestCases[caseType]);
                         scrollToForm();
-                        
+
                         // 显示成功提示
                         showNotification('✅ 示例案例已加载完成！向下滚动查看表单内容，可直接提交分析或修改参数', 'success');
                     }
@@ -1766,17 +1781,17 @@
                     el.style.transform = 'translateY(0)';
                     el.style.visibility = 'visible';
                 });
-                
+
                 // 强制重新布局
                 mainForm.style.display = 'block';
                 mainForm.offsetHeight; // 触发重绘
             }
-            
+
             // 填充项目基础信息
             const projectNameEl = document.getElementById('project_name');
             const projectDescEl = document.getElementById('project_description');
             const projectStageEl = document.getElementById('project_stage');
-            
+
             if (projectNameEl) {
                 projectNameEl.value = caseData.projectName || '';
                 projectNameEl.setAttribute('value', caseData.projectName || '');
@@ -1788,35 +1803,35 @@
             if (projectStageEl) {
                 projectStageEl.value = caseData.projectStage || '';
             }
-            
+
             // 清空现有人物卡片并重置计数器
             const personsContainer = document.getElementById('personsContainer');
             if (personsContainer) {
                 personsContainer.innerHTML = '';
                 personCount = 0; // 重置人物计数器
-                
+
                 // 确保容器可见
                 personsContainer.style.display = 'block';
                 personsContainer.style.opacity = '1';
                 personsContainer.style.visibility = 'visible';
             }
-            
+
             // 添加测试案例中的人物
             if (caseData.persons && caseData.persons.length > 0) {
                 caseData.persons.forEach((person, index) => {
                     addPerson();
                     const personCards = document.querySelectorAll('.person-card');
                     const currentCard = personCards[personCards.length - 1];
-                        
+
                     if (!currentCard) return;
-                    
+
                     // 强制显示人物卡片（移除动画类）
                     currentCard.classList.remove('fade-in', 'slide-up');
                     currentCard.style.opacity = '1';
                     currentCard.style.transform = 'translateY(0)';
                     currentCard.style.visibility = 'visible';
                     currentCard.style.display = 'block';
-                        
+
                     // 填充人物信息
                     const nameInput = currentCard.querySelector('input[name="person_name[]"]');
                     if (nameInput) {
@@ -1826,7 +1841,7 @@
                         nameInput.style.opacity = '1';
                         nameInput.style.visibility = 'visible';
                     }
-                        
+
                     // 选择角色
                     if (person.roles) {
                         person.roles.forEach(role => {
@@ -1838,7 +1853,7 @@
                         updateRolesSummary(currentCard);
                         updateResourceSuggestions(currentCard);
                     }
-                    
+
                     // 添加资源
                     if (person.resources) {
                         person.resources.forEach(resource => {
@@ -1846,7 +1861,7 @@
                             addSelectedResource(resource, personId);
                         });
                     }
-                    
+
                     // 选择需求选项
                     if (person.makeHappy) {
                         person.makeHappy.forEach(need => {
@@ -1856,18 +1871,18 @@
                             }
                         });
                     }
-                    
+
                     // 填充备注
                     const notesTextarea = currentCard.querySelector('textarea[name="person_notes[]"]');
                     if (notesTextarea) notesTextarea.value = person.notes || '';
-                    
+
                     // 在最后一个人物加载完成后更新编号
                     if (index === caseData.persons.length - 1) {
                         updatePersonNumbers();
                     }
                 });
             }
-            
+
 
         }
 
@@ -1876,11 +1891,11 @@
             document.getElementById('project_name').value = '';
             document.getElementById('project_description').value = '';
             document.getElementById('project_stage').value = '';
-            
+
             document.getElementById('personsContainer').innerHTML = '';
             personCount = 0; // 重置计数器
             addPerson();
-            
+
 
         }
 
@@ -1917,9 +1932,9 @@
             notification.style.right = '20px';
             notification.style.zIndex = '9999';
             notification.style.maxWidth = '400px';
-            
+
             document.body.appendChild(notification);
-            
+
             setTimeout(() => {
                 notification.remove();
             }, 4000);
@@ -1931,7 +1946,7 @@
             setRandomPlaceholder();
             handleDemoCaseSelection();
         });
-        
+
         // 添加平滑滚动
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -1945,24 +1960,24 @@
                 }
             });
         });
-        
+
         // 添加输入框焦点动画
         document.querySelectorAll('.form-control').forEach(input => {
             input.addEventListener('focus', function() {
                 this.parentElement.classList.add('focused');
             });
-            
+
             input.addEventListener('blur', function() {
                 this.parentElement.classList.remove('focused');
             });
         });
-        
+
         // 移动端汉堡菜单功能
         function toggleMobileMenu() {
             const dropdown = document.getElementById('mobileDropdown');
             const toggle = document.querySelector('.mobile-menu-toggle');
             const icon = toggle.querySelector('i');
-            
+
             if (dropdown.classList.contains('show')) {
                 dropdown.classList.remove('show');
                 icon.className = 'fas fa-bars';
@@ -1971,19 +1986,19 @@
                 icon.className = 'fas fa-times';
             }
         }
-        
+
         // 点击菜单外部关闭菜单
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('mobileDropdown');
             const toggle = document.querySelector('.mobile-menu-toggle');
-            
+
             if (dropdown && dropdown.classList.contains('show') && 
                 !dropdown.contains(event.target) && !toggle.contains(event.target)) {
                 dropdown.classList.remove('show');
                 toggle.querySelector('i').className = 'fas fa-bars';
             }
         });
-        
+
         // 点击菜单项后关闭菜单
         document.querySelectorAll('.mobile-dropdown .dropdown-item').forEach(item => {
             item.addEventListener('click', function() {
@@ -2033,7 +2048,7 @@
                                 </label>
                             </div>
                         </div>
-                        
+
                         <div class="role-category" data-category="delivery">
                             <h6 class="role-category-title delivery">
                                 <i class="fas fa-hands-helping"></i>
@@ -2062,7 +2077,7 @@
                                 </label>
                             </div>
                         </div>
-                        
+
                         <div class="role-category" data-category="funding">
                             <h6 class="role-category-title funding">
                                 <i class="fas fa-coins"></i>
@@ -2096,22 +2111,18 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">添加资源（一行一个）</label>
-                        <textarea class="form-control" id="resourcesTextArea" rows="8" placeholder="请输入此人掌握的资源，每个资源占一行&#10;例如：&#10;资金100万&#10;工厂生产线&#10;微信群5000人&#10;专业技术团队"></textarea>
+                        <label for="resourcesTextArea" class="form-label">掌握的资源</label>
+                        <textarea class="form-control" id="resourcesTextArea" rows="6" 
+                                placeholder="每行一个资源，例如：&#10;微信群500人&#10;抖音账号10万粉丝&#10;采购预算50万"></textarea>
                     </div>
-                    <div class="resource-suggestions">
-                        <h6>常见资源类型（点击快速添加）：</h6>
-                        <div class="suggestion-tags">
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('资金投入')">资金投入</span>
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('人脉网络')">人脉网络</span>
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('技术团队')">技术团队</span>
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('营销渠道')">营销渠道</span>
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('办公场地')">办公场地</span>
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('设备设施')">设备设施</span>
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('品牌影响力')">品牌影响力</span>
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('客户资源')">客户资源</span>
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('供应链关系')">供应链关系</span>
-                            <span class="suggestion-tag" onclick="addResourceSuggestion('专业知识')">专业知识</span>
+
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-3">
+                            <i class="fas fa-lightbulb text-warning me-1"></i>
+                            基于身份角色的资源推荐
+                        </h6>
+                        <div id="modalResourceSuggestions" class="modal-resource-suggestions">
+                            <!-- 智能推荐内容将在这里动态生成 -->
                         </div>
                     </div>
                 </div>

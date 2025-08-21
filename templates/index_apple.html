@@ -233,7 +233,7 @@
                                   placeholder="详细描述您的项目背景、目标和现状..." required></textarea>
                     </div>
 
-                    
+
 
                 </div>
             </div>
@@ -379,11 +379,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             // 初始化独立人物清单表格
             updatePersonnelTable();
+            // 设置输入框的随机提示语
+            setRandomPlaceholder();
+            // 处理测试案例选择
+            handleDemoCaseSelection();
         });
 
 
 
-        
+
 
         // 角色到资源的映射
         const roleToResourceSuggestions = {
@@ -452,7 +456,7 @@
             });
         }
 
-        
+
 
         // ==== 独立人物清单表格管理功能 ====
 
@@ -640,7 +644,7 @@
         // 为模态框更新资源推荐
         function updateModalResourceSuggestions(selectedRoles) {
             const suggestionsContainer = document.getElementById('modalResourceSuggestions');
-            
+
             if (!selectedRoles || selectedRoles.length === 0) {
                 suggestionsContainer.innerHTML = '<p class="text-muted">请先在角色选择中选择身份角色以获得智能推荐</p>';
                 return;
@@ -663,7 +667,7 @@
             const tagsHtml = Array.from(allSuggestions).map(resource => 
                 `<span class="suggestion-tag" onclick="addResourceSuggestion('${resource.replace(/'/g, "\\'")}')">${resource}</span>`
             ).join('');
-            
+
             suggestionsContainer.innerHTML = `<div class="suggestion-tags">${tagsHtml}</div>`;
         }
 
@@ -800,9 +804,9 @@
             });
         }
 
-        
 
-        
+
+
 
         // 表单提交前验证和处理
         document.getElementById('mainForm').addEventListener('submit', function(e) {
@@ -855,7 +859,7 @@
 
             addInput('project_name', formData.projectName);
             addInput('project_description', formData.projectDescription);
-            
+
 
             // 添加关键人物数据
             formData.keyPersons.forEach((person, index) => {
@@ -1006,7 +1010,7 @@
                 projectDescEl.value = caseData.projectDescription || '';
                 projectDescEl.textContent = caseData.projectDescription || '';
             }
-            
+
 
             // 清空现有人物卡片并重置计数器
             const personsContainer = document.getElementById('personsContainer');
@@ -1055,7 +1059,7 @@
                             }
                         });
                         updateRolesSummary(currentCard);
-                        updateResourceSuggestions(currentCard);
+                        updateResourceSuggestions(currentCard.dataset.personId); // Pass personId
                     }
 
                     // 添加资源
@@ -1107,7 +1111,7 @@
             const formElement = document.getElementById('mainForm');
             if (formElement) {
                 setTimeout(() => {
-                    formElement.scrollIntoView({ 
+                    formElement.scrollIntoView({
                         behavior: 'smooth', 
                         block: 'start' 
                     });
@@ -1143,7 +1147,7 @@
             }, 4000);
         }
 
-        
+
 
         // 添加平滑滚动
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1392,7 +1396,7 @@
 
                         <div class="motivation-category">
                             <div class="category-header">
-                                <span class="category-icon dark">🔴</span>
+                                <span class="category-icon gray">🔴</span>
                                 <h6>想被尊重 / 有地位</h6>
                                 <p>他要身份感，面子感和圈子认可。</p>
                             </div>

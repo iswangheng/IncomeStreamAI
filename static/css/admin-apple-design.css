@@ -104,6 +104,12 @@
     min-height: 100vh;
 }
 
+.admin-main-full {
+    min-height: 100vh;
+    width: 100%;
+    padding: 0;
+}
+
 /* 顶部工具栏 */
 .admin-toolbar {
     position: sticky;
@@ -144,7 +150,9 @@
 
 /* 页面标题区域 */
 .admin-page-header {
-    padding: var(--space-10) var(--space-6) var(--space-10); /* 增加上下间距 */
+    padding: var(--space-8) var(--space-6) var(--space-6); /* 优化间距 */
+    max-width: 1400px; /* 限制最大宽度 */
+    margin: 0 auto; /* 居中对齐 */
 }
 
 .admin-page-title {
@@ -163,9 +171,27 @@
 /* 统计卡片 */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--space-8); /* 增加卡片间距 */
-    padding: 0 var(--space-6) var(--space-12); /* 增加底部间距 */
+    grid-template-columns: repeat(4, 1fr); /* 强制4列布局 */
+    gap: var(--space-6); /* 适当减少间距以适应4列 */
+    padding: 0 var(--space-6) var(--space-8); /* 优化底部间距 */
+    max-width: 1400px; /* 限制最大宽度 */
+    margin: 0 auto; /* 居中对齐 */
+}
+
+/* 响应式布局 - 在较小屏幕上允许换行 */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-4);
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+        padding: 0 var(--space-4) var(--space-8);
+    }
 }
 
 .stats-card {
@@ -175,6 +201,11 @@
     box-shadow: var(--shadow-sm);
     border: 0.5px solid var(--color-gray-200);
     transition: var(--transition-base);
+    min-width: 200px; /* 确保卡片有最小宽度 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: auto;
 }
 
 .stats-card:hover {
@@ -233,7 +264,8 @@
 
 /* 数据表格 */
 .table-container {
-    margin: var(--space-8) var(--space-6) var(--space-12); /* 增加上下间距 */
+    margin: var(--space-6) auto var(--space-8); /* 居中对齐并优化间距 */
+    max-width: 1400px; /* 与统计卡片保持一致的最大宽度 */
     background: var(--color-bg-primary);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-sm);
@@ -258,7 +290,40 @@
 .table-filters {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--space-3);
+    padding: 0 var(--space-6);
+    margin: 0 auto var(--space-6);
+    max-width: 1400px; /* 与其他容器保持一致 */
+}
+
+.filters-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.filters-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--color-text-secondary);
+    z-index: 1;
+}
+
+.search-wrapper .filter-input {
+    padding-left: var(--space-10); /* 为图标留出空间 */
 }
 
 .filter-input {
@@ -389,6 +454,12 @@
 }
 
 /* 文件上传区域 */
+.upload-section {
+    max-width: 1400px;
+    margin: 0 auto var(--space-6);
+    padding: 0 var(--space-6);
+}
+
 .upload-zone {
     border: 2px dashed var(--color-gray-300);
     border-radius: var(--radius-xl);
@@ -397,7 +468,7 @@
     background: var(--color-bg-primary);
     transition: var(--transition-base);
     cursor: pointer;
-    margin: var(--space-8) 0; /* 上下一致的边距，左右为0让容器控制居中 */
+    margin: 0; /* 移除边距，让父容器控制 */
 }
 
 .upload-zone:hover {
@@ -584,11 +655,41 @@
     }
     
     .table-container {
-        margin: var(--space-4);
+        margin: var(--space-4) var(--space-4) var(--space-8);
+        max-width: none;
+    }
+    
+    .table-filters {
+        padding: 0 var(--space-4);
+        margin: 0 var(--space-4) var(--space-6);
+        max-width: none;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filters-left,
+    .filters-right {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .stats-grid {
+        padding: 0 var(--space-4) var(--space-8);
+        max-width: none;
+    }
+    
+    .admin-page-header {
+        padding: var(--space-6) var(--space-4) var(--space-4);
+        max-width: none;
+    }
+    
+    .upload-section {
+        margin: 0 var(--space-4) var(--space-6);
+        padding: 0;
+        max-width: none;
     }
     
     .upload-zone {
-        margin: var(--space-4);
         padding: var(--space-8);
     }
 }

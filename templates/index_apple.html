@@ -1202,11 +1202,41 @@
             document.getElementById('resourcesTextArea').value = resourcesText;
 
             // 根据已选择的角色生成智能推荐
-            generateResourceSuggestionsForModal(person.roles || []);
+            updateModalResourceSuggestions(person.roles || []);
 
             // 显示模态框
             const modal = new bootstrap.Modal(document.getElementById('editResourcesModal'));
             modal.show();
+        }
+
+        // 为模态框更新资源推荐
+        function updateModalResourceSuggestions(selectedRoles) {
+            const suggestionsContainer = document.getElementById('modalResourceSuggestions');
+            
+            if (!selectedRoles || selectedRoles.length === 0) {
+                suggestionsContainer.innerHTML = '<p class="text-muted">请先在角色选择中选择身份角色以获得智能推荐</p>';
+                return;
+            }
+
+            // 获取所有选中角色的候选资源
+            const allSuggestions = new Set();
+            selectedRoles.forEach(role => {
+                if (roleToResourceSuggestions[role]) {
+                    roleToResourceSuggestions[role].forEach(resource => allSuggestions.add(resource));
+                }
+            });
+
+            if (allSuggestions.size === 0) {
+                suggestionsContainer.innerHTML = '<p class="text-muted">暂无推荐资源</p>';
+                return;
+            }
+
+            // 生成推荐标签
+            const tagsHtml = Array.from(allSuggestions).map(resource => 
+                `<span class="suggestion-tag" onclick="addResourceSuggestion('${resource.replace(/'/g, "\\'")}')">${resource}</span>`
+            ).join('');
+            
+            suggestionsContainer.innerHTML = `<div class="suggestion-tags">${tagsHtml}</div>`;
         }
 
         // 编辑人物需求

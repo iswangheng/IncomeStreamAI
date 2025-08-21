@@ -270,6 +270,11 @@
         display: none !important;
     }
     
+    /* 确保汉堡菜单显示 */
+    .nav-actions .mobile-menu-toggle {
+        display: flex !important;
+    }
+    
     /* 汉堡菜单按钮 */
     .mobile-menu-toggle {
         display: flex !important;
@@ -403,14 +408,33 @@
     }
 }
 
-/* 桌面版隐藏汉堡菜单 */
+/* 桌面版样式 */
 @media (min-width: 769px) {
+    /* 隐藏移动端汉堡菜单 */
     .mobile-menu-toggle {
         display: none !important;
     }
     
     .mobile-dropdown {
         display: none !important;
+    }
+    
+    /* 确保桌面版按钮和用户菜单正常显示 */
+    .nav-actions .btn {
+        display: inline-flex !important;
+    }
+    
+    .user-menu {
+        display: flex !important;
+    }
+    
+    /* 桌面版导航栏高度 */
+    .navigation-bar {
+        min-height: 64px;
+    }
+    
+    .nav-content {
+        height: 64px;
     }
 }
 

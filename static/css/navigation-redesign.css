@@ -231,57 +231,183 @@
 /* Mobile - Major Redesign */
 @media (max-width: 768px) {
     .navigation-bar {
-        min-height: auto;
-        padding: var(--space-3) 0;
+        min-height: 56px;
+        padding: 0;
+        position: relative;
     }
     
     .nav-content {
         flex-direction: row;
         justify-content: space-between;
-        gap: var(--space-2);
+        align-items: center;
+        gap: 0;
         padding: 0 var(--space-4);
+        height: 56px;
     }
     
-    /* Mobile Brand Section */
+    /* Mobile Brand Section - 更小更紧凑 */
     .nav-brand {
+        font-size: var(--text-lg);
+        font-weight: 600;
+        color: var(--color-primary);
+        margin-right: auto;
+    }
+    
+    .nav-brand i {
+        font-size: var(--text-base);
+        margin-right: var(--space-1);
+    }
+    
+    /* 移动端操作区域 - 汉堡菜单样式 */
+    .nav-actions {
+        position: relative;
+        flex-shrink: 0;
+    }
+    
+    /* 隐藏所有按钮，显示汉堡菜单 */
+    .nav-actions .btn {
+        display: none;
+    }
+    
+    /* 汉堡菜单按钮 */
+    .mobile-menu-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: rgba(0, 122, 255, 0.1);
+        border-radius: var(--radius-lg);
+        color: var(--color-primary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .mobile-menu-toggle:hover {
+        background: rgba(0, 122, 255, 0.15);
+        transform: scale(1.05);
+    }
+    
+    /* 移动端下拉菜单 */
+    .mobile-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        border: 0.5px solid rgba(0, 0, 0, 0.08);
+        border-top: none;
+        padding: var(--space-4);
+        display: none;
+        animation: slideDown 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .mobile-dropdown.show {
+        display: block;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* 移动端菜单项 */
+    .mobile-dropdown .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        margin-bottom: var(--space-2);
+        background: var(--color-bg-secondary);
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        color: var(--color-text-primary);
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        width: 100%;
+        text-align: left;
+    }
+    
+    .mobile-dropdown .dropdown-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .mobile-dropdown .dropdown-item:hover {
+        background: var(--color-primary);
+        color: white;
+        transform: translateX(4px);
+    }
+    
+    .mobile-dropdown .dropdown-item i {
+        width: 20px;
+        text-align: center;
+        font-size: var(--text-sm);
+    }
+    
+    /* 用户信息区域 */
+    .mobile-user-info {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-4);
+        background: rgba(0, 122, 255, 0.05);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--space-4);
+        border: 1px solid rgba(0, 122, 255, 0.1);
+    }
+    
+    .mobile-user-info .user-avatar {
+        width: 36px;
+        height: 36px;
+        background: var(--color-primary);
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
         font-size: var(--text-lg);
     }
     
-    /* Mobile Actions Container */
-    .nav-actions {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: var(--space-1);
-        flex-shrink: 0;
+    .mobile-user-info .user-details h4 {
+        margin: 0;
+        font-size: var(--text-base);
+        font-weight: 600;
+        color: var(--color-text-primary);
     }
     
-    /* Mobile Action Buttons */
-    .nav-actions .btn {
-        padding: var(--space-2) var(--space-2);
-        font-size: var(--text-xs);
-        white-space: nowrap;
-        flex-shrink: 0;
+    .mobile-user-info .user-details p {
+        margin: 0;
+        font-size: var(--text-sm);
+        color: var(--color-text-secondary);
     }
     
-    /* Mobile User Menu */
+    /* 隐藏桌面版用户菜单 */
     .user-menu {
-        flex-shrink: 0;
-        padding-left: var(--space-2);
-        margin-left: var(--space-1);
-        border-left: 1px solid rgba(209, 209, 214, 0.4);
-        gap: var(--space-2);
-    }
-    
-    .user-info {
-        flex: 1;
-        justify-content: flex-start;
-        min-width: 0;
-        font-size: var(--text-xs);
-    }
-    
-    /* Hidden buttons on mobile */
-    .nav-actions .btn:nth-child(n+3) {
         display: none;
+    }
+}
+
+/* 桌面版隐藏汉堡菜单 */
+@media (min-width: 769px) {
+    .mobile-menu-toggle {
+        display: none !important;
+    }
+    
+    .mobile-dropdown {
+        display: none !important;
     }
 }
 

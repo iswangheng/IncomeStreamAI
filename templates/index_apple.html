@@ -546,23 +546,68 @@
                 '待补充';
 
             row.innerHTML = `
-                <div class="row-number">${number}</div>
-                <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;">
-                    ${person.name}
-                </div>
-                <div class="row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer;">
-                    ${roleTagsHtml || '<span style="color: #999;">未选择</span>'}
-                </div>
-                <div class="row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer;" title="${person.resources.join('、')}">
-                    ${resourcesSummary}
-                </div>
-                <div class="row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer;" title="${person.needs.join('、')}">
-                    ${needsSummary}
-                </div>
-                <div class="row-actions">
-                    <button class="action-btn delete" onclick="deletePerson(${person.id})" title="删除此人物">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                <div class="personnel-table-row">
+                    <!-- 桌面端表格布局 -->
+                    <div class="desktop-table-layout">
+                        <div class="row-number">${number}</div>
+                        <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;">
+                            ${person.name}
+                        </div>
+                        <div class="row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer;">
+                            ${roleTagsHtml || '<span style="color: #999;">未选择</span>'}
+                        </div>
+                        <div class="row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer;" title="${person.resources.join('、')}">
+                            ${resourcesSummary}
+                        </div>
+                        <div class="row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer;" title="${person.needs.join('、')}">
+                            ${needsSummary}
+                        </div>
+                        <div class="row-actions">
+                            <button class="action-btn delete" onclick="deletePerson(${person.id})" title="删除此人物">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 移动端卡片布局 -->
+                    <div class="mobile-card-layout">
+                        <div class="mobile-person-header">
+                            <div class="mobile-person-title">
+                                <div class="row-number">${number}</div>
+                                <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;">
+                                    ${person.name}
+                                </div>
+                            </div>
+                            <div class="row-actions">
+                                <button class="action-btn delete" onclick="deletePerson(${person.id})" title="删除此人物">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mobile-person-content">
+                            <div class="mobile-field">
+                                <div class="mobile-field-label">身份角色</div>
+                                <div class="mobile-field-content row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer;">
+                                    ${roleTagsHtml || '<span style="color: #999;">未选择</span>'}
+                                </div>
+                            </div>
+
+                            <div class="mobile-field">
+                                <div class="mobile-field-label">掌握资源</div>
+                                <div class="mobile-field-content row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer;" title="${person.resources.join('、')}">
+                                    ${resourcesSummary}
+                                </div>
+                            </div>
+
+                            <div class="mobile-field">
+                                <div class="mobile-field-label">如何让TA高兴</div>
+                                <div class="mobile-field-content row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer;" title="${person.needs.join('、')}">
+                                    ${needsSummary}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
 
@@ -694,7 +739,7 @@
         function initNeedsStickyScroll() {
             const modalBody = document.querySelector('#editNeedsModal .modal-body');
             const stickySection = document.getElementById('needsStickySection');
-            
+
             if (!modalBody || !stickySection) return;
 
             modalBody.addEventListener('scroll', () => {
@@ -781,11 +826,11 @@
             } else {
                 textarea.value = need;
             }
-            
+
             // 更新显示区域
             const needs = textarea.value.split('\n').map(n => n.trim()).filter(n => n);
             updateNeedsDisplay(needs);
-            
+
             textarea.focus();
         }
 
@@ -1437,7 +1482,7 @@
                             </div>
                         </div>
 
-                        
+
                     </div>
                 </div>
                 <div class="modal-footer">

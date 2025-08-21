@@ -6,14 +6,14 @@
 
 // 等待DOM加载完成
 document.addEventListener('DOMContentLoaded', function() {
-    
+
     // 初始化所有增强效果
     initEnhancedEffects();
     initScrollAnimations();
     initParticleEffects();
     initHoverEffects();
     initLoadingAnimations();
-    
+
 });
 
 /**
@@ -24,7 +24,7 @@ function initEnhancedEffects() {
     setTimeout(() => {
         document.body.classList.remove('preload-animations');
     }, 100);
-    
+
     // 添加GPU加速类到关键元素
     const interactiveElements = document.querySelectorAll('.interactive, .card, .btn');
     interactiveElements.forEach(el => {
@@ -40,7 +40,7 @@ function initScrollAnimations() {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
     };
-    
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -49,7 +49,7 @@ function initScrollAnimations() {
             }
         });
     }, observerOptions);
-    
+
     // 观察所有动画元素
     const animatedElements = document.querySelectorAll('.fade-in, .slide-up, .scale-in');
     animatedElements.forEach(el => {
@@ -76,7 +76,7 @@ function initParticleEffects() {
         overflow: hidden;
     `;
     document.body.appendChild(particleContainer);
-    
+
     // 创建粒子
     for (let i = 0; i < 20; i++) {
         createParticle(particleContainer);
@@ -91,7 +91,7 @@ function createParticle(container) {
     const size = Math.random() * 4 + 1;
     const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe'];
     const color = colors[Math.floor(Math.random() * colors.length)];
-    
+
     particle.style.cssText = `
         position: absolute;
         width: ${size}px;
@@ -101,13 +101,13 @@ function createParticle(container) {
         opacity: ${Math.random() * 0.6 + 0.2};
         box-shadow: 0 0 ${size * 2}px ${color};
     `;
-    
+
     // 随机位置
     particle.style.left = Math.random() * 100 + '%';
     particle.style.top = Math.random() * 100 + '%';
-    
+
     container.appendChild(particle);
-    
+
     // 添加浮动动画
     animateParticle(particle);
 }
@@ -121,7 +121,7 @@ function animateParticle(particle) {
     const startY = parseInt(particle.style.top);
     const endX = Math.random() * 100;
     const endY = Math.random() * 100;
-    
+
     particle.animate([
         {
             transform: `translate(0, 0) scale(1)`,
@@ -155,13 +155,13 @@ function initHoverEffects() {
             this.style.transform = 'translateY(-8px) scale(1.02)';
             this.style.filter = 'brightness(1.05)';
         });
-        
+
         card.addEventListener('mouseleave', function() {
             this.style.transform = 'translateY(0) scale(1)';
             this.style.filter = 'brightness(1)';
         });
     });
-    
+
     // 按钮波纹效果
     const buttons = document.querySelectorAll('.btn');
     buttons.forEach(button => {
@@ -169,7 +169,7 @@ function initHoverEffects() {
             createRippleEffect(e, this);
         });
     });
-    
+
     // 输入框焦点效果
     const inputs = document.querySelectorAll('.form-control');
     inputs.forEach(input => {
@@ -177,7 +177,7 @@ function initHoverEffects() {
             this.parentElement.classList.add('input-focused');
             createFocusGlow(this);
         });
-        
+
         input.addEventListener('blur', function() {
             this.parentElement.classList.remove('input-focused');
             removeFocusGlow(this);
@@ -194,7 +194,7 @@ function createRippleEffect(event, element) {
     const size = Math.max(rect.width, rect.height);
     const x = event.clientX - rect.left - size / 2;
     const y = event.clientY - rect.top - size / 2;
-    
+
     ripple.style.cssText = `
         position: absolute;
         width: ${size}px;
@@ -207,7 +207,7 @@ function createRippleEffect(event, element) {
         animation: ripple 0.6s linear;
         pointer-events: none;
     `;
-    
+
     // 添加波纹动画样式
     if (!document.getElementById('ripple-styles')) {
         const style = document.createElement('style');
@@ -222,11 +222,11 @@ function createRippleEffect(event, element) {
         `;
         document.head.appendChild(style);
     }
-    
+
     element.style.position = 'relative';
     element.style.overflow = 'hidden';
     element.appendChild(ripple);
-    
+
     setTimeout(() => {
         ripple.remove();
     }, 600);
@@ -250,7 +250,7 @@ function createFocusGlow(element) {
         opacity: 0;
         animation: glowPulse 1.5s ease-in-out infinite alternate;
     `;
-    
+
     // 添加发光动画样式
     if (!document.getElementById('glow-styles')) {
         const style = document.createElement('style');
@@ -263,7 +263,7 @@ function createFocusGlow(element) {
         `;
         document.head.appendChild(style);
     }
-    
+
     element.parentElement.style.position = 'relative';
     element.parentElement.appendChild(glow);
 }
@@ -289,7 +289,7 @@ function initLoadingAnimations() {
     pageElements.forEach((element, index) => {
         element.style.animationDelay = (index * 0.1) + 's';
     });
-    
+
     // 为表单提交添加加载效果
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
@@ -313,7 +313,7 @@ function showSimpleLoadingOverlay() {
             <div class="simple-loading-spinner"></div>
         </div>
     `;
-    
+
     overlay.style.cssText = `
         position: fixed;
         top: 0;
@@ -329,7 +329,7 @@ function showSimpleLoadingOverlay() {
         opacity: 0;
         animation: fadeIn 0.3s ease-out forwards;
     `;
-    
+
     // 添加简单加载动画样式
     if (!document.getElementById('simple-loading-styles')) {
         const style = document.createElement('style');
@@ -338,7 +338,7 @@ function showSimpleLoadingOverlay() {
             .simple-loading-content {
                 text-align: center;
             }
-            
+
             .simple-loading-spinner {
                 width: 40px;
                 height: 40px;
@@ -347,19 +347,19 @@ function showSimpleLoadingOverlay() {
                 border-top: 3px solid #007AFF;
                 animation: spin 1s linear infinite;
             }
-            
+
             @keyframes spin {
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
-            
+
             @keyframes fadeIn {
                 to { opacity: 1; }
             }
         `;
         document.head.appendChild(style);
     }
-    
+
     document.body.appendChild(overlay);
 }
 
@@ -385,7 +385,7 @@ function throttle(func, wait) {
  */
 function handleResize() {
     const isMobile = window.innerWidth <= 768;
-    
+
     if (isMobile) {
         // 移动设备优化
         document.body.classList.add('mobile-optimized');
@@ -397,3 +397,32 @@ function handleResize() {
 // 响应式处理
 window.addEventListener('resize', throttle(handleResize, 250));
 handleResize(); // 初始调用
+
+// 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeInteractions();
+        });
+
+        // 移动端字段编辑函数
+        function editPersonField(personIndex, fieldType) {
+            // 触发编辑人物的模态框
+            const editButton = document.querySelector(`[onclick="editPerson(${personIndex})"]`);
+            if (editButton) {
+                editButton.click();
+
+                // 延迟聚焦到对应字段
+                setTimeout(() => {
+                    let targetField;
+                    if (fieldType === 'resources') {
+                        targetField = document.querySelector('#editPersonModal textarea[placeholder*="资源"]');
+                    } else if (fieldType === 'needs') {
+                        targetField = document.querySelector('#editPersonModal textarea[placeholder*="需求"], #editPersonModal textarea[placeholder*="高兴"]');
+                    }
+
+                    if (targetField) {
+                        targetField.focus();
+                        targetField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 300);
+            }
+        }

@@ -869,13 +869,23 @@ body::after {
 
 /* 表格行样式 */
 .personnel-table-row {
+    position: relative;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+/* 桌面端表格布局 */
+.desktop-table-layout {
     display: grid;
     grid-template-columns: 40px 1fr 1.5fr 1.5fr 1.2fr 80px;
     gap: 12px;
     padding: 16px 20px;
-    border-bottom: 1px solid #f0f0f0;
-    transition: all 0.2s ease;
-    background: white;
+}
+
+/* 移动端卡片布局 */
+.mobile-card-layout {
+    display: none;
 }
 
 .personnel-table-row:hover {
@@ -1015,34 +1025,181 @@ body::after {
     font-size: 13px;
 }
 
-/* 响应式适配 */
+/* 响应式适配 - 移动端改为卡片布局 */
 @media (max-width: 768px) {
-    .personnel-table-header,
-    .personnel-table-row {
-        grid-template-columns: 30px 1fr 80px;
-        gap: 8px;
+    .personnel-table-header {
+        display: none; /* 隐藏表格头部 */
     }
 
-    .col-roles,
-    .col-resources,
-    .col-needs,
-    .row-roles,
-    .row-resources,
-    .row-needs {
+    .personnel-table-body {
+        background: transparent;
+    }
+
+    .personnel-table-row {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 16px;
+        padding: 0;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+    }
+
+    /* 隐藏桌面端布局 */
+    .desktop-table-layout {
         display: none;
     }
 
-    .table-column,
-    .row-name {
+    /* 显示移动端布局 */
+    .mobile-card-layout {
+        display: block;
+        padding: 16px;
+    }
+
+    .personnel-table-row:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    /* 卡片头部 - 姓名和序号 */
+    .mobile-person-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .mobile-person-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .row-number {
+        width: 24px;
+        height: 24px;
         font-size: 12px;
     }
 
-    .personnel-table-header {
-        padding: 12px 16px;
+    .row-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
     }
 
-    .personnel-table-row {
+    /* 卡片内容区域 */
+    .mobile-person-content {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .mobile-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .mobile-field-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .mobile-field-content {
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 6px 0;
+        border-bottom: 1px solid transparent;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-field-content:hover {
+        background: rgba(102, 126, 234, 0.05);
+        border-bottom-color: rgba(102, 126, 234, 0.3);
+        border-radius: 4px;
+        padding: 6px 8px;
+        margin: 0 -8px;
+    }
+
+    .mobile-field-content.empty {
+        color: #999;
+        font-style: italic;
+        font-size: 14px;
+    }
+
+    .mobile-field-content.empty:after {
+        content: " (点击编辑)";
+        font-size: 12px;
+        opacity: 0.6;
+    }
+
+    /* 角色标签在移动端的样式 */
+    .row-roles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: flex-start;
+        min-height: auto;
+    }
+
+    .role-tag {
+        font-size: 10px;
+        padding: 2px 6px;
+        margin: 0;
+    }
+
+    /* 操作按钮区域 */
+    .row-actions {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        display: flex;
+        gap: 4px;
+    }
+
+    .action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        padding: 0;
+    }
+
+    /* 空状态优化 */
+    .empty-personnel-state {
+        padding: 32px 16px;
+        text-align: center;
+    }
+
+    .empty-state-content i {
+        font-size: 36px;
+        margin-bottom: 12px;
+    }
+
+    .empty-state-content h4 {
+        font-size: 16px;
+        margin-bottom: 6px;
+    }
+
+    .empty-state-content p {
+        font-size: 13px;
+    }
+
+    /* 快速添加按钮 */
+    .personnel-quick-add {
         padding: 12px 16px;
+        margin: 0 -1px;
+    }
+
+    .personnel-quick-add .btn {
+        font-size: 14px;
+        padding: 10px 16px;
     }
 }
 

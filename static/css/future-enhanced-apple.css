@@ -1073,6 +1073,323 @@ body::after {
     transition: all 0.2s ease;
     border-radius: 4px;
 }
+
+/* ==== 模态框角色选择增强样式 ==== */
+.role-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.role-category {
+    background: #fafbfc;
+    border-radius: 16px;
+    padding: 20px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.role-category::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.role-category:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.role-category:hover::before {
+    transform: translateX(100%);
+}
+
+.role-category[data-category="demand"] {
+    background: linear-gradient(135deg, #f8fff8 0%, #fafbfc 100%);
+    border-left: 4px solid #4caf50;
+}
+
+.role-category[data-category="delivery"] {
+    background: linear-gradient(135deg, #f0f8ff 0%, #fafbfc 100%);
+    border-left: 4px solid #2196f3;
+}
+
+.role-category[data-category="funding"] {
+    background: linear-gradient(135deg, #fff8f0 0%, #fafbfc 100%);
+    border-left: 4px solid #ff9800;
+}
+
+.role-category-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.role-category-title.demand {
+    color: #2e7d32;
+}
+
+.role-category-title.delivery {
+    color: #1976d2;
+}
+
+.role-category-title.funding {
+    color: #f57c00;
+}
+
+.role-category-title i {
+    font-size: 18px;
+    padding: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.role-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.role-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: white;
+    border: 2px solid #e8eaed;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0;
+    font-weight: 500;
+    font-size: 14px;
+    user-select: none;
+    overflow: hidden;
+}
+
+.role-item::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    transition: all 0.4s ease;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.role-item:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.role-item:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.role-item input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.3s ease;
+    background: white;
+    z-index: 1;
+}
+
+.role-item input[type="checkbox"]:checked {
+    background: #667eea;
+    border-color: #667eea;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.role-item input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.role-item span {
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease;
+}
+
+.role-item:hover span {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.role-item input[type="checkbox"]:checked + span {
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* 选中状态的整体样式 */
+.role-item:has(input:checked) {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, white 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+}
+
+/* 动画效果 */
+@keyframes roleSelect {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.role-item input[type="checkbox"]:checked {
+    animation: roleSelect 0.3s ease;
+}
+
+/* 帮助图标样式优化 */
+.help-icon {
+    margin-left: auto;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.help-icon:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* 光滑的焦点环效果 */
+.role-item input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.25);
+}
+
+/* 类别标题的光晕效果 */
+.role-category-title:hover i {
+    transform: rotate(15deg) scale(1.1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* 增强的悬停效果 */
+.role-category:hover .role-item {
+    transform: translateY(-1px);
+}
+
+.role-category:hover .role-item:not(:hover) {
+    opacity: 0.8;
+    transform: translateY(0);
+}
+
+/* 角色项目的文字变化效果 */
+.role-item span::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: #667eea;
+    transition: width 0.3s ease;
+}
+
+.role-item:hover span::after,
+.role-item input[type="checkbox"]:checked + span::after {
+    width: 100%;
+}
+
+/* 选中时的呼吸灯效果 */
+@keyframes breathe {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2); }
+    50% { box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.4); }
+}
+
+.role-item input[type="checkbox"]:checked {
+    animation: roleSelect 0.3s ease, breathe 2s ease-in-out infinite;
+}
+
+/* 类别分割线效果 */
+.role-category + .role-category::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ddd, transparent);
+    transform: translateX(-50%);
+}
+
+/* 模态框标题增强 */
+.modal-title {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* 保存按钮增强效果 */
+.modal-footer .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.modal-footer .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* 模态框响应式设计 */
+@media (max-width: 768px) {
+    .role-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .role-category {
+        padding: 16px;
+    }
+    
+    .role-item {
+        padding: 12px 16px;
+    }
+    
+    .role-category-title {
+        font-size: 14px;
+    }
+    
+    .role-item span {
+        font-size: 13px;
+    }
+}
 }
 
 /* 其他输入容器 */

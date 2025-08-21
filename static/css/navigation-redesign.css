@@ -422,6 +422,8 @@
     /* 桌面版导航tab样式 */
     .nav-actions .btn:not(.mobile-menu-toggle) {
         display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
         background: none !important;
         border: none !important;
         border-radius: 0 !important;
@@ -435,11 +437,23 @@
         box-shadow: none !important;
     }
     
+    /* 确保图标显示 */
+    .nav-actions .btn:not(.mobile-menu-toggle) i {
+        font-size: 16px !important;
+        color: inherit !important;
+        opacity: 1 !important;
+    }
+    
     /* hover效果 */
     .nav-actions .btn:not(.mobile-menu-toggle):hover {
         color: #007AFF !important;
         background: rgba(0, 122, 255, 0.05) !important;
         transform: translateY(-1px) !important;
+    }
+    
+    /* hover时图标颜色 */
+    .nav-actions .btn:not(.mobile-menu-toggle):hover i {
+        color: #007AFF !important;
     }
     
     /* 活跃状态下划线 */

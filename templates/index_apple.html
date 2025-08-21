@@ -1346,18 +1346,72 @@
                         <textarea class="form-control" id="needsTextArea" rows="6" placeholder="请输入让这个人高兴的方式，每个方式占一行&#10;例如：&#10;获得更多利润&#10;提升品牌知名度&#10;节省运营成本&#10;获得认可和尊重"></textarea>
                     </div>
                     <div class="needs-suggestions">
-                        <h6>常见需求类型（点击快速添加）：</h6>
-                        <div class="suggestion-tags">
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('获得更多利润')">获得更多利润</span>
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('提升品牌知名度')">提升品牌知名度</span>
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('节省成本开支')">节省成本开支</span>
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('获得认可赞扬')">获得认可赞扬</span>
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('扩大影响力')">扩大影响力</span>
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('学习新知识')">学习新知识</span>
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('建立新关系')">建立新关系</span>
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('获得便利服务')">获得便利服务</span>
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('提升工作效率')">提升工作效率</span>
-                            <span class="suggestion-tag" onclick="addNeedsSuggestion('解决实际问题')">解决实际问题</span>
+                        <div class="motivation-category">
+                            <div class="category-header">
+                                <span class="category-icon green">💚</span>
+                                <h6>想看到回报 / 实际效果</h6>
+                                <p>他在意投入和产出，有明确的"结果导向"。</p>
+                            </div>
+                            <div class="motivation-tags">
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('拿到分成/抽成')">拿到分成/抽成</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('带来客户/用户')">带来客户/用户</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('项目尽快落地')">项目尽快落地</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('能长期持续赚钱')">能长期持续赚钱</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('有资源被用起来（不闲置）')">有资源被用起来（不闲置）</span>
+                            </div>
+                        </div>
+
+                        <div class="motivation-category">
+                            <div class="category-header">
+                                <span class="category-icon blue">💙</span>
+                                <h6>想被看到 / 被宣传</h6>
+                                <p>他要曝光，要名声，而且最好是精准曝光。</p>
+                            </div>
+                            <div class="motivation-tags">
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('有品牌露出（线上线下）')">有品牌露出（线上线下）</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('打造个人标签/专家身份')">打造个人标签/专家身份</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('曝光到目标圈层')">曝光到目标圈层</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('项目中看起来是主导者')">项目中看起来是主导者</span>
+                            </div>
+                        </div>
+
+                        <div class="motivation-category">
+                            <div class="category-header">
+                                <span class="category-icon red">❤️</span>
+                                <h6>不想冒风险</h6>
+                                <p>他想参与，但不能有风险或预损失。</p>
+                            </div>
+                            <div class="motivation-tags">
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('不出钱不担责')">不出钱不担责</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('不公开露脸')">不公开露脸</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('不影响已有合作方')">不影响已有合作方</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('保证信息保密')">保证信息保密</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('可隐身参与（不被对手知道）')">可隐身参与（不被对手知道）</span>
+                            </div>
+                        </div>
+
+                        <div class="motivation-category">
+                            <div class="category-header">
+                                <span class="category-icon dark">🔴</span>
+                                <h6>想被尊重 / 有地位</h6>
+                                <p>他要身份感，面子感和圈子认可。</p>
+                            </div>
+                            <div class="motivation-tags">
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('成为顾问/专家')">成为顾问/专家</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('被认可很重要')">被认可很重要</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('提升在圈子里的地位')">提升在圈子里的地位</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('像是他发起的局')">像是他发起的局</span>
+                            </div>
+                        </div>
+
+                        <div class="motivation-category">
+                            <div class="category-header">
+                                <span class="category-icon gray">⚡</span>
+                                <h6>其他（可补充描述）</h6>
+                            </div>
+                            <div class="motivation-other">
+                                <p>还有什么特别的点会让他愿意参与？比如：需要快速刷一个案例 / 成功故事</p>
+                            </div>
                         </div>
                     </div>
                 </div>

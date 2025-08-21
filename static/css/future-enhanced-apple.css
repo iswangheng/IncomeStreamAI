@@ -742,7 +742,7 @@ body::after {
 /* 表格头部 */
 .personnel-table-header {
     display: grid;
-    grid-template-columns: 40px 1fr 1.2fr 1.5fr 1.2fr 80px;
+    grid-template-columns: 40px 1fr 1.5fr 1.5fr 1.2fr 80px;
     gap: 12px;
     padding: 16px 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -811,7 +811,7 @@ body::after {
 /* 表格行样式 */
 .personnel-table-row {
     display: grid;
-    grid-template-columns: 40px 1fr 1.2fr 1.5fr 1.2fr 80px;
+    grid-template-columns: 40px 1fr 1.5fr 1.5fr 1.2fr 80px;
     gap: 12px;
     padding: 16px 20px;
     border-bottom: 1px solid #f0f0f0;
@@ -866,6 +866,9 @@ body::after {
     font-size: 11px;
     font-weight: 500;
     white-space: nowrap;
+    display: inline-block;
+    margin-right: 4px;
+    margin-bottom: 2px;
 }
 
 .role-tag.demand {

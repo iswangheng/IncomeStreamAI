@@ -1023,15 +1023,15 @@
         
         // 角色映射
         const roleMapping = {
-            'enterprise_owner': { text: '企业主', type: 'demand' },
-            'store_owner': { text: '实体店主', type: 'demand' },
-            'department_head': { text: '部门负责人', type: 'demand' },
-            'brand_manager': { text: '主理人', type: 'demand' },
-            'product_provider': { text: '产品', type: 'delivery' },
-            'service_provider': { text: '服务', type: 'delivery' },
-            'traffic_provider': { text: '流量', type: 'delivery' },
-            'other_provider': { text: '其他', type: 'delivery' },
-            'funding_provider': { text: '资金提供方', type: 'funding' }
+            'enterprise_owner': { text: '企业主', type: 'demand', displayText: '需求方-企业主' },
+            'store_owner': { text: '实体店主', type: 'demand', displayText: '需求方-实体店主' },
+            'department_head': { text: '部门负责人', type: 'demand', displayText: '需求方-部门负责人' },
+            'brand_manager': { text: '主理人', type: 'demand', displayText: '需求方-主理人' },
+            'product_provider': { text: '产品', type: 'delivery', displayText: '交付方-产品' },
+            'service_provider': { text: '服务', type: 'delivery', displayText: '交付方-服务' },
+            'traffic_provider': { text: '流量', type: 'delivery', displayText: '交付方-流量' },
+            'other_provider': { text: '其他', type: 'delivery', displayText: '交付方-其他' },
+            'funding_provider': { text: '资金提供方', type: 'funding', displayText: '资金提供方' }
         };
         
         // 添加新人物到独立表格
@@ -1089,7 +1089,7 @@
             // 角色标签
             const roleTagsHtml = person.roles.map(roleValue => {
                 const roleInfo = roleMapping[roleValue];
-                return roleInfo ? `<span class="role-tag ${roleInfo.type}">${roleInfo.text}</span>` : '';
+                return roleInfo ? `<span class="role-tag ${roleInfo.type}">${roleInfo.displayText}</span>` : '';
             }).join('');
             
             // 资源摘要

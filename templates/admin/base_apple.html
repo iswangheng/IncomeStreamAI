@@ -39,6 +39,14 @@
                     Angela AI - 管理中心
                 </a>
                 <div class="nav-actions">
+                    <a href="{{ url_for('admin_users') }}" class="nav-link {{ 'active' if request.endpoint.startswith('admin_users') or request.endpoint == 'admin_add_user' or request.endpoint == 'admin_edit_user' }}">
+                        <i class="fas fa-users"></i>
+                        用户管理
+                    </a>
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_dashboard' }}">
+                        <i class="fas fa-database"></i>
+                        知识库
+                    </a>
                     <a href="{{ url_for('index') }}" class="btn btn-primary">
                         <i class="fas fa-home"></i>返回前台
                     </a>
@@ -233,6 +241,54 @@
             });
         }
     </script>
+    
+    <style>
+        /* 导航链接样式 */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+        
+        .nav-actions .nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-4);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            transition: var(--transition-fast);
+            font-weight: var(--font-medium);
+            font-size: var(--text-sm);
+        }
+        
+        .nav-actions .nav-link:hover {
+            color: var(--color-text-primary);
+            background: var(--color-gray-100);
+        }
+        
+        .nav-actions .nav-link.active {
+            color: var(--color-primary);
+            background: rgba(var(--color-primary-rgb), 0.1);
+        }
+        
+        .nav-actions .nav-link i {
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-actions {
+                flex-wrap: wrap;
+                gap: var(--space-2);
+            }
+            
+            .nav-actions .nav-link {
+                font-size: var(--text-xs);
+                padding: var(--space-2) var(--space-3);
+            }
+        }
+    </style>
     
     {% block scripts %}
     {% endblock %}

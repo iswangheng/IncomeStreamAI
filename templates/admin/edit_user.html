@@ -1,0 +1,541 @@
+{% extends "admin/base_apple.html" %}
+
+{% block title %}编辑用户 - Angela AI{% endblock %}
+
+{% block content %}
+<!-- 页面标题区域 -->
+<div class="admin-page-header">
+    <div class="header-content">
+        <div class="page-nav">
+            <a href="{{ url_for('admin_users') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                返回用户管理
+            </a>
+        </div>
+        <h1 class="admin-page-title">编辑用户</h1>
+        <p class="admin-page-subtitle">修改用户 "{{ user.name or user.phone }}" 的信息</p>
+    </div>
+</div>
+
+<!-- 用户信息卡片 -->
+<div class="user-info-card fade-in">
+    <div class="user-profile">
+        <div class="user-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="user-details">
+            <h3>{{ user.name or '未设置姓名' }}</h3>
+            <p>{{ user.phone }}</p>
+            <div class="user-meta">
+                <span class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    注册于 {{ user.created_at_display }}
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    {{ user.last_login_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 表单容器 -->
+<div class="form-container fade-in" style="animation-delay: 0.1s;">
+    <div class="form-card">
+        <div class="form-header">
+            <h3 class="form-title">
+                <i class="fas fa-user-edit"></i>
+                编辑用户信息
+            </h3>
+            <p class="form-subtitle">更新用户的基本信息和登录凭据</p>
+        </div>
+        
+        <form method="post" class="user-form" id="editUserForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name" class="form-label required">姓名</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" 
+                               id="name" 
+                               name="name" 
+                               class="form-control" 
+                               placeholder="请输入用户姓名"
+                               required
+                               maxlength="100"
+                               value="{{ user.name or '' }}">
+                    </div>
+                    <div class="form-help">用户的真实姓名或昵称</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone" class="form-label required">手机号</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone input-icon"></i>
+                        <input type="tel" 
+                               id="phone" 
+                               name="phone" 
+                               class="form-control" 
+                               placeholder="请输入11位手机号"
+                               required
+                               pattern="^1[3-9]\d{9}$"
+                               maxlength="11"
+                               value="{{ user.phone }}">
+                    </div>
+                    <div class="form-help">用于登录的手机号码</div>
+                </div>
+            </div>
+            
+            <!-- 密码修改区域 -->
+            <div class="password-section">
+                <div class="section-header">
+                    <h4 class="section-title">
+                        <i class="fas fa-lock"></i>
+                        密码设置
+                    </h4>
+                    <div class="form-check">
+                        <input type="checkbox" id="changePassword" class="form-check-input" onchange="togglePasswordFields()">
+                        <label for="changePassword" class="form-check-label">修改密码</label>
+                    </div>
+                </div>
+                
+                <div id="passwordFields" class="password-fields" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="password" class="form-label">新密码</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" 
+                                       id="password" 
+                                       name="password" 
+                                       class="form-control" 
+                                       placeholder="请输入新密码"
+                                       minlength="6"
+                                       maxlength="50">
+                                <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                    <i class="fas fa-eye" id="password-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-help">密码长度应在6-50个字符之间</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirm_password" class="form-label">确认新密码</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" 
+                                       id="confirm_password" 
+                                       name="confirm_password" 
+                                       class="form-control" 
+                                       placeholder="请再次输入新密码"
+                                       minlength="6"
+                                       maxlength="50">
+                                <button type="button" class="password-toggle" onclick="togglePassword('confirm_password')">
+                                    <i class="fas fa-eye" id="confirm_password-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-help">请确认新密码输入正确</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    取消
+                </a>
+                <button type="submit" class="btn btn-primary interactive">
+                    <i class="fas fa-save me-2"></i>
+                    保存更改
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// 切换密码字段显示
+function togglePasswordFields() {
+    const checkbox = document.getElementById('changePassword');
+    const passwordFields = document.getElementById('passwordFields');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    
+    if (checkbox.checked) {
+        passwordFields.style.display = 'block';
+        passwordInput.required = true;
+        confirmPasswordInput.required = true;
+    } else {
+        passwordFields.style.display = 'none';
+        passwordInput.required = false;
+        confirmPasswordInput.required = false;
+        passwordInput.value = '';
+        confirmPasswordInput.value = '';
+        passwordInput.classList.remove('is-valid', 'is-invalid');
+        confirmPasswordInput.classList.remove('is-valid', 'is-invalid');
+    }
+}
+
+// 密码显示切换
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const eye = document.getElementById(fieldId + '-eye');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        eye.classList.remove('fa-eye');
+        eye.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        eye.classList.remove('fa-eye-slash');
+        eye.classList.add('fa-eye');
+    }
+}
+
+// 表单验证
+document.getElementById('editUserForm').addEventListener('submit', function(e) {
+    const phone = document.getElementById('phone').value;
+    const changePassword = document.getElementById('changePassword').checked;
+    
+    // 验证手机号格式
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+        e.preventDefault();
+        alert('请输入有效的11位手机号');
+        document.getElementById('phone').focus();
+        return;
+    }
+    
+    // 如果选择修改密码，验证密码
+    if (changePassword) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        
+        if (password.length < 6) {
+            e.preventDefault();
+            alert('密码长度至少为6个字符');
+            document.getElementById('password').focus();
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('两次输入的密码不匹配，请重新输入');
+            document.getElementById('confirm_password').focus();
+            return;
+        }
+    }
+});
+
+// 实时验证手机号
+document.getElementById('phone').addEventListener('input', function(e) {
+    const value = e.target.value;
+    if (value.length > 11) {
+        e.target.value = value.slice(0, 11);
+    }
+    
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (value.length === 11) {
+        if (phoneRegex.test(value)) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.remove('is-valid');
+            e.target.classList.add('is-invalid');
+        }
+    } else {
+        e.target.classList.remove('is-valid', 'is-invalid');
+    }
+});
+
+// 实时验证密码匹配
+document.getElementById('confirm_password').addEventListener('input', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = e.target.value;
+    
+    if (confirmPassword.length > 0) {
+        if (password === confirmPassword) {
+            e.target.classList.remove('is-invalid');
+            e.target.classList.add('is-valid');
+        } else {
+            e.target.classList.remove('is-valid');
+            e.target.classList.add('is-invalid');
+        }
+    } else {
+        e.target.classList.remove('is-valid', 'is-invalid');
+    }
+});
+</script>
+
+<style>
+.form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+}
+
+.user-info-card {
+    max-width: 800px;
+    margin: 0 auto var(--space-6) auto;
+    padding: 0 var(--space-4);
+}
+
+.user-profile {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    box-shadow: var(--shadow-sm);
+}
+
+.user-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.user-details h3 {
+    margin: 0 0 var(--space-1) 0;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+}
+
+.user-details p {
+    margin: 0 0 var(--space-3) 0;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+}
+
+.user-meta {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
+.form-card {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.form-header {
+    padding: var(--space-8);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    text-align: center;
+}
+
+.form-title {
+    margin: 0 0 var(--space-2) 0;
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+}
+
+.form-subtitle {
+    margin: 0;
+    opacity: 0.9;
+    font-size: var(--text-base);
+}
+
+.user-form {
+    padding: var(--space-8);
+}
+
+.form-grid {
+    display: grid;
+    gap: var(--space-6);
+    margin-bottom: var(--space-6);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.form-label {
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+    font-size: var(--text-sm);
+}
+
+.form-label.required::after {
+    content: ' *';
+    color: var(--color-error);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: var(--space-4);
+    color: var(--color-text-secondary);
+    z-index: 1;
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
+    border: 2px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-base);
+    transition: var(--transition-fast);
+    background: var(--color-bg-primary);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.form-control.is-valid {
+    border-color: var(--status-active);
+}
+
+.form-control.is-invalid {
+    border-color: var(--color-error);
+}
+
+.password-toggle {
+    position: absolute;
+    right: var(--space-4);
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+}
+
+.password-toggle:hover {
+    color: var(--color-text-primary);
+    background: var(--color-gray-100);
+}
+
+.form-help {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+}
+
+.password-section {
+    margin-bottom: var(--space-8);
+    padding: var(--space-6);
+    background: var(--color-gray-50);
+    border-radius: var(--radius-lg);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+
+.section-title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.form-check-label {
+    cursor: pointer;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.password-fields {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-gray-200);
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-4);
+    justify-content: flex-end;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    transition: var(--transition-fast);
+    margin-bottom: var(--space-4);
+}
+
+.back-link:hover {
+    color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-container {
+        padding: 0 var(--space-2);
+    }
+    
+    .user-form {
+        padding: var(--space-6);
+    }
+    
+    .user-profile {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .user-meta {
+        justify-content: center;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+}
+</style>
+{% endblock %}

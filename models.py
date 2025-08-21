@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from app import db
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -27,6 +27,22 @@ class User(UserMixin, db.Model):
     def update_last_login(self):
         """更新最后登录时间"""
         self.last_login = datetime.utcnow()
+    
+    @property
+    def created_at_display(self):
+        """格式化的创建时间 (UTC+8)"""
+        if self.created_at:
+            utc8_time = self.created_at + timedelta(hours=8)
+            return utc8_time.strftime('%Y年%m月%d日 %H:%M:%S')
+        return ''
+    
+    @property
+    def last_login_display(self):
+        """格式化的最后登录时间 (UTC+8)"""
+        if self.last_login:
+            utc8_time = self.last_login + timedelta(hours=8)
+            return utc8_time.strftime('%Y年%m月%d日 %H:%M:%S')
+        return '从未登录'
     
     def __repr__(self):
         return f'<User {self.phone}>'

@@ -1255,6 +1255,146 @@ def admin_dashboard():
                          search_query=search_query)
 
 
+# 用户管理路由
+@app.route('/admin/users')
+@login_required
+def admin_users():
+    """用户管理页面"""
+    search_query = request.args.get('search', '')
+    
+    query = User.query
+    if search_query:
+        query = query.filter(
+            db.or_(
+                User.name.contains(search_query),
+                User.phone.contains(search_query)
+            )
+        )
+    
+    users = query.order_by(User.created_at.desc()).all()
+    
+    return render_template('admin/users.html', 
+                         users=users,
+                         search_query=search_query)
+
+
+@app.route('/admin/users/add', methods=['GET', 'POST'])
+@login_required
+def admin_add_user():
+    """添加新用户"""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        # 验证输入
+        if not name or not phone or not password:
+            flash('姓名、手机号和密码都不能为空', 'error')
+            return render_template('admin/add_user.html')
+        
+        # 验证手机号格式
+        if len(phone) != 11 or not phone.isdigit():
+            flash('请输入有效的11位手机号', 'error')
+            return render_template('admin/add_user.html')
+        
+        # 检查手机号是否已存在
+        existing_user = User.query.filter_by(phone=phone).first()
+        if existing_user:
+            flash('该手机号已被注册', 'error')
+            return render_template('admin/add_user.html')
+        
+        try:
+            # 创建新用户
+            user = User()
+            user.name = name
+            user.phone = phone
+            user.set_password(password)
+            user.active = True
+            
+            db.session.add(user)
+            db.session.commit()
+            
+            flash(f'用户 "{name}" 创建成功', 'success')
+            return redirect(url_for('admin_users'))
+            
+        except Exception as e:
+            flash(f'创建用户失败: {str(e)}', 'error')
+            return render_template('admin/add_user.html')
+    
+    return render_template('admin/add_user.html')
+
+
+@app.route('/admin/users/<int:user_id>/edit', methods=['GET', 'POST'])
+@login_required
+def admin_edit_user(user_id):
+    """编辑用户信息"""
+    user = User.query.get_or_404(user_id)
+    
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        # 验证输入
+        if not name or not phone:
+            flash('姓名和手机号不能为空', 'error')
+            return render_template('admin/edit_user.html', user=user)
+        
+        # 验证手机号格式
+        if len(phone) != 11 or not phone.isdigit():
+            flash('请输入有效的11位手机号', 'error')
+            return render_template('admin/edit_user.html', user=user)
+        
+        # 检查手机号是否与其他用户冲突
+        existing_user = User.query.filter(User.phone == phone, User.id != user_id).first()
+        if existing_user:
+            flash('该手机号已被其他用户使用', 'error')
+            return render_template('admin/edit_user.html', user=user)
+        
+        try:
+            # 更新用户信息
+            user.name = name
+            user.phone = phone
+            
+            # 如果提供了新密码，则更新密码
+            if password:
+                user.set_password(password)
+            
+            db.session.commit()
+            
+            flash(f'用户 "{name}" 信息更新成功', 'success')
+            return redirect(url_for('admin_users'))
+            
+        except Exception as e:
+            flash(f'更新用户信息失败: {str(e)}', 'error')
+            return render_template('admin/edit_user.html', user=user)
+    
+    return render_template('admin/edit_user.html', user=user)
+
+
+@app.route('/admin/users/<int:user_id>/delete', methods=['POST'])
+@login_required
+def admin_delete_user(user_id):
+    """删除用户"""
+    user = User.query.get_or_404(user_id)
+    
+    # 防止删除当前登录用户
+    if user.id == current_user.id:
+        flash('不能删除当前登录的用户', 'error')
+        return redirect(url_for('admin_users'))
+    
+    try:
+        username = user.name
+        db.session.delete(user)
+        db.session.commit()
+        
+        flash(f'用户 "{username}" 已删除', 'success')
+        
+    except Exception as e:
+        flash(f'删除用户失败: {str(e)}', 'error')
+    
+    return redirect(url_for('admin_users'))
+
 
 @app.route('/admin/knowledge/upload', methods=['POST'])
 @login_required

@@ -556,7 +556,8 @@
                             <div class="mobile-person-title">
                                 <div class="row-number">${number}</div>
                                 <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;" title="点击编辑姓名">
-                                    <span class="mobile-field-prefix">姓名：</span>${person.name}
+                                    <span class="mobile-field-prefix">姓名：</span>
+                                    <span class="name-content">${person.name}</span>
                                     <div class="mobile-edit-hint">点击编辑</div>
                                 </div>
                             </div>
@@ -754,6 +755,11 @@
         // 为模态框更新资源推荐
         function updateModalResourceSuggestions(selectedRoles) {
             const suggestionsContainer = document.getElementById('modalResourceSuggestions');
+
+            if (!suggestionsContainer) {
+                console.warn('资源推荐容器未找到');
+                return;
+            }
 
             if (!selectedRoles || selectedRoles.length === 0) {
                 suggestionsContainer.innerHTML = '<p class="text-muted">请先在角色选择中选择身份角色以获得智能推荐</p>';

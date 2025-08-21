@@ -1120,12 +1120,22 @@ body::after {
         transition: all 0.2s ease;
     }
 
-    .mobile-field-content:hover {
+    .mobile-field-content:hover,
+    .mobile-field-content:active {
         background: rgba(102, 126, 234, 0.05);
         border-bottom-color: rgba(102, 126, 234, 0.3);
         border-radius: 4px;
         padding: 6px 8px;
         margin: 0 -8px;
+    }
+
+    /* 移动端触摸反馈 */
+    .row-name:active,
+    .row-roles:active,
+    .row-resources:active,
+    .row-needs:active {
+        background: rgba(102, 126, 234, 0.15) !important;
+        transform: scale(0.98);
     }
 
     /* 移动端编辑状态样式 */

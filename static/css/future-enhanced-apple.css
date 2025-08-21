@@ -558,11 +558,66 @@ body::after {
     margin-top: 8px;
 }
 
+/* 角色大类容器 */
+.role-category {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.role-category:nth-child(1) {
+    border-left-color: #2ecc71; /* 需求方 - 绿色 */
+}
+
+.role-category:nth-child(2) {
+    border-left-color: #3498db; /* 交付方 - 蓝色 */
+}
+
+.role-category:nth-child(3) {
+    border-left-color: #f39c12; /* 资金方 - 金色 */
+}
+
+/* 角色分类标题 */
+.role-category-title {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.role-category-title i {
+    font-size: 18px;
+}
+
+.role-category:nth-child(1) .role-category-title {
+    color: #2ecc71;
+}
+
+.role-category:nth-child(2) .role-category-title {
+    color: #3498db;
+}
+
+.role-category:nth-child(3) .role-category-title {
+    color: #f39c12;
+}
+
+.role-category-title small {
+    font-size: 12px;
+    font-weight: 400;
+    color: #666;
+    margin-left: 4px;
+}
+
 .role-checkbox-group {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 0;
 }
 
 .role-item {

@@ -380,61 +380,93 @@
                 
                 <div class="form-group">
                     <label class="form-label">
-                        身份角色（可多选）
-                        <span class="help-icon" data-tooltip="请选择该人物在项目中的身份角色，可选择多个">
+                        身份角色（必须至少选择一个）
+                        <span class="help-icon" data-tooltip="请选择该人物在项目中的身份角色，需要在需求方和交付方中各选择至少一个">
                             <i class="fas fa-question-circle"></i>
                         </span>
                     </label>
                     <div class="role-selection-container">
-                        <div class="role-checkbox-group">
-                            <label class="checkbox-item role-item" data-desc="有需求/有预算的一方，项目最终买单者或提出方（如企业客户、政府采购）">
-                                <input type="checkbox" name="person_role[]" value="buyer">
-                                <span>需求方 / 采购方</span>
-                                <div class="role-tooltip">有需求/有预算的一方，项目最终买单者或提出方</div>
-                            </label>
-                            <label class="checkbox-item role-item" data-desc="提供资金或赞助，换取回报/分润/权益（如VC、天使、品牌赞助商）">
-                                <input type="checkbox" name="person_role[]" value="investor">
-                                <span>投资方 / 资金方</span>
-                                <div class="role-tooltip">提供资金或赞助，换取回报/分润/权益</div>
-                            </label>
-                            <label class="checkbox-item role-item" data-desc="提供可销售的产品或服务（实体或数字），可作为变现载体（如品牌方、课程/软件提供方）">
-                                <input type="checkbox" name="person_role[]" value="product">
-                                <span>产品方 / 服务方</span>
-                                <div class="role-tooltip">提供可销售的产品或服务，可作为变现载体</div>
-                            </label>
-                            <label class="checkbox-item role-item" data-desc="提供原创内容、IP或影响力资源，可用于引流与联名（如自媒体、作家、IP方）">
-                                <input type="checkbox" name="person_role[]" value="content">
-                                <span>内容方 / IP方</span>
-                                <div class="role-tooltip">提供原创内容、IP或影响力资源，可用于引流与联名</div>
-                            </label>
-                            <label class="checkbox-item role-item" data-desc="负责落地与产出结果，按方案交付（如活动执行公司、研发/制作团队）">
-                                <input type="checkbox" name="person_role[]" value="delivery">
-                                <span>交付方 / 执行方</span>
-                                <div class="role-tooltip">负责落地与产出结果，按方案交付</div>
-                            </label>
-                            <label class="checkbox-item role-item" data-desc="拥有分发能力，把产品/内容推广给用户（如代理商、电商平台、社群主、媒体）">
-                                <input type="checkbox" name="person_role[]" value="channel">
-                                <span>渠道方 / 推广方</span>
-                                <div class="role-tooltip">拥有分发能力，把产品/内容推广给用户</div>
-                            </label>
-                            <label class="checkbox-item role-item" data-desc="运营并维护某平台/系统/入口，掌控流量与规则（如APP/SaaS/媒体平台运营）">
-                                <input type="checkbox" name="person_role[]" value="ops">
-                                <span>平台运营方</span>
-                                <div class="role-tooltip">运营并维护某平台/系统/入口，掌控流量与规则</div>
-                            </label>
-                            <label class="checkbox-item role-item" data-desc="整合各方资源、定节奏并推动落地的牵头者（如项目经理、总策划、行业协会）">
-                                <input type="checkbox" name="person_role[]" value="orchestrator">
-                                <span>统筹方 / 牵头方</span>
-                                <div class="role-tooltip">整合各方资源、定节奏并推动落地的牵头者</div>
-                            </label>
-                            <label class="checkbox-item role-item" data-desc="提供专业知识、资质或背书，提高可信度（如行业顾问、认证机构、导师）">
-                                <input type="checkbox" name="person_role[]" value="expert">
-                                <span>外部专家 / 顾问</span>
-                                <div class="role-tooltip">提供专业知识、资质或背书，提高可信度</div>
-                            </label>
+                        
+                        <!-- 需求方 -->
+                        <div class="role-category">
+                            <h5 class="role-category-title">
+                                <i class="fas fa-shopping-cart"></i>
+                                需求方
+                                <small>（有需求、有预算的一方）</small>
+                            </h5>
+                            <div class="role-checkbox-group">
+                                <label class="checkbox-item role-item" data-desc="公司、企业的老板或决策者，有决策权和预算权">
+                                    <input type="checkbox" name="person_role[]" value="enterprise_owner">
+                                    <span>企业主</span>
+                                    <div class="role-tooltip">公司、企业的老板或决策者，有决策权和预算权</div>
+                                </label>
+                                <label class="checkbox-item role-item" data-desc="实体门店的店主或经营者，需要客流和业绩提升">
+                                    <input type="checkbox" name="person_role[]" value="store_owner">
+                                    <span>实体店主</span>
+                                    <div class="role-tooltip">实体门店的店主或经营者，需要客流和业绩提升</div>
+                                </label>
+                                <label class="checkbox-item role-item" data-desc="部门、团队的管理者，有特定业务需求和预算分配权">
+                                    <input type="checkbox" name="person_role[]" value="department_head">
+                                    <span>部门负责人</span>
+                                    <div class="role-tooltip">部门、团队的管理者，有特定业务需求和预算分配权</div>
+                                </label>
+                                <label class="checkbox-item role-item" data-desc="品牌、项目或社群的主要负责人，有品牌发展需求">
+                                    <input type="checkbox" name="person_role[]" value="brand_manager">
+                                    <span>主理人</span>
+                                    <div class="role-tooltip">品牌、项目或社群的主要负责人，有品牌发展需求</div>
+                                </label>
+                            </div>
                         </div>
+
+                        <!-- 交付方 -->
+                        <div class="role-category">
+                            <h5 class="role-category-title">
+                                <i class="fas fa-truck"></i>
+                                交付方
+                                <small>（提供产品、服务或能力的一方）</small>
+                            </h5>
+                            <div class="role-checkbox-group">
+                                <label class="checkbox-item role-item" data-desc="提供实体产品、数字产品或服务的供应商">
+                                    <input type="checkbox" name="person_role[]" value="product_provider">
+                                    <span>产品</span>
+                                    <div class="role-tooltip">提供实体产品、数字产品或服务的供应商</div>
+                                </label>
+                                <label class="checkbox-item role-item" data-desc="提供专业服务、技能或解决方案的服务商">
+                                    <input type="checkbox" name="person_role[]" value="service_provider">
+                                    <span>服务</span>
+                                    <div class="role-tooltip">提供专业服务、技能或解决方案的服务商</div>
+                                </label>
+                                <label class="checkbox-item role-item" data-desc="拥有用户、粉丝、渠道等流量资源，能够引流推广">
+                                    <input type="checkbox" name="person_role[]" value="traffic_provider">
+                                    <span>流量</span>
+                                    <div class="role-tooltip">拥有用户、粉丝、渠道等流量资源，能够引流推广</div>
+                                </label>
+                                <label class="checkbox-item role-item" data-desc="提供其他特殊资源或能力，如资质、关系、平台等">
+                                    <input type="checkbox" name="person_role[]" value="other_provider">
+                                    <span>其他</span>
+                                    <div class="role-tooltip">提供其他特殊资源或能力，如资质、关系、平台等</div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 资金方 -->
+                        <div class="role-category">
+                            <h5 class="role-category-title">
+                                <i class="fas fa-dollar-sign"></i>
+                                资金方
+                                <small>（提供资金支持的一方）</small>
+                            </h5>
+                            <div class="role-checkbox-group">
+                                <label class="checkbox-item role-item" data-desc="提供资金或赞助，期望获得回报、分润或权益的投资者">
+                                    <input type="checkbox" name="person_role[]" value="funding_provider">
+                                    <span>资金方</span>
+                                    <div class="role-tooltip">提供资金或赞助，期望获得回报、分润或权益的投资者</div>
+                                </label>
+                            </div>
+                        </div>
+                        
                         <div class="selected-roles-summary" id="selectedRoles_${personCount}">
-                            <small class="text-muted">尚未选择角色</small>
+                            <small class="text-muted">请在需求方和交付方中各选择至少一个角色</small>
                         </div>
                     </div>
                 </div>
@@ -659,11 +691,12 @@
             // 初始化资源输入功能
             initResourceInput(personCard);
             
-            // 监听角色变化更新资源推荐
+            // 监听角色变化更新资源推荐和角色摘要
             const roleCheckboxes = personCard.querySelectorAll('input[name="person_role[]"]');
             roleCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', () => {
                     updateResourceSuggestions(personCard);
+                    updateRolesSummary(personCard);
                 });
             });
             
@@ -759,32 +792,74 @@
             const summaryText = summaryContainer.querySelector('small');
             
             if (checkedItems.length === 0) {
-                summaryText.textContent = '尚未选择角色';
+                summaryText.textContent = '请在需求方和交付方中各选择至少一个角色';
                 summaryContainer.classList.remove('has-selection');
-            } else if (checkedItems.length === 1) {
-                const selectedItem = checkedItems[0].closest('.role-item');
-                summaryText.textContent = `已选择：${selectedItem.querySelector('span').textContent}`;
+                summaryContainer.style.color = '#999';
+                return;
+            }
+            
+            // 检查选择的角色分布
+            const selectedRoles = Array.from(checkedItems).map(cb => cb.value);
+            const demandRoles = ['enterprise_owner', 'store_owner', 'department_head', 'brand_manager'];
+            const deliveryRoles = ['product_provider', 'service_provider', 'traffic_provider', 'other_provider'];
+            const fundingRoles = ['funding_provider'];
+            
+            const selectedDemandRoles = selectedRoles.filter(role => demandRoles.includes(role));
+            const selectedDeliveryRoles = selectedRoles.filter(role => deliveryRoles.includes(role));
+            const selectedFundingRoles = selectedRoles.filter(role => fundingRoles.includes(role));
+            
+            // 构建摘要文本
+            let summaryParts = [];
+            if (selectedDemandRoles.length > 0) {
+                const roleNames = selectedDemandRoles.map(role => {
+                    const checkbox = personCard.querySelector(`input[value="${role}"]`);
+                    return checkbox.closest('.role-item').querySelector('span').textContent;
+                });
+                summaryParts.push(`需求方: ${roleNames.join('、')}`);
+            }
+            
+            if (selectedDeliveryRoles.length > 0) {
+                const roleNames = selectedDeliveryRoles.map(role => {
+                    const checkbox = personCard.querySelector(`input[value="${role}"]`);
+                    return checkbox.closest('.role-item').querySelector('span').textContent;
+                });
+                summaryParts.push(`交付方: ${roleNames.join('、')}`);
+            }
+            
+            if (selectedFundingRoles.length > 0) {
+                summaryParts.push(`资金方`);
+            }
+            
+            // 检查是否满足要求（需求方或交付方至少选一个）
+            const hasValidSelection = selectedDemandRoles.length > 0 || selectedDeliveryRoles.length > 0;
+            
+            if (hasValidSelection) {
+                summaryText.textContent = `已选择：${summaryParts.join(' + ')}`;
                 summaryContainer.classList.add('has-selection');
+                summaryContainer.style.color = '#667eea';
             } else {
-                const roleNames = Array.from(checkedItems).map(cb => 
-                    cb.closest('.role-item').querySelector('span').textContent
-                );
-                summaryText.textContent = `已选择 ${checkedItems.length} 个角色：${roleNames.join('、')}`;
-                summaryContainer.classList.add('has-selection');
+                summaryText.textContent = '需要在需求方和交付方中各选择至少一个角色';
+                summaryContainer.classList.remove('has-selection');
+                summaryContainer.style.color = '#e74c3c';
             }
         }
         
         // 角色到资源的映射
         const roleToResourceSuggestions = {
-            "buyer": ["采购预算", "项目立项权", "签约权限", "内部宣传位", "目标客户名单"],
-            "investor": ["赞助额度", "现金预算", "投后服务渠道", "投委会背书", "路演名额"],
-            "product": ["产品试用名额", "样品/兑换码", "分销价权限", "售后/客服支持", "API/SDK授权"],
-            "content": ["公众号/视频号/抖音号X粉", "版权授权", "专栏/播客位", "内容制作团队", "素材库"],
-            "delivery": ["执行团队编制", "设计/拍摄/研发能力", "供应链/施工队", "制作/交付SOP", "搭建工具/模板"],
-            "channel": ["社群X个", "私域好友数X", "媒体投放位", "电商渠道位", "线下门店/展位"],
-            "ops": ["APP/小程序入口位", "Push/弹窗位", "频道/专题页", "数据看板访问", "客服体系接入"],
-            "orchestrator": ["跨方对接权", "项目排期控制", "合同模板/法务接口", "行业协会关系", "内推白名单"],
-            "expert": ["专业认证/资质", "顾问背书", "评审名额", "培训课程", "行业人脉图谱"]
+            // 需求方
+            "enterprise_owner": ["采购预算", "项目立项权", "签约权限", "内部宣传位", "企业客户名单", "决策权"],
+            "store_owner": ["店铺空间", "客流量", "本地资源", "营业执照", "店面展示位", "顾客数据"],
+            "department_head": ["部门预算", "团队人力", "内部协调权", "KPI指标", "汇报渠道", "资源分配权"],
+            "brand_manager": ["品牌授权", "营销预算", "品牌露出机会", "用户社群", "品牌合作资源", "市场推广权"],
+            
+            // 交付方
+            "product_provider": ["产品试用名额", "样品/兑换码", "分销价权限", "售后支持", "产品授权", "库存资源"],
+            "service_provider": ["专业技能", "执行团队", "服务时间", "工具平台", "交付方案", "质量保证"],
+            "traffic_provider": ["用户粉丝", "媒体渠道", "社群资源", "推广位", "流量入口", "曝光机会"],
+            "other_provider": ["特殊资质", "关系网络", "平台权限", "独特资源", "专业认证", "行业地位"],
+            
+            // 资金方
+            "funding_provider": ["投资资金", "赞助额度", "现金预算", "投后服务", "背书资源", "融资渠道"]
         };
         
         // 资源示例模板

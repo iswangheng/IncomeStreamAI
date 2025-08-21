@@ -165,16 +165,47 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validate person cards
         let hasInvalidPerson = false;
-        personCards.forEach(function(card) {
+        let hasRoleValidationError = false;
+        let roleErrorMessage = '';
+        
+        personCards.forEach(function(card, index) {
             const personName = card.querySelector('input[name="person_name[]"]').value.trim();
             if (!personName) {
                 hasInvalidPerson = true;
+            }
+            
+            // 角色验证逻辑
+            const roleCheckboxes = card.querySelectorAll('input[name="person_role[]"]:checked');
+            if (roleCheckboxes.length === 0) {
+                hasRoleValidationError = true;
+                roleErrorMessage = `第${index + 1}个关键人物必须选择至少一个身份角色`;
+                return;
+            }
+            
+            // 检查是否在需求方和交付方中各选择了至少一个
+            const selectedRoles = Array.from(roleCheckboxes).map(cb => cb.value);
+            const demandRoles = ['enterprise_owner', 'store_owner', 'department_head', 'brand_manager'];
+            const deliveryRoles = ['product_provider', 'service_provider', 'traffic_provider', 'other_provider'];
+            
+            const hasDemandRole = selectedRoles.some(role => demandRoles.includes(role));
+            const hasDeliveryRole = selectedRoles.some(role => deliveryRoles.includes(role));
+            
+            if (!hasDemandRole && !hasDeliveryRole) {
+                hasRoleValidationError = true;
+                roleErrorMessage = `第${index + 1}个关键人物需要在需求方和交付方中各选择至少一个角色`;
+                return;
             }
         });
         
         if (hasInvalidPerson) {
             e.preventDefault();
             alert('请为所有关键人物填写姓名/代号');
+            return false;
+        }
+        
+        if (hasRoleValidationError) {
+            e.preventDefault();
+            alert(roleErrorMessage);
             return false;
         }
         

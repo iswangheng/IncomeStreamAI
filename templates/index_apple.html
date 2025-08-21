@@ -377,6 +377,8 @@
     <script>
         // 初始化功能
         document.addEventListener('DOMContentLoaded', function() {
+            // 初始化交互功能
+            initializeInteractions();
             // 初始化独立人物清单表格
             updatePersonnelTable();
             // 设置输入框的随机提示语
@@ -527,21 +529,38 @@
                 '待补充';
 
             row.innerHTML = `
-                <div class="personnel-table-row">
-                    <!-- 桌面端表格布局 -->
-                    <div class="desktop-table-layout">
-                        <div class="row-number">${number}</div>
-                        <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;">
-                            ${person.name}
-                        </div>
-                        <div class="row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer;">
-                            ${roleTagsHtml || '<span style="color: #999;">未选择</span>'}
-                        </div>
-                        <div class="row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer;" title="${person.resources.join('、')}">
-                            ${resourcesSummary}
-                        </div>
-                        <div class="row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer;" title="${person.needs.join('、')}">
-                            ${needsSummary}
+                <!-- 桌面端表格布局 -->
+                <div class="desktop-table-layout">
+                    <div class="row-number">${number}</div>
+                    <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;">
+                        ${person.name}
+                    </div>
+                    <div class="row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer;">
+                        ${roleTagsHtml || '<span style="color: #999;">未选择</span>'}
+                    </div>
+                    <div class="row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer;" title="${person.resources.join('、')}">
+                        ${resourcesSummary}
+                    </div>
+                    <div class="row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer;" title="${person.needs.join('、')}">
+                        ${needsSummary}
+                    </div>
+                    <div class="row-actions">
+                        <button class="action-btn delete" onclick="deletePerson(${person.id})" title="删除此人物">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 移动端卡片布局 -->
+                <div class="mobile-card-layout">
+                    <div class="mobile-person-header">
+                        <div class="mobile-person-title">
+                            <div class="row-number">${number}</div>
+                            <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;" title="点击编辑姓名">
+                                <span class="mobile-field-prefix">姓名：</span>
+                                <span class="name-content">${person.name}</span>
+                                <div class="mobile-edit-hint">点击编辑</div>
+                            </div>
                         </div>
                         <div class="row-actions">
                             <button class="action-btn delete" onclick="deletePerson(${person.id})" title="删除此人物">
@@ -550,44 +569,25 @@
                         </div>
                     </div>
 
-                    <!-- 移动端卡片布局 -->
-                    <div class="mobile-card-layout">
-                        <div class="mobile-person-header">
-                            <div class="mobile-person-title">
-                                <div class="row-number">${number}</div>
-                                <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;" title="点击编辑姓名">
-                                    <span class="mobile-field-prefix">姓名：</span>
-                                    <span class="name-content">${person.name}</span>
-                                    <div class="mobile-edit-hint">点击编辑</div>
-                                </div>
-                            </div>
-                            <div class="row-actions">
-                                <button class="action-btn delete" onclick="deletePerson(${person.id})" title="删除此人物">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                    <div class="mobile-person-content">
+                        <div class="mobile-field">
+                            <div class="mobile-field-label">身份角色</div>
+                            <div class="mobile-field-content row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s;" title="点击编辑身份角色">
+                                ${roleTagsHtml || '<span style="color: #999;">未选择 <small>(点击编辑)</small></span>'}
                             </div>
                         </div>
 
-                        <div class="mobile-person-content">
-                            <div class="mobile-field">
-                                <div class="mobile-field-label">身份角色</div>
-                                <div class="mobile-field-content row-roles" onclick="editPersonRoles(${person.id})" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s;" title="点击编辑身份角色">
-                                    ${roleTagsHtml || '<span style="color: #999;">未选择 <small>(点击编辑)</small></span>'}
-                                </div>
+                        <div class="mobile-field">
+                            <div class="mobile-field-label">掌握资源</div>
+                            <div class="mobile-field-content row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s;" title="点击编辑掌握资源">
+                                ${resourcesSummary === '待添加' ? '<span style="color: #999;">待添加 <small>(点击编辑)</small></span>' : resourcesSummary}
                             </div>
+                        </div>
 
-                            <div class="mobile-field">
-                                <div class="mobile-field-label">掌握资源</div>
-                                <div class="mobile-field-content row-resources" onclick="editPersonResources(${person.id})" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s;" title="点击编辑掌握资源">
-                                    ${resourcesSummary === '待添加' ? '<span style="color: #999;">待添加 <small>(点击编辑)</small></span>' : resourcesSummary}
-                                </div>
-                            </div>
-
-                            <div class="mobile-field">
-                                <div class="mobile-field-label">如何让TA高兴</div>
-                                <div class="mobile-field-content row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s;" title="点击编辑让TA高兴的方式">
-                                    ${needsSummary === '待补充' ? '<span style="color: #999;">待补充 <small>(点击编辑)</small></span>' : needsSummary}
-                                </div>
+                        <div class="mobile-field">
+                            <div class="mobile-field-label">如何让TA高兴</div>
+                            <div class="mobile-field-content row-needs" onclick="editPersonNeeds(${person.id})" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s;" title="点击编辑让TA高兴的方式">
+                                ${needsSummary === '待补充' ? '<span style="color: #999;">待补充 <small>(点击编辑)</small></span>' : needsSummary}
                             </div>
                         </div>
                     </div>
@@ -1296,6 +1296,91 @@
             setTimeout(() => {
                 notification.remove();
             }, 4000);
+        }
+
+        // === 缺失的辅助函数 ===
+
+        // 添加资源推荐到文本框
+        function addResourceSuggestion(resource) {
+            const textarea = document.getElementById('resourcesTextArea');
+            if (!textarea) return;
+
+            const currentValue = textarea.value.trim();
+            const newValue = currentValue ? currentValue + '\n' + resource : resource;
+            textarea.value = newValue;
+            
+            // 触发输入事件以更新UI
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        // 添加需求推荐到文本框
+        function addNeedsSuggestion(need) {
+            const textarea = document.getElementById('needsTextArea');
+            if (!textarea) return;
+
+            const currentValue = textarea.value.trim();
+            const newValue = currentValue ? currentValue + '\n' + need : need;
+            textarea.value = newValue;
+            
+            // 触发输入事件以更新UI
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        // 添加人物函数（兼容旧的调用方式）
+        function addPerson() {
+            addNewPersonnel();
+        }
+
+        // 更新需求显示（占位函数，兼容旧代码）
+        function updateNeedsDisplay() {
+            // 这个函数主要是为了兼容性，实际的更新由updatePersonnelTable处理
+            console.log('updateNeedsDisplay called - handled by updatePersonnelTable');
+        }
+
+        // 初始化交互功能
+        function initializeInteractions() {
+            console.log('交互功能已初始化');
+            
+            // 初始化人物表格
+            if (typeof updatePersonnelTable === 'function') {
+                updatePersonnelTable();
+            }
+            
+            // 设置随机提示语
+            if (typeof setRandomPlaceholder === 'function') {
+                setRandomPlaceholder();
+            }
+            
+            // 处理测试案例选择
+            if (typeof handleDemoCaseSelection === 'function') {
+                handleDemoCaseSelection();
+            }
+        }
+
+        // 为模态框生成资源推荐
+        function generateResourceSuggestionsForModal() {
+            // 获取当前编辑的人物信息
+            if (!currentEditingPersonId) return;
+            
+            const person = personnelData.find(p => p.id === currentEditingPersonId);
+            if (!person) return;
+            
+            // 调用现有的更新函数
+            if (typeof updateModalResourceSuggestions === 'function') {
+                updateModalResourceSuggestions(person.roles || []);
+            }
+        }
+
+        // 删除人物
+        function deletePerson(personId) {
+            const person = personnelData.find(p => p.id === personId);
+            if (!person) return;
+            
+            if (confirm(`确定要删除"${person.name}"吗？`)) {
+                personnelData = personnelData.filter(p => p.id !== personId);
+                updatePersonnelTable();
+                showQuickToast('人物已删除');
+            }
         }
 
 

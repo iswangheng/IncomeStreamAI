@@ -1368,6 +1368,61 @@ body::after {
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
+/* ==== 角色提示工具提示系统 ==== */
+.role-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 400;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.role-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+}
+
+.role-item:hover .role-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+/* 确保角色项目具有相对定位以支持绝对定位的提示 */
+.role-item {
+    position: relative;
+}
+
+/* 提示文字的宽度适应 */
+.role-tooltip {
+    max-width: 200px;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* 移除原来的帮助图标样式，不再需要 */
+.help-icon {
+    display: none;
+}
+
 /* 模态框响应式设计 */
 @media (max-width: 768px) {
     .role-options {
@@ -1388,6 +1443,13 @@ body::after {
     
     .role-item span {
         font-size: 13px;
+    }
+    
+    /* 移动端的提示框调整 */
+    .role-tooltip {
+        max-width: 160px;
+        font-size: 11px;
+        padding: 6px 10px;
     }
 }
 }

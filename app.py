@@ -906,7 +906,6 @@ def generate():
         # Get form data
         project_name = request.form.get('project_name', '').strip()
         project_description = request.form.get('project_description', '').strip()
-        project_stage = request.form.get('project_stage', '')
         
         # Validate required fields
         if not project_name or not project_description:
@@ -933,7 +932,6 @@ def generate():
         form_data = {
             "projectName": project_name,
             "projectDescription": project_description,
-            "projectStage": project_stage,
             "keyPersons": key_persons
         }
         

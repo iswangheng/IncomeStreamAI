@@ -173,7 +173,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr); /* 强制4列布局 */
     gap: var(--space-6); /* 适当减少间距以适应4列 */
-    padding: 0 var(--space-6) var(--space-8); /* 优化底部间距 */
+    padding: 0 var(--space-6) var(--space-8); /* 左右内边距与其他容器保持一致 */
     max-width: 1400px; /* 限制最大宽度 */
     margin: 0 auto; /* 居中对齐 */
 }
@@ -264,8 +264,10 @@
 
 /* 数据表格 */
 .table-container {
-    margin: var(--space-6) auto var(--space-8); /* 居中对齐并优化间距 */
-    max-width: 1400px; /* 与统计卡片保持一致的最大宽度 */
+    margin: var(--space-6) var(--space-6) var(--space-8); /* 左右边距与统计卡片保持一致 */
+    max-width: calc(1400px - 2 * var(--space-6)); /* 减去左右边距后的最大宽度 */
+    margin-left: auto;
+    margin-right: auto;
     background: var(--color-bg-primary);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-sm);
@@ -292,9 +294,10 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: 0 var(--space-6);
-    margin: 0 auto var(--space-6);
-    max-width: 1400px; /* 与其他容器保持一致 */
+    margin: 0 var(--space-6) var(--space-6); /* 左右边距与统计卡片和表格保持一致 */
+    max-width: calc(1400px - 2 * var(--space-6)); /* 减去左右边距后的最大宽度 */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .filters-left {

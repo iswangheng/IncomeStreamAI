@@ -1117,6 +1117,101 @@ body::after {
     background: #a8a8a8;
 }
 
+/* 需求模态框的粘性顶部区域 */
+.needs-sticky-section {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    margin: -20px -20px 20px -20px;
+    padding: 20px;
+    border-radius: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.needs-sticky-section.scrolled {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-bottom-color: rgba(102, 126, 234, 0.2);
+}
+
+.needs-sticky-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.needs-count-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+}
+
+.needs-display-area {
+    min-height: 80px;
+    max-height: 120px;
+    overflow-y: auto;
+    background: rgba(102, 126, 234, 0.05);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.needs-display-empty {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+}
+
+.needs-display-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.needs-display-tag {
+    background: #667eea;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.needs-display-tag .remove-mini {
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    color: white;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    font-size: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.needs-display-tag .remove-mini:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
 /* 可点击行的悬停效果 */
 .row-name:hover,
 .row-roles:hover,

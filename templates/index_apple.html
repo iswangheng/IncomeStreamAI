@@ -680,9 +680,89 @@
             // 设置文本框内容
             document.getElementById('needsTextArea').value = person.needs.join('\n');
 
+            // 初始化粘性区域显示
+            updateNeedsDisplay(person.needs || []);
+
             // 显示模态框
             const modal = new bootstrap.Modal(document.getElementById('editNeedsModal'));
             modal.show();
+
+            // 绑定滚动事件
+            setTimeout(() => {
+                initNeedsStickyScroll();
+                bindNeedsTextAreaUpdate();
+            }, 300);
+        }
+
+        // 更新需求显示区域
+        function updateNeedsDisplay(needs) {
+            const countBadge = document.getElementById('needsCountBadge');
+            const displayEmpty = document.getElementById('needsDisplayEmpty');
+            const displayList = document.getElementById('needsDisplayList');
+
+            countBadge.textContent = needs.length;
+
+            if (needs.length === 0) {
+                displayEmpty.style.display = 'flex';
+                displayList.style.display = 'none';
+            } else {
+                displayEmpty.style.display = 'none';
+                displayList.style.display = 'flex';
+                
+                displayList.innerHTML = '';
+                needs.forEach((need, index) => {
+                    const tag = document.createElement('div');
+                    tag.className = 'needs-display-tag';
+                    tag.innerHTML = `
+                        ${need}
+                        <button class="remove-mini" onclick="removeNeedFromDisplay(${index})" title="删除">×</button>
+                    `;
+                    displayList.appendChild(tag);
+                });
+            }
+        }
+
+        // 从显示区域删除需求
+        function removeNeedFromDisplay(index) {
+            const textarea = document.getElementById('needsTextArea');
+            const currentNeeds = textarea.value.split('\n').map(n => n.trim()).filter(n => n);
+            
+            if (index >= 0 && index < currentNeeds.length) {
+                currentNeeds.splice(index, 1);
+                textarea.value = currentNeeds.join('\n');
+                updateNeedsDisplay(currentNeeds);
+            }
+        }
+
+        // 初始化粘性滚动效果
+        function initNeedsStickyScroll() {
+            const modalBody = document.querySelector('#editNeedsModal .modal-body');
+            const stickySection = document.getElementById('needsStickySection');
+            
+            if (!modalBody || !stickySection) return;
+
+            modalBody.addEventListener('scroll', () => {
+                if (modalBody.scrollTop > 20) {
+                    stickySection.classList.add('scrolled');
+                } else {
+                    stickySection.classList.remove('scrolled');
+                }
+            });
+        }
+
+        // 绑定文本框更新事件
+        function bindNeedsTextAreaUpdate() {
+            const textarea = document.getElementById('needsTextArea');
+            
+            const updateDisplay = () => {
+                const needs = textarea.value.split('\n').map(n => n.trim()).filter(n => n);
+                updateNeedsDisplay(needs);
+            };
+
+            textarea.addEventListener('input', updateDisplay);
+            textarea.addEventListener('paste', () => {
+                setTimeout(updateDisplay, 100);
+            });
         }
 
         // 保存角色选择
@@ -760,6 +840,11 @@
             } else {
                 textarea.value = need;
             }
+            
+            // 更新显示区域
+            const needs = textarea.value.split('\n').map(n => n.trim()).filter(n => n);
+            updateNeedsDisplay(needs);
+            
             textarea.focus();
         }
 
@@ -1345,6 +1430,24 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <!-- 粘性顶部区域：显示已添加的内容 -->
+                    <div class="needs-sticky-section" id="needsStickySection">
+                        <div class="needs-sticky-header">
+                            <div>
+                                <h6 style="margin: 0; font-weight: 600;">已添加的让TA高兴的方式</h6>
+                            </div>
+                            <div class="needs-count-badge" id="needsCountBadge">0</div>
+                        </div>
+                        <div class="needs-display-area" id="needsDisplayArea">
+                            <div class="needs-display-empty" id="needsDisplayEmpty">
+                                还没有添加任何方式，请在下方文本框输入或点击推荐标签
+                            </div>
+                            <div class="needs-display-list" id="needsDisplayList" style="display: none;">
+                                <!-- 已添加的需求标签将显示在这里 -->
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">添加让TA高兴的方式（一行一个）</label>
                         <textarea class="form-control" id="needsTextArea" rows="6" placeholder="请输入让这个人高兴的方式，每个方式占一行&#10;例如：&#10;获得更多利润&#10;提升品牌知名度&#10;节省运营成本&#10;获得认可和尊重"></textarea>

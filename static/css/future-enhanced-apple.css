@@ -1155,6 +1155,14 @@ body::after {
         opacity: 0.8;
     }
 
+    /* 移动端字段前缀样式 */
+    .mobile-field-prefix {
+        font-size: 12px;
+        color: #666;
+        font-weight: 500;
+        margin-right: 4px;
+    }
+
     /* 姓名编辑输入框样式 */
     .name-edit-input {
         animation: editFocusIn 0.2s ease-out;

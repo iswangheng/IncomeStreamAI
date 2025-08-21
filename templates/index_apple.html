@@ -556,7 +556,7 @@
                             <div class="mobile-person-title">
                                 <div class="row-number">${number}</div>
                                 <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;" title="点击编辑姓名">
-                                    ${person.name}
+                                    <span class="mobile-field-prefix">姓名：</span>${person.name}
                                     <div class="mobile-edit-hint">点击编辑</div>
                                 </div>
                             </div>
@@ -834,6 +834,9 @@
             // 关闭模态框
             const modal = bootstrap.Modal.getInstance(document.getElementById('editRolesModal'));
             modal.hide();
+
+            // 显示保存成功提示
+            showQuickToast('角色已保存');
         }
 
         // 保存资源
@@ -851,6 +854,9 @@
             // 关闭模态框
             const modal = bootstrap.Modal.getInstance(document.getElementById('editResourcesModal'));
             modal.hide();
+
+            // 显示保存成功提示
+            showQuickToast('资源已保存');
         }
 
         // 保存需求
@@ -868,6 +874,9 @@
             // 关闭模态框
             const modal = bootstrap.Modal.getInstance(document.getElementById('editNeedsModal'));
             modal.hide();
+
+            // 显示保存成功提示
+            showQuickToast('需求已保存');
         }
 
         // 添加资源建议
@@ -1346,6 +1355,29 @@
             // 兼容旧的函数调用，使用新的函数名
             updateModalResourceSuggestions(selectedRoles);
         }
+
+        // 修复角色选择后的资源推荐更新
+        document.addEventListener('DOMContentLoaded', function() {
+            // 监听角色选择变化
+            const roleModal = document.getElementById('editRolesModal');
+            if (roleModal) {
+                roleModal.addEventListener('show.bs.modal', function() {
+                    // 当角色模态框显示时，确保当前编辑人物ID已设置
+                    console.log('编辑角色模态框已打开，当前编辑人物ID:', currentEditingPersonId);
+                });
+            }
+
+            // 监听资源模态框显示事件
+            const resourceModal = document.getElementById('editResourcesModal');
+            if (resourceModal) {
+                resourceModal.addEventListener('show.bs.modal', function() {
+                    const person = personnelData.find(p => p.id === currentEditingPersonId);
+                    if (person) {
+                        updateModalResourceSuggestions(person.roles || []);
+                    }
+                });
+            }
+        });
 
         // 修复移动端编辑功能 - 确保模态框中的资源推荐功能正常
         function updateModalResourceSuggestions(selectedRoles) {

@@ -419,11 +419,17 @@
         display: none !important;
     }
     
-    /* 确保桌面版按钮和用户菜单正常显示 */
-    .nav-actions .btn {
+    /* 确保桌面版按钮正常显示 */
+    .nav-actions .btn:not(.mobile-menu-toggle) {
         display: inline-flex !important;
     }
     
+    .nav-actions .btn.btn-primary,
+    .nav-actions .btn.btn-secondary {
+        display: inline-flex !important;
+    }
+    
+    /* 确保用户菜单正常显示 */
     .user-menu {
         display: flex !important;
     }
@@ -435,6 +441,15 @@
     
     .nav-content {
         height: 64px;
+        padding: 0 24px;
+    }
+    
+    /* 桌面版操作区域 */
+    .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
     }
 }
 

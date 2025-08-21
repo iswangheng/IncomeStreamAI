@@ -1094,7 +1094,7 @@ body::after {
 
 /* 模态框内容区域的滚动优化 */
 .modal-body {
-    max-height: 60vh;
+    max-height: 75vh;
     overflow-y: auto;
     overflow-x: visible;
     position: relative;
@@ -1143,7 +1143,7 @@ body::after {
 
 /* 需求建议内容区域 - 限制滚动高度 */
 .needs-suggestions {
-    max-height: calc(50vh - 120px);
+    max-height: calc(65vh - 140px);
     overflow-y: auto;
     padding-right: 8px;
 }

@@ -3,7 +3,17 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Mobile menu functions initialized');
     
     // 移动端菜单切换函数
+    let isToggling = false; // 防止重复调用
+    
     function toggleMobileMenu() {
+        if (isToggling) {
+            console.log('Toggle already in progress, skipping');
+            return;
+        }
+        
+        isToggling = true;
+        setTimeout(() => { isToggling = false; }, 300); // 防抖
+        
         console.log('Toggle mobile menu called from dashboard');
         const dropdown = document.querySelector('.mobile-dropdown');
         const menuToggle = document.querySelector('.mobile-menu-toggle');
@@ -28,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 dropdown.style.visibility = 'visible';
                 dropdown.style.opacity = '1';
                 dropdown.style.pointerEvents = 'auto';
+                dropdown.style.transform = 'translateY(0) translateZ(0)';
                 
                 menuToggle.innerHTML = '<i class="fas fa-times"></i>';
                 console.log('Menu opened - forced styles applied');
@@ -37,7 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 调试信息
                 const rect = dropdown.getBoundingClientRect();
                 console.log('Dropdown position:', rect);
-                console.log('Dropdown computed styles:', window.getComputedStyle(dropdown));
             }
         } else {
             console.log('Dropdown or menuToggle not found');
@@ -63,8 +73,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 transform: translateZ(0);
                 -webkit-transform: translateZ(0);
             `;
-            backdrop.addEventListener('click', toggleMobileMenu);
-            backdrop.addEventListener('touchstart', toggleMobileMenu);
+            
+            // 延迟添加事件监听器，避免立即触发
+            setTimeout(() => {
+                backdrop.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleMobileMenu();
+                });
+                backdrop.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleMobileMenu();
+                });
+            }, 100);
+            
             document.body.appendChild(backdrop);
             
             // 禁止背景滚动
@@ -86,6 +109,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuToggle = document.querySelector('.mobile-menu-toggle');
     if (menuToggle) {
         menuToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
+        
+        // 为移动端添加触摸事件支持
+        menuToggle.addEventListener('touchend', function(e) {
             e.preventDefault();
             e.stopPropagation();
             toggleMobileMenu();

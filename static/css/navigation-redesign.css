@@ -375,6 +375,7 @@
             -webkit-transform: translateZ(0) !important;
             isolation: isolate;
             pointer-events: auto !important;
+            will-change: transform, opacity;
         }
         
         /* 强制确保菜单显示在最前面 */
@@ -385,6 +386,16 @@
             position: fixed !important;
             top: 64px !important;
             z-index: 2147483647 !important;
+            pointer-events: auto !important;
+            transform: translateY(0) translateZ(0) !important;
+            -webkit-transform: translateY(0) translateZ(0) !important;
+        }
+        
+        /* 防止事件穿透和确保菜单可交互 */
+        .mobile-dropdown.show * {
+            pointer-events: auto !important;
+            position: relative;
+            z-index: 1;
         }
         
         /* 为特定页面（如历史页面）添加额外保护 */
@@ -397,6 +408,13 @@
             bottom: 0;
             z-index: -1;
             pointer-events: none;
+        }
+        
+        /* 确保菜单按钮在移动端正常显示 */
+        .mobile-menu-toggle {
+            z-index: 2147483648 !important;
+            position: relative !important;
+            pointer-events: auto !important;
         }
     }
     

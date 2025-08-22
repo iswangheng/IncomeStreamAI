@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isToggling = true;
         setTimeout(() => { isToggling = false; }, 300); // 防抖
         
-        console.log('Toggle mobile menu called from dashboard');
+        console.log('Toggle mobile menu called');
         const dropdown = document.querySelector('.mobile-dropdown');
         const menuToggle = document.querySelector('.mobile-menu-toggle');
         
@@ -23,114 +23,26 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (isVisible) {
                 dropdown.classList.remove('show');
-                dropdown.style.display = 'none';
                 menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
                 console.log('Menu closed');
-                // 移除背景遮罩
-                removeBackdrop();
             } else {
                 dropdown.classList.add('show');
-                // 强制设置显示样式
-                dropdown.style.display = 'block';
-                dropdown.style.position = 'fixed';
-                dropdown.style.top = '64px';
-                dropdown.style.zIndex = '2147483647';
-                dropdown.style.visibility = 'visible';
-                dropdown.style.opacity = '1';
-                dropdown.style.pointerEvents = 'auto';
-                dropdown.style.transform = 'translateY(0) translateZ(0)';
-                
                 menuToggle.innerHTML = '<i class="fas fa-times"></i>';
-                console.log('Menu opened - forced styles applied');
-                // 添加背景遮罩
-                addBackdrop();
-                
-                // 调试信息
-                const rect = dropdown.getBoundingClientRect();
-                console.log('Dropdown position:', rect);
+                console.log('Menu opened');
             }
         } else {
             console.log('Dropdown or menuToggle not found');
         }
     }
     
-    // 添加背景遮罩
-    function addBackdrop() {
-        let backdrop = document.querySelector('.mobile-menu-backdrop');
-        if (!backdrop) {
-            backdrop = document.createElement('div');
-            backdrop.className = 'mobile-menu-backdrop';
-            backdrop.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.1);
-                z-index: 2147483646;
-                backdrop-filter: blur(1px);
-                -webkit-backdrop-filter: blur(1px);
-                transform: translateZ(0);
-                -webkit-transform: translateZ(0);
-            `;
-            
-            // 延迟添加事件监听器，避免立即触发
-            setTimeout(() => {
-                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-                
-                if (isTouchDevice) {
-                    backdrop.addEventListener('touchend', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleMobileMenu();
-                    });
-                } else {
-                    backdrop.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleMobileMenu();
-                    });
-                }
-            }, 200);
-            
-            document.body.appendChild(backdrop);
-            
-            // 禁止背景滚动
-            document.body.style.overflow = 'hidden';
-        }
-    }
-    
-    // 移除背景遮罩
-    function removeBackdrop() {
-        const backdrop = document.querySelector('.mobile-menu-backdrop');
-        if (backdrop) {
-            backdrop.remove();
-            // 恢复背景滚动
-            document.body.style.overflow = '';
-        }
-    }
-    
     // 绑定汉堡菜单点击事件
     const menuToggle = document.querySelector('.mobile-menu-toggle');
     if (menuToggle) {
-        // 检测是否为触摸设备
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        
-        if (isTouchDevice) {
-            // 仅绑定触摸事件，避免双重触发
-            menuToggle.addEventListener('touchend', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleMobileMenu();
-            });
-        } else {
-            // 桌面设备使用点击事件
-            menuToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleMobileMenu();
-            });
-        }
+        menuToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
     }
     
     // 点击菜单项后关闭菜单
@@ -143,9 +55,22 @@ document.addEventListener('DOMContentLoaded', function() {
             if (dropdown && menuToggle) {
                 dropdown.classList.remove('show');
                 menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-                removeBackdrop();
             }
         });
+    });
+    
+    // 点击页面其他地方关闭菜单
+    document.addEventListener('click', function(e) {
+        const dropdown = document.querySelector('.mobile-dropdown');
+        const menuToggle = document.querySelector('.mobile-menu-toggle');
+        
+        if (dropdown && menuToggle && dropdown.classList.contains('show')) {
+            // 如果点击的不是菜单或菜单按钮，则关闭菜单
+            if (!dropdown.contains(e.target) && !menuToggle.contains(e.target)) {
+                dropdown.classList.remove('show');
+                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        }
     });
     
     // 全局暴露函数供其他脚本使用
@@ -160,7 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (dropdown && menuToggle) {
                 dropdown.classList.remove('show');
                 menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-                removeBackdrop();
             }
         }
     });

@@ -305,8 +305,8 @@
         .page-header {
             background: white;
             border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 24px;
+            padding: 20px 30px;
+            margin: 0 0 24px 0;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             border: 1px solid #f0f0f0;
         }
@@ -342,6 +342,8 @@
 
             .admin-main-full {
                 padding: 16px;
+                margin-top: 0 !important;
+                padding-top: 0 !important;
             }
 
             .page-header {
@@ -476,9 +478,9 @@
     </div>
 
     <!-- 主内容区域 -->
-    <div class="admin-main-full">
+    <div class="admin-main-full" style="padding-top: 0; margin-top: 0;">
         <!-- 页面标题 -->
-        <div class="page-header" style="margin-top: 0; padding-top: var(--space-4);">
+        <div class="page-header" style="margin-top: 0; padding-top: 16px; margin-bottom: 20px;">
             <h1 class="page-title">
                 <i class="fas fa-users"></i>
                 用户管理

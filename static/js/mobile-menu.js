@@ -13,17 +13,34 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (isVisible) {
                 dropdown.classList.remove('show');
+                dropdown.style.display = 'none';
                 menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
                 console.log('Menu closed');
                 // 移除背景遮罩
                 removeBackdrop();
             } else {
                 dropdown.classList.add('show');
+                // 强制设置显示样式
+                dropdown.style.display = 'block';
+                dropdown.style.position = 'fixed';
+                dropdown.style.top = '64px';
+                dropdown.style.zIndex = '2147483647';
+                dropdown.style.visibility = 'visible';
+                dropdown.style.opacity = '1';
+                dropdown.style.pointerEvents = 'auto';
+                
                 menuToggle.innerHTML = '<i class="fas fa-times"></i>';
-                console.log('Menu opened');
+                console.log('Menu opened - forced styles applied');
                 // 添加背景遮罩
                 addBackdrop();
+                
+                // 调试信息
+                const rect = dropdown.getBoundingClientRect();
+                console.log('Dropdown position:', rect);
+                console.log('Dropdown computed styles:', window.getComputedStyle(dropdown));
             }
+        } else {
+            console.log('Dropdown or menuToggle not found');
         }
     }
     

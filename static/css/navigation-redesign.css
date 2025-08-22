@@ -374,6 +374,29 @@
             transform: translateZ(0) !important;
             -webkit-transform: translateZ(0) !important;
             isolation: isolate;
+            pointer-events: auto !important;
+        }
+        
+        /* 强制确保菜单显示在最前面 */
+        body .mobile-dropdown.show {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: fixed !important;
+            top: 64px !important;
+            z-index: 2147483647 !important;
+        }
+        
+        /* 为特定页面（如历史页面）添加额外保护 */
+        .mobile-dropdown.show::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            pointer-events: none;
         }
     }
     

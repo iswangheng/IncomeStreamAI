@@ -1248,6 +1248,51 @@ def view_analysis_record(record_id):
         flash('查看分析记录时发生错误', 'error')
         return redirect(url_for('analysis_history'))
 
+@app.route('/admin/api/users')
+@login_required
+@admin_required
+def api_users():
+    """用户数据API接口"""
+    try:
+        users = User.query.all()
+        
+        # 计算统计数据
+        total_users = len(users)
+        active_users = sum(1 for user in users if user.active)
+        admin_users = sum(1 for user in users if user.is_admin)
+        recent_users = sum(1 for user in users if user.created_at and (datetime.utcnow() - user.created_at).days <= 30)
+        
+        # 准备用户数据
+        users_data = []
+        for user in users:
+            users_data.append({
+                'id': user.id,
+                'name': user.name,
+                'phone': user.phone,
+                'is_admin': user.is_admin,
+                'active': user.active,
+                'created_at': user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else None,
+                'last_login': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else None,
+                'current_user_id': current_user.id
+            })
+        
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total': total_users,
+                'active': active_users,
+                'admin': admin_users,
+                'recent': recent_users
+            },
+            'users': users_data
+        })
+    except Exception as e:
+        app.logger.error(f"获取用户数据失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': '获取用户数据失败'
+        }), 500
+
 @app.route('/admin')
 @app.route('/admin/dashboard')
 @login_required

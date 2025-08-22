@@ -1353,6 +1353,50 @@
         padding-right: var(--space-4);
     }
     
+    /* 操作按钮样式 */
+    .action-buttons {
+        display: flex;
+        gap: var(--space-2);
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--text-sm);
+        transition: var(--transition-fast);
+        position: relative;
+    }
+    
+    .action-btn.edit {
+        background: var(--color-primary);
+        color: white;
+    }
+    
+    .action-btn.edit:hover {
+        background: var(--color-primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);
+    }
+    
+    .action-btn.delete {
+        background: var(--color-error);
+        color: white;
+    }
+    
+    .action-btn.delete:hover {
+        background: var(--color-error-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
+    
     .admin-page-header {
         padding-top: var(--space-6);
         padding-bottom: var(--space-6);

@@ -1249,6 +1249,7 @@ def view_analysis_record(record_id):
         return redirect(url_for('analysis_history'))
 
 @app.route('/admin')
+@app.route('/admin/dashboard')
 @login_required
 @admin_required
 def admin_dashboard():

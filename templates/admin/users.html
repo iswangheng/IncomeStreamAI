@@ -1,21 +1,20 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用户管理 - Angela AI 管理中心</title>
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <!-- 自定义样式 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation-redesign.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-apple-design.css') }}">
-    
+
     <style>
         /* 移动端优先的用户卡片设计 */
         .user-grid {
@@ -23,28 +22,28 @@
             gap: 16px;
             margin-top: 20px;
         }
-        
+
         /* 移动端：单列布局 */
         @media (max-width: 768px) {
             .user-grid {
                 grid-template-columns: 1fr;
             }
         }
-        
+
         /* 平板端：双列布局 */
         @media (min-width: 769px) and (max-width: 1024px) {
             .user-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        
+
         /* 桌面端：三列布局 */
         @media (min-width: 1025px) {
             .user-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
-        
+
         .user-card {
             background: white;
             border-radius: 20px;
@@ -55,7 +54,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .user-card::before {
             content: '';
             position: absolute;
@@ -67,17 +66,17 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        
+
         .user-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 40px rgba(0, 122, 255, 0.2);
             border-color: rgba(0, 122, 255, 0.3);
         }
-        
+
         .user-card:hover::before {
             opacity: 1;
         }
-        
+
         .user-header {
             display: flex;
             align-items: center;
@@ -86,7 +85,7 @@
             padding-bottom: 16px;
             border-bottom: 1px solid #f5f5f7;
         }
-        
+
         .user-avatar {
             width: 56px;
             height: 56px;
@@ -101,7 +100,7 @@
             flex-shrink: 0;
             box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
         }
-        
+
         .user-info h3 {
             margin: 0 0 4px 0;
             font-size: 18px;
@@ -109,14 +108,14 @@
             color: #1d1d1f;
             line-height: 1.2;
         }
-        
+
         .user-info p {
             margin: 0;
             font-size: 14px;
             color: #8e8e93;
             line-height: 1.3;
         }
-        
+
         .user-status {
             position: absolute;
             top: 20px;
@@ -127,24 +126,24 @@
             font-weight: 600;
             text-align: center;
         }
-        
+
         .status-active {
             background: #d4edda;
             color: #155724;
         }
-        
+
         .status-inactive {
             background: #f8d7da;
             color: #721c24;
         }
-        
+
         .user-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-bottom: 20px;
         }
-        
+
         .detail-item {
             text-align: center;
             padding: 12px;
@@ -152,11 +151,11 @@
             border-radius: 12px;
             transition: all 0.2s ease;
         }
-        
+
         .detail-item:hover {
             background: #e3f2fd;
         }
-        
+
         .detail-label {
             display: block;
             font-size: 11px;
@@ -166,18 +165,18 @@
             letter-spacing: 0.5px;
             margin-bottom: 4px;
         }
-        
+
         .detail-value {
             font-size: 14px;
             color: #1d1d1f;
             font-weight: 600;
         }
-        
+
         .user-actions {
             display: flex;
             gap: 8px;
         }
-        
+
         .action-btn {
             flex: 1;
             padding: 12px;
@@ -193,29 +192,29 @@
             gap: 6px;
             min-height: 44px;
         }
-        
+
         .btn-edit {
             background: #e3f2fd;
             color: #1976d2;
         }
-        
+
         .btn-edit:hover {
             background: #bbdefb;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
         }
-        
+
         .btn-delete {
             background: #ffebee;
             color: #d32f2f;
         }
-        
+
         .btn-delete:hover {
             background: #ffcdd2;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
         }
-        
+
         /* 搜索和筛选区域优化 */
         .search-filters {
             background: white;
@@ -225,7 +224,7 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             border: 1px solid #f0f0f0;
         }
-        
+
         .search-filters .form-control,
         .search-filters .form-select {
             border-radius: 12px;
@@ -234,20 +233,20 @@
             font-size: 16px;
             transition: all 0.2s ease;
         }
-        
+
         .search-filters .form-control:focus,
         .search-filters .form-select:focus {
             border-color: #007AFF;
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
         }
-        
+
         .search-filters .btn {
             border-radius: 12px;
             padding: 14px 20px;
             font-weight: 600;
             min-height: 52px;
         }
-        
+
         /* 空状态优化 */
         .empty-state {
             text-align: center;
@@ -257,7 +256,7 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             border: 1px solid #f0f0f0;
         }
-        
+
         .empty-icon {
             width: 80px;
             height: 80px;
@@ -270,19 +269,19 @@
             font-size: 32px;
             color: #8e8e93;
         }
-        
+
         .empty-state h3 {
             color: #1d1d1f;
             font-weight: 600;
             margin-bottom: 8px;
         }
-        
+
         .empty-state p {
             color: #8e8e93;
             margin: 0;
             font-size: 16px;
         }
-        
+
         /* 页面头部优化 */
         .page-header {
             background: white;
@@ -292,7 +291,7 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             border: 1px solid #f0f0f0;
         }
-        
+
         .page-title {
             font-size: 32px;
             font-weight: 700;
@@ -303,46 +302,46 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .page-subtitle {
             font-size: 16px;
             color: #8e8e93;
             margin: 0;
         }
-        
+
         /* 移动端布局调整 */
         @media (max-width: 768px) {
             .admin-main-full {
                 padding: 16px;
             }
-            
+
             .page-header {
                 padding: 20px;
                 margin-bottom: 16px;
             }
-            
+
             .page-title {
                 font-size: 24px;
             }
-            
+
             .search-filters {
                 padding: 16px;
                 margin-bottom: 16px;
             }
-            
+
             .search-filters .row > div {
                 margin-bottom: 12px;
             }
-            
+
             .search-filters .row > div:last-child {
                 margin-bottom: 0;
             }
-            
+
             .user-details {
                 grid-template-columns: 1fr;
                 gap: 8px;
             }
-            
+
             .detail-item {
                 padding: 8px;
             }
@@ -357,7 +356,7 @@
                 <i class="fas fa-brain"></i>
                 Angela AI Tool
             </a>
-            
+
             <div class="nav-actions">
                 <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
                     <i class="fas fa-tachometer-alt"></i>
@@ -367,13 +366,13 @@
                     <i class="fas fa-user"></i>
                     <span>个人资料</span>
                 </a>
-                
+
                 <!-- 移动端汉堡菜单 -->
                 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
-            
+
             <!-- 桌面端用户菜单 -->
             <div class="user-menu">
                 <div class="user-info">
@@ -386,7 +385,7 @@
                 </a>
             </div>
         </div>
-        
+
         <!-- 移动端下拉菜单 -->
         <div class="mobile-dropdown">
             <!-- 用户信息 -->
@@ -399,7 +398,7 @@
                     <p>管理员用户</p>
                 </div>
             </div>
-            
+
             <!-- 菜单项 -->
             <a href="{{ url_for('dashboard') }}" class="dropdown-item">
                 <i class="fas fa-tachometer-alt"></i>
@@ -440,11 +439,11 @@
                             <span class="input-group-text">
                                 <i class="fas fa-search"></i>
                             </span>
-                            <input type="text" 
-                                   class="form-control" 
-                                   name="search" 
+                            <input type="text"
+                                   class="form-control"
+                                   name="search"
                                    value="{{ request.args.get('search', '') }}"
-                                   placeholder="搜索用户名或邮箱..." 
+                                   placeholder="搜索用户名或邮箱..."
                                    id="searchInput">
                         </div>
                     </div>
@@ -481,7 +480,7 @@
                         <i class="fas fa-circle"></i>
                         {{ '活跃' if user.is_active else '非活跃' }}
                     </div>
-                    
+
                     <!-- 用户头部信息 -->
                     <div class="user-header">
                         <div class="user-avatar">
@@ -492,7 +491,7 @@
                             <p>{{ user.email or '未设置邮箱' }}</p>
                         </div>
                     </div>
-                    
+
                     <!-- 用户详细信息 -->
                     <div class="user-details">
                         <div class="detail-item">
@@ -518,14 +517,14 @@
                             </span>
                         </div>
                     </div>
-                    
+
                     <!-- 操作按钮 -->
                     <div class="user-actions">
                         <button class="action-btn btn-edit" onclick="editUser({{ user.id }})">
                             <i class="fas fa-edit"></i>
                             编辑
                         </button>
-                        <button class="action-btn btn-delete" onclick="deleteUser({{ user.id }}, '{{ user.username|replace("'", "\\'") }}')">
+                        <button class="action-btn btn-delete" onclick="deleteUser({{ user.id }}, '{{ user.username|replace('\'', '\\\'') }}')">
                             <i class="fas fa-trash-alt"></i>
                             删除
                         </button>
@@ -549,7 +548,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- 移动端菜单脚本 -->
     <script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
-    
+
     <script>
         // 编辑用户
         function editUser(userId) {
@@ -596,7 +595,7 @@
             toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
             toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + message + ' <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>';
             document.body.appendChild(toast);
-            
+
             setTimeout(() => {
                 if (toast.parentNode) {
                     toast.remove();
@@ -609,22 +608,22 @@
             const searchInput = document.getElementById('searchInput');
             const statusFilter = document.getElementById('statusFilter');
             const userCards = document.querySelectorAll('.user-card');
-            
+
             function filterUsers() {
                 const searchValue = searchInput.value.toLowerCase();
                 const statusValue = statusFilter.value;
-                
+
                 userCards.forEach(card => {
                     const userName = card.querySelector('.user-info h3').textContent.toLowerCase();
                     const userEmail = card.querySelector('.user-info p').textContent.toLowerCase();
                     const userStatus = card.querySelector('.user-status');
                     const isActive = userStatus.classList.contains('status-active');
-                    
+
                     const matchesSearch = !searchValue || userName.includes(searchValue) || userEmail.includes(searchValue);
-                    const matchesStatus = !statusValue || 
-                                        (statusValue === 'active' && isActive) || 
+                    const matchesStatus = !statusValue ||
+                                        (statusValue === 'active' && isActive) ||
                                         (statusValue === 'inactive' && !isActive);
-                    
+
                     if (matchesSearch && matchesStatus) {
                         card.style.display = '';
                         card.style.animation = 'fadeInUp 0.3s ease';
@@ -632,12 +631,12 @@
                         card.style.display = 'none';
                     }
                 });
-                
+
                 // 检查是否有可见的卡片
                 const visibleCards = Array.from(userCards).filter(card => card.style.display !== 'none');
                 const emptyState = document.querySelector('.empty-state');
                 const userGrid = document.querySelector('.user-grid');
-                
+
                 if (visibleCards.length === 0 && userCards.length > 0) {
                     if (userGrid) userGrid.style.display = 'none';
                     if (!emptyState) {
@@ -654,19 +653,19 @@
                     }
                 }
             }
-            
+
             if (searchInput) {
                 searchInput.addEventListener('input', filterUsers);
             }
             if (statusFilter) {
                 statusFilter.addEventListener('change', filterUsers);
             }
-            
+
             // 添加动画样式
             const style = document.createElement('style');
             style.textContent = '@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }';
             document.head.appendChild(style);
-            
+
             console.log('用户管理页面功能已初始化');
         });
     </script>

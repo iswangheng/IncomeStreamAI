@@ -85,103 +85,202 @@
     </div>
 </div>
 
-<!-- 用户表格 -->
+<!-- 用户表格 - 响应式设计 -->
 <div class="table-container fade-in" style="animation-delay: 0.5s;">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>姓名</th>
-                <th>手机号</th>
-                <th>用户类型</th>
-                <th>状态</th>
-                <th>创建时间</th>
-                <th>最后登录</th>
-                <th class="text-center">操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-            <tr class="table-row-hover">
-                <td>{{ user.id }}</td>
-                <td>
-                    <div class="user-info">
-                        <div class="user-avatar-small">
-                            <i class="fas fa-user"></i>
+    <!-- 桌面端表格视图 -->
+    <div class="desktop-table-view">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>姓名</th>
+                    <th>手机号</th>
+                    <th>用户类型</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                    <th>最后登录</th>
+                    <th class="text-center">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr class="table-row-hover">
+                    <td>{{ user.id }}</td>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar-small">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-details">
+                                <strong>{{ user.name or '未设置' }}</strong>
+                            </div>
                         </div>
-                        <div class="user-details">
-                            <strong>{{ user.name or '未设置' }}</strong>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <span class="phone-number">{{ user.phone }}</span>
-                </td>
-                <td>
-                    <span class="user-type-badge {% if user.is_admin %}admin{% endif %}">
-                        {% if user.is_admin %}
-                            <i class="fas fa-user-shield"></i>
-                            管理员
+                    </td>
+                    <td>
+                        <span class="phone-number">{{ user.phone }}</span>
+                    </td>
+                    <td>
+                        <span class="user-type-badge {% if user.is_admin %}admin{% endif %}">
+                            {% if user.is_admin %}
+                                <i class="fas fa-user-shield"></i>
+                                管理员
+                            {% else %}
+                                <i class="fas fa-user"></i>
+                                普通用户
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        {% if user.active %}
+                            <span class="status-badge status-active">
+                                <i class="fas fa-check-circle"></i>
+                                活跃
+                            </span>
                         {% else %}
-                            <i class="fas fa-user"></i>
-                            普通用户
+                            <span class="status-badge status-paused">
+                                <i class="fas fa-pause-circle"></i>
+                                停用
+                            </span>
                         {% endif %}
-                    </span>
-                </td>
-                <td>
-                    {% if user.active %}
-                        <span class="status-badge status-active">
-                            <i class="fas fa-check-circle"></i>
-                            活跃
+                    </td>
+                    <td>
+                        <span class="datetime-display">{{ user.created_at_display }}</span>
+                    </td>
+                    <td>
+                        <span class="datetime-display">{{ user.last_login_display }}</span>
+                    </td>
+                    <td class="text-center">
+                        <div class="action-buttons">
+                            <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" 
+                               class="action-btn edit" 
+                               title="编辑用户">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% if user.id != current_user.id %}
+                            <button type="button" 
+                                    class="action-btn delete" 
+                                    onclick="confirmDelete({{ user.id }}, '{{ user.name or user.phone }}')"
+                                    title="删除用户">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <div class="empty-state">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5>暂无用户数据</h5>
+                            <p class="text-muted">还没有注册的用户</p>
+                            <a href="{{ url_for('admin_add_user') }}" class="btn btn-primary">
+                                <i class="fas fa-user-plus me-2"></i>
+                                添加第一个用户
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 移动端卡片视图 -->
+    <div class="mobile-cards-view">
+        {% for user in users %}
+        <div class="user-card">
+            <div class="user-card-header">
+                <div class="user-main-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-basic">
+                        <h4 class="user-name">{{ user.name or '未设置' }}</h4>
+                        <p class="user-phone">{{ user.phone }}</p>
+                    </div>
+                </div>
+                <div class="user-id">
+                    <span class="id-label">ID</span>
+                    <span class="id-value">{{ user.id }}</span>
+                </div>
+            </div>
+            
+            <div class="user-card-body">
+                <div class="user-card-row">
+                    <div class="card-field">
+                        <label>用户类型</label>
+                        <span class="user-type-badge {% if user.is_admin %}admin{% endif %}">
+                            {% if user.is_admin %}
+                                <i class="fas fa-user-shield"></i>
+                                管理员
+                            {% else %}
+                                <i class="fas fa-user"></i>
+                                普通用户
+                            {% endif %}
                         </span>
-                    {% else %}
-                        <span class="status-badge status-paused">
-                            <i class="fas fa-pause-circle"></i>
-                            停用
-                        </span>
-                    {% endif %}
-                </td>
-                <td>
-                    <span class="datetime-display">{{ user.created_at_display }}</span>
-                </td>
-                <td>
-                    <span class="datetime-display">{{ user.last_login_display }}</span>
-                </td>
-                <td class="text-center">
-                    <div class="action-buttons">
-                        <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" 
-                           class="btn btn-sm btn-outline-primary" 
-                           title="编辑用户">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        {% if user.id != current_user.id %}
-                        <button type="button" 
-                                class="btn btn-sm btn-outline-danger" 
-                                onclick="confirmDelete({{ user.id }}, '{{ user.name or user.phone }}')"
-                                title="删除用户">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                    </div>
+                    <div class="card-field">
+                        <label>状态</label>
+                        {% if user.active %}
+                            <span class="status-badge status-active">
+                                <i class="fas fa-check-circle"></i>
+                                活跃
+                            </span>
+                        {% else %}
+                            <span class="status-badge status-paused">
+                                <i class="fas fa-pause-circle"></i>
+                                停用
+                            </span>
                         {% endif %}
                     </div>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="8" class="text-center py-5">
-                    <div class="empty-state">
-                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
-                        <h5>暂无用户数据</h5>
-                        <p class="text-muted">还没有注册的用户</p>
-                        <a href="{{ url_for('admin_add_user') }}" class="btn btn-primary">
-                            <i class="fas fa-user-plus me-2"></i>
-                            添加第一个用户
-                        </a>
+                </div>
+                
+                <div class="user-card-row">
+                    <div class="card-field">
+                        <label>创建时间</label>
+                        <span class="datetime-value">{{ user.created_at_display }}</span>
                     </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                </div>
+                
+                <div class="user-card-row">
+                    <div class="card-field">
+                        <label>最后登录</label>
+                        <span class="datetime-value">{{ user.last_login_display }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="user-card-actions">
+                <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" 
+                   class="mobile-action-btn edit">
+                    <i class="fas fa-edit"></i>
+                    编辑
+                </a>
+                {% if user.id != current_user.id %}
+                <button type="button" 
+                        class="mobile-action-btn delete" 
+                        onclick="confirmDelete({{ user.id }}, '{{ user.name or user.phone }}')">
+                    <i class="fas fa-trash"></i>
+                    删除
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="mobile-empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>暂无用户数据</h3>
+            <p>还没有注册的用户</p>
+            <a href="{{ url_for('admin_add_user') }}" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i>
+                添加第一个用户
+            </a>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 <!-- 删除确认模态框 -->
@@ -253,6 +352,7 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
 </script>
 
 <style>
+/* 基础样式 */
 .user-info {
     display: flex;
     align-items: center;
@@ -309,6 +409,283 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
     padding: var(--space-8);
 }
 
+/* 响应式视图控制 */
+.mobile-cards-view {
+    display: none;
+}
+
+.desktop-table-view {
+    display: block;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .desktop-table-view {
+        display: none;
+    }
+    
+    .mobile-cards-view {
+        display: block;
+        padding: 0;
+    }
+    
+    /* 用户卡片样式 */
+    .user-card {
+        background: var(--color-bg-primary);
+        border-radius: var(--radius-xl);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--color-gray-200);
+        margin-bottom: var(--space-4);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 122, 255, 0.15);
+    }
+    
+    /* 卡片头部 */
+    .user-card-header {
+        padding: var(--space-4);
+        background: linear-gradient(135deg, rgba(0, 122, 255, 0.05) 0%, rgba(255, 255, 255, 0.8) 100%);
+        border-bottom: 1px solid var(--color-gray-200);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .user-main-info {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        flex: 1;
+    }
+    
+    .user-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    
+    .user-basic {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .user-name {
+        font-size: var(--text-lg);
+        font-weight: var(--font-semibold);
+        color: var(--color-text-primary);
+        margin: 0 0 4px 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .user-phone {
+        font-size: var(--text-sm);
+        color: var(--color-text-secondary);
+        font-family: var(--font-mono);
+        margin: 0;
+        font-weight: 500;
+    }
+    
+    .user-id {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(0, 122, 255, 0.1);
+        padding: var(--space-2);
+        border-radius: var(--radius-md);
+        min-width: 50px;
+    }
+    
+    .id-label {
+        font-size: 10px;
+        color: var(--color-primary);
+        font-weight: var(--font-medium);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .id-value {
+        font-size: var(--text-base);
+        font-weight: var(--font-bold);
+        color: var(--color-primary);
+    }
+    
+    /* 卡片内容 */
+    .user-card-body {
+        padding: var(--space-4);
+    }
+    
+    .user-card-row {
+        display: flex;
+        gap: var(--space-4);
+        margin-bottom: var(--space-3);
+    }
+    
+    .user-card-row:last-child {
+        margin-bottom: 0;
+    }
+    
+    .card-field {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .card-field label {
+        display: block;
+        font-size: 11px;
+        color: var(--color-text-tertiary);
+        font-weight: var(--font-medium);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    
+    .datetime-value {
+        font-size: var(--text-xs);
+        color: var(--color-text-secondary);
+        line-height: 1.3;
+    }
+    
+    /* 卡片操作区 */
+    .user-card-actions {
+        padding: var(--space-3) var(--space-4);
+        background: var(--color-gray-50);
+        border-top: 1px solid var(--color-gray-200);
+        display: flex;
+        gap: var(--space-3);
+    }
+    
+    .mobile-action-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-lg);
+        font-size: var(--text-sm);
+        font-weight: var(--font-medium);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        min-height: 44px;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .mobile-action-btn.edit {
+        background: var(--color-primary);
+        color: white;
+    }
+    
+    .mobile-action-btn.edit:hover {
+        background: var(--color-primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    }
+    
+    .mobile-action-btn.delete {
+        background: var(--status-deleted);
+        color: white;
+    }
+    
+    .mobile-action-btn.delete:hover {
+        background: #c62828;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+    }
+    
+    /* 移动端空状态 */
+    .mobile-empty-state {
+        text-align: center;
+        padding: var(--space-8) var(--space-4);
+    }
+    
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--color-gray-100);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-4);
+        color: var(--color-text-tertiary);
+        font-size: var(--text-2xl);
+    }
+    
+    .mobile-empty-state h3 {
+        font-size: var(--text-lg);
+        font-weight: var(--font-semibold);
+        color: var(--color-text-primary);
+        margin: 0 0 var(--space-2);
+    }
+    
+    .mobile-empty-state p {
+        font-size: var(--text-sm);
+        color: var(--color-text-secondary);
+        margin: 0 0 var(--space-6);
+    }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+    .user-card {
+        margin-bottom: var(--space-3);
+        border-radius: var(--radius-lg);
+    }
+    
+    .user-card-header {
+        padding: var(--space-3);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+    }
+    
+    .user-main-info {
+        width: 100%;
+    }
+    
+    .user-id {
+        align-self: flex-end;
+    }
+    
+    .user-card-body {
+        padding: var(--space-3);
+    }
+    
+    .user-card-row {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    
+    .user-card-actions {
+        padding: var(--space-3);
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .mobile-action-btn {
+        min-height: 48px;
+    }
+}
+
+/* 模态框样式 */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -375,6 +752,31 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
     display: flex;
     gap: var(--space-3);
     justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .modal-dialog {
+        width: 95%;
+        margin: var(--space-4);
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: var(--space-4);
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+    
+    .modal-footer button,
+    .modal-footer .btn {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+    }
 }
 </style>
 {% endblock %}

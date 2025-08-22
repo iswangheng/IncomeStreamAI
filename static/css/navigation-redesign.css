@@ -326,8 +326,8 @@
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
         border-radius: 16px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-        border: 0.5px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(0, 0, 0, 0.1);
         padding: 16px;
         display: none;
         animation: slideDown 0.3s ease;
@@ -338,6 +338,8 @@
         -webkit-overflow-scrolling: touch;
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
+        /* 确保菜单内容清晰可见 */
+        isolation: isolate;
     }
     
     .mobile-dropdown.show {
@@ -422,12 +424,14 @@
     .mobile-user-info {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 12px;
-        background: rgba(0, 122, 255, 0.05);
-        border-radius: 12px;
-        margin-bottom: 12px;
-        border: 1px solid rgba(0, 122, 255, 0.1);
+        gap: 12px;
+        padding: 16px;
+        background: rgba(0, 122, 255, 0.08);
+        border-radius: 14px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(0, 122, 255, 0.15);
+        position: relative;
+        z-index: 10;
     }
     
     .mobile-user-info .user-avatar {
@@ -472,20 +476,22 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 10px 12px;
-        margin-bottom: 6px;
-        background: #f5f5f7;
-        border-radius: 10px;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        background: rgba(245, 245, 247, 0.8);
+        border-radius: 12px;
         text-decoration: none;
         color: #1d1d1f;
         font-weight: 500;
         transition: all 0.2s ease;
-        border: none;
+        border: 1px solid rgba(0, 0, 0, 0.05);
         width: 100%;
         text-align: left;
-        font-size: 14px;
-        min-height: 44px;
+        font-size: 15px;
+        min-height: 48px;
         box-sizing: border-box;
+        position: relative;
+        z-index: 10;
     }
     
     .mobile-dropdown .dropdown-item:last-child {

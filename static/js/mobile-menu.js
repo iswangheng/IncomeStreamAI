@@ -66,10 +66,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(0, 0, 0, 0.4);
+                background: rgba(0, 0, 0, 0.1);
                 z-index: 2147483646;
-                backdrop-filter: blur(3px);
-                -webkit-backdrop-filter: blur(3px);
+                backdrop-filter: blur(1px);
+                -webkit-backdrop-filter: blur(1px);
                 transform: translateZ(0);
                 -webkit-transform: translateZ(0);
             `;

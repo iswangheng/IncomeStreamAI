@@ -76,17 +76,22 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 延迟添加事件监听器，避免立即触发
             setTimeout(() => {
-                backdrop.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleMobileMenu();
-                });
-                backdrop.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleMobileMenu();
-                });
-            }, 100);
+                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                
+                if (isTouchDevice) {
+                    backdrop.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleMobileMenu();
+                    });
+                } else {
+                    backdrop.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleMobileMenu();
+                    });
+                }
+            }, 200);
             
             document.body.appendChild(backdrop);
             
@@ -108,18 +113,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // 绑定汉堡菜单点击事件
     const menuToggle = document.querySelector('.mobile-menu-toggle');
     if (menuToggle) {
-        menuToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleMobileMenu();
-        });
+        // 检测是否为触摸设备
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         
-        // 为移动端添加触摸事件支持
-        menuToggle.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleMobileMenu();
-        });
+        if (isTouchDevice) {
+            // 仅绑定触摸事件，避免双重触发
+            menuToggle.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleMobileMenu();
+            });
+        } else {
+            // 桌面设备使用点击事件
+            menuToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleMobileMenu();
+            });
+        }
     }
     
     // 点击菜单项后关闭菜单

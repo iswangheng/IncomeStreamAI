@@ -20,8 +20,25 @@ document.addEventListener('DOMContentLoaded', function() {
             userMenu.classList.toggle('active');
         });
         
-        // 点击其他地方关闭菜单
+        // 点击其他地方关闭菜单 - 避免与移动端菜单冲突
         document.addEventListener('click', function(e) {
+            // 如果点击的是移动端菜单相关元素，不关闭用户菜单
+            const mobileDropdown = document.querySelector('.mobile-dropdown');
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const backdrop = document.querySelector('.mobile-menu-backdrop');
+            
+            if (mobileDropdown && mobileDropdown.classList.contains('show')) {
+                return; // 移动端菜单开启时不处理
+            }
+            
+            if (e.target === mobileToggle || (mobileToggle && mobileToggle.contains(e.target))) {
+                return; // 点击移动端菜单按钮时不处理
+            }
+            
+            if (e.target === backdrop) {
+                return; // 点击移动端背景遮罩时不处理
+            }
+            
             if (!userMenu.contains(e.target)) {
                 userMenu.classList.remove('active');
             }

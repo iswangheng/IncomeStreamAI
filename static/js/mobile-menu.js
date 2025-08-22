@@ -39,13 +39,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(0, 0, 0, 0.3);
-                z-index: 999999;
-                backdrop-filter: blur(2px);
-                -webkit-backdrop-filter: blur(2px);
+                background: rgba(0, 0, 0, 0.4);
+                z-index: 2147483646;
+                backdrop-filter: blur(3px);
+                -webkit-backdrop-filter: blur(3px);
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
             `;
             backdrop.addEventListener('click', toggleMobileMenu);
+            backdrop.addEventListener('touchstart', toggleMobileMenu);
             document.body.appendChild(backdrop);
+            
+            // 禁止背景滚动
+            document.body.style.overflow = 'hidden';
         }
     }
     
@@ -54,6 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const backdrop = document.querySelector('.mobile-menu-backdrop');
         if (backdrop) {
             backdrop.remove();
+            // 恢复背景滚动
+            document.body.style.overflow = '';
         }
     }
     

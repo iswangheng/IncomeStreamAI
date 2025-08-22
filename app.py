@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import traceback
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -343,8 +344,6 @@ def _internal_check_analysis_status():
             
             # 保存备用方案到数据库
             import uuid
-            import json
-            from models import AnalysisResult
             
             fallback_id = str(uuid.uuid4())
             analysis_result = AnalysisResult(
@@ -433,8 +432,6 @@ def _handle_analysis_execution(form_data, session):
             
             # 保存完整的分析结果到数据库
             try:
-                from models import AnalysisResult
-                import json
                 
                 # 创建AnalysisResult实例
                 analysis_result = AnalysisResult(
@@ -510,8 +507,6 @@ def _handle_analysis_execution(form_data, session):
                 
                 # 保存备用方案到数据库
                 import uuid
-                import json
-                from models import AnalysisResult
                 
                 fallback_id = str(uuid.uuid4())
                 analysis_result = AnalysisResult(
@@ -796,7 +791,6 @@ def results():
                     
                     # 将备用方案也保存到数据库
                     try:
-                        from models import AnalysisResult
                         import uuid
                         fallback_id = str(uuid.uuid4())
                         
@@ -847,8 +841,6 @@ def results():
             # 尝试从数据库获取任何存在的结果
             if result_id:
                 try:
-                    from models import AnalysisResult
-                    import json
                     
                     analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
                     if analysis_record and analysis_record.result_data:
@@ -869,9 +861,7 @@ def results():
                 
                 # 保存到数据库
                 try:
-                    from models import AnalysisResult
                     import uuid
-                    import json
                     
                     emergency_id = str(uuid.uuid4())
                     analysis_result = AnalysisResult(

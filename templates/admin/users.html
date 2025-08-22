@@ -17,267 +17,335 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-apple-design.css') }}">
     
     <style>
-        /* 移动端用户列表优化样式 */
-        .mobile-user-card {
+        /* 移动端优先的用户卡片设计 */
+        .user-grid {
+            display: grid;
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        /* 移动端：单列布局 */
+        @media (max-width: 768px) {
+            .user-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 平板端：双列布局 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .user-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* 桌面端：三列布局 */
+        @media (min-width: 1025px) {
+            .user-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .user-card {
             background: white;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             border: 1px solid #f0f0f0;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
         
-        .mobile-user-card:hover {
-            box-shadow: 0 4px 20px rgba(0, 122, 255, 0.15);
-            transform: translateY(-2px);
+        .user-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .mobile-user-header {
+        .user-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 122, 255, 0.2);
+            border-color: rgba(0, 122, 255, 0.3);
+        }
+        
+        .user-card:hover::before {
+            opacity: 1;
+        }
+        
+        .user-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #f0f0f0;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f5f5f7;
         }
         
-        .mobile-user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .mobile-user-avatar {
-            width: 48px;
-            height: 48px;
+        .user-avatar {
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             background: linear-gradient(135deg, #007AFF, #5856D6);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            font-size: 20px;
+            font-weight: 700;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+        
+        .user-info h3 {
+            margin: 0 0 4px 0;
             font-size: 18px;
             font-weight: 600;
-            flex-shrink: 0;
-        }
-        
-        .mobile-user-details h5 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
             color: #1d1d1f;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            line-height: 1.2;
         }
         
-        .mobile-user-details p {
-            margin: 4px 0 0 0;
+        .user-info p {
+            margin: 0;
             font-size: 14px;
             color: #8e8e93;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            line-height: 1.3;
         }
         
-        .mobile-user-status {
-            padding: 4px 8px;
+        .user-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 6px 12px;
             border-radius: 12px;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             text-align: center;
-            min-width: 60px;
         }
         
-        .mobile-user-status.active {
+        .status-active {
             background: #d4edda;
             color: #155724;
         }
         
-        .mobile-user-status.inactive {
+        .status-inactive {
             background: #f8d7da;
             color: #721c24;
         }
         
-        .mobile-user-meta {
+        .user-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
         
-        .mobile-meta-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .detail-item {
+            text-align: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            transition: all 0.2s ease;
         }
         
-        .mobile-meta-label {
-            font-size: 12px;
+        .detail-item:hover {
+            background: #e3f2fd;
+        }
+        
+        .detail-label {
+            display: block;
+            font-size: 11px;
             color: #8e8e93;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 4px;
         }
         
-        .mobile-meta-value {
+        .detail-value {
             font-size: 14px;
             color: #1d1d1f;
-            font-weight: 500;
+            font-weight: 600;
         }
         
-        .mobile-user-actions {
+        .user-actions {
             display: flex;
             gap: 8px;
-            justify-content: flex-end;
         }
         
-        .mobile-action-btn {
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
+        .action-btn {
+            flex: 1;
+            padding: 12px;
             border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 4px;
-            min-height: 36px;
-            min-width: 80px;
             justify-content: center;
+            gap: 6px;
+            min-height: 44px;
         }
         
-        .mobile-action-btn.edit {
+        .btn-edit {
             background: #e3f2fd;
             color: #1976d2;
         }
         
-        .mobile-action-btn.edit:hover {
+        .btn-edit:hover {
             background: #bbdefb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
         }
         
-        .mobile-action-btn.delete {
+        .btn-delete {
             background: #ffebee;
             color: #d32f2f;
         }
         
-        .mobile-action-btn.delete:hover {
+        .btn-delete:hover {
             background: #ffcdd2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
         }
         
-        /* 桌面端表格样式 */
-        .desktop-table {
+        /* 搜索和筛选区域优化 */
+        .search-filters {
             background: white;
-            border-radius: 16px;
-            overflow: hidden;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f0f0f0;
         }
         
-        .desktop-table .table {
-            margin: 0;
+        .search-filters .form-control,
+        .search-filters .form-select {
+            border-radius: 12px;
+            border: 2px solid #f0f0f0;
+            padding: 14px 16px;
+            font-size: 16px;
+            transition: all 0.2s ease;
         }
         
-        .desktop-table .table thead th {
-            background: linear-gradient(135deg, #007AFF, #5856D6);
-            color: white;
+        .search-filters .form-control:focus,
+        .search-filters .form-select:focus {
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        
+        .search-filters .btn {
+            border-radius: 12px;
+            padding: 14px 20px;
             font-weight: 600;
-            border: none;
-            padding: 16px;
+            min-height: 52px;
         }
         
-        .desktop-table .table tbody td {
-            padding: 16px;
-            vertical-align: middle;
-            border-top: 1px solid #f0f0f0;
-        }
-        
-        /* 响应式控制 */
-        @media (min-width: 769px) {
-            .mobile-user-list {
-                display: none;
-            }
-            .desktop-table {
-                display: block;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .mobile-user-list {
-                display: block;
-            }
-            .desktop-table {
-                display: none;
-            }
-            
-            .admin-main-full {
-                padding: 16px;
-            }
-            
-            .admin-page-header {
-                margin: 0 0 16px 0;
-                padding: 16px;
-            }
-            
-            .admin-page-title {
-                font-size: 24px;
-            }
-            
-            .admin-page-subtitle {
-                font-size: 14px;
-            }
-            
-            .table-filters {
-                margin: 0 0 16px 0;
-                padding: 16px;
-                background: white;
-                border-radius: 16px;
-                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            }
-            
-            .table-filters form {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .table-filters .form-control {
-                font-size: 16px;
-                padding: 12px;
-            }
-            
-            .table-filters .btn {
-                min-height: 44px;
-                font-size: 16px;
-            }
-        }
-        
-        /* 空状态样式 */
+        /* 空状态优化 */
         .empty-state {
             text-align: center;
-            padding: 40px 20px;
+            padding: 60px 20px;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f0f0f0;
         }
         
-        .empty-state i {
-            font-size: 48px;
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
             color: #8e8e93;
-            margin-bottom: 16px;
         }
         
-        .empty-state h5 {
+        .empty-state h3 {
             color: #1d1d1f;
+            font-weight: 600;
             margin-bottom: 8px;
         }
         
         .empty-state p {
             color: #8e8e93;
             margin: 0;
+            font-size: 16px;
+        }
+        
+        /* 页面头部优化 */
+        .page-header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f0f0f0;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .page-subtitle {
+            font-size: 16px;
+            color: #8e8e93;
+            margin: 0;
+        }
+        
+        /* 移动端布局调整 */
+        @media (max-width: 768px) {
+            .admin-main-full {
+                padding: 16px;
+            }
+            
+            .page-header {
+                padding: 20px;
+                margin-bottom: 16px;
+            }
+            
+            .page-title {
+                font-size: 24px;
+            }
+            
+            .search-filters {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+            
+            .search-filters .row > div {
+                margin-bottom: 12px;
+            }
+            
+            .search-filters .row > div:last-child {
+                margin-bottom: 0;
+            }
+            
+            .user-details {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .detail-item {
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -355,40 +423,48 @@
     <!-- 主内容区域 -->
     <div class="admin-main-full">
         <!-- 页面标题 -->
-        <div class="admin-page-header">
-            <h1 class="admin-page-title">用户管理</h1>
-            <p class="admin-page-subtitle">管理系统中的所有用户账户和权限</p>
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-users"></i>
+                用户管理
+            </h1>
+            <p class="page-subtitle">管理系统中的所有用户账户和权限设置</p>
         </div>
 
-        <!-- 筛选和搜索 -->
-        <div class="table-filters">
+        <!-- 搜索和筛选 -->
+        <div class="search-filters">
             <form method="GET" action="{{ url_for('admin_users') }}">
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <input type="text" 
-                               class="form-control" 
-                               name="search" 
-                               value="{{ request.args.get('search', '') }}"
-                               placeholder="搜索用户名或邮箱..." 
-                               id="searchInput">
+                    <div class="col-12 col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="search" 
+                                   value="{{ request.args.get('search', '') }}"
+                                   placeholder="搜索用户名或邮箱..." 
+                                   id="searchInput">
+                        </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-3">
                         <select class="form-select" name="status" id="statusFilter">
                             <option value="">所有状态</option>
-                            <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>活跃</option>
-                            <option value="inactive" {% if request.args.get('status') == 'inactive' %}selected{% endif %}>非活跃</option>
+                            <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>活跃用户</option>
+                            <option value="inactive" {% if request.args.get('status') == 'inactive' %}selected{% endif %}>非活跃用户</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="fas fa-search"></i>
-                            <span class="d-none d-md-inline">搜索</span>
+                            <span class="d-none d-sm-inline ms-1">搜索</span>
                         </button>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-6 col-md-3">
                         <a href="{{ url_for('add_user') }}" class="btn btn-success w-100">
                             <i class="fas fa-plus"></i>
-                            <span class="d-none d-md-inline">添加用户</span>
+                            <span class="d-none d-sm-inline ms-1">添加用户</span>
                         </a>
                     </div>
                 </div>
@@ -396,106 +472,75 @@
         </div>
 
         {% if users %}
-            <!-- 移动端用户列表 -->
-            <div class="mobile-user-list">
+            <!-- 用户卡片网格 -->
+            <div class="user-grid">
                 {% for user in users %}
-                <div class="mobile-user-card">
-                    <div class="mobile-user-header">
-                        <div class="mobile-user-info">
-                            <div class="mobile-user-avatar">
-                                {{ user.username[0].upper() }}
-                            </div>
-                            <div class="mobile-user-details">
-                                <h5>{{ user.username }}</h5>
-                                <p>{{ user.email or '未设置邮箱' }}</p>
-                            </div>
+                <div class="user-card">
+                    <!-- 状态标签 -->
+                    <div class="user-status {{ 'status-active' if user.is_active else 'status-inactive' }}">
+                        <i class="fas fa-circle"></i>
+                        {{ '活跃' if user.is_active else '非活跃' }}
+                    </div>
+                    
+                    <!-- 用户头部信息 -->
+                    <div class="user-header">
+                        <div class="user-avatar">
+                            {{ user.username[0].upper() }}
                         </div>
-                        <div class="mobile-user-status {{ 'active' if user.is_active else 'inactive' }}">
-                            {{ '活跃' if user.is_active else '非活跃' }}
+                        <div class="user-info">
+                            <h3>{{ user.username }}</h3>
+                            <p>{{ user.email or '未设置邮箱' }}</p>
                         </div>
                     </div>
                     
-                    <div class="mobile-user-meta">
-                        <div class="mobile-meta-item">
-                            <span class="mobile-meta-label">角色权限</span>
-                            <span class="mobile-meta-value">
+                    <!-- 用户详细信息 -->
+                    <div class="user-details">
+                        <div class="detail-item">
+                            <span class="detail-label">用户ID</span>
+                            <span class="detail-value">#{{ user.id }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">角色权限</span>
+                            <span class="detail-value">
+                                <i class="fas {{ 'fa-crown' if user.is_admin else 'fa-user' }}"></i>
                                 {{ '管理员' if user.is_admin else '普通用户' }}
                             </span>
                         </div>
-                        <div class="mobile-meta-item">
-                            <span class="mobile-meta-label">注册时间</span>
-                            <span class="mobile-meta-value">
-                                {{ user.created_at.strftime('%m/%d') if user.created_at else '未知' }}
+                        <div class="detail-item">
+                            <span class="detail-label">注册时间</span>
+                            <span class="detail-value">{{ user.created_at.strftime('%m/%d %H:%M') if user.created_at else '未知' }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最后活跃</span>
+                            <span class="detail-value">
+                                <i class="fas fa-clock"></i>
+                                最近
                             </span>
                         </div>
                     </div>
                     
-                    <div class="mobile-user-actions">
-                        <button class="mobile-action-btn edit" onclick="editUser({{ user.id }})">
+                    <!-- 操作按钮 -->
+                    <div class="user-actions">
+                        <button class="action-btn btn-edit" onclick="editUser({{ user.id }})">
                             <i class="fas fa-edit"></i>
                             编辑
                         </button>
-                        <button class="mobile-action-btn delete" onclick="deleteUser({{ user.id }}, '{{ user.username|e }}')">
-                            <i class="fas fa-trash"></i>
+                        <button class="action-btn btn-delete" onclick="deleteUser({{ user.id }}, '{{ user.username|replace("'", "\\'") }}')">
+                            <i class="fas fa-trash-alt"></i>
                             删除
                         </button>
                     </div>
                 </div>
                 {% endfor %}
             </div>
-
-            <!-- 桌面端表格 -->
-            <div class="desktop-table">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>用户名</th>
-                            <th>邮箱</th>
-                            <th>角色</th>
-                            <th>状态</th>
-                            <th>注册时间</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.username }}</td>
-                            <td>{{ user.email or '未设置' }}</td>
-                            <td>
-                                <span class="badge bg-primary">
-                                    {{ '管理员' if user.is_admin else '普通用户' }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge {{ 'bg-success' if user.is_active else 'bg-secondary' }}">
-                                    {{ '活跃' if user.is_active else '非活跃' }}
-                                </span>
-                            </td>
-                            <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else '未知' }}</td>
-                            <td>
-                                <button class="btn btn-info btn-sm" onclick="editUser({{ user.id }})">
-                                    <i class="fas fa-edit"></i>
-                                    编辑
-                                </button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteUser({{ user.id }}, '{{ user.username|e }}')">
-                                    <i class="fas fa-trash"></i>
-                                    删除
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
         {% else %}
             <!-- 空状态 -->
             <div class="empty-state">
-                <i class="fas fa-users"></i>
-                <h5>暂无用户数据</h5>
-                <p>系统中还没有注册用户，点击上方"添加用户"开始创建</p>
+                <div class="empty-icon">
+                    <i class="fas fa-users-slash"></i>
+                </div>
+                <h3>暂无用户数据</h3>
+                <p>系统中还没有符合条件的用户，尝试调整筛选条件或添加新用户</p>
             </div>
         {% endif %}
     </div>
@@ -506,12 +551,12 @@
     <script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
     
     <script>
-        // 确保全局函数定义
-        window.editUser = function(userId) {
+        // 全局函数定义
+        function editUser(userId) {
             window.location.href = '/admin/users/' + userId + '/edit';
-        };
+        }
 
-        window.deleteUser = function(userId, userName) {
+        function deleteUser(userId, userName) {
             if (confirm('确定要删除用户 "' + userName + '" 吗？此操作不可撤销！')) {
                 fetch('/admin/users/' + userId + '/delete', {
                     method: 'POST',
@@ -522,85 +567,121 @@
                 })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error('删除请求失败');
                     }
                     return response.json();
                 })
                 .then(data => {
                     if (data.success) {
-                        alert('用户删除成功');
-                        window.location.reload();
+                        showToast('用户删除成功', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
                     } else {
-                        alert('删除失败：' + (data.message || '未知错误'));
+                        showToast('删除失败：' + (data.message || '未知错误'), 'error');
                     }
                 })
                 .catch(error => {
                     console.error('删除用户失败:', error);
-                    alert('删除失败，请稍后重试');
+                    showToast('删除失败，请稍后重试', 'error');
                 });
             }
-        };
+        }
+
+        // 简单的提示功能
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
 
         // 实时搜索功能
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('用户管理页面已加载');
-            
             const searchInput = document.getElementById('searchInput');
             const statusFilter = document.getElementById('statusFilter');
+            const userCards = document.querySelectorAll('.user-card');
             
-            if (searchInput && statusFilter) {
-                function filterUsers() {
-                    const search = searchInput.value.toLowerCase();
-                    const statusValue = statusFilter.value;
+            function filterUsers() {
+                const searchValue = searchInput.value.toLowerCase();
+                const statusValue = statusFilter.value;
+                
+                userCards.forEach(card => {
+                    const userName = card.querySelector('.user-info h3').textContent.toLowerCase();
+                    const userEmail = card.querySelector('.user-info p').textContent.toLowerCase();
+                    const userStatus = card.querySelector('.user-status');
+                    const isActive = userStatus.classList.contains('status-active');
                     
-                    // 移动端卡片过滤
-                    const mobileCards = document.querySelectorAll('.mobile-user-card');
-                    mobileCards.forEach(card => {
-                        const userNameElement = card.querySelector('.mobile-user-details h5');
-                        const userEmailElement = card.querySelector('.mobile-user-details p');
-                        const userStatusElement = card.querySelector('.mobile-user-status');
-                        
-                        if (userNameElement && userEmailElement && userStatusElement) {
-                            const userName = userNameElement.textContent.toLowerCase();
-                            const userEmail = userEmailElement.textContent.toLowerCase();
-                            const isActive = userStatusElement.classList.contains('active');
-                            
-                            const matchesSearch = !search || userName.includes(search) || userEmail.includes(search);
-                            const matchesStatus = !statusValue || 
-                                                (statusValue === 'active' && isActive) || 
-                                                (statusValue === 'inactive' && !isActive);
-                            
-                            card.style.display = matchesSearch && matchesStatus ? '' : 'none';
-                        }
-                    });
+                    const matchesSearch = !searchValue || userName.includes(searchValue) || userEmail.includes(searchValue);
+                    const matchesStatus = !statusValue || 
+                                        (statusValue === 'active' && isActive) || 
+                                        (statusValue === 'inactive' && !isActive);
                     
-                    // 桌面端表格行过滤
-                    const tableRows = document.querySelectorAll('.desktop-table tbody tr');
-                    tableRows.forEach(row => {
-                        if (row.cells && row.cells.length >= 5) {
-                            const userName = row.cells[1].textContent.toLowerCase();
-                            const userEmail = row.cells[2].textContent.toLowerCase();
-                            const statusBadge = row.cells[4].querySelector('.badge');
-                            
-                            if (statusBadge) {
-                                const isActive = statusBadge.classList.contains('bg-success');
-                                
-                                const matchesSearch = !search || userName.includes(search) || userEmail.includes(search);
-                                const matchesStatus = !statusValue || 
-                                                    (statusValue === 'active' && isActive) || 
-                                                    (statusValue === 'inactive' && !isActive);
-                                
-                                row.style.display = matchesSearch && matchesStatus ? '' : 'none';
-                            }
-                        }
-                    });
+                    if (matchesSearch && matchesStatus) {
+                        card.style.display = '';
+                        card.style.animation = 'fadeInUp 0.3s ease';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // 检查是否有可见的卡片
+                const visibleCards = Array.from(userCards).filter(card => card.style.display !== 'none');
+                const emptyState = document.querySelector('.empty-state');
+                const userGrid = document.querySelector('.user-grid');
+                
+                if (visibleCards.length === 0 && userCards.length > 0) {
+                    if (userGrid) userGrid.style.display = 'none';
+                    if (!emptyState) {
+                        const emptyDiv = document.createElement('div');
+                        emptyDiv.className = 'empty-state';
+                        emptyDiv.innerHTML = `
+                            <div class="empty-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>未找到匹配的用户</h3>
+                            <p>尝试调整搜索条件或筛选选项</p>
+                        `;
+                        document.querySelector('.admin-main-full').appendChild(emptyDiv);
+                    }
+                } else {
+                    if (userGrid) userGrid.style.display = '';
+                    const tempEmptyState = document.querySelector('.empty-state:last-child');
+                    if (tempEmptyState && tempEmptyState !== emptyState) {
+                        tempEmptyState.remove();
+                    }
                 }
-                
-                searchInput.addEventListener('input', filterUsers);
-                statusFilter.addEventListener('change', filterUsers);
-                
-                console.log('用户搜索功能已初始化');
             }
+            
+            searchInput.addEventListener('input', filterUsers);
+            statusFilter.addEventListener('change', filterUsers);
+            
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            console.log('用户管理页面功能已初始化');
         });
     </script>
 </body>

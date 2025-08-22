@@ -35,6 +35,12 @@
                     <i class="fas fa-sign-in-alt"></i>
                     {{ user.last_login_display }}
                 </span>
+                <span class="meta-item">
+                    <i class="fas fa-user-tag"></i>
+                    <span class="user-type-badge {% if user.is_admin %}admin{% endif %}">
+                        {{ user.user_type_display }}
+                    </span>
+                </span>
             </div>
         </div>
     </div>
@@ -84,6 +90,45 @@
                                value="{{ user.phone }}">
                     </div>
                     <div class="form-help">用于登录的手机号码</div>
+                </div>
+            </div>
+            
+            <!-- 用户类型设置区域 -->
+            <div class="user-type-section">
+                <div class="section-header">
+                    <h4 class="section-title">
+                        <i class="fas fa-user-tag"></i>
+                        用户类型
+                    </h4>
+                </div>
+                <div class="form-group">
+                    <div class="user-type-options">
+                        <label class="type-option">
+                            <input type="radio" name="user_type" value="user" {% if not user.is_admin %}checked{% endif %} onchange="updateUserTypeCheckbox(false)">
+                            <div class="option-card">
+                                <div class="option-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="option-content">
+                                    <h5>普通用户</h5>
+                                    <p>只能访问前台功能和个人设置</p>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="type-option">
+                            <input type="radio" name="user_type" value="admin" {% if user.is_admin %}checked{% endif %} onchange="updateUserTypeCheckbox(true)">
+                            <div class="option-card admin-option">
+                                <div class="option-icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="option-content">
+                                    <h5>管理员</h5>
+                                    <p>可以访问前台功能和后台管理中心</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    <input type="checkbox" name="is_admin" id="isAdminCheckbox" style="display: none;" {% if user.is_admin %}checked{% endif %}>
                 </div>
             </div>
             
@@ -156,6 +201,12 @@
 </div>
 
 <script>
+// 更新用户类型复选框
+function updateUserTypeCheckbox(isAdmin) {
+    const checkbox = document.getElementById('isAdminCheckbox');
+    checkbox.checked = isAdmin;
+}
+
 // 切换密码字段显示
 function togglePasswordFields() {
     const checkbox = document.getElementById('changePassword');
@@ -486,6 +537,114 @@ document.getElementById('confirm_password').addEventListener('input', function(e
 .password-fields {
     padding-top: var(--space-4);
     border-top: 1px solid var(--color-gray-200);
+}
+
+.user-type-section {
+    margin-bottom: var(--space-8);
+    padding: var(--space-6);
+    background: var(--color-gray-50);
+    border-radius: var(--radius-lg);
+}
+
+.user-type-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+}
+
+.type-option {
+    cursor: pointer;
+}
+
+.type-option input[type="radio"] {
+    display: none;
+}
+
+.option-card {
+    padding: var(--space-4);
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.option-card:hover {
+    border-color: var(--color-primary);
+    background: var(--color-gray-50);
+}
+
+.type-option input[type="radio"]:checked + .option-card {
+    border-color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.05);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.admin-option.option-card {
+    border-color: var(--color-secondary);
+}
+
+.admin-option.option-card:hover {
+    border-color: var(--color-secondary);
+}
+
+.type-option input[type="radio"]:checked + .admin-option.option-card {
+    border-color: var(--color-secondary);
+    background: rgba(var(--color-secondary-rgb), 0.05);
+    box-shadow: 0 0 0 3px rgba(var(--color-secondary-rgb), 0.1);
+}
+
+.option-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+}
+
+.type-option input[type="radio"]:checked + .option-card .option-icon {
+    background: var(--color-primary);
+    color: white;
+}
+
+.type-option input[type="radio"]:checked + .admin-option.option-card .option-icon {
+    background: var(--color-secondary);
+}
+
+.option-content h5 {
+    margin: 0 0 var(--space-1) 0;
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+}
+
+.option-content p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.user-type-badge {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    border-radius: var(--radius-md);
+    background: var(--color-gray-100);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.user-type-badge.admin {
+    background: var(--color-secondary);
+    color: white;
 }
 
 .form-actions {

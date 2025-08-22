@@ -65,17 +65,37 @@ def load_user(user_id):
     """Flask-Login用户加载回调"""
     return User.query.get(int(user_id))
 
+def admin_required(f):
+    """管理员权限检查装饰器"""
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        if not current_user.is_admin:
+            flash('您没有权限访问此页面', 'error')
+            return redirect(url_for('index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 with app.app_context():
     db.create_all()
     
-    # 创建默认登录账号
+    # 创建默认管理员账号
     default_user = User.query.filter_by(phone='18302196515').first()
     if not default_user:
-        default_user = User(phone='18302196515', name='默认用户')
+        default_user = User(phone='18302196515', name='系统管理员')
         default_user.set_password('aibenzong9264')
+        default_user.is_admin = True
         db.session.add(default_user)
         db.session.commit()
-        print("已创建默认登录账号: 18302196515 / aibenzong9264")
+        print("已创建默认管理员账号: 18302196515 / aibenzong9264")
+    elif not default_user.is_admin:
+        # 确保18302196515用户是管理员
+        default_user.is_admin = True
+        default_user.name = '系统管理员'
+        db.session.commit()
+        print("已将18302196515用户设置为管理员")
 
 @app.route('/')
 @login_required
@@ -1230,6 +1250,7 @@ def view_analysis_record(record_id):
 
 @app.route('/admin')
 @login_required
+@admin_required
 def admin_dashboard():
     """后台管理主页 - 直接显示文件列表"""
     # 查询条件
@@ -1256,6 +1277,7 @@ def admin_dashboard():
 # 用户管理路由
 @app.route('/admin/users')
 @login_required
+@admin_required
 def admin_users():
     """用户管理页面"""
     search_query = request.args.get('search', '')
@@ -1278,12 +1300,14 @@ def admin_users():
 
 @app.route('/admin/users/add', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def admin_add_user():
     """添加新用户"""
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         phone = request.form.get('phone', '').strip()
         password = request.form.get('password', '').strip()
+        is_admin = request.form.get('is_admin') == 'on'
         
         # 验证输入
         if not name or not phone or not password:
@@ -1308,11 +1332,13 @@ def admin_add_user():
             user.phone = phone
             user.set_password(password)
             user.active = True
+            user.is_admin = is_admin
             
             db.session.add(user)
             db.session.commit()
             
-            flash(f'用户 "{name}" 创建成功', 'success')
+            user_type = '管理员' if is_admin else '普通用户'
+            flash(f'{user_type} "{name}" 创建成功', 'success')
             return redirect(url_for('admin_users'))
             
         except Exception as e:
@@ -1324,6 +1350,7 @@ def admin_add_user():
 
 @app.route('/admin/users/<int:user_id>/edit', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def admin_edit_user(user_id):
     """编辑用户信息"""
     user = User.query.get_or_404(user_id)
@@ -1332,6 +1359,7 @@ def admin_edit_user(user_id):
         name = request.form.get('name', '').strip()
         phone = request.form.get('phone', '').strip()
         password = request.form.get('password', '').strip()
+        is_admin = request.form.get('is_admin') == 'on'
         
         # 验证输入
         if not name or not phone:
@@ -1353,6 +1381,7 @@ def admin_edit_user(user_id):
             # 更新用户信息
             user.name = name
             user.phone = phone
+            user.is_admin = is_admin
             
             # 如果提供了新密码，则更新密码
             if password:
@@ -1360,7 +1389,8 @@ def admin_edit_user(user_id):
             
             db.session.commit()
             
-            flash(f'用户 "{name}" 信息更新成功', 'success')
+            user_type = '管理员' if is_admin else '普通用户'
+            flash(f'{user_type} "{name}" 信息更新成功', 'success')
             return redirect(url_for('admin_users'))
             
         except Exception as e:
@@ -1372,6 +1402,7 @@ def admin_edit_user(user_id):
 
 @app.route('/admin/users/<int:user_id>/delete', methods=['POST'])
 @login_required
+@admin_required
 def admin_delete_user(user_id):
     """删除用户"""
     user = User.query.get_or_404(user_id)
@@ -1396,6 +1427,7 @@ def admin_delete_user(user_id):
 
 @app.route('/admin/knowledge/upload', methods=['POST'])
 @login_required
+@admin_required
 def upload_knowledge():
     """上传知识库文件"""
     if 'file' not in request.files:
@@ -1449,6 +1481,7 @@ def upload_knowledge():
 
 @app.route('/admin/knowledge/upload-multiple', methods=['POST'])
 @login_required
+@admin_required
 def upload_knowledge_multiple():
     """批量上传知识库文件"""
     files = request.files.getlist('files')
@@ -1515,6 +1548,7 @@ def upload_knowledge_multiple():
 
 @app.route('/admin/knowledge/create-text', methods=['POST'])
 @login_required
+@admin_required
 def create_text_knowledge():
     """创建文本知识条目"""
     title = request.form.get('title', '').strip()
@@ -1566,6 +1600,7 @@ def create_text_knowledge():
 
 @app.route('/admin/knowledge/<int:item_id>/edit', methods=['POST'])
 @login_required
+@admin_required
 def edit_text_knowledge(item_id):
     """编辑文本知识条目"""
     item = KnowledgeItem.query.get_or_404(item_id)
@@ -1604,6 +1639,7 @@ def edit_text_knowledge(item_id):
 
 @app.route('/admin/knowledge/<int:item_id>/toggle-status', methods=['POST'])
 @login_required
+@admin_required
 def toggle_knowledge_status(item_id):
     """切换知识库条目状态"""
     item = KnowledgeItem.query.get_or_404(item_id)
@@ -1624,6 +1660,7 @@ def toggle_knowledge_status(item_id):
 
 @app.route('/admin/knowledge/<int:item_id>/delete', methods=['POST'])
 @login_required
+@admin_required
 def delete_knowledge(item_id):
     """删除知识库条目"""
     item = KnowledgeItem.query.get_or_404(item_id)
@@ -1722,6 +1759,7 @@ def result_preview():
 
 @app.route('/admin/ai-chat', methods=['POST'])
 @login_required
+@admin_required
 def ai_chat():
     """AI对话测试接口"""
     try:

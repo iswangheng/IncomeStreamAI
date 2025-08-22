@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False, comment='密码哈希')
     name = db.Column(db.String(100), nullable=True, comment='用户姓名')
     active = db.Column(db.Boolean, default=True, comment='账户是否激活')
+    is_admin = db.Column(db.Boolean, default=False, comment='是否为管理员用户')
     created_at = db.Column(db.DateTime, default=datetime.utcnow, comment='创建时间')
     last_login = db.Column(db.DateTime, comment='最后登录时间')
     
@@ -43,6 +44,11 @@ class User(UserMixin, db.Model):
             utc8_time = self.last_login + timedelta(hours=8)
             return utc8_time.strftime('%Y年%m月%d日 %H:%M:%S')
         return '从未登录'
+    
+    @property
+    def user_type_display(self):
+        """用户类型显示文本"""
+        return '管理员' if self.is_admin else '普通用户'
     
     def __repr__(self):
         return f'<User {self.phone}>'

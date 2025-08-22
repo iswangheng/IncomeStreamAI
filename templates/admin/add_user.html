@@ -102,6 +102,45 @@
                 </div>
             </div>
             
+            <!-- 用户类型设置区域 -->
+            <div class="user-type-section">
+                <div class="section-header">
+                    <h4 class="section-title">
+                        <i class="fas fa-user-tag"></i>
+                        用户类型
+                    </h4>
+                </div>
+                <div class="form-group">
+                    <div class="user-type-options">
+                        <label class="type-option">
+                            <input type="radio" name="user_type" value="user" checked onchange="updateUserTypeCheckbox(false)">
+                            <div class="option-card">
+                                <div class="option-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="option-content">
+                                    <h5>普通用户</h5>
+                                    <p>只能访问前台功能和个人设置</p>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="type-option">
+                            <input type="radio" name="user_type" value="admin" onchange="updateUserTypeCheckbox(true)">
+                            <div class="option-card admin-option">
+                                <div class="option-icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div class="option-content">
+                                    <h5>管理员</h5>
+                                    <p>可以访问前台功能和后台管理中心</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    <input type="checkbox" name="is_admin" id="isAdminCheckbox" style="display: none;">
+                </div>
+            </div>
+            
             <div class="form-actions">
                 <a href="{{ url_for('admin_users') }}" class="btn btn-secondary">
                     <i class="fas fa-times me-2"></i>
@@ -117,6 +156,12 @@
 </div>
 
 <script>
+// 更新用户类型复选框
+function updateUserTypeCheckbox(isAdmin) {
+    const checkbox = document.getElementById('isAdminCheckbox');
+    checkbox.checked = isAdmin;
+}
+
 // 密码显示切换
 function togglePassword(fieldId) {
     const field = document.getElementById(fieldId);
@@ -322,6 +367,115 @@ document.getElementById('confirm_password').addEventListener('input', function(e
 .form-help {
     font-size: var(--text-xs);
     color: var(--color-text-secondary);
+}
+
+.user-type-section {
+    margin-bottom: var(--space-8);
+    padding: var(--space-6);
+    background: var(--color-gray-50);
+    border-radius: var(--radius-lg);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+
+.section-title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.user-type-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+}
+
+.type-option {
+    cursor: pointer;
+}
+
+.type-option input[type="radio"] {
+    display: none;
+}
+
+.option-card {
+    padding: var(--space-4);
+    background: var(--color-bg-primary);
+    border: 2px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.option-card:hover {
+    border-color: var(--color-primary);
+    background: var(--color-gray-50);
+}
+
+.type-option input[type="radio"]:checked + .option-card {
+    border-color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.05);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.admin-option.option-card {
+    border-color: var(--color-secondary);
+}
+
+.admin-option.option-card:hover {
+    border-color: var(--color-secondary);
+}
+
+.type-option input[type="radio"]:checked + .admin-option.option-card {
+    border-color: var(--color-secondary);
+    background: rgba(var(--color-secondary-rgb), 0.05);
+    box-shadow: 0 0 0 3px rgba(var(--color-secondary-rgb), 0.1);
+}
+
+.option-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+}
+
+.type-option input[type="radio"]:checked + .option-card .option-icon {
+    background: var(--color-primary);
+    color: white;
+}
+
+.type-option input[type="radio"]:checked + .admin-option.option-card .option-icon {
+    background: var(--color-secondary);
+}
+
+.option-content h5 {
+    margin: 0 0 var(--space-1) 0;
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-text-primary);
+}
+
+.option-content p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.4;
 }
 
 .form-actions {

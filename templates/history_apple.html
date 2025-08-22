@@ -300,9 +300,11 @@
                 <a href="{{ url_for('index') }}" class="btn btn-primary">
                     <i class="fas fa-arrow-left"></i>重新设计方案
                 </a>
+                {% if current_user.is_admin %}
                 <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
                     <i class="fas fa-cog"></i>管理中心
                 </a>
+                {% endif %}
                 <div class="user-menu">
                     <div class="user-trigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
                         <div class="user-info">

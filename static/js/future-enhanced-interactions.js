@@ -398,6 +398,27 @@ function handleResize() {
 window.addEventListener('resize', throttle(handleResize, 250));
 handleResize(); // 初始调用
 
+/**
+ * 初始化所有交互功能
+ */
+function initializeInteractions() {
+    console.log('交互功能已初始化');
+    
+    // 确保所有交互元素都已初始化
+    initEnhancedEffects();
+    
+    // 添加点击反馈效果
+    const interactiveElements = document.querySelectorAll('.interactive, .btn');
+    interactiveElements.forEach(element => {
+        element.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+}
+
 // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
             initializeInteractions();

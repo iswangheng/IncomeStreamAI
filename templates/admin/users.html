@@ -431,11 +431,11 @@
                     </div>
                     
                     <div class="mobile-user-actions">
-                        <button class="mobile-action-btn edit" onclick="editUser('{{ user.id }}')">
+                        <button class="mobile-action-btn edit" onclick="editUser({{ user.id }})">
                             <i class="fas fa-edit"></i>
                             编辑
                         </button>
-                        <button class="mobile-action-btn delete" onclick="deleteUser('{{ user.id }}', '{{ user.username }}')">
+                        <button class="mobile-action-btn delete" onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
                             <i class="fas fa-trash"></i>
                             删除
                         </button>
@@ -476,11 +476,11 @@
                             </td>
                             <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else '未知' }}</td>
                             <td>
-                                <button class="btn btn-info btn-sm" onclick="editUser('{{ user.id }}')">
+                                <button class="btn btn-info btn-sm" onclick="editUser({{ user.id }})">
                                     <i class="fas fa-edit"></i>
                                     编辑
                                 </button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteUser('{{ user.id }}', '{{ user.username }}')">
+                                <button class="btn btn-danger btn-sm" onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
                                     <i class="fas fa-trash"></i>
                                     删除
                                 </button>
@@ -508,13 +508,13 @@
     <script>
         // 编辑用户
         function editUser(userId) {
-            window.location.href = `/admin/users/${userId}/edit`;
+            window.location.href = '/admin/users/' + userId + '/edit';
         }
 
         // 删除用户
         function deleteUser(userId, userName) {
-            if (confirm(`确定要删除用户 "${userName}" 吗？此操作不可撤销！`)) {
-                fetch(`/admin/users/${userId}/delete`, {
+            if (confirm('确定要删除用户 "' + userName + '" 吗？此操作不可撤销！')) {
+                fetch('/admin/users/' + userId + '/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

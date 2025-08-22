@@ -987,5 +987,44 @@ document.addEventListener('DOMContentLoaded', function() {
         switchTab(activeTab);
     }
 });
+
+// 修复移动端下拉菜单显示问题
+document.addEventListener('DOMContentLoaded', function() {
+    // 重新定义toggleAdminMobileMenu函数以修复显示问题
+    window.toggleAdminMobileMenu = function() {
+        console.log('Toggle mobile menu called from dashboard');
+        const dropdown = document.getElementById('adminMobileDropdown');
+        const toggle = document.querySelector('.mobile-menu-toggle');
+        const icon = toggle ? toggle.querySelector('i') : null;
+
+        if (!dropdown) {
+            console.error('Mobile dropdown not found');
+            return;
+        }
+
+        const isVisible = dropdown.style.display === 'block' || dropdown.classList.contains('show');
+        
+        if (isVisible) {
+            dropdown.classList.remove('show');
+            dropdown.style.display = 'none';
+            if (icon) icon.className = 'fas fa-bars';
+            console.log('Menu closed');
+        } else {
+            dropdown.classList.add('show');
+            dropdown.style.display = 'block';
+            if (icon) icon.className = 'fas fa-times';
+            console.log('Menu opened');
+        }
+    };
+    
+    // 确保CSS显示正确
+    const dropdown = document.getElementById('adminMobileDropdown');
+    if (dropdown) {
+        dropdown.style.display = 'none';
+        dropdown.classList.remove('show');
+    }
+    
+    console.log('Mobile menu functions initialized');
+});
 </script>
 {% endblock %}

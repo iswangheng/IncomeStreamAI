@@ -442,6 +442,44 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+// 在页面顶部定义全局函数，确保按钮点击时可用
+function switchTab(tabName) {
+    console.log('Switching to tab:', tabName);
+    
+    // 移除所有tab按钮的active类
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // 隐藏所有tab内容
+    document.querySelectorAll('.admin-tab-content').forEach(content => {
+        content.style.display = 'none';
+    });
+    
+    // 激活当前tab按钮
+    const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+    
+    // 显示当前tab内容
+    const activeContent = document.getElementById(`${tabName}-tab`);
+    if (activeContent) {
+        activeContent.style.display = 'block';
+    }
+    
+    // 如果切换到用户管理tab，加载用户数据
+    if (tabName === 'users' && typeof loadUsersData === 'function') {
+        loadUsersData();
+    }
+}
+
+// 确保函数是全局可访问的
+window.switchTab = switchTab;
+console.log('switchTab function defined globally');
+</script>
+
 <style>
 /* Admin Tab 样式 */
 .admin-tabs {
@@ -798,29 +836,7 @@ document.querySelectorAll('form').forEach(form => {
     });
 });
 
-// Tab 切换功能
-function switchTab(tabName) {
-    // 移除所有tab按钮的active类
-    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // 隐藏所有tab内容
-    document.querySelectorAll('.admin-tab-content').forEach(content => {
-        content.style.display = 'none';
-    });
-    
-    // 激活当前tab按钮
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-    
-    // 显示当前tab内容
-    document.getElementById(`${tabName}-tab`).style.display = 'block';
-    
-    // 如果切换到用户管理tab，加载用户数据
-    if (tabName === 'users') {
-        loadUsersData();
-    }
-}
+// Tab 切换功能已在页面顶部定义
 
 // 加载用户数据
 async function loadUsersData() {
@@ -911,7 +927,7 @@ function renderUsersTable(users) {
                                 <button class="action-btn edit" onclick="editUser(${user.id})" title="编辑用户">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                ${user.id !== ${user.current_user_id || 0} ? `
+                                ${user.id !== user.current_user_id ? `
                                 <button class="action-btn delete" onclick="deleteUser(${user.id}, '${user.name || user.phone}')" title="删除用户">
                                     <i class="fas fa-trash"></i>
                                 </button>

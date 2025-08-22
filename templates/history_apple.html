@@ -305,6 +305,48 @@
                     <i class="fas fa-cog"></i>管理中心
                 </a>
                 {% endif %}
+                
+                <!-- 移动端汉堡菜单按钮 -->
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <!-- 移动端下拉菜单 -->
+                <div class="mobile-dropdown" id="mobileDropdown">
+                    <div class="mobile-user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-details">
+                            <h4>{{ current_user.name or '用户' }}</h4>
+                            <p>{{ current_user.phone }}</p>
+                        </div>
+                    </div>
+
+                    <a href="{{ url_for('index') }}" class="dropdown-item">
+                        <i class="fas fa-arrow-left"></i>
+                        重新设计方案
+                    </a>
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="dropdown-item">
+                        <i class="fas fa-cog"></i>
+                        管理中心
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('change_password') }}" class="dropdown-item">
+                        <i class="fas fa-key"></i>
+                        修改密码
+                    </a>
+                    <a href="{{ url_for('edit_profile') }}" class="dropdown-item">
+                        <i class="fas fa-user-edit"></i>
+                        个人资料
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        退出登录
+                    </a>
+                </div>
+                
                 <div class="user-menu">
                     <div class="user-trigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
                         <div class="user-info">
@@ -431,5 +473,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/user-menu.js') }}"></script>
+    
+    <script>
+        // 移动端汉堡菜单功能
+        function toggleMobileMenu() {
+            const dropdown = document.getElementById('mobileDropdown');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            const icon = toggle.querySelector('i');
+
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+                icon.className = 'fas fa-bars';
+            } else {
+                dropdown.classList.add('show');
+                icon.className = 'fas fa-times';
+            }
+        }
+    </script>
 </body>
 </html>

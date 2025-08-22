@@ -23,6 +23,58 @@
 .admin-layout {
     min-height: 100vh;
     background: var(--admin-bg-main);
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* 移动端响应式优化 */
+@media (max-width: 768px) {
+    /* 防止横向滚动 */
+    body {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+    
+    /* 导航栏移动端优化 */
+    .navigation-bar .nav-content {
+        padding: 0 16px !important;
+        overflow: hidden;
+    }
+    
+    /* 隐藏桌面端按钮 */
+    .navigation-bar .nav-actions .btn {
+        display: none !important;
+    }
+    
+    /* 显示移动端汉堡菜单 */
+    .navigation-bar .mobile-menu-toggle {
+        display: block !important;
+    }
+    
+    /* 用户菜单移动端隐藏 */
+    .navigation-bar .user-menu {
+        display: none !important;
+    }
+    
+    /* 管理后台内容区域 */
+    .admin-main-full {
+        width: 100%;
+        overflow-x: hidden;
+        max-width: 100vw;
+        box-sizing: border-box;
+        padding: 0 16px;
+    }
+    
+    /* 数据表格移动端优化 */
+    .data-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .data-table table {
+        min-width: 100%;
+        white-space: nowrap;
+    }
 }
 
 /* 侧边栏导航 */

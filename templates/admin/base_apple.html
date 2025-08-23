@@ -28,32 +28,20 @@
     
     <!-- 强制修复样式 -->
     <style>
-        /* 强制修复汉堡菜单样式 */
+        /* 隐藏移动端汉堡菜单，显示PC端用户菜单 */
         .mobile-menu-toggle {
+            display: none !important;
+        }
+        
+        .mobile-dropdown {
+            display: none !important;
+        }
+        
+        /* 显示用户菜单 */
+        .user-menu {
             display: flex !important;
             align-items: center !important;
-            justify-content: center !important;
-            width: 44px !important;
-            height: 44px !important;
-            border: none !important;
-            background: rgba(0, 122, 255, 0.1) !important;
-            border-radius: 12px !important;
-            color: #007AFF !important;
-            cursor: pointer !important;
-            transition: all 0.2s ease !important;
-            font-size: 18px !important;
-            flex-shrink: 0 !important;
-            position: relative !important;
-        }
-
-        .mobile-menu-toggle:hover {
-            background: rgba(0, 122, 255, 0.2) !important;
-            transform: scale(1.05) !important;
-        }
-
-        .mobile-menu-toggle i {
-            font-size: 18px !important;
-            color: #007AFF !important;
+            gap: 12px !important;
         }
 
         /* 强制修复Tab按钮样式 */

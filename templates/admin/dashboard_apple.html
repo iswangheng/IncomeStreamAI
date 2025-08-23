@@ -1156,8 +1156,8 @@ function filterUsers() {
 
 // 编辑用户
 function editUser(userId) {
-    // 跳转到编辑用户页面
-    window.location.href = `/admin/users/${userId}/edit`;
+    // 跳转到编辑用户页面，添加重定向参数
+    window.location.href = `/admin/users/${userId}/edit?redirect_to=dashboard`;
 }
 
 // 删除用户

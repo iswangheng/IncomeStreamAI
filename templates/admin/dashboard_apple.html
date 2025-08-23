@@ -12,19 +12,19 @@
 <!-- Tab 导航栏 -->
 <div class="admin-tabs">
     <div class="admin-tab-nav">
-        <button class="admin-tab-btn active" data-tab="knowledge" onclick="switchTab('knowledge')">
-            <i class="fas fa-database"></i>
-            知识库
-        </button>
-        <button class="admin-tab-btn" data-tab="users" onclick="switchTab('users')">
+        <button class="admin-tab-btn active" data-tab="users" onclick="switchTab('users')">
             <i class="fas fa-users"></i>
             用户管理
+        </button>
+        <button class="admin-tab-btn" data-tab="knowledge" onclick="switchTab('knowledge')">
+            <i class="fas fa-database"></i>
+            知识库
         </button>
     </div>
 </div>
 
-<!-- 知识库管理 Tab 内容 -->
-<div class="admin-tab-content" id="knowledge-tab">
+<!-- 用户管理 Tab 内容 -->
+<div class="admin-tab-content" id="users-tab">
 
 <!-- 统计卡片 -->
 <div class="stats-grid">
@@ -278,8 +278,8 @@
 </div>
 <!-- 知识库管理 Tab 内容结束 -->
 
-<!-- 用户管理 Tab 内容 -->
-<div class="admin-tab-content" id="users-tab" style="display: none;">
+<!-- 知识库管理 Tab 内容 -->
+<div class="admin-tab-content" id="knowledge-tab" style="display: none;">
 
     <!-- 用户统计卡片 -->
     <div class="stats-grid">
@@ -494,6 +494,12 @@ function showToast(message, type) {
 // 确保函数是全局可访问的
 window.switchTab = switchTab;
 console.log('switchTab function defined globally');
+
+// 页面加载时默认显示用户管理tab
+document.addEventListener('DOMContentLoaded', function() {
+    // 确保默认显示用户管理tab
+    switchTab('users');
+});
 
 // 确保管理中心的消息提示也能自动消失
     function initAutoHideMessages() {

@@ -518,10 +518,6 @@
         flex-shrink: 0;
     }
     
-    /* 隐藏桌面版用户菜单 */
-    .user-menu {
-        display: none;
-    }
 }
 
 /* 桌面版样式 */

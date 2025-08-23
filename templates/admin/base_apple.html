@@ -37,19 +37,25 @@
             display: none !important;
         }
         
-        /* 强制显示PC端用户菜单 */
-        .user-menu {
+        /* 强制显示PC端用户菜单 - 使用更精确的选择器 */
+        nav.navigation-bar .nav-actions .user-menu {
             display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
             align-items: center !important;
             gap: 12px !important;
             padding-left: 12px !important;
             border-left: 1px solid rgba(209, 209, 214, 0.4) !important;
             margin-left: 8px !important;
             flex-shrink: 0 !important;
+            position: relative !important;
+            z-index: 100 !important;
         }
 
-        .user-trigger {
+        nav.navigation-bar .nav-actions .user-trigger {
             display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
             align-items: center !important;
             gap: 8px !important;
             cursor: pointer !important;
@@ -61,32 +67,40 @@
             font-size: 14px !important;
             font-weight: 500 !important;
             transition: all 0.2s ease !important;
+            text-decoration: none !important;
         }
 
-        .user-trigger:hover {
+        nav.navigation-bar .nav-actions .user-trigger:hover {
             background: rgba(245, 245, 247, 0.8) !important;
             border-color: rgba(209, 209, 214, 0.8) !important;
         }
 
-        .user-info {
+        nav.navigation-bar .nav-actions .user-info {
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
         }
 
-        .user-info i {
+        nav.navigation-bar .nav-actions .user-info i {
             font-size: 16px !important;
             color: #007AFF !important;
         }
 
-        .dropdown-arrow {
+        nav.navigation-bar .nav-actions .dropdown-arrow {
             font-size: 12px !important;
             color: #6D6D70 !important;
             transition: transform 0.2s ease !important;
         }
 
-        .user-menu:hover .dropdown-arrow {
+        nav.navigation-bar .nav-actions .user-menu:hover .dropdown-arrow {
             transform: rotate(180deg) !important;
+        }
+
+        /* 确保用户名显示 */
+        nav.navigation-bar .nav-actions .user-name {
+            display: inline !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         /* 强制修复Tab按钮样式 */

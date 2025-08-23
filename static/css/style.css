@@ -108,6 +108,28 @@ body {
     transition: all 0.3s ease;
 }
 
+/* 修复输入框icon遮挡问题 */
+.form-control:has(+ .input-group-text),
+.input-group .form-control {
+    padding-left: 48px;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-group .input-group-text {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    z-index: 10;
+    padding: 0;
+    color: var(--warm-orange);
+}
+
 .form-control:focus, .form-select:focus {
     border-color: var(--warm-orange);
     box-shadow: 0 0 0 0.2rem var(--shadow-soft);

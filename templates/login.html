@@ -188,6 +188,25 @@
             transition: var(--transition-fast);
         }
         
+        /* 修复输入框icon遮挡问题 */
+        .input-group .form-input {
+            padding-left: 50px;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-group .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            color: var(--color-text-tertiary);
+            pointer-events: none;
+        }
+        
         .form-input:focus {
             outline: none;
             border-color: var(--color-primary);

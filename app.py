@@ -683,7 +683,7 @@ def results():
             except Exception as switch_error:
                 app.logger.error(f"Failed to switch from fallback to AI result: {str(switch_error)}")
 
-        # 如果没有表单数据，不要随意从其他记录中恢复，应该重定向到首页
+        # 如果没有form_data，不要随意从其他记录中恢复，应该重定向到首页
         if not form_data:
             app.logger.warning("No form data found in session - should not recover random records")
             flash('会话已过期，请重新提交表单', 'error')
@@ -1407,24 +1407,22 @@ def admin_edit_user(user_id):
             return render_template('admin/edit_user.html', user=user)
 
         try:
-            # 更新用户信息
-            user.name = name
-            user.phone = phone
-            user.is_admin = is_admin
+            current_user.name = name
+            current_user.phone = phone
+            current_user.is_admin = is_admin
+            db.session.commit()
 
             # 如果提供了新密码，则更新密码
             if password:
-                user.set_password(password)
+                current_user.set_password(password)
+                db.session.commit() # Commit again if password was changed
 
-            db.session.commit()
-
-            user_type = '管理员' if is_admin else '普通用户'
-            flash('用户信息更新成功！', 'success')
-            
-            # Modified redirection logic
+            # 根据重定向参数决定跳转目标
             if redirect_to == 'dashboard':
-                return redirect(url_for('admin_dashboard') + '?tab=users')
+                flash('用户信息更新成功！', 'success')
+                return redirect(url_for('admin_dashboard', tab='users'))
             else:
+                flash('用户信息更新成功！', 'success')
                 return redirect(url_for('admin_users'))
 
         except Exception as e:

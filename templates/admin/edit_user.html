@@ -321,40 +321,76 @@ document.getElementById('confirm_password').addEventListener('input', function(e
 
 // 自动消失的消息提示功能
 document.addEventListener('DOMContentLoaded', function() {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(function(alert) {
-        // 为每个alert添加关闭按钮（如果没有的话）
-        if (!alert.querySelector('.btn-close')) {
+    // 查找所有可能的消息提示元素
+    const messageSelectors = [
+        '.alert', 
+        '.flash-message', 
+        '.message', 
+        '.notification',
+        '[class*="alert"]',
+        '[class*="success"]',
+        '[class*="error"]',
+        '[class*="message"]'
+    ];
+    
+    const allMessages = [];
+    messageSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+            if (!allMessages.includes(el)) {
+                allMessages.push(el);
+            }
+        });
+    });
+
+    allMessages.forEach(function(alert) {
+        // 确保元素可见
+        if (alert.offsetParent === null) return;
+        
+        // 为每个消息添加关闭按钮（如果没有的话）
+        if (!alert.querySelector('.btn-close') && !alert.querySelector('[onclick*="remove"]')) {
             const closeBtn = document.createElement('button');
             closeBtn.type = 'button';
             closeBtn.className = 'btn-close';
             closeBtn.setAttribute('aria-label', 'Close');
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: none;
+                border: none;
+                font-size: 20px;
+                cursor: pointer;
+                opacity: 0.7;
+                padding: 4px;
+                line-height: 1;
+            `;
+            closeBtn.innerHTML = '×';
             closeBtn.onclick = function() {
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-20px)';
-                setTimeout(() => {
-                    if (alert.parentNode) {
-                        alert.remove();
-                    }
-                }, 300);
+                removeMessage(alert);
             };
+            alert.style.position = 'relative';
             alert.appendChild(closeBtn);
         }
 
         // 5秒后自动消失
         setTimeout(function() {
-            if (alert.parentNode) {
-                alert.style.transition = 'all 0.3s ease';
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-20px)';
-                setTimeout(() => {
-                    if (alert.parentNode) {
-                        alert.remove();
-                    }
-                }, 300);
-            }
+            removeMessage(alert);
         }, 5000);
     });
+
+    function removeMessage(element) {
+        if (element && element.parentNode) {
+            element.style.transition = 'all 0.3s ease';
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                if (element.parentNode) {
+                    element.remove();
+                }
+            }, 300);
+        }
+    }
 });
 </script>
 

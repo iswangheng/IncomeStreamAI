@@ -483,6 +483,7 @@ function showToast(message, type) {
     toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + message + ' <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>';
     document.body.appendChild(toast);
 
+    // 5秒后自动消失
     setTimeout(() => {
         if (toast.parentNode) {
             toast.remove();
@@ -493,762 +494,94 @@ function showToast(message, type) {
 // 确保函数是全局可访问的
 window.switchTab = switchTab;
 console.log('switchTab function defined globally');
-</script>
 
-<style>
-/* Admin Tab 样式 */
-.admin-tabs {
-    max-width: 1400px;
-    margin: 0 auto var(--space-6);
-    padding: 0 var(--space-6);
-}
+// 确保管理中心的消息提示也能自动消失
+    function initAutoHideMessages() {
+        const messageSelectors = [
+            '.alert', 
+            '.flash-message', 
+            '.message', 
+            '.notification',
+            '[class*="alert"]',
+            '[class*="success"]',
+            '[class*="error"]',
+            '[class*="message"]'
+        ];
 
-.admin-tab-nav {
-    display: flex;
-    background: var(--color-bg-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--space-2);
-    box-shadow: var(--shadow-sm);
-    border: 0.5px solid var(--color-gray-200);
-    gap: var(--space-2);
-}
-
-.admin-tab-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-4) var(--space-6);
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-base);
-    font-weight: var(--font-medium);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: var(--transition-base);
-    position: relative;
-    overflow: hidden;
-}
-
-.admin-tab-btn:hover {
-    color: var(--color-primary);
-    background: rgba(0, 122, 255, 0.05);
-}
-
-.admin-tab-btn.active {
-    color: var(--color-primary);
-    background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(0, 122, 255, 0.05) 100%);
-    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.15);
-}
-
-.admin-tab-btn.active::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 3px;
-    background: var(--color-primary);
-    border-radius: 3px 3px 0 0;
-}
-
-.admin-tab-btn i {
-    font-size: var(--text-lg);
-}
-
-.admin-tab-content {
-    animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* 移动端适配 */
-@media (max-width: 768px) {
-    .admin-tabs {
-        padding: 0 var(--space-4);
-        margin-bottom: var(--space-4);
-    }
-
-    .admin-tab-nav {
-        flex-direction: row;
-        padding: var(--space-1);
-        border-radius: var(--radius-lg);
-    }
-
-    .admin-tab-btn {
-        padding: var(--space-3) var(--space-4);
-        font-size: var(--text-sm);
-        flex-direction: column;
-        gap: var(--space-1);
-    }
-
-    .admin-tab-btn i {
-        font-size: var(--text-base);
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-tabs {
-        padding: 0 var(--space-3);
-    }
-
-    .admin-tab-btn {
-        padding: var(--space-2) var(--space-3);
-        font-size: var(--text-xs);
-    }
-
-    .admin-tab-btn i {
-        font-size: var(--text-sm);
-    }
-}
-</style>
-
-<script>
-// 多文件上传处理
-document.getElementById('fileInput').addEventListener('change', function() {
-    if (this.files.length > 0) {
-        handleFileUpload(Array.from(this.files));
-    }
-});
-
-// 拖拽上传
-const uploadZone = document.querySelector('.upload-zone');
-
-uploadZone.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    this.classList.add('dragover');
-});
-
-uploadZone.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-});
-
-uploadZone.addEventListener('drop', function(e) {
-    e.preventDefault();
-    this.classList.remove('dragover');
-
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-        handleFileUpload(files);
-    }
-});
-
-// 处理文件上传
-async function handleFileUpload(files) {
-    if (files.length === 0) return;
-
-    // 显示上传进度区域
-    showUploadProgress();
-
-    // 清空之前的上传列表
-    const uploadList = document.getElementById('uploadList');
-    uploadList.innerHTML = '';
-
-    // 为每个文件创建进度项
-    files.forEach(file => {
-        const uploadItem = createUploadItem(file);
-        uploadList.appendChild(uploadItem);
-    });
-
-    // 逐个上传文件
-    for (let i = 0; i < files.length; i++) {
-        await uploadSingleFile(files[i], i);
-    }
-
-    // 上传完成后延迟隐藏进度区域
-    setTimeout(() => {
-        hideUploadProgress();
-        // 刷新页面显示新上传的文件
-        location.reload();
-    }, 2000);
-}
-
-// 上传单个文件
-async function uploadSingleFile(file, index) {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const uploadItem = document.querySelector(`[data-file-index="${index}"]`);
-    const progressBar = uploadItem.querySelector('.upload-progress-bar');
-    const statusIcon = uploadItem.querySelector('.upload-status i');
-    const statusText = uploadItem.querySelector('.upload-status-text');
-
-    try {
-        statusText.textContent = '上传中...';
-
-        const response = await fetch('{{ url_for("upload_knowledge") }}', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            progressBar.style.width = '100%';
-            statusIcon.className = 'fas fa-check-circle';
-            statusIcon.style.color = 'var(--status-active)';
-            statusText.textContent = '上传成功';
-            uploadItem.classList.add('upload-success');
-        } else {
-            throw new Error('上传失败');
-        }
-    } catch (error) {
-        statusIcon.className = 'fas fa-times-circle';
-        statusIcon.style.color = 'var(--status-error)';
-        statusText.textContent = '上传失败';
-        uploadItem.classList.add('upload-error');
-    }
-}
-
-// 创建上传项目DOM
-function createUploadItem(file) {
-    const item = document.createElement('div');
-    item.className = 'upload-item';
-    item.setAttribute('data-file-index', document.querySelectorAll('.upload-item').length);
-
-    item.innerHTML = `
-        <div class="upload-item-info">
-            <div class="upload-file-icon">
-                <i class="fas fa-file"></i>
-            </div>
-            <div class="upload-file-details">
-                <div class="upload-file-name">${file.name}</div>
-                <div class="upload-file-size">${formatFileSize(file.size)}</div>
-            </div>
-        </div>
-        <div class="upload-item-progress">
-            <div class="upload-progress-track">
-                <div class="upload-progress-bar" style="width: 0%"></div>
-            </div>
-            <div class="upload-status">
-                <i class="fas fa-clock"></i>
-                <span class="upload-status-text">等待上传</span>
-            </div>
-        </div>
-    `;
-
-    return item;
-}
-
-// 显示上传进度区域
-function showUploadProgress() {
-    const progressArea = document.getElementById('uploadProgress');
-    progressArea.style.display = 'block';
-    setTimeout(() => {
-        progressArea.classList.add('show');
-    }, 10);
-}
-
-// 隐藏上传进度区域
-function hideUploadProgress() {
-    const progressArea = document.getElementById('uploadProgress');
-    progressArea.classList.remove('show');
-    setTimeout(() => {
-        progressArea.style.display = 'none';
-    }, 300);
-}
-
-// 格式化文件大小
-function formatFileSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-}
-
-// 编辑文本项目
-function editTextItem(itemId, title, content) {
-    document.getElementById('editTitle').value = title.replace('.txt', '');
-    document.getElementById('editContent').value = content;
-    document.getElementById('editForm').action = `/admin/knowledge/${itemId}/edit`;
-    document.getElementById('editModal').style.display = 'flex';
-
-    // 添加显示动画
-    setTimeout(() => {
-        document.querySelector('.modal-content').style.transform = 'scale(1)';
-        document.querySelector('.modal-content').style.opacity = '1';
-    }, 10);
-}
-
-// 关闭编辑模态框
-function closeEditModal(event) {
-    if (event && event.target !== event.currentTarget) return;
-
-    const modal = document.getElementById('editModal');
-    const content = document.querySelector('.modal-content');
-
-    content.style.transform = 'scale(0.95)';
-    content.style.opacity = '0';
-
-    setTimeout(() => {
-        modal.style.display = 'none';
-        content.style.transform = 'scale(1)';
-        content.style.opacity = '1';
-    }, 200);
-}
-
-// 键盘快捷键
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeEditModal();
-    }
-});
-
-// 页面加载动画
-document.addEventListener('DOMContentLoaded', function() {
-    // 为统计卡片添加交错动画
-    const statsCards = document.querySelectorAll('.stats-card');
-    statsCards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-    });
-
-    // 为表格行添加交错动画
-    const tableRows = document.querySelectorAll('.data-table tbody tr');
-    tableRows.forEach((row, index) => {
-        row.style.animationDelay = `${0.7 + index * 0.05}s`;
-    });
-
-    // 添加滚动动画观察器
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, { threshold: 0.1 });
-
-    // 观察所有动画元素
-    document.querySelectorAll('.slide-up').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-});
-
-// 表单验证增强
-document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function(e) {
-        const submitBtn = this.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>处理中...';
-            submitBtn.disabled = true;
-
-            // 如果表单验证失败，恢复按钮状态
-            setTimeout(() => {
-                if (!this.checkValidity()) {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
+        const allMessages = [];
+        messageSelectors.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                // 确保只选取可见的元素，并且是直接子元素，避免重复添加
+                if (!allMessages.includes(el) && el.offsetParent !== null && el.parentElement === document.body) {
+                    allMessages.push(el);
                 }
-            }, 100);
-        }
-    });
-});
-
-// Tab 切换功能已在页面顶部定义
-
-// 加载用户数据
-async function loadUsersData() {
-    try {
-        const response = await fetch('/admin/api/users');
-        const data = await response.json();
-
-        if (data.success) {
-            // 更新统计数据
-            document.getElementById('total-users').textContent = data.stats.total || 0;
-            document.getElementById('active-users').textContent = data.stats.active || 0;
-            document.getElementById('admin-users').textContent = data.stats.admin || 0;
-            document.getElementById('recent-users').textContent = data.stats.recent || 0;
-
-            // 更新用户表格
-            renderUsersTable(data.users);
-        }
-    } catch (error) {
-        console.error('加载用户数据失败:', error);
-        document.getElementById('usersTableContainer').innerHTML = 
-            '<div style="text-align: center; padding: var(--space-8); color: var(--color-error);">' +
-            '<i class="fas fa-exclamation-triangle" style="font-size: var(--text-2xl); margin-bottom: var(--space-2);"></i>' +
-            '<p>加载用户数据失败，请刷新页面重试</p>' +
-            '</div>';
-    }
-}
-
-// 渲染用户卡片布局
-function renderUsersTable(users) {
-    const container = document.getElementById('usersTableContainer');
-
-    if (!users || users.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state" style="text-align: center; padding: var(--space-8);">
-                <div class="empty-icon">
-                    <i class="fas fa-users" style="font-size: var(--text-4xl); color: var(--color-gray-400); margin-bottom: var(--space-4);"></i>
-                </div>
-                <h4 class="empty-title">暂无用户数据</h4>
-                <p class="empty-description">还没有注册的用户</p>
-            </div>
-        `;
-        return;
-    }
-
-    // 移动端友好的卡片布局
-    const cardsHTML = `
-        <div class="users-grid" style="
-            display: grid;
-            gap: 16px;
-            grid-template-columns: 1fr;
-        ">
-            ${users.map(user => `
-                <div class="user-card-dashboard" style="
-                    background: white;
-                    border-radius: 20px;
-                    padding: 20px;
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-                    border: 1px solid #f0f0f0;
-                    transition: all 0.3s ease;
-                    position: relative;
-                    overflow: hidden;
-                ">
-                    <!-- 状态标签 -->
-                    <div style="
-                        position: absolute;
-                        top: 20px;
-                        right: 20px;
-                        padding: 6px 12px;
-                        border-radius: 12px;
-                        font-size: 12px;
-                        font-weight: 600;
-                        text-align: center;
-                        ${user.active ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;'}
-                    ">
-                        <i class="fas fa-${user.active ? 'check-circle' : 'pause-circle'}"></i>
-                        ${user.active ? '活跃' : '停用'}
-                    </div>
-
-                    <!-- 用户头部信息 -->
-                    <div style="
-                        display: flex;
-                        align-items: center;
-                        gap: 16px;
-                        margin-bottom: 16px;
-                        padding-bottom: 16px;
-                        border-bottom: 1px solid #f5f5f7;
-                    ">
-                        <div style="
-                            width: 56px;
-                            height: 56px;
-                            border-radius: 50%;
-                            background: linear-gradient(135deg, #007AFF, #5856D6);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            color: white;
-                            font-size: 20px;
-                            font-weight: 700;
-                            flex-shrink: 0;
-                            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-                        ">
-                            ${(user.name || user.phone || 'U').charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <h3 style="
-                                margin: 0 0 4px 0;
-                                font-size: 18px;
-                                font-weight: 600;
-                                color: #1d1d1f;
-                                line-height: 1.2;
-                            ">${user.name || '未设置姓名'}</h3>
-                            <p style="
-                                margin: 0;
-                                font-size: 14px;
-                                color: #8e8e93;
-                                line-height: 1.3;
-                            ">${user.phone}</p>
-                        </div>
-                    </div>
-
-                    <!-- 用户详细信息 -->
-                    <div style="
-                        display: grid;
-                        grid-template-columns: 1fr 1fr;
-                        gap: 12px;
-                        margin-bottom: 20px;
-                    ">
-                        <div style="
-                            text-align: center;
-                            padding: 12px;
-                            background: #f8f9fa;
-                            border-radius: 12px;
-                            transition: all 0.2s ease;
-                        ">
-                            <span style="
-                                display: block;
-                                font-size: 11px;
-                                color: #8e8e93;
-                                font-weight: 500;
-                                text-transform: uppercase;
-                                letter-spacing: 0.5px;
-                                margin-bottom: 4px;
-                            ">用户ID</span>
-                            <span style="
-                                font-size: 14px;
-                                color: #1d1d1f;
-                                font-weight: 600;
-                            ">#${user.id}</span>
-                        </div>
-                        <div style="
-                            text-align: center;
-                            padding: 12px;
-                            background: #f8f9fa;
-                            border-radius: 12px;
-                            transition: all 0.2s ease;
-                        ">
-                            <span style="
-                                display: block;
-                                font-size: 11px;
-                                color: #8e8e93;
-                                font-weight: 500;
-                                text-transform: uppercase;
-                                letter-spacing: 0.5px;
-                                margin-bottom: 4px;
-                            ">角色权限</span>
-                            <span style="
-                                font-size: 14px;
-                                color: #1d1d1f;
-                                font-weight: 600;
-                            ">
-                                <i class="fas fa-${user.is_admin ? 'crown' : 'user'}"></i>
-                                ${user.is_admin ? '管理员' : '普通用户'}
-                            </span>
-                        </div>
-                        <div style="
-                            text-align: center;
-                            padding: 12px;
-                            background: #f8f9fa;
-                            border-radius: 12px;
-                            transition: all 0.2s ease;
-                        ">
-                            <span style="
-                                display: block;
-                                font-size: 11px;
-                                color: #8e8e93;
-                                font-weight: 500;
-                                text-transform: uppercase;
-                                letter-spacing: 0.5px;
-                                margin-bottom: 4px;
-                            ">注册时间</span>
-                            <span style="
-                                font-size: 14px;
-                                color: #1d1d1f;
-                                font-weight: 600;
-                            ">${user.created_at || '未知'}</span>
-                        </div>
-                        <div style="
-                            text-align: center;
-                            padding: 12px;
-                            background: #f8f9fa;
-                            border-radius: 12px;
-                            transition: all 0.2s ease;
-                        ">
-                            <span style="
-                                display: block;
-                                font-size: 11px;
-                                color: #8e8e93;
-                                font-weight: 500;
-                                text-transform: uppercase;
-                                letter-spacing: 0.5px;
-                                margin-bottom: 4px;
-                            ">最后活跃</span>
-                            <span style="
-                                font-size: 14px;
-                                color: #1d1d1f;
-                                font-weight: 600;
-                            ">
-                                <i class="fas fa-clock"></i>
-                                ${user.last_login || '从未登录'}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- 操作按钮 -->
-                    <div style="
-                        display: flex;
-                        gap: 8px;
-                    ">
-                        <button onclick="editUser(${user.id})" style="
-                            flex: 1;
-                            padding: 12px;
-                            border: none;
-                            border-radius: 12px;
-                            font-size: 14px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: all 0.2s ease;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 6px;
-                            min-height: 44px;
-                            background: #e3f2fd;
-                            color: #1976d2;
-                        " onmouseover="this.style.background='#bbdefb'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(25, 118, 210, 0.2)';" onmouseout="this.style.background='#e3f2fd'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                            <i class="fas fa-edit"></i>
-                            编辑
-                        </button>
-                        ${user.id !== user.current_user_id ? `
-                        <button onclick="deleteUser(${user.id}, '${(user.name || user.phone || '').replace(/'/g, '\\\'')}')" style="
-                            flex: 1;
-                            padding: 12px;
-                            border: none;
-                            border-radius: 12px;
-                            font-size: 14px;
-                            font-weight: 600;
-                            cursor: pointer;
-                            transition: all 0.2s ease;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 6px;
-                            min-height: 44px;
-                            background: #ffebee;
-                            color: #d32f2f;
-                        " onmouseover="this.style.background='#ffcdd2'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(211, 47, 47, 0.2)';" onmouseout="this.style.background='#ffebee'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                            <i class="fas fa-trash-alt"></i>
-                            删除
-                        </button>
-                        ` : ''}
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-
-        <style>
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .users-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-        }
-
-        @media (min-width: 1025px) {
-            .users-grid {
-                grid-template-columns: repeat(3, 1fr) !important;
-            }
-        }
-
-        .user-card-dashboard:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 40px rgba(0, 122, 255, 0.2) !important;
-            border-color: rgba(0, 122, 255, 0.3) !important;
-        }
-        </style>
-    `;
-
-    container.innerHTML = cardsHTML;
-}
-
-// 用户搜索过滤
-function filterUsers() {
-    const search = document.getElementById('userSearch').value.toLowerCase();
-    const statusFilter = document.getElementById('userStatusFilter').value;
-    const cards = document.querySelectorAll('#usersTableContainer .user-card-dashboard');
-
-    cards.forEach(card => {
-        const text = card.textContent.toLowerCase();
-        const statusElement = card.querySelector('div[style*="position: absolute"]');
-        const status = statusElement ? (statusElement.textContent.includes('活跃') ? 'active' : 'inactive') : '';
-
-        const matchesSearch = !search || text.includes(search);
-        const matchesStatus = !statusFilter || status === statusFilter;
-
-        card.style.display = matchesSearch && matchesStatus ? '' : 'none';
-    });
-}
-
-// 编辑用户
-function editUser(userId) {
-    // 跳转到编辑用户页面，添加重定向参数
-    window.location.href = `/admin/users/${userId}/edit?redirect_to=dashboard`;
-}
-
-// 删除用户
-function deleteUser(userId, userName) {
-    if (confirm(`确定要删除用户 "${userName}" 吗？此操作不可撤销！`)) {
-        // 发送删除请求
-        fetch(`/admin/users/${userId}/delete`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('用户删除成功');
-                loadUsersData(); // 重新加载用户数据
-            } else {
-                alert('删除失败: ' + (data.message || '未知错误'));
-            }
-        })
-        .catch(error => {
-            console.error('删除用户失败:', error);
-            alert('删除失败，请重试');
+            });
         });
-    }
-}
 
-// 页面加载时的初始化
-document.addEventListener('DOMContentLoaded', function() {
-    // 检查URL参数决定初始显示哪个tab
-    const urlParams = new URLSearchParams(window.location.search);
-    const activeTab = urlParams.get('tab') || 'knowledge';
+        allMessages.forEach(function(alert) {
+            // 添加关闭按钮
+            if (!alert.querySelector('.btn-close') && !alert.querySelector('[onclick*="remove"]')) {
+                const closeBtn = document.createElement('button');
+                closeBtn.type = 'button';
+                closeBtn.className = 'btn-close';
+                closeBtn.style.cssText = `
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    background: none;
+                    border: none;
+                    font-size: 20px;
+                    cursor: pointer;
+                    opacity: 0.7;
+                    padding: 4px;
+                `;
+                closeBtn.innerHTML = '×';
+                closeBtn.onclick = function() {
+                    removeMessage(alert);
+                };
+                alert.style.position = 'relative';
+                alert.appendChild(closeBtn);
+            }
 
-    if (activeTab !== 'knowledge') {
-        switchTab(activeTab);
-    }
-});
+            // 5秒后自动消失
+            setTimeout(function() {
+                removeMessage(alert);
+            }, 5000);
+        });
 
-// 修复移动端下拉菜单显示问题
-document.addEventListener('DOMContentLoaded', function() {
-    // 重新定义toggleAdminMobileMenu函数以修复显示问题
-    window.toggleAdminMobileMenu = function() {
-        console.log('Toggle mobile menu called from dashboard');
-        const dropdown = document.getElementById('adminMobileDropdown');
-        const toggle = document.querySelector('.mobile-menu-toggle');
-        const icon = toggle ? toggle.querySelector('i') : null;
-
-        if (!dropdown) {
-            console.error('Mobile dropdown not found');
-            return;
+        function removeMessage(element) {
+            if (element && element.parentNode) {
+                element.style.transition = 'all 0.3s ease';
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (element.parentNode) {
+                        element.remove();
+                    }
+                }, 300);
+            }
         }
-
-        const isVisible = dropdown.style.display === 'block' || dropdown.classList.contains('show');
-
-        if (isVisible) {
-            dropdown.classList.remove('show');
-            dropdown.style.display = 'none';
-            if (icon) icon.className = 'fas fa-bars';
-            console.log('Menu closed');
-        } else {
-            dropdown.classList.add('show');
-            dropdown.style.display = 'block';
-            if (icon) icon.className = 'fas fa-times';
-            console.log('Menu opened');
-        }
-    };
-
-    // 确保CSS显示正确
-    const dropdown = document.getElementById('adminMobileDropdown');
-    if (dropdown) {
-        dropdown.style.display = 'none';
-        dropdown.classList.remove('show');
     }
 
-    console.log('Mobile menu functions initialized');
-});
+    // 立即执行一次
+    initAutoHideMessages();
+
+    // 监听页面变化（比如切换标签页后，或者AJAX加载内容后）
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            // 检查是否有新的节点被添加
+            if (mutation.addedNodes.length > 0) {
+                // 稍微延迟执行，确保新元素已渲染
+                setTimeout(initAutoHideMessages, 100);
+            }
+        });
+    });
+
+    // 监听整个文档的子节点变化
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 </script>
 {% endblock %}

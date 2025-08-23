@@ -1207,8 +1207,8 @@ def api_users():
 @login_required
 @admin_required
 def admin_dashboard():
-    """后台管理主页 - 直接显示文件列表"""
-    # 查询条件
+    """后台管理主页 - 统一管理界面"""
+    # 查询知识库数据
     status_filter = request.args.get('status', '')
     search_query = request.args.get('search', '')
 
@@ -1223,7 +1223,7 @@ def admin_dashboard():
     # 按上传时间倒序排列，只显示未删除的文件
     knowledge_items = query.filter(KnowledgeItem.status != 'deleted').order_by(KnowledgeItem.upload_time.desc()).all()
 
-    return render_template('admin/dashboard_apple.html', 
+    return render_template('admin/dashboard_unified.html', 
                          knowledge_items=knowledge_items,
                          status_filter=status_filter,
                          search_query=search_query)

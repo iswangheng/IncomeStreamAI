@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理中心 - Angela · 非劳务收入管道设计师</title>
+
+    <!-- 预加载关键字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Apple级别设计系统 -->
+    <link href="{{ url_for('static', filename='css/apple-design-system.css') }}" rel="stylesheet">
+    <!-- 未来科幻增强版设计系统 -->
+    <link href="{{ url_for('static', filename='css/future-enhanced-apple.css') }}" rel="stylesheet">
+    <!-- 按钮修复样式 -->
+    <link href="{{ url_for('static', filename='css/button-fix.css') }}" rel="stylesheet">
+    <!-- 用户认证样式 -->
+    <link href="{{ url_for('static', filename='css/auth-styles.css') }}" rel="stylesheet">
+    <!-- 世界一流导航设计 -->
+    <link href="{{ url_for('static', filename='css/navigation-redesign.css') }}" rel="stylesheet">
+    <!-- 用户菜单下拉设计 -->
+    <link href="{{ url_for('static', filename='css/user-menu-dropdown.css') }}" rel="stylesheet">
+    <!-- 导航栏间距修复 - 解决顶部空白问题 -->
+    <link href="{{ url_for('static', filename='css/navigation-spacing-fix.css') }}" rel="stylesheet">
+
+    <!-- SEO优化 -->
+    <meta name="description" content="管理中心 - 用户和知识库管理">
+    <meta name="keywords" content="管理中心,用户管理,知识库管理,Angela AI">
+    
+    <style>
+        /* 管理中心专用样式 */
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-8);
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: var(--space-8);
+        }
+        
+        .admin-title {
+            font: var(--font-title-1);
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-2);
+        }
+        
+        .admin-subtitle {
+            font: var(--font-body);
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+        
+        /* Tab导航样式 */
+        .admin-tabs {
+            margin-bottom: var(--space-8);
+        }
+        
+        .admin-tab-nav {
+            display: flex;
+            gap: 8px;
+            background: var(--color-gray-100);
+            padding: 4px;
+            border-radius: 16px;
+            border: 1px solid var(--color-border);
+            margin: 0 auto;
+            max-width: 400px;
+            width: fit-content;
+        }
+        
+        .admin-tab-btn {
+            flex: 1;
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            white-space: nowrap;
+        }
+        
+        .admin-tab-btn:hover {
+            color: var(--color-text-primary);
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        .admin-tab-btn.active {
+            background: white;
+            color: var(--color-primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-tab-btn i {
+            font-size: 18px;
+        }
+        
+        /* Tab内容 */
+        .admin-tab-content {
+            display: none;
+        }
+        
+        .admin-tab-content.active {
+            display: block;
+        }
+        
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: var(--radius-3);
+            padding: var(--space-6);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--color-border);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .stats-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+        
+        .stats-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: var(--space-3);
+        }
+        
+        .stats-icon i {
+            font-size: 20px;
+            color: white;
+        }
+        
+        .stats-value {
+            font: var(--font-title-2);
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-1);
+        }
+        
+        .stats-label {
+            font: var(--font-caption);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-2);
+        }
+        
+        .stats-change {
+            font: var(--font-caption);
+            display: flex;
+            align-items: center;
+        }
+        
+        .stats-change.positive {
+            color: var(--status-active);
+        }
+        
+        /* 表格样式 */
+        .admin-table {
+            background: white;
+            border-radius: var(--radius-3);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--color-border);
+        }
+        
+        .table-header {
+            background: var(--color-gray-50);
+            padding: var(--space-4) var(--space-6);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .table-title {
+            font: var(--font-headline);
+            color: var(--color-text-primary);
+            margin: 0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            border: none;
+            border-radius: var(--radius-2);
+            color: white;
+            font: var(--font-body);
+            padding: var(--space-3) var(--space-4);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            text-decoration: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));
+            transform: translateY(-1px);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: var(--color-gray-100);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-2);
+            color: var(--color-text-primary);
+            font: var(--font-body);
+            padding: var(--space-3) var(--space-4);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            text-decoration: none;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--color-gray-200);
+            transform: translateY(-1px);
+            color: var(--color-text-primary);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: var(--space-4);
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+            
+            .admin-tab-nav {
+                max-width: none;
+                width: 100%;
+            }
+            
+            .admin-tab-btn {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 引用公共导航栏组件 -->
+    {% include 'components/navigation.html' %}
+
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <!-- 页面标题区域 -->
+        <header class="page-header">
+            <h1 class="page-title">管理中心</h1>
+            <p class="page-subtitle">管理知识库文件和用户账户</p>
+        </header>
+
+        <div class="admin-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <!-- Tab 导航栏 -->
+            <div class="admin-tabs">
+                <div class="admin-tab-nav">
+                    <button class="admin-tab-btn active" data-tab="users" onclick="switchTab('users')">
+                        <i class="fas fa-users"></i>
+                        用户管理
+                    </button>
+                    <button class="admin-tab-btn" data-tab="knowledge" onclick="switchTab('knowledge')">
+                        <i class="fas fa-database"></i>
+                        知识库
+                    </button>
+                </div>
+            </div>
+
+            <!-- 用户管理 Tab 内容 -->
+            <div class="admin-tab-content active" id="users-tab">
+                <!-- 用户统计卡片 -->
+                <div class="stats-grid">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--color-primary);">
+                                <i class="fas fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="total-users">0</div>
+                        <div class="stats-label">总用户数</div>
+                        <div class="stats-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            注册用户
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--status-active);">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="active-users">0</div>
+                        <div class="stats-label">活跃用户</div>
+                        <div class="stats-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            正常状态
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--color-accent);">
+                                <i class="fas fa-user-cog"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="admin-users">0</div>
+                        <div class="stats-label">管理员</div>
+                        <div class="stats-change">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            超级权限
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--color-secondary);">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="recent-users">0</div>
+                        <div class="stats-label">本月新增</div>
+                        <div class="stats-change positive">
+                            <i class="fas fa-calendar me-1"></i>
+                            最近注册
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户表格 -->
+                <div class="admin-table">
+                    <div class="table-header">
+                        <h3 class="table-title">
+                            <i class="fas fa-users me-2"></i>
+                            用户列表
+                        </h3>
+                        <button class="btn-primary" onclick="window.location.href='/admin/users/add'">
+                            <i class="fas fa-plus"></i>
+                            添加用户
+                        </button>
+                    </div>
+                    <div id="users-content">
+                        <div class="text-center p-4">
+                            <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                            <p>正在加载用户数据...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 知识库 Tab 内容 -->
+            <div class="admin-tab-content" id="knowledge-tab">
+                <!-- 知识库统计卡片 -->
+                <div class="stats-grid">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--color-primary);">
+                                <i class="fas fa-database"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value">{{ knowledge_items|length }}</div>
+                        <div class="stats-label">知识库文件</div>
+                        <div class="stats-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            活跃状态
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--status-active);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value">{{ knowledge_items|selectattr("status", "equalto", "active")|list|length }}</div>
+                        <div class="stats-label">活跃文件</div>
+                        <div class="stats-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            可用于AI处理
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--status-paused);">
+                                <i class="fas fa-pause-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value">{{ knowledge_items|selectattr("status", "equalto", "paused")|list|length }}</div>
+                        <div class="stats-label">暂停文件</div>
+                        <div class="stats-change">
+                            <i class="fas fa-minus me-1"></i>
+                            临时停用
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--color-accent);">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value">{{ (knowledge_items|sum(attribute='file_size') / 1024 / 1024)|round(1) }}</div>
+                        <div class="stats-label">总大小 (MB)</div>
+                        <div class="stats-change">
+                            <i class="fas fa-database me-1"></i>
+                            存储空间使用
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 知识库表格 -->
+                <div class="admin-table">
+                    <div class="table-header">
+                        <h3 class="table-title">
+                            <i class="fas fa-database me-2"></i>
+                            知识库文件
+                        </h3>
+                        <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-plus"></i>
+                            上传文件
+                        </button>
+                    </div>
+                    <div class="table-responsive p-4">
+                        {% if knowledge_items %}
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>文件名</th>
+                                        <th>大小</th>
+                                        <th>状态</th>
+                                        <th>上传时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in knowledge_items %}
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-file-alt me-2"></i>
+                                            {{ item.original_filename }}
+                                        </td>
+                                        <td>{{ "%.1f KB"|format(item.file_size / 1024) }}</td>
+                                        <td>
+                                            {% if item.status == 'active' %}
+                                                <span class="badge bg-success">活跃</span>
+                                            {% elif item.status == 'paused' %}
+                                                <span class="badge bg-warning">暂停</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ item.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.upload_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                {% if item.status == 'active' %}
+                                                    <button class="btn btn-warning btn-sm" onclick="toggleKnowledgeStatus({{ item.id }}, 'paused')">
+                                                        <i class="fas fa-pause"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <button class="btn btn-success btn-sm" onclick="toggleKnowledgeStatus({{ item.id }}, 'active')">
+                                                        <i class="fas fa-play"></i>
+                                                    </button>
+                                                {% endif %}
+                                                <button class="btn btn-danger btn-sm" onclick="deleteKnowledge({{ item.id }})">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-database fa-3x text-muted mb-3"></i>
+                                <h5>暂无知识库文件</h5>
+                                <p class="text-muted">点击上传文件开始添加知识库内容</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- 隐藏的文件上传表单 -->
+                <form id="uploadForm" action="{{ url_for('upload_knowledge_multiple') }}" method="post" enctype="multipart/form-data" style="display: none;">
+                    <input type="file" id="fileInput" name="files" accept=".txt,.pdf,.doc,.docx,.xlsx,.csv,.md,.json" multiple>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/future-enhanced-interactions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-menu.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+    
+    <script>
+        // Tab切换功能
+        function switchTab(tabName) {
+            console.log('Switching to tab:', tabName);
+            
+            // 隐藏所有tab内容
+            document.querySelectorAll('.admin-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有tab按钮的active状态
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 显示对应tab内容
+            const targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+            
+            // 激活对应tab按钮
+            const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+            }
+            
+            // 如果切换到用户管理，加载用户数据
+            if (tabName === 'users') {
+                loadUserData();
+            }
+        }
+        
+        // 加载用户数据
+        async function loadUserData() {
+            try {
+                const response = await fetch('/admin/api/users');
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 更新统计数据
+                    document.getElementById('total-users').textContent = data.stats.total;
+                    document.getElementById('active-users').textContent = data.stats.active;
+                    document.getElementById('admin-users').textContent = data.stats.admin;
+                    document.getElementById('recent-users').textContent = data.stats.recent;
+                    
+                    // 更新用户表格
+                    updateUserTable(data.users);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('加载用户数据失败:', error);
+                document.getElementById('users-content').innerHTML = `
+                    <div class="text-center p-4">
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+                        <p>加载用户数据失败</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 更新用户表格
+        function updateUserTable(users) {
+            const content = document.getElementById('users-content');
+            
+            if (users.length === 0) {
+                content.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5>暂无用户</h5>
+                        <p class="text-muted">点击添加用户开始管理</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let tableHTML = `
+                <div class="table-responsive p-4">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>用户信息</th>
+                                <th>手机号</th>
+                                <th>角色</th>
+                                <th>状态</th>
+                                <th>最后登录</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            users.forEach(user => {
+                tableHTML += `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-3">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">${user.name || '未设置姓名'}</div>
+                                    <div class="text-muted small">ID: ${user.id}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${user.phone}</td>
+                        <td>
+                            ${user.is_admin ? '<span class="badge bg-danger">管理员</span>' : '<span class="badge bg-primary">普通用户</span>'}
+                        </td>
+                        <td>
+                            ${user.active ? '<span class="badge bg-success">正常</span>' : '<span class="badge bg-secondary">禁用</span>'}
+                        </td>
+                        <td>${user.last_login || '从未登录'}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary btn-sm" onclick="editUser(${user.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                ${user.current_user_id !== user.id ? `
+                                    <button class="btn btn-outline-${user.active ? 'warning' : 'success'} btn-sm" onclick="toggleUserStatus(${user.id}, ${!user.active})">
+                                        <i class="fas fa-${user.active ? 'ban' : 'check'}"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteUser(${user.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                ` : '<span class="badge bg-info">当前用户</span>'}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            content.innerHTML = tableHTML;
+        }
+        
+        // 编辑用户
+        function editUser(userId) {
+            window.location.href = `/admin/users/${userId}/edit`;
+        }
+        
+        // 切换用户状态
+        async function toggleUserStatus(userId, active) {
+            if (!confirm(`确定要${active ? '启用' : '禁用'}该用户吗？`)) return;
+            
+            try {
+                const response = await fetch(`/admin/users/${userId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ active: active })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    loadUserData(); // 重新加载数据
+                    showToast(`用户状态${active ? '启用' : '禁用'}成功`, 'success');
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('操作失败，请重试', 'error');
+            }
+        }
+        
+        // 删除用户
+        async function deleteUser(userId) {
+            if (!confirm('确定要删除该用户吗？此操作不可恢复！')) return;
+            
+            try {
+                const response = await fetch(`/admin/users/${userId}/delete`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    loadUserData(); // 重新加载数据
+                    showToast('用户删除成功', 'success');
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('删除失败，请重试', 'error');
+            }
+        }
+        
+        // 知识库管理功能
+        async function toggleKnowledgeStatus(itemId, status) {
+            try {
+                const response = await fetch(`/admin/knowledge/${itemId}/toggle`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ status: status })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    location.reload(); // 刷新页面
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('操作失败，请重试', 'error');
+            }
+        }
+        
+        async function deleteKnowledge(itemId) {
+            if (!confirm('确定要删除该知识库文件吗？')) return;
+            
+            try {
+                const response = await fetch(`/admin/knowledge/${itemId}/delete`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    location.reload(); // 刷新页面
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('删除失败，请重试', 'error');
+            }
+        }
+        
+        // 文件上传处理
+        document.getElementById('fileInput').addEventListener('change', function() {
+            if (this.files.length > 0) {
+                document.getElementById('uploadForm').submit();
+            }
+        });
+        
+        // 提示信息
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message} <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+        
+        // 页面加载时默认显示用户管理tab
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('交互功能已初始化');
+            switchTab('users');
+        });
+    </script>
+</body>
+</html>

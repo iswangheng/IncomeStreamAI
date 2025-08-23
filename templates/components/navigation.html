@@ -42,14 +42,6 @@
                     管理中心
                 </a>
                 {% endif %}
-                <a href="{{ url_for('change_password') }}" class="dropdown-item">
-                    <i class="fas fa-key"></i>
-                    修改密码
-                </a>
-                <a href="{{ url_for('edit_profile') }}" class="dropdown-item">
-                    <i class="fas fa-user-edit"></i>
-                    个人资料
-                </a>
                 <a href="{{ url_for('logout') }}" class="dropdown-item">
                     <i class="fas fa-sign-out-alt"></i>
                     退出登录
@@ -75,14 +67,6 @@
                             </div>
                         </div>
                     </div>
-                    <a href="{{ url_for('change_password') }}" class="dropdown-item" role="menuitem">
-                        <i class="fas fa-key"></i>
-                        修改密码
-                    </a>
-                    <a href="{{ url_for('edit_profile') }}" class="dropdown-item" role="menuitem">
-                        <i class="fas fa-user-edit"></i>
-                        个人资料
-                    </a>
                     <a href="{{ url_for('logout') }}" class="dropdown-item logout" role="menuitem">
                         <i class="fas fa-sign-out-alt"></i>
                         退出登录

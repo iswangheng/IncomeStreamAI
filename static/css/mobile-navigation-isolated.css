@@ -62,18 +62,19 @@
     .navigation-bar .mobile-dropdown {
         position: absolute !important;
         top: 100% !important;
-        right: 0 !important;
-        left: 0 !important;
+        right: 12px !important;
+        left: auto !important;
+        width: 280px !important;
+        max-width: calc(100vw - 24px) !important;
         background: rgba(255, 255, 255, 0.98) !important;
         backdrop-filter: blur(20px) !important;
         -webkit-backdrop-filter: blur(20px) !important;
         border: 1px solid rgba(209, 209, 214, 0.4) !important;
-        border-top: none !important;
-        border-radius: 0 0 16px 16px !important;
+        border-radius: 16px !important;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
         opacity: 0 !important;
         visibility: hidden !important;
-        transform: translateY(-10px) !important;
+        transform: translateY(-10px) scale(0.95) !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         z-index: 999 !important;
         max-height: 0 !important;
@@ -84,63 +85,72 @@
     .navigation-bar .mobile-dropdown.show {
         opacity: 1 !important;
         visibility: visible !important;
-        transform: translateY(0) !important;
-        max-height: 500px !important;
-        padding: 16px 0 20px 0 !important;
+        transform: translateY(0) scale(1) !important;
+        max-height: 400px !important;
+        padding: 12px !important;
     }
     
     /* 移动端用户信息区域 */
     .navigation-bar .mobile-user-info {
         display: flex !important;
         align-items: center !important;
-        padding: 16px 24px !important;
+        padding: 12px 16px !important;
         border-bottom: 1px solid rgba(209, 209, 214, 0.3) !important;
         margin-bottom: 8px !important;
         background: rgba(247, 247, 249, 0.5) !important;
+        border-radius: 8px !important;
     }
     
     .navigation-bar .mobile-user-info .user-avatar {
-        width: 48px !important;
-        height: 48px !important;
+        width: 40px !important;
+        height: 40px !important;
         background: linear-gradient(135deg, #007AFF, #5856D6) !important;
         border-radius: 50% !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        margin-right: 12px !important;
+        margin-right: 10px !important;
         flex-shrink: 0 !important;
     }
     
     .navigation-bar .mobile-user-info .user-avatar i {
-        font-size: 20px !important;
+        font-size: 18px !important;
         color: white !important;
     }
     
     .navigation-bar .mobile-user-info .user-details h4 {
-        font-size: 16px !important;
+        font-size: 15px !important;
         font-weight: 600 !important;
         color: #1d1d1f !important;
-        margin: 0 0 4px 0 !important;
+        margin: 0 0 2px 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        max-width: 180px !important;
     }
     
     .navigation-bar .mobile-user-info .user-details p {
-        font-size: 14px !important;
+        font-size: 13px !important;
         color: #8e8e93 !important;
         margin: 0 !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        max-width: 180px !important;
     }
     
     /* 移动端菜单项 */
     .navigation-bar .mobile-dropdown .dropdown-item {
         display: flex !important;
         align-items: center !important;
-        padding: 12px 24px !important;
+        padding: 10px 16px !important;
         color: #1d1d1f !important;
         text-decoration: none !important;
-        font-size: 16px !important;
+        font-size: 15px !important;
         font-weight: 500 !important;
         transition: all 0.2s ease !important;
-        border-radius: 0 !important;
-        margin: 0 !important;
+        border-radius: 8px !important;
+        margin: 2px 0 !important;
     }
     
     .navigation-bar .mobile-dropdown .dropdown-item:hover {
@@ -153,11 +163,12 @@
     }
     
     .navigation-bar .mobile-dropdown .dropdown-item i {
-        font-size: 18px !important;
-        margin-right: 12px !important;
-        width: 20px !important;
+        font-size: 16px !important;
+        margin-right: 10px !important;
+        width: 18px !important;
         text-align: center !important;
         color: inherit !important;
+        flex-shrink: 0 !important;
     }
     
     /* 确保导航栏容器正确 */
@@ -219,5 +230,17 @@
     
     .navigation-bar .mobile-menu-toggle i {
         font-size: 16px !important;
+    }
+    
+    /* 超小屏幕下拉菜单适配 */
+    .navigation-bar .mobile-dropdown {
+        right: 8px !important;
+        width: 260px !important;
+        max-width: calc(100vw - 16px) !important;
+    }
+    
+    .navigation-bar .mobile-user-info .user-details h4,
+    .navigation-bar .mobile-user-info .user-details p {
+        max-width: 150px !important;
     }
 }

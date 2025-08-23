@@ -114,7 +114,66 @@
         padding: 0;
         color: var(--color-primary);
         pointer-events: none;
-    }radius-lg);
+    }
+
+/* ==== 管理中心 Tab 导航样式 ==== */
+.admin-tabs {
+    max-width: 1200px;
+    margin: 0 auto var(--space-8);
+    padding: 0 var(--space-6);
+}
+
+.admin-tab-nav {
+    display: flex;
+    gap: var(--space-2);
+    background: var(--color-background-secondary);
+    padding: var(--space-1);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+}
+
+.admin-tab-btn {
+    flex: 1;
+    padding: var(--space-3) var(--space-4);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-lg);
+    color: var(--color-text-secondary);
+    font-weight: var(--font-medium);
+    font-size: var(--text-base);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 44px;
+}
+
+.admin-tab-btn:hover {
+    color: var(--color-text-primary);
+    background: var(--color-background);
+}
+
+.admin-tab-btn.active {
+    background: var(--color-background);
+    color: var(--color-primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-tab-btn i {
+    font-size: var(--text-lg);
+}
+
+/* ==== Tab 内容区域 ==== */
+.admin-tab-content {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}radius-lg);
         border: 1px solid var(--color-gray-300);
         box-sizing: border-box;
         -webkit-appearance: none;

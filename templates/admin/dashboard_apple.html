@@ -41,7 +41,7 @@
             活跃状态
         </div>
     </div>
-    
+
     <div class="stats-card fade-in" style="animation-delay: 0.1s;">
         <div class="stats-header">
             <div class="stats-icon" style="background: var(--status-active);">
@@ -55,7 +55,7 @@
             可用于AI处理
         </div>
     </div>
-    
+
     <div class="stats-card fade-in" style="animation-delay: 0.2s;">
         <div class="stats-header">
             <div class="stats-icon" style="background: var(--status-paused);">
@@ -69,7 +69,7 @@
             临时停用
         </div>
     </div>
-    
+
     <div class="stats-card fade-in" style="animation-delay: 0.3s;">
         <div class="stats-header">
             <div class="stats-icon" style="background: var(--color-accent);">
@@ -96,7 +96,7 @@
     <div class="upload-formats">
         支持格式：TXT, PDF, DOC, DOCX, XLSX, CSV, MD, JSON
     </div>
-    
+
     <form id="uploadForm" action="{{ url_for('upload_knowledge_multiple') }}" method="post" enctype="multipart/form-data" style="display: none;">
         <input type="file" id="fileInput" name="files" accept=".txt,.pdf,.doc,.docx,.xlsx,.csv,.md,.json" multiple>
     </form>
@@ -165,7 +165,7 @@
             </form>
         </div>
     </div>
-    
+
     {% if knowledge_items %}
     <table class="data-table">
         <thead>
@@ -229,7 +229,7 @@
                             <i class="fas fa-edit"></i>
                         </button>
                         {% endif %}
-                        
+
                         <form method="post" action="{{ url_for('toggle_knowledge_status', item_id=item.id) }}" style="display: inline;">
                             <button type="submit" class="action-btn toggle">
                                 {% if item.status == 'active' %}
@@ -239,7 +239,7 @@
                                 {% endif %}
                             </button>
                         </form>
-                        
+
                         <form method="post" action="{{ url_for('delete_knowledge', item_id=item.id) }}" 
                               onsubmit="return confirm('确定要删除这个文件吗？')" style="display: inline;">
                             <button type="submit" class="action-btn delete">
@@ -280,7 +280,7 @@
 
 <!-- 用户管理 Tab 内容 -->
 <div class="admin-tab-content" id="users-tab" style="display: none;">
-    
+
     <!-- 用户统计卡片 -->
     <div class="stats-grid">
         <div class="stats-card fade-in">
@@ -296,7 +296,7 @@
                 注册用户
             </div>
         </div>
-        
+
         <div class="stats-card fade-in" style="animation-delay: 0.1s;">
             <div class="stats-header">
                 <div class="stats-icon" style="background: var(--status-active);">
@@ -310,7 +310,7 @@
                 可正常使用
             </div>
         </div>
-        
+
         <div class="stats-card fade-in" style="animation-delay: 0.2s;">
             <div class="stats-header">
                 <div class="stats-icon" style="background: var(--color-accent);">
@@ -324,7 +324,7 @@
                 管理权限
             </div>
         </div>
-        
+
         <div class="stats-card fade-in" style="animation-delay: 0.3s;">
             <div class="stats-header">
                 <div class="stats-icon" style="background: var(--status-paused);">
@@ -396,7 +396,7 @@
                 </form>
             </div>
         </div>
-        
+
         <div id="usersTableContainer">
             <!-- 用户表格将通过AJAX加载 -->
             <div class="loading-spinner" style="text-align: center; padding: var(--space-8);">
@@ -446,33 +446,48 @@
 // 在页面顶部定义全局函数，确保按钮点击时可用
 function switchTab(tabName) {
     console.log('Switching to tab:', tabName);
-    
+
     // 移除所有tab按钮的active类
     document.querySelectorAll('.admin-tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // 隐藏所有tab内容
     document.querySelectorAll('.admin-tab-content').forEach(content => {
         content.style.display = 'none';
     });
-    
+
     // 激活当前tab按钮
     const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
     if (activeBtn) {
         activeBtn.classList.add('active');
     }
-    
+
     // 显示当前tab内容
     const activeContent = document.getElementById(`${tabName}-tab`);
     if (activeContent) {
         activeContent.style.display = 'block';
     }
-    
+
     // 如果切换到用户管理tab，加载用户数据
     if (tabName === 'users' && typeof loadUsersData === 'function') {
         loadUsersData();
     }
+}
+
+// 简单的提示功能
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-' + (type === 'success' ? 'success' : 'danger') + ' position-fixed';
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + message + ' <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>';
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 5000);
 }
 
 // 确保函数是全局可访问的
@@ -559,20 +574,20 @@ console.log('switchTab function defined globally');
         padding: 0 var(--space-4);
         margin-bottom: var(--space-4);
     }
-    
+
     .admin-tab-nav {
         flex-direction: row;
         padding: var(--space-1);
         border-radius: var(--radius-lg);
     }
-    
+
     .admin-tab-btn {
         padding: var(--space-3) var(--space-4);
         font-size: var(--text-sm);
         flex-direction: column;
         gap: var(--space-1);
     }
-    
+
     .admin-tab-btn i {
         font-size: var(--text-base);
     }
@@ -582,12 +597,12 @@ console.log('switchTab function defined globally');
     .admin-tabs {
         padding: 0 var(--space-3);
     }
-    
+
     .admin-tab-btn {
         padding: var(--space-2) var(--space-3);
         font-size: var(--text-xs);
     }
-    
+
     .admin-tab-btn i {
         font-size: var(--text-sm);
     }
@@ -618,7 +633,7 @@ uploadZone.addEventListener('dragleave', function(e) {
 uploadZone.addEventListener('drop', function(e) {
     e.preventDefault();
     this.classList.remove('dragover');
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
         handleFileUpload(files);
@@ -628,25 +643,25 @@ uploadZone.addEventListener('drop', function(e) {
 // 处理文件上传
 async function handleFileUpload(files) {
     if (files.length === 0) return;
-    
+
     // 显示上传进度区域
     showUploadProgress();
-    
+
     // 清空之前的上传列表
     const uploadList = document.getElementById('uploadList');
     uploadList.innerHTML = '';
-    
+
     // 为每个文件创建进度项
     files.forEach(file => {
         const uploadItem = createUploadItem(file);
         uploadList.appendChild(uploadItem);
     });
-    
+
     // 逐个上传文件
     for (let i = 0; i < files.length; i++) {
         await uploadSingleFile(files[i], i);
     }
-    
+
     // 上传完成后延迟隐藏进度区域
     setTimeout(() => {
         hideUploadProgress();
@@ -659,20 +674,20 @@ async function handleFileUpload(files) {
 async function uploadSingleFile(file, index) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const uploadItem = document.querySelector(`[data-file-index="${index}"]`);
     const progressBar = uploadItem.querySelector('.upload-progress-bar');
     const statusIcon = uploadItem.querySelector('.upload-status i');
     const statusText = uploadItem.querySelector('.upload-status-text');
-    
+
     try {
         statusText.textContent = '上传中...';
-        
+
         const response = await fetch('{{ url_for("upload_knowledge") }}', {
             method: 'POST',
             body: formData
         });
-        
+
         if (response.ok) {
             progressBar.style.width = '100%';
             statusIcon.className = 'fas fa-check-circle';
@@ -695,7 +710,7 @@ function createUploadItem(file) {
     const item = document.createElement('div');
     item.className = 'upload-item';
     item.setAttribute('data-file-index', document.querySelectorAll('.upload-item').length);
-    
+
     item.innerHTML = `
         <div class="upload-item-info">
             <div class="upload-file-icon">
@@ -716,7 +731,7 @@ function createUploadItem(file) {
             </div>
         </div>
     `;
-    
+
     return item;
 }
 
@@ -751,7 +766,7 @@ function editTextItem(itemId, title, content) {
     document.getElementById('editContent').value = content;
     document.getElementById('editForm').action = `/admin/knowledge/${itemId}/edit`;
     document.getElementById('editModal').style.display = 'flex';
-    
+
     // 添加显示动画
     setTimeout(() => {
         document.querySelector('.modal-content').style.transform = 'scale(1)';
@@ -762,13 +777,13 @@ function editTextItem(itemId, title, content) {
 // 关闭编辑模态框
 function closeEditModal(event) {
     if (event && event.target !== event.currentTarget) return;
-    
+
     const modal = document.getElementById('editModal');
     const content = document.querySelector('.modal-content');
-    
+
     content.style.transform = 'scale(0.95)';
     content.style.opacity = '0';
-    
+
     setTimeout(() => {
         modal.style.display = 'none';
         content.style.transform = 'scale(1)';
@@ -790,13 +805,13 @@ document.addEventListener('DOMContentLoaded', function() {
     statsCards.forEach((card, index) => {
         card.style.animationDelay = `${index * 0.1}s`;
     });
-    
+
     // 为表格行添加交错动画
     const tableRows = document.querySelectorAll('.data-table tbody tr');
     tableRows.forEach((row, index) => {
         row.style.animationDelay = `${0.7 + index * 0.05}s`;
     });
-    
+
     // 添加滚动动画观察器
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -806,7 +821,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }, { threshold: 0.1 });
-    
+
     // 观察所有动画元素
     document.querySelectorAll('.slide-up').forEach(el => {
         el.style.opacity = '0';
@@ -824,7 +839,7 @@ document.querySelectorAll('form').forEach(form => {
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>处理中...';
             submitBtn.disabled = true;
-            
+
             // 如果表单验证失败，恢复按钮状态
             setTimeout(() => {
                 if (!this.checkValidity()) {
@@ -843,14 +858,14 @@ async function loadUsersData() {
     try {
         const response = await fetch('/admin/api/users');
         const data = await response.json();
-        
+
         if (data.success) {
             // 更新统计数据
             document.getElementById('total-users').textContent = data.stats.total || 0;
             document.getElementById('active-users').textContent = data.stats.active || 0;
             document.getElementById('admin-users').textContent = data.stats.admin || 0;
             document.getElementById('recent-users').textContent = data.stats.recent || 0;
-            
+
             // 更新用户表格
             renderUsersTable(data.users);
         }
@@ -867,7 +882,7 @@ async function loadUsersData() {
 // 渲染用户卡片布局
 function renderUsersTable(users) {
     const container = document.getElementById('usersTableContainer');
-    
+
     if (!users || users.length === 0) {
         container.innerHTML = `
             <div class="empty-state" style="text-align: center; padding: var(--space-8);">
@@ -880,7 +895,7 @@ function renderUsersTable(users) {
         `;
         return;
     }
-    
+
     // 移动端友好的卡片布局
     const cardsHTML = `
         <div class="users-grid" style="
@@ -1118,13 +1133,13 @@ function renderUsersTable(users) {
                 grid-template-columns: repeat(2, 1fr) !important;
             }
         }
-        
+
         @media (min-width: 1025px) {
             .users-grid {
                 grid-template-columns: repeat(3, 1fr) !important;
             }
         }
-        
+
         .user-card-dashboard:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 40px rgba(0, 122, 255, 0.2) !important;
@@ -1132,7 +1147,7 @@ function renderUsersTable(users) {
         }
         </style>
     `;
-    
+
     container.innerHTML = cardsHTML;
 }
 
@@ -1141,15 +1156,15 @@ function filterUsers() {
     const search = document.getElementById('userSearch').value.toLowerCase();
     const statusFilter = document.getElementById('userStatusFilter').value;
     const cards = document.querySelectorAll('#usersTableContainer .user-card-dashboard');
-    
+
     cards.forEach(card => {
         const text = card.textContent.toLowerCase();
         const statusElement = card.querySelector('div[style*="position: absolute"]');
         const status = statusElement ? (statusElement.textContent.includes('活跃') ? 'active' : 'inactive') : '';
-        
+
         const matchesSearch = !search || text.includes(search);
         const matchesStatus = !statusFilter || status === statusFilter;
-        
+
         card.style.display = matchesSearch && matchesStatus ? '' : 'none';
     });
 }
@@ -1191,7 +1206,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 检查URL参数决定初始显示哪个tab
     const urlParams = new URLSearchParams(window.location.search);
     const activeTab = urlParams.get('tab') || 'knowledge';
-    
+
     if (activeTab !== 'knowledge') {
         switchTab(activeTab);
     }
@@ -1212,7 +1227,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const isVisible = dropdown.style.display === 'block' || dropdown.classList.contains('show');
-        
+
         if (isVisible) {
             dropdown.classList.remove('show');
             dropdown.style.display = 'none';
@@ -1225,14 +1240,14 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Menu opened');
         }
     };
-    
+
     // 确保CSS显示正确
     const dropdown = document.getElementById('adminMobileDropdown');
     if (dropdown) {
         dropdown.style.display = 'none';
         dropdown.classList.remove('show');
     }
-    
+
     console.log('Mobile menu functions initialized');
 });
 </script>

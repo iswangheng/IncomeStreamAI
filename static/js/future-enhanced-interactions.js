@@ -302,7 +302,57 @@ function initLoadingAnimations() {
 /**
  * 显示加载覆盖层
  */
-
+function showToast(message, type = 'info', duration = 5000) {
+    const toast = document.createElement('div');
+    toast.className = `toast-notification toast-${type}`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+            <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        min-width: 300px;
+        background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+        color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460'};
+        border: 1px solid ${type === 'success' ? '#c3e6cb' : type === 'error' ? '#f5c6cb' : '#bee5eb'};
+        border-radius: 8px;
+        padding: 12px 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // 触发入场动画
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+    }, 10);
+    
+    // 自动消失
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }
+    }, duration);
+}
 
 // 简单的加载状态，用于个人资料等非AI分析场景
 function showSimpleLoadingOverlay() {

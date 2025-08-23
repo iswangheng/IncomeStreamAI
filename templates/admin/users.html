@@ -544,11 +544,11 @@
                     <!-- 用户头部信息 -->
                     <div class="user-header">
                         <div class="user-avatar">
-                            {{ user.username[0].upper() }}
+                            {{ (user.name or user.phone)[0].upper() }}
                         </div>
                         <div class="user-info">
-                            <h3>{{ user.username }}</h3>
-                            <p>{{ user.email or '未设置邮箱' }}</p>
+                            <h3>{{ user.name or user.phone }}</h3>
+                            <p>{{ user.phone }}</p>
                         </div>
                     </div>
 
@@ -584,7 +584,7 @@
                             <i class="fas fa-edit"></i>
                             编辑
                         </button>
-                        <button class="action-btn btn-delete" onclick="deleteUser({{ user.id }}, '{{ user.username|replace('\'', '\\\'') }}')">
+                        <button class="action-btn btn-delete" onclick="deleteUser({{ user.id }}, '{{ (user.name or user.phone)|replace('\'', '\\\'') }}')">
                             <i class="fas fa-trash-alt"></i>
                             删除
                         </button>
@@ -675,11 +675,11 @@
 
                 userCards.forEach(card => {
                     const userName = card.querySelector('.user-info h3').textContent.toLowerCase();
-                    const userEmail = card.querySelector('.user-info p').textContent.toLowerCase();
+                    const userPhone = card.querySelector('.user-info p').textContent.toLowerCase();
                     const userStatus = card.querySelector('.user-status');
                     const isActive = userStatus.classList.contains('status-active');
 
-                    const matchesSearch = !searchValue || userName.includes(searchValue) || userEmail.includes(searchValue);
+                    const matchesSearch = !searchValue || userName.includes(searchValue) || userPhone.includes(searchValue);
                     const matchesStatus = !statusValue ||
                                         (statusValue === 'active' && isActive) ||
                                         (statusValue === 'inactive' && !isActive);

@@ -457,6 +457,25 @@ document.getElementById('confirm_password').addEventListener('input', function(e
     background: var(--color-bg-primary);
 }
 
+/* 修复输入框icon遮挡问题 - 针对input-wrapper结构 */
+.input-wrapper .form-control {
+    padding-left: 48px;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper .input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    color: var(--color-text-secondary);
+    pointer-events: none;
+}
+
 .form-control:focus {
     outline: none;
     border-color: var(--color-primary);

@@ -300,7 +300,7 @@ function initLoadingAnimations() {
 }
 
 /**
- * 显示加载覆盖层
+ * 显示消息提示（5秒自动消失）
  */
 function showToast(message, type = 'info', duration = 5000) {
     const toast = document.createElement('div');
@@ -309,7 +309,7 @@ function showToast(message, type = 'info', duration = 5000) {
         <div class="toast-content">
             <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
             <span>${message}</span>
-            <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
+            <button class="toast-close" onclick="removeToastElement(this.parentElement.parentElement)">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -342,16 +342,23 @@ function showToast(message, type = 'info', duration = 5000) {
     
     // 自动消失
     setTimeout(() => {
-        if (toast.parentNode) {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.remove();
-                }
-            }, 300);
-        }
+        removeToastElement(toast);
     }, duration);
+}
+
+/**
+ * 移除Toast元素的辅助函数
+ */
+function removeToastElement(toastElement) {
+    if (toastElement && toastElement.parentNode) {
+        toastElement.style.opacity = '0';
+        toastElement.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (toastElement.parentNode) {
+                toastElement.remove();
+            }
+        }, 300);
+    }
 }
 
 // 简单的加载状态，用于个人资料等非AI分析场景

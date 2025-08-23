@@ -1,0 +1,223 @@
+/* ================================
+   移动端导航栏 - 完全隔离样式
+   确保与PC端零冲突
+   ================================ */
+
+/* 移动端专用样式 - 优先级最高 */
+@media (max-width: 768px) {
+    /* 强制重置所有可能冲突的样式 */
+    .navigation-bar .mobile-menu-toggle {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1px solid rgba(209, 209, 214, 0.6) !important;
+        border-radius: 12px !important;
+        padding: 12px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        backdrop-filter: blur(10px) !important;
+        -webkit-backdrop-filter: blur(10px) !important;
+        min-width: 48px !important;
+        height: 48px !important;
+        width: 48px !important;
+        position: relative !important;
+        z-index: 1000 !important;
+        margin-left: auto !important;
+    }
+    
+    .navigation-bar .mobile-menu-toggle:hover {
+        background: rgba(247, 247, 249, 0.98) !important;
+        border-color: rgba(174, 174, 178, 0.8) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .navigation-bar .mobile-menu-toggle:active {
+        transform: translateY(0) !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .navigation-bar .mobile-menu-toggle i {
+        font-size: 18px !important;
+        color: #1d1d1f !important;
+        transition: color 0.2s ease !important;
+    }
+    
+    .navigation-bar .mobile-menu-toggle:hover i {
+        color: #007AFF !important;
+    }
+    
+    /* 隐藏PC端的按钮和用户菜单 */
+    .navigation-bar .nav-actions .btn:not(.mobile-menu-toggle) {
+        display: none !important;
+    }
+    
+    .navigation-bar .user-menu {
+        display: none !important;
+    }
+    
+    /* 移动端下拉菜单样式 */
+    .navigation-bar .mobile-dropdown {
+        position: absolute !important;
+        top: 100% !important;
+        right: 0 !important;
+        left: 0 !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(209, 209, 214, 0.4) !important;
+        border-top: none !important;
+        border-radius: 0 0 16px 16px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        transform: translateY(-10px) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: 999 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+    }
+    
+    .navigation-bar .mobile-dropdown.show {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
+        max-height: 500px !important;
+        padding: 16px 0 20px 0 !important;
+    }
+    
+    /* 移动端用户信息区域 */
+    .navigation-bar .mobile-user-info {
+        display: flex !important;
+        align-items: center !important;
+        padding: 16px 24px !important;
+        border-bottom: 1px solid rgba(209, 209, 214, 0.3) !important;
+        margin-bottom: 8px !important;
+        background: rgba(247, 247, 249, 0.5) !important;
+    }
+    
+    .navigation-bar .mobile-user-info .user-avatar {
+        width: 48px !important;
+        height: 48px !important;
+        background: linear-gradient(135deg, #007AFF, #5856D6) !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-right: 12px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .navigation-bar .mobile-user-info .user-avatar i {
+        font-size: 20px !important;
+        color: white !important;
+    }
+    
+    .navigation-bar .mobile-user-info .user-details h4 {
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        color: #1d1d1f !important;
+        margin: 0 0 4px 0 !important;
+    }
+    
+    .navigation-bar .mobile-user-info .user-details p {
+        font-size: 14px !important;
+        color: #8e8e93 !important;
+        margin: 0 !important;
+    }
+    
+    /* 移动端菜单项 */
+    .navigation-bar .mobile-dropdown .dropdown-item {
+        display: flex !important;
+        align-items: center !important;
+        padding: 12px 24px !important;
+        color: #1d1d1f !important;
+        text-decoration: none !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .navigation-bar .mobile-dropdown .dropdown-item:hover {
+        background: rgba(0, 122, 255, 0.08) !important;
+        color: #007AFF !important;
+    }
+    
+    .navigation-bar .mobile-dropdown .dropdown-item:active {
+        background: rgba(0, 122, 255, 0.12) !important;
+    }
+    
+    .navigation-bar .mobile-dropdown .dropdown-item i {
+        font-size: 18px !important;
+        margin-right: 12px !important;
+        width: 20px !important;
+        text-align: center !important;
+        color: inherit !important;
+    }
+    
+    /* 确保导航栏容器正确 */
+    .navigation-bar .nav-content {
+        padding: 0 16px !important;
+        max-width: none !important;
+    }
+    
+    .navigation-bar .nav-brand {
+        font-size: 18px !important;
+        font-weight: 600 !important;
+    }
+    
+    .navigation-bar .nav-brand i {
+        font-size: 20px !important;
+    }
+    
+    /* 强制重置nav-actions容器 */
+    .navigation-bar .nav-actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0 !important;
+        justify-content: flex-end !important;
+        flex-shrink: 0 !important;
+    }
+}
+
+/* 确保PC端不显示移动端元素 */
+@media (min-width: 769px) {
+    .navigation-bar .mobile-menu-toggle {
+        display: none !important;
+    }
+    
+    .navigation-bar .mobile-dropdown {
+        display: none !important;
+    }
+    
+    .navigation-bar .mobile-user-info {
+        display: none !important;
+    }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 480px) {
+    .navigation-bar .nav-content {
+        padding: 0 12px !important;
+    }
+    
+    .navigation-bar .nav-brand {
+        font-size: 16px !important;
+    }
+    
+    .navigation-bar .mobile-menu-toggle {
+        min-width: 44px !important;
+        height: 44px !important;
+        width: 44px !important;
+        padding: 10px !important;
+    }
+    
+    .navigation-bar .mobile-menu-toggle i {
+        font-size: 16px !important;
+    }
+}

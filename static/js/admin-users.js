@@ -157,9 +157,9 @@ function filterUsers() {
 
         let matchesStatus = true;
         if (statusFilter === 'active') {
-            matchesStatus = user.active;
+            matchesStatus = user.is_active;
         } else if (statusFilter === 'inactive') {
-            matchesStatus = !user.active;
+            matchesStatus = !user.is_active;
         }
 
         return matchesSearch && matchesStatus;
@@ -242,16 +242,80 @@ function exportUsers() {
     showToast(`成功导出 ${users.length} 个用户数据`, 'success');
 }
 
+// 用户操作函数
+function editUser(userId) {
+    window.location.href = `/admin/users/${userId}/edit`;
+}
+
+function deleteUser(userId) {
+    if (confirm('确定要删除这个用户吗？此操作不可撤销！')) {
+        fetch(`/admin/users/${userId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('用户删除成功', 'success');
+                loadUsersData(); // 重新加载用户列表
+            } else {
+                showToast(data.message || '删除失败', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('删除用户失败:', error);
+            showToast('删除失败，请稍后重试', 'error');
+        });
+    }
+}
+
+function toggleUserStatus(userId, newStatus) {
+    const action = newStatus ? '启用' : '禁用';
+    if (confirm(`确定要${action}这个用户吗？`)) {
+        fetch(`/admin/users/${userId}/toggle-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ is_active: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(`用户${action}成功`, 'success');
+                loadUsersData(); // 重新加载用户列表
+            } else {
+                showToast(data.message || `${action}失败`, 'error');
+            }
+        })
+        .catch(error => {
+            console.error(`${action}用户失败:`, error);
+            showToast(`${action}失败，请稍后重试`, 'error');
+        });
+    }
+}
+
 // 确保函数全局可访问
 window.loadUsersData = loadUsersData;
 window.filterUsers = filterUsers;
 window.exportUsers = exportUsers;
+window.editUser = editUser;
+window.deleteUser = deleteUser;
+window.toggleUserStatus = toggleUserStatus;
 
 // 添加refreshUsers函数以处理刷新用户列表按钮
 function refreshUsers() {
+    console.log('刷新用户列表');
     if (typeof loadUsersData === 'function') {
         loadUsersData();
         showToast('用户列表已刷新', 'success');
+    } else {
+        console.error('loadUsersData 函数未定义');
+        showToast('刷新失败', 'error');
     }
 }
 

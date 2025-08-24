@@ -328,61 +328,75 @@ class AngelaAI:
 【知识库要点】（只给要点，避免冗长）
 {kb_snippets}"""
             
-            assistant_prompt = """请严格按照非劳务收入管道设计原理，输出以下JSON格式：
+            # 构建关键人物列表用于提示
+            key_persons_names = ', '.join([person.get('name', f'人物{i+1}') for i, person in enumerate(key_persons)])
+            
+            assistant_prompt = f"""请严格按照非劳务收入管道设计原理，输出以下JSON格式：
 
-【重要要求】
-1. parties_structure 必须包含用户输入的所有关键人物，不得遗漏任何一个
-2. 每个参与方都必须标注角色类型：role_type 字段必须是 "需求方"、"交付方" 或 "资金方" 之一
-3. 如果需要补充其他关键人物，也必须明确标注角色类型
-4. 设计者始终是整个闭环的统筹者，角色类型为 "统筹方"
+【关键要求 - 必须严格执行】
+1. 用户输入了以下关键人物，parties_structure 中必须包含所有这些人物，一个都不能遗漏：
+   {key_persons_names}
+2. 每个参与方都必须有 role_type 字段，值必须是："需求方"、"交付方"、"资金方"、"统筹方" 之一
+3. 设计者的 role_type 固定为 "统筹方"
+4. 其他人物根据其在闭环中的作用确定 role_type
+5. 如果需要补充其他关键人物，也必须标注 role_type
 
-{
-  "overview": {
+【JSON格式】
+{{
+  "overview": {{
     "situation": "运用【意识+能量+能力=结果】公式分析当前情况（<=150字），必须包含设计者自己的位置",
     "income_type": "主要适用的非劳务收入类型（租金/利息/股份/版权/居间/企业连锁/团队收益）",
     "core_insight": "核心洞察：为什么这个项目能形成非劳务收入管道，并且设计者本人如何在其中获利",
     "gaps": ["缺少的关键角色或环节1","..."],
     "suggested_roles_to_hunt": [
-      {
+      {{
         "role":"建议补齐的角色",
         "role_type":"需求方/交付方/资金方",
         "why":"为什么需要",
         "where_to_find":"去哪找",
         "outreach_script":"切实可行的话术（包含交换逻辑：你给什么/对方得什么）"
-      }
+      }}
     ]
-  },
+  }},
   "paths": [
-    {
+    {{
       "id": "path_1",
       "name": "路径名（<=20字）",
-      "income_mechanism": {
+      "income_mechanism": {{
         "type": "所属的非劳务收入类型（七大类之一或组合）",
         "trigger": "收益触发点（钱从哪来）",
         "settlement": "结算方式（按单/按期/分红/授权费等）"
-      },
+      }},
       "parties_structure": [
-        {
+        {{
           "party": "设计者（你）",
           "role_type": "统筹方",
           "resources": ["你提供的资源或规则"],
           "role_value": "你在闭环中的价值（统筹/撮合/规则制定等）",
           "make_them_happy": "如何让自己在闭环中不被跳过并持续获利"
-        },
-        {
-          "party": "【必须包含用户输入的每个关键人物】",
+        }},
+        {{
+          "party": "用户输入的关键人物1",
+          "role_type": "需求方/交付方/资金方",
+          "resources": ["他能提供的资源"],
+          "role_value": "他在闭环中的位置/作用", 
+          "make_them_happy": "如何让他高兴（满足的需求/动机）"
+        }},
+        {{
+          "party": "用户输入的关键人物2（如果有）",
           "role_type": "需求方/交付方/资金方",
           "resources": ["他能提供的资源"],
           "role_value": "他在闭环中的位置/作用",
           "make_them_happy": "如何让他高兴（满足的需求/动机）"
-        },
-        {
-          "party": "【如需补充的关键人物】",
+        }},
+        {{
+          "party": "用户输入的关键人物3（如果有）",
           "role_type": "需求方/交付方/资金方",
-          "resources": ["..."],
-          "role_value": "...",
-          "make_them_happy": "..."
-        }
+          "resources": ["他能提供的资源"],
+          "role_value": "他在闭环中的位置/作用",
+          "make_them_happy": "如何让他高兴（满足的需求/动机）"
+        }}
+        // 注意：必须包含所有用户输入的关键人物，不得遗漏
       ],
       "action_steps": [
         {

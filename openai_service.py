@@ -454,11 +454,14 @@ class AngelaAI:
   ]
 }}"""
             
+            # 获取模型配置
+            model_config = self.get_model_config('main_analysis')
+            
             # 打印prompt长度信息
             total_prompt = system_prompt + user_content + assistant_prompt
             logger.info(f"===== OpenAI API Request Info =====")
-            logger.info(f"Model: {self.model}")
-            logger.info(f"Max tokens: {self.max_tokens}")
+            logger.info(f"Model: {model_config['model']}")
+            logger.info(f"Max tokens: {model_config['max_tokens']}")
             logger.info(f"System prompt length: {len(system_prompt)} chars")
             logger.info(f"User content length: {len(user_content)} chars")
             logger.info(f"Assistant prompt length: {len(assistant_prompt)} chars")
@@ -468,9 +471,6 @@ class AngelaAI:
             logger.info(f"User: {user_content[:500]}..." if len(user_content) > 500 else f"User: {user_content}")
             logger.info(f"Assistant: {assistant_prompt[:500]}..." if len(assistant_prompt) > 500 else f"Assistant: {assistant_prompt}")
             logger.info(f"================================")
-            
-            # 获取模型配置
-            model_config = self.get_model_config('main_analysis')
             
             # 调用OpenAI API，带重试机制
             response = self._call_openai_with_retry(
@@ -536,8 +536,11 @@ class AngelaAI:
 
 请优化这条路径，保持相同的ID，但调整action_steps、resources使用、MVP等内容。"""
             
+            # 获取模型配置
+            model_config = self.get_model_config('refinement')
+            
             response = client.chat.completions.create(
-                model=self.model,
+                model=model_config['model'],
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_content}

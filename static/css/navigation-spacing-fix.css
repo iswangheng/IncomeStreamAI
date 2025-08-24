@@ -43,9 +43,26 @@ body {
 .main-content,
 .container,
 .content,
-.admin-main-full {
+.admin-main-full,
+.result-page-container {
     margin-top: 0 !important;
     padding-top: 0 !important;
+}
+
+/* 特别针对结果页面的容器间距优化 */
+.result-page-container {
+    padding-top: 70px !important; /* 只保留导航栏高度的间距 */
+}
+
+/* 减少页面头部区域的间距 */
+.result-hero {
+    margin-bottom: var(--space-8) !important;
+    padding-top: var(--space-4) !important;
+}
+
+.page-header {
+    margin-bottom: var(--space-4) !important;
+    padding: var(--space-4) var(--space-2) !important;
 }
 
 /* 页面内容直接从导航栏下方开始 */
@@ -72,8 +89,19 @@ body.admin-layout {
     }
     
     .main-content,
-    .admin-main-full {
+    .admin-main-full,
+    .result-page-container {
         padding-top: 0 !important;
+    }
+    
+    /* 移动端结果页面顶部间距 */
+    .result-page-container {
+        padding-top: 70px !important;
+    }
+    
+    .result-hero {
+        margin-bottom: var(--space-6) !important;
+        padding-top: var(--space-2) !important;
     }
 }
 
@@ -83,8 +111,24 @@ body.admin-layout {
     }
     
     .main-content,
-    .admin-main-full {
+    .admin-main-full,
+    .result-page-container {
         padding-top: 0 !important;
+    }
+    
+    /* 超小屏幕结果页面优化 */
+    .result-page-container {
+        padding-top: 68px !important;
+    }
+    
+    .result-hero {
+        margin-bottom: var(--space-4) !important;
+        padding-top: 0 !important;
+    }
+    
+    .page-header {
+        margin-bottom: var(--space-3) !important;
+        padding: var(--space-3) var(--space-2) !important;
     }
 }
 

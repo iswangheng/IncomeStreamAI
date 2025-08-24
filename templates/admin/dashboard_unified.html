@@ -807,10 +807,17 @@
         async function saveModelConfig() {
             const modelSelect = document.getElementById('modelSelection');
             const tempRange = document.getElementById('temperatureRange');
+            const submitBtn = document.querySelector('#modelConfigForm button[type="submit"]');
             
             if (!modelSelect || !tempRange) {
                 showToast('页面元素未加载完成，请刷新重试', 'error');
                 return;
+            }
+            
+            // 禁用按钮并显示加载状态
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>保存中...';
             }
             
             const model = modelSelect.value;
@@ -821,8 +828,6 @@
             console.log('准备保存配置:', { model, temperature, maxTokens, timeout });
 
             try {
-                showToast('正在保存配置...', 'info');
-                
                 const response = await fetch('/admin/api/model_config', {
                     method: 'POST',
                     headers: {
@@ -858,6 +863,12 @@
             } catch (error) {
                 console.error('保存配置失败:', error);
                 showToast(`保存配置失败: ${error.message}`, 'error');
+            } finally {
+                // 恢复按钮状态
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>保存配置';
+                }
             }
         }
 

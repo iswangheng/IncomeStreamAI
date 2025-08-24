@@ -61,13 +61,25 @@
                 <div class="user-dropdown" role="menu">
                     <div class="dropdown-header">
                         <div class="user-profile">
-                            <div class="user-avatar"></div>
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
                             <div class="user-details">
                                 <h4>{{ current_user.name or '用户' }}</h4>
                                 <p>{{ current_user.phone }}</p>
                             </div>
                         </div>
                     </div>
+                    <a href="{{ url_for('analysis_history') }}" class="dropdown-item" role="menuitem">
+                        <i class="fas fa-history"></i>
+                        历史记录
+                    </a>
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="dropdown-item" role="menuitem">
+                        <i class="fas fa-cog"></i>
+                        管理中心
+                    </a>
+                    {% endif %}
                     <a href="{{ url_for('logout') }}" class="dropdown-item logout" role="menuitem">
                         <i class="fas fa-sign-out-alt"></i>
                         退出登录

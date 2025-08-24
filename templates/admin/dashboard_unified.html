@@ -809,6 +809,8 @@
             const tempRange = document.getElementById('temperatureRange');
             const submitBtn = document.querySelector('#modelConfigForm button[type="submit"]');
             
+            console.log('保存函数被调用，按钮元素:', submitBtn);
+            
             if (!modelSelect || !tempRange) {
                 showToast('页面元素未加载完成，请刷新重试', 'error');
                 return;
@@ -816,8 +818,11 @@
             
             // 禁用按钮并显示加载状态
             if (submitBtn) {
+                console.log('设置按钮加载状态');
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>保存中...';
+            } else {
+                console.error('找不到提交按钮');
             }
             
             const model = modelSelect.value;
@@ -865,9 +870,13 @@
                 showToast(`保存配置失败: ${error.message}`, 'error');
             } finally {
                 // 恢复按钮状态
+                console.log('准备恢复按钮状态，按钮元素:', submitBtn);
                 if (submitBtn) {
+                    console.log('恢复按钮状态');
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>保存配置';
+                } else {
+                    console.error('恢复按钮状态时找不到按钮');
                 }
             }
         }

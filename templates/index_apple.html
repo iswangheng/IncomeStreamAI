@@ -57,11 +57,11 @@
                             <i class="fas fa-graduation-cap"></i>
                         </div>
                         <div class="case-content">
-                            <h4>英语培训管道案例</h4>
-                            <p>通过连接升学规划师和英语机构，3个月内搭建年收入40万的培训管道</p>
+                            <h4>在线口语陪练连接平台</h4>
+                            <p>连接升学规划师客户和专业外教，打造标准化口语培训产品，3方共赢收入管道</p>
                             <div class="case-tags">
-                                <span class="tag">教育培训</span>
-                                <span class="tag">B2B连接</span>
+                                <span class="tag">在线教育</span>
+                                <span class="tag">资源连接</span>
                             </div>
                         </div>
                     </div>
@@ -71,11 +71,11 @@
                             <i class="fas fa-building"></i>
                         </div>
                         <div class="case-content">
-                            <h4>商铺租赁管道案例</h4>
-                            <p>1万元启动资金，通过二房东模式，8年累计收益72万</p>
+                            <h4>社区生活服务集合店</h4>
+                            <p>整租商铺分区转包，打造便利店+美甲+托管一体化社区服务，客户互导增收</p>
                             <div class="case-tags">
-                                <span class="tag">房地产</span>
-                                <span class="tag">差价收益</span>
+                                <span class="tag">社区服务</span>
+                                <span class="tag">业态整合</span>
                             </div>
                         </div>
                     </div>
@@ -85,11 +85,11 @@
                             <i class="fas fa-seedling"></i>
                         </div>
                         <div class="case-content">
-                            <h4>知了猴养殖管道案例</h4>
-                            <p>1万元启动成本，搭建7条管道，实现年收入70万的农村创业</p>
+                            <h4>订单农业知了猴供应链</h4>
+                            <p>建立标准化养殖收购体系，连接林农、专家、餐厅，年产值目标50万供应链</p>
                             <div class="case-tags">
-                                <span class="tag">农业创新</span>
-                                <span class="tag">资源整合</span>
+                                <span class="tag">订单农业</span>
+                                <span class="tag">供应链整合</span>
                             </div>
                         </div>
                     </div>
@@ -1163,72 +1163,100 @@
         // 测试案例数据
         const demoTestCases = {
             'english-training': {
-                projectName: 'Bonnie英语培训管道',
-                projectDescription: '有一天，一个做升学规划的朋友在饭局上随口吐槽："最近合作的英语机构交付太差，特别不靠谱，你有没有靠谱的老师推荐？"我发现我有这个朋友就有生源，我可以去找老师就有交付，我来做连接不就能搭个闭环？而且机构交付差是因为价格太低只有市场价1/3，我就设计标准化产品配助教，成本降下来。',
+                projectName: '在线口语陪练连接平台',
+                projectDescription: '我通过朋友圈发现，升学规划师朋友经常有家长询问英语培训推荐，而我认识的外教群体因为疫情线下课减少正在找线上机会。我设计了"1对1外教口语陪练"产品：标准化课程包（30分钟/节，8节一期），统一定价288元/期，我负责获客和质量监督，外教获得稳定学员，升学规划师获得推荐费。这样形成三方共赢的收入管道。',
                 projectStage: 'testing',
                 persons: [
                     {
-                        name: '升学规划师朋友',
-                        roles: ['channel'],
-                        resources: ['家长客户资源', '升学规划服务信任度', '教育圈人脉'],
-                        makeHappy: ['bring_leads', 'no_conflict_current_partner', 'recurring_income'],
-                        notes: '有流量焦虑，经常有家长问英语培训推荐'
+                        name: '升学规划师Lisa',
+                        roles: ['enterprise_owner'],
+                        resources: ['1000+精准家长客户', '教育咨询品牌信任度', '家长微信群3个', '升学规划专业认证'],
+                        makeHappy: ['recurring_income', 'no_conflict_current_partner', 'brand_exposure', 'be_recognized'],
+                        notes: '主营升学规划，家长经常问英语培训推荐，但她不想直接做培训影响主业，希望有可信赖的推荐来源'
                     },
                     {
-                        name: '英语培训机构',
-                        roles: ['product', 'delivery'],
-                        resources: ['英语课程产品', '师资助教团队', '线上教学系统'],
-                        makeHappy: ['bring_leads', 'brand_exposure'],
-                        notes: '想转型线上，有流量焦虑，交付成本高'
+                        name: '英语外教Kevin',
+                        roles: ['service_provider'],
+                        resources: ['TESOL认证', '5年教学经验', '线上教学设备', '标准美式发音', '课程设计能力'],
+                        makeHappy: ['stable_supply', 'recurring_income', 'be_recognized'],
+                        notes: '疫情后线下课程减少，正在寻找稳定的线上学员来源，擅长口语教学和课程标准化'
+                    },
+                    {
+                        name: '程序员家长王先生',
+                        roles: ['store_owner'],
+                        resources: ['教育支付预算年5万', '对在线教育接受度高', '注重教学效果', '愿意分享好的教育产品'],
+                        makeHappy: ['cost_control', 'stable_supply', 'unique_products'],
+                        notes: '孩子12岁，英语基础不错但缺乏口语练习，希望找到性价比高且效果好的外教一对一'
                     }
                 ]
             },
             'rental-business': {
-                projectName: 'Angela临街商铺二房东管道',
-                projectDescription: '我打了20多个电话调研发现一个房东有临街双层商铺，挂了两三个月都租不出去，因为房东要求整租，很多人想分开租上下层。更重要的是，这个铺子没有煤气不能做热菜，所以餐饮做不了。但通过市场调研我发现一楼可以做便利店、水果店，二楼可以做美容SPA、理发店。房东还是个社恐，太好了！',
+                projectName: '社区生活服务集合店',
+                projectDescription: '我在调研中发现，某社区临街200平商铺空置3个月，房东要求整租但租金偏高导致无人问津。通过分析发现，这个位置适合做"生活服务集合店"：一楼做社区便利店+代收快递，二楼做美容美甲+儿童托管。我设计了分租转包模式：我整租后按功能分区转租，同时整合各业态形成客户互导，让各商家都获得更多客流。',
                 projectStage: 'testing',
                 persons: [
                     {
-                        name: '社恐房东',
-                        roles: ['investor'],
-                        resources: ['临街双层商铺', '5年长期租约意愿', '稳定现金流需求'],
-                        makeHappy: ['recurring_income', 'no_money_no_liability', 'no_public_appearance'],
-                        notes: '社恐不想跟太多租客打交道，要求整租，铺子空置好几个月'
+                        name: '商铺房东老张',
+                        roles: ['funding_provider'],
+                        resources: ['临街200平双层商铺', '停车位3个', '独立水电接入', '商业用地证照齐全'],
+                        makeHappy: ['recurring_income', 'no_money_no_liability', 'use_idle_assets'],
+                        notes: '退休教师，不愿操心具体经营，希望稳定租金收入，优先考虑长期租约'
+                    },
+                    {
+                        name: '便利店老板小李',
+                        roles: ['service_provider'],
+                        resources: ['便利店运营经验', '供应商渠道', '快递代收服务', '社区居民信任度'],
+                        makeHappy: ['stable_supply', 'cost_control', 'traffic_sharing'],
+                        notes: '原店面到期需要换地方，有成熟的便利店运营模式，希望租金合理且有稳定客流'
+                    },
+                    {
+                        name: '美甲师Amy',
+                        roles: ['service_provider'],
+                        resources: ['专业美甲技能', '固定客户群200+', '美甲设备全套', '小红书1万粉丝'],
+                        makeHappy: ['brand_exposure', 'cost_control', 'traffic_sharing'],
+                        notes: '想要有固定门店提升专业形象，预算有限，希望通过客户互导增加收入'
+                    },
+                    {
+                        name: '托管老师刘阿姨',
+                        roles: ['service_provider'],
+                        resources: ['幼教资格证', '15年托管经验', '家长口碑好', '安全意识强'],
+                        makeHappy: ['stable_supply', 'be_recognized', 'recurring_income'],
+                        notes: '之前在家做托管，想要正规化经营，需要合适的场地和合理的租金'
                     }
                 ]
             },
             'cicada-farming': {
-                projectName: '楚楚知了猴7条管道',
-                projectDescription: '我是十八线小县城美容院老板娘，全年无休当高强度打工者。老公开玩笑说"要不咱们养一片林子自己抓知了猴吧？"让我意识到这么多人吃知了猴，我为什么不能做供货方？我盘了4个关键资源：销路（烧烤摊、餐馆供不应求）、林地（老公同学有柳树林）、蝉卵（劳务市场乡亲能捡）、技术（当地养殖户教学）。',
+                projectName: '订单农业知了猴供应链',
+                projectDescription: '我发现县城餐饮市场知了猴供不应求，价格每斤80-120元，但缺乏稳定供应。通过调研发现可以建立"订单农业模式"：与餐厅签订供货协议，向农户定制化收购，建立标准化养殖和收购体系。我有餐饮渠道资源，本地林农有场地但缺销路，专业养殖户有技术但缺规模，形成完美的资源互补。计划第一年供应5家餐厅，年产值目标50万。',
                 projectStage: 'testing',
                 persons: [
                     {
-                        name: '柳树林主',
-                        roles: ['investor'],
-                        resources: ['柳树林地', '除草需求', '长期合作意愿'],
-                        makeHappy: ['use_idle_assets', 'recurring_income', 'no_money_no_liability'],
-                        notes: '除草成本高是真正痛点，我们帮他除草换取低价租金'
+                        name: '林地承包户老王',
+                        roles: ['other_provider'],
+                        resources: ['柳树林地200亩', '山区水源充足', '农业设施基础', '当地农户关系网'],
+                        makeHappy: ['use_idle_assets', 'recurring_income', 'no_money_no_liability', 'be_recognized'],
+                        notes: '林地利用率低，除草成本高，愿意低价租给能带来额外收入且帮助管理的合作方'
                     },
                     {
-                        name: '当地养殖户老师',
-                        roles: ['expert'],
-                        resources: ['知了猴养殖技术', '成功经验', '行业人脉'],
-                        makeHappy: ['be_recognized', 'brand_exposure', 'be_consultant'],
-                        notes: '被称为"乡村袁隆平"，感受到尊重后愿意倾囊相授'
+                        name: '知了猴养殖专家赵师傅',
+                        roles: ['service_provider'],
+                        resources: ['养殖技术专利', '培训教材', '成功案例', '行业人脉网络', '质量检测设备'],
+                        makeHappy: ['be_recognized', 'brand_exposure', 'be_consultant', 'recurring_income'],
+                        notes: '有15年养殖经验，技术成熟但缺乏推广渠道，希望通过技术输出获得收入和行业地位'
                     },
                     {
-                        name: '劳务市场大爷大妈',
-                        roles: ['delivery'],
-                        resources: ['蝉卵采集能力', '山区熟悉度', '时间充裕'],
-                        makeHappy: ['recurring_income', 'be_recognized'],
-                        notes: '以件计价不设打卡，干得开心效率更高'
+                        name: '餐厅老板陈总',
+                        roles: ['enterprise_owner'],
+                        resources: ['餐厅客流日均200+', '食材采购预算月2万', '当地餐饮协会资源', '冷链存储设备'],
+                        makeHappy: ['stable_supply', 'cost_control', 'unique_products', 'brand_exposure'],
+                        notes: '主营农家菜，知了猴是招牌特色但经常断货，愿意预付定金确保稳定供应'
                     },
                     {
-                        name: '烧烤摊餐馆老板',
-                        roles: ['buyer'],
-                        resources: ['稳定销路需求', '现金交易', '食材采购渠道'],
-                        makeHappy: ['stable_supply', 'cost_control', 'unique_products'],
-                        notes: '知了猴供不应求，愿意预付定金确保稳定供货'
+                        name: '收购协调员小张',
+                        roles: ['traffic_provider'],
+                        resources: ['农户资源网络', '收购经验', '运输车辆', '当地市场信息', '农产品收购许可'],
+                        makeHappy: ['recurring_income', 'be_recognized', 'stable_supply'],
+                        notes: '曾做过其他农产品收购，熟悉当地农户和市场情况，希望找到稳定且利润较好的收购项目'
                     }
                 ]
             }

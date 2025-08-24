@@ -416,6 +416,37 @@
             gap: var(--space-6);
             position: relative;
         }
+        
+        /* 彻底隐藏所有编号圆圈和连接线 */
+        .party-card::before,
+        .party-card::after,
+        .party-card *::before,
+        .party-card *::after {
+            display: none !important;
+        }
+        
+        .business-flow-grid::before,
+        .business-flow-grid::after,
+        .business-flow-section::before,
+        .business-flow-section::after {
+            display: none !important;
+        }
+        
+        /* 恢复待补齐标签 */
+        .party-card.pending::before {
+            content: '待补齐' !important;
+            display: block !important;
+            position: absolute;
+            top: -8px;
+            right: 12px;
+            background: #F59E0B;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 2;
+        }
 
 
         .party-card {
@@ -970,7 +1001,6 @@
                         {% set role_order = ['需求方', '交付方', '资金方'] %}
                         
                         {% for role_type in role_order %}
-                        {% set outer_loop = loop %}
                         {% for party in pipeline.parties_structure %}
                         {% if party.role_type == role_type %}
                         <div class="party-card role-{{ party.role_type }} {{ 'pending' if party.party.startswith('【待补齐】') else '' }}">

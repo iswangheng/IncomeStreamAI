@@ -1600,20 +1600,10 @@
                     
                     <!-- 节点层 -->
                     <div class="network-nodes">
-                        <!-- 预定义位置数组 - 分散布局避免重叠 -->
-                        {% set positions = [
-                            {'x': 20, 'y': 20},
-                            {'x': 80, 'y': 20},
-                            {'x': 80, 'y': 80},
-                            {'x': 20, 'y': 80},
-                            {'x': 50, 'y': 15},
-                            {'x': 50, 'y': 85}
-                        ] %}
-                        
-                        <!-- 首先渲染设计者节点（中心） -->
+                        <!-- 设计者节点 - 固定中心位置 -->
                         {% for party in path.parties_structure %}
                             {% if party.party == '设计者（你）' or '你' in party.party %}
-                            <div class="party-node designer center-node" data-node-id="designer">
+                            <div class="party-node designer" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3;" data-node-id="designer">
                                 <div class="party-indicator"></div>
                                 <div class="party-name">{{ party.party }}</div>
                                 <div class="party-resources">
@@ -1630,52 +1620,37 @@
                                     {{ party.make_them_happy }}
                                 </div>
                             </div>
+                            {% break %}
                             {% endif %}
                         {% endfor %}
                         
-                        <!-- 然后渲染其他参与方节点（围绕） -->
-                        <div class="surrounding-nodes">
-                            {% for party in path.parties_structure %}
-                                {% if not (party.party == '设计者（你）' or '你' in party.party) %}
-                                {% if loop.index == 2 %}
-                                    {% set pos_x = 20 %}
-                                    {% set pos_y = 20 %}
-                                {% elif loop.index == 3 %}
-                                    {% set pos_x = 80 %}
-                                    {% set pos_y = 20 %}
-                                {% elif loop.index == 4 %}
-                                    {% set pos_x = 80 %}
-                                    {% set pos_y = 80 %}
-                                {% elif loop.index == 5 %}
-                                    {% set pos_x = 20 %}
-                                    {% set pos_y = 80 %}
-                                {% else %}
-                                    {% set pos_x = 50 %}
-                                    {% set pos_y = 15 %}
-                                {% endif %}
-                                
-                                <div class="party-node participant surrounding-node" 
-                                     data-node-id="party{{ loop.index }}"
-                                     style="left: {{ pos_x }}%; top: {{ pos_y }}%;">
-                                    <div class="party-indicator"></div>
-                                    <div class="party-name">{{ party.party }}</div>
-                                    <div class="party-resources">
-                                        <strong>资源：</strong>
-                                        {% if party.resources %}
-                                            {% for resource in party.resources %}
-                                            <span class="resource-tag">{{ resource }}</span>
-                                            {% endfor %}
-                                        {% endif %}
-                                    </div>
-                                    <div class="party-value">{{ party.role_value }}</div>
-                                    <div class="party-happiness">
-                                        <i class="fas fa-handshake"></i>
-                                        {{ party.make_them_happy }}
-                                    </div>
+                        <!-- 其他参与方 - 固定位置 -->
+                        {% set participant_positions = ['15%', '85%'] %}
+                        {% set participant_count = 0 %}
+                        {% for party in path.parties_structure %}
+                            {% if not (party.party == '设计者（你）' or '你' in party.party) %}
+                            <div class="party-node participant" 
+                                 style="position: absolute; left: {{ participant_positions[participant_count] }}; top: 50%; transform: translate(-50%, -50%);" 
+                                 data-node-id="party{{ loop.index }}">
+                                <div class="party-indicator"></div>
+                                <div class="party-name">{{ party.party }}</div>
+                                <div class="party-resources">
+                                    <strong>资源：</strong>
+                                    {% if party.resources %}
+                                        {% for resource in party.resources %}
+                                        <span class="resource-tag">{{ resource }}</span>
+                                        {% endfor %}
+                                    {% endif %}
                                 </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
+                                <div class="party-value">{{ party.role_value }}</div>
+                                <div class="party-happiness">
+                                    <i class="fas fa-handshake"></i>
+                                    {{ party.make_them_happy }}
+                                </div>
+                            </div>
+                            {% set participant_count = participant_count + 1 %}
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
                 

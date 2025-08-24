@@ -1230,27 +1230,6 @@ def admin_dashboard():
 
 
 # 用户管理路由
-@app.route('/admin/users')
-@login_required
-@admin_required
-def admin_users():
-    """用户管理页面"""
-    search_query = request.args.get('search', '')
-
-    query = User.query
-    if search_query:
-        query = query.filter(
-            db.or_(
-                User.name.contains(search_query),
-                User.phone.contains(search_query)
-            )
-        )
-
-    users = query.order_by(User.created_at.desc()).all()
-
-    return render_template('admin/users.html', 
-                         users=users,
-                         search_query=search_query)
 
 
 @app.route('/admin/users/add', methods=['GET', 'POST'])
@@ -1294,7 +1273,7 @@ def admin_add_user():
 
             user_type = '管理员' if is_admin else '普通用户'
             flash(f'{user_type} "{name}" 创建成功', 'success')
-            return redirect(url_for('admin_users'))
+            return redirect(url_for('admin_dashboard') + '?tab=users')
 
         except Exception as e:
             flash(f'创建用户失败: {str(e)}', 'error')
@@ -1344,13 +1323,8 @@ def admin_edit_user(user_id):
                 current_user.set_password(password)
                 db.session.commit() # Commit again if password was changed
 
-            # 根据重定向参数决定跳转目标
-            if redirect_to == 'dashboard':
-                flash('用户信息更新成功！', 'success')
-                return redirect(url_for('admin_dashboard', tab='users'))
-            else:
-                flash('用户信息更新成功！', 'success')
-                return redirect(url_for('admin_users'))
+            flash('用户信息更新成功！', 'success')
+            return redirect(url_for('admin_dashboard') + '?tab=users')
 
         except Exception as e:
             flash(f'更新用户信息失败: {str(e)}', 'error')
@@ -1369,7 +1343,7 @@ def admin_delete_user(user_id):
     # 防止删除当前登录用户
     if user.id == current_user.id:
         flash('不能删除当前登录的用户', 'error')
-        return redirect(url_for('admin_users'))
+        return redirect(url_for('admin_dashboard') + '?tab=users')
 
     try:
         username = user.name
@@ -1381,7 +1355,7 @@ def admin_delete_user(user_id):
     except Exception as e:
         flash(f'删除用户失败: {str(e)}', 'error')
 
-    return redirect(url_for('admin_users'))
+    return redirect(url_for('admin_dashboard') + '?tab=users')
 
 
 @app.route('/admin/knowledge/upload', methods=['POST'])

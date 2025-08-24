@@ -244,7 +244,7 @@ function exportUsers() {
 
 // 用户操作函数
 function editUser(userId) {
-    window.location.href = `/admin/users/${userId}/edit`;
+    window.location.href = `/admin/users/${userId}/edit?redirect_to=dashboard`;
 }
 
 function deleteUser(userId) {

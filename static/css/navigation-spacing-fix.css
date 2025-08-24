@@ -18,7 +18,7 @@ body {
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border-bottom: 0.5px solid rgba(0, 0, 0, 0.08) !important;
-    min-height: 32px !important;
+    min-height: 56px !important;
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
@@ -34,8 +34,8 @@ body {
     width: 100% !important;
     max-width: 1200px !important;
     margin: 0 auto !important;
-    padding: 0 16px !important;
-    min-height: 32px !important;
+    padding: 0 24px !important;
+    min-height: 56px !important;
     box-sizing: border-box !important;
 }
 
@@ -51,7 +51,7 @@ body {
 
 /* 特别针对结果页面的容器间距优化 - PC端调整 */
 .result-page-container {
-    padding-top: 40px !important; /* 匹配新的导航栏高度 */
+    padding-top: 64px !important; /* 匹配新的导航栏高度 */
 }
 
 /* 减少页面头部区域的间距 */
@@ -105,40 +105,40 @@ body.admin-layout {
     }
 }
 
-/* PC端特定样式 - 更窄的导航栏 */
+/* PC端特定样式 - 标准导航栏高度 */
 @media (min-width: 769px) {
     .navigation-bar {
-        min-height: 32px !important;
-        height: 32px !important;
+        min-height: 56px !important;
+        height: 56px !important;
     }
     
     .nav-content {
-        min-height: 32px !important;
-        height: 32px !important;
-        padding: 0 16px !important;
+        min-height: 56px !important;
+        height: 56px !important;
+        padding: 0 24px !important;
     }
     
     /* PC端结果页面调整 */
     .result-page-container {
-        padding-top: 40px !important;
+        padding-top: 64px !important;
     }
     
     /* PC端导航元素优化 */
     .nav-brand {
-        font-size: 16px !important;
-        line-height: 1 !important;
+        font-size: 18px !important;
+        line-height: 1.2 !important;
     }
     
     .nav-actions .btn {
-        padding: 4px 12px !important;
-        font-size: 13px !important;
-        line-height: 1.2 !important;
+        padding: 8px 16px !important;
+        font-size: 14px !important;
+        line-height: 1.4 !important;
     }
     
     .user-info {
-        font-size: 13px !important;
-        padding: 4px 8px !important;
-        line-height: 1.2 !important;
+        font-size: 14px !important;
+        padding: 8px 12px !important;
+        line-height: 1.4 !important;
     }
 }
 

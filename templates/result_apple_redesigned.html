@@ -123,67 +123,86 @@
 
         /* 主容器 - 已移动到导航栏样式部分 */
 
-        /* 页面头部 */
+        /* 页面头部 - 优化间距和布局 */
         .result-hero {
             text-align: center;
-            margin-bottom: var(--space-12);
-            padding: var(--space-8) 0;
+            margin-bottom: var(--space-6);
+            padding: var(--space-4) 0 var(--space-5);
+            position: relative;
         }
 
-        /* 分析概览卡片 */
+        /* 分析概览卡片 - 优化间距 */
         .analysis-overview {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: var(--radius-4);
-            padding: var(--space-8);
-            margin-bottom: var(--space-6);
+            padding: var(--space-6);
+            margin-bottom: var(--space-5);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .overview-header {
             display: flex;
             align-items: center;
             gap: var(--space-3);
-            margin-bottom: var(--space-5);
+            margin-bottom: var(--space-4);
+            padding-bottom: var(--space-3);
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
         }
 
         .overview-icon {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             background: var(--accent-gradient);
             border-radius: var(--radius-3);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .overview-title {
-            font-size: var(--text-2xl);
+            font-size: var(--text-xl);
             font-weight: var(--font-bold);
             color: var(--color-text-primary);
             margin: 0;
+            line-height: 1.3;
         }
 
         .overview-subtitle {
             font-size: var(--text-sm);
             color: var(--color-text-secondary);
             margin: 0;
+            margin-top: var(--space-1);
         }
 
         .overview-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: var(--space-6);
-            margin-bottom: var(--space-6);
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
         }
 
         .overview-section {
             padding: var(--space-4);
-            background: rgba(0, 122, 255, 0.05);
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.08), rgba(88, 86, 214, 0.05));
             border-radius: var(--radius-3);
-            border-left: 4px solid var(--color-primary);
+            border-left: 3px solid var(--color-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .overview-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.3), transparent);
         }
 
         .overview-section h4 {
@@ -208,13 +227,14 @@
             align-items: center;
             gap: var(--space-2);
             padding: var(--space-2) var(--space-4);
-            background: linear-gradient(45deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
+            background: linear-gradient(45deg, rgba(40, 167, 69, 0.12), rgba(32, 201, 151, 0.12));
             color: var(--color-success);
-            border: 1px solid rgba(40, 167, 69, 0.3);
+            border: 1px solid rgba(40, 167, 69, 0.25);
             border-radius: var(--radius-full);
             font-size: var(--text-sm);
             font-weight: var(--font-medium);
-            margin-bottom: var(--space-4);
+            margin-bottom: var(--space-3);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
         }
 
         /* 缺失角色建议卡片 */
@@ -744,7 +764,38 @@
         @media (max-width: 768px) {
             .overview-content {
                 grid-template-columns: 1fr;
+                gap: var(--space-3);
             }
+            
+            .result-hero {
+                padding: var(--space-3) 0 var(--space-4);
+                margin-bottom: var(--space-4);
+            }
+            
+            .hero-title {
+                font-size: clamp(1.5rem, 6vw, 2.2rem);
+            }
+            
+            .hero-subtitle {
+                font-size: var(--text-base);
+                margin-bottom: var(--space-3);
+            }
+            
+            .analysis-overview {
+                padding: var(--space-4);
+                margin-bottom: var(--space-4);
+            }
+            
+            .overview-header {
+                margin-bottom: var(--space-3);
+            }
+            
+            .overview-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+        }
             
             .parties-diagram {
                 grid-template-columns: 1fr;
@@ -763,36 +814,42 @@
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: var(--radius-full);
-            padding: var(--space-2) var(--space-4);
-            margin-bottom: var(--space-4);
-            backdrop-filter: blur(20px);
+            padding: var(--space-2) var(--space-3);
+            margin-bottom: var(--space-3);
+            backdrop-filter: blur(15px);
             font-size: var(--text-sm);
             font-weight: var(--font-medium);
-            color: var(--color-primary);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .hero-badge:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
         }
 
         .hero-title {
-            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
             font-weight: 700;
             color: white;
-            margin-bottom: var(--space-3);
-            line-height: 1.2;
-            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            margin-bottom: var(--space-2);
+            line-height: 1.3;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
         }
 
         .hero-subtitle {
-            font-size: var(--text-xl);
-            color: rgba(255, 255, 255, 0.95);
-            margin-bottom: var(--space-8);
-            max-width: 600px;
+            font-size: var(--text-lg);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: var(--space-4);
+            max-width: 500px;
             margin-left: auto;
             margin-right: auto;
-            line-height: 1.6;
-            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+            line-height: 1.5;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
         }
 
         /* 卡片系统 */

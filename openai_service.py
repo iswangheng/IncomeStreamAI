@@ -318,56 +318,76 @@ class AngelaAI:
             assistant_prompt = """请严格按照非劳务收入管道设计原理，输出以下JSON格式：
 {
   "overview": {
-    "situation": "运用【意识+能量+能力=结果】公式分析当前情况（<=150字）",
-    "income_type": "主要适用的收入类型（租金/版权/股份/其他）",
-    "core_insight": "核心洞察：为什么这个项目能形成非劳务收入管道",
+    "situation": "运用【意识+能量+能力=结果】公式分析当前情况（<=150字），必须包含设计者自己的位置",
+    "income_type": "主要适用的非劳务收入类型（租金/利息/股份/版权/居间/企业连锁/团队收益）",
+    "core_insight": "核心洞察：为什么这个项目能形成非劳务收入管道，并且设计者本人如何在其中获利",
     "gaps": ["缺少的关键角色或环节1","..."],
     "suggested_roles_to_hunt": [
-      {"role":"具体角色（如：本地餐饮老板/内容创作者）","why":"为什么需要这个角色","where_to_find":"具体去哪找（如：本地商会/小红书私信）","outreach_script":"开场话术（<=80字）"}
+      {
+        "role":"建议补齐的角色",
+        "why":"为什么需要",
+        "where_to_find":"去哪找",
+        "outreach_script":"切实可行的话术（包含交换逻辑：你给什么/对方得什么）"
+      }
     ]
   },
   "paths": [
     {
       "id": "path_1",
       "name": "路径名（<=20字）",
-      "income_mechanism": "收入机制（如：中介费分成/授权费/股权分红）",
-      "three_parties_structure": {
-        "party_a": "甲方名称和需求",
-        "party_b": "乙方名称和能提供的",
-        "your_role": "你的中间人价值和不可替代性"
+      "income_mechanism": {
+        "type": "所属的非劳务收入类型（七大类之一或组合）",
+        "trigger": "收益触发点（钱从哪来）",
+        "settlement": "结算方式（按单/按期/分红/授权费等）"
       },
-      "scene": "操作场景/媒介（如：微信群直播/线下沙龙/公众号合作）",
-      "who_moves_first": "首先行动者和具体动作",
-      "action_steps": [
-        {"owner":"你","step":"第1步具体动作（平台/形式/频率）","make_who_happy":"让谁高兴？为什么高兴？"},
-        {"owner":"关键人物A","step":"对方的响应动作","make_who_happy":"满足了谁的需求"},
-        {"owner":"你","step":"第2步跟进动作","make_who_happy":"进一步巩固哪方关系"},
-        {"owner":"关键人物B/外部资源","step":"第3步扩展动作","make_who_happy":"形成多赢局面"}
+      "parties_structure": [
+        {
+          "party": "设计者（你）",
+          "resources": ["你提供的资源或规则"],
+          "role_value": "你在闭环中的价值（统筹/撮合/规则制定等）",
+          "make_them_happy": "如何让自己在闭环中不被跳过并持续获利"
+        },
+        {
+          "party": "关键人物A",
+          "resources": ["他能提供的资源"],
+          "role_value": "他在闭环中的位置/作用",
+          "make_them_happy": "如何让他高兴（满足的需求/动机）"
+        },
+        {
+          "party": "关键人物B",
+          "resources": ["..."],
+          "role_value": "...",
+          "make_them_happy": "..."
+        }
       ],
-      "use_key_person_resources": ["明确引用谁的什么具体资源"],
-      "use_external_resources": ["直接动用的外部资源"],
-      "revenue_trigger": "非劳务收益触发条件和机制（具体金额/比例）",
-      "mvp": "24小时内最小验证动作（含成功标准，如：3个意向客户确认/获得1个试点机会）",
-      "avoid_being_bypassed": "如何确保不被跳过的3个措施",
-      "risks": ["风险1","风险2"],
-      "plan_b": "主要风险的具体应对方案",
-      "scaling_potential": "规模化潜力（如：可复制到多少个区域/品类）"
+      "action_steps": [
+        {
+          "owner":"你",
+          "action":"具体动作（动作类型+平台/场景+频率/形式）",
+          "why_it_works":"满足了谁的动机，用了哪份资源"
+        },
+        {
+          "owner":"关键人物A",
+          "action":"响应动作",
+          "why_it_works":"满足了谁的动机"
+        }
+      ],
+      "mvp": "最小闭环，用1-3句话说明如何形成自洽的闭环",
+      "weak_link": "闭环中最脆弱的一环及原因",
+      "revenue_trigger": "明确写出钱从哪来，属于哪类非劳务收入类型",
+      "risks_and_planB": [
+        {"risk":"具体风险1","mitigation":"对应的应对方案"},
+        {"risk":"具体风险2","mitigation":"对应的应对方案"}
+      ],
+      "first_step": "方案的启动动作，在哪里做，为什么可行",
+      "labor_load_estimate": {
+        "hours_per_week": "设计者预计投入小时数/周",
+        "level": "轻度(<5h)/中度(5-10h)/过高(>10h)",
+        "alternative": "如何降低劳动量的替代方案"
+      }
     }
-  ],
-  "implementation_priority": "建议实施顺序和理由",
-  "notes": "基于知识库案例的额外建议"
-}
-
-【设计要求】
-- 必须设计三方及以上闭环，确保你在管道中心位置
-- 每个路径都要有明确的非劳务收入触发机制（不能是你亲自干活赚钱）
-- action_steps要体现"让关键人物都高兴"的原则
-- MVP必须在24小时内可验证，有明确成功判据
-- 优先使用项目现有资源，巧妙串联各方需求
-- 参考知识库中的成功案例模式：
-  * Bonnie模式：连接有需求方+有产品方，设计标准化产品降低成本，三方合作协议确保不被跳过，抽成1000元/人，年收入40万
-  * Angela模式：市场调研发现供需不匹配，整租转分租赚差价，1万启动成本，与房东签长约确保稳定，8年收入72万  
-  * 楚楚模式：发现日常需求背后商机，整合4方资源（销路+林地+人力+技术），让每方都高兴，3个月搭建，年收入70万"""
+  ]
+}"""
             
             # 打印prompt长度信息
             total_prompt = system_prompt + user_content + assistant_prompt

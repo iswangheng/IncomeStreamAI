@@ -468,6 +468,39 @@
             background: linear-gradient(135deg, #F8F9FA, #E8F5E8);
         }
 
+        /* 待补齐角色样式 */
+        .party-card.pending {
+            background: linear-gradient(135deg, rgba(156, 163, 175, 0.1), rgba(229, 231, 235, 0.15));
+            border: 2px dashed #9CA3AF;
+            opacity: 0.75;
+            position: relative;
+        }
+
+        .party-card.pending::before {
+            content: '待补齐';
+            position: absolute;
+            top: -8px;
+            right: 12px;
+            background: #F59E0B;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .party-card.pending .party-name {
+            color: #6B7280;
+            font-style: italic;
+        }
+
+        .party-card.pending .resource-tag {
+            background: rgba(156, 163, 175, 0.2);
+            color: #6B7280;
+            border: 1px dashed #9CA3AF;
+        }
+
         /* 流程步骤指示器 */
         .flow-step-indicator {
             position: absolute;
@@ -980,7 +1013,7 @@
                         {% set outer_loop = loop %}
                         {% for party in pipeline.parties_structure %}
                         {% if party.role_type == role_type %}
-                        <div class="party-card role-{{ party.role_type }}">
+                        <div class="party-card role-{{ party.role_type }} {{ 'pending' if party.party.startswith('【待补齐】') else '' }}">
                             <div class="flow-step-indicator">{{ outer_loop.index }}</div>
                             <div class="party-header">
                                 <div class="party-name">{{ party.party }}</div>

@@ -318,9 +318,12 @@ class AngelaAI:
     * 收益如何触发，并明确设计者的收益。
 * 不需要写到执行颗粒度（如具体平台、发帖频次），保持在"战略设计/管道架构"的层次。
 
-5. 缺口识别与补齐
+5. 缺口识别与补齐（重要！）
+* **人物数量判断**：当关键人物少于2个时，必须识别为"明显不足"，需要补齐。
+* **闭环完整性检查**：需求方、交付方、资金方至少各有1个，否则无法形成有效闭环。
 * 如果资源足够，直接输出闭环并说明原因。
 * 如果不足：点出缺少角色/资源，并提供【去哪找 + 如何说服】。
+* **必须具体化**：不能只说"需要合作伙伴"，要明确角色名称、职能、寻找路径。
 * 所有话术必须接地气，符合中国商业环境，避免大路货。
 * 话术必须包含交换逻辑（你给什么 / 他得到什么）。
 
@@ -431,7 +434,7 @@ class AngelaAI:
 2. 每个参与方都必须有 role_type 字段，且值必须是以下四选一："需求方"、"交付方"、"资金方"、"统筹方"。
 3. 设计者（你）必须出现在 parties_structure 中，且 role_type 固定为 "统筹方"。
 4. 其他人物根据其在闭环中的实际作用确定 role_type；如判断与常识不符，仍须保留其原名，并在 role_value 中解释定位依据。
-5. 如确有必要补充其他关键人物才能闭环：可在 parties_structure 中加入"待补齐角色"（同样标注 role_type），并在 overview.suggested_roles_to_hunt 中给出【去哪找 + 话术】；但**只有当现有人物明显不足以构成闭环**时才建议补充；若已足够闭环，则该数组必须为 []。
+5. **关键**：如果当前关键人物少于2个，或者缺少需求方/交付方/资金方中的任何一方，**必须**在 parties_structure 中加入"待补齐角色"，并在 overview.suggested_roles_to_hunt 中详细说明。待补齐角色的 party 字段请用 "【待补齐】XXX" 格式命名。
 6. 输出为**框架性草案**（战略/架构层次），不写执行颗粒度（具体平台、频次、字数等）。MVP 仅用 1–3 句话说明闭环逻辑。
 
 【JSON结构（仅返回此对象，不要多余文字）】
@@ -477,7 +480,14 @@ class AngelaAI:
         //   "role_value": "该人物在闭环中的位置/作用（框架层面）",
         //   "make_them_happy": "如何让TA高兴（对应的动机/激励，框架层面）"
         // }}
-        // 若确需补充"待补齐角色"，也放在此数组中，并保持与 suggested_roles_to_hunt 对应。
+        // 若关键人物不足或缺少某类角色，必须加入"待补齐角色"：
+        // {{
+        //   "party": "【待补齐】角色名称",
+        //   "role_type": "需求方/交付方/资金方",
+        //   "resources": ["该角色应提供的资源"],
+        //   "role_value": "该角色在闭环中的重要作用",
+        //   "make_them_happy": "如何吸引和激励该角色加入"
+        // }}
       ],
       "framework_logic": {{
         "resource_chain": "资源如何串联形成闭环（框架描述，不写平台与频次）",
@@ -757,6 +767,20 @@ class AngelaAI:
 
         # 智能判断是否需要补充角色
         needs_additional_roles = len(key_persons) < 2  # 简单规则：少于2个人物时建议补充
+        
+        # 分析现有人物的角色类型分布
+        existing_role_types = set()
+        for person in key_persons:
+            original_role = person.get('role', '')
+            if original_role:
+                role_type = self.get_role_type_by_identifier(original_role)
+                existing_role_types.add(role_type)
+        
+        # 检查是否缺少关键角色类型
+        required_types = {'需求方', '交付方'}
+        missing_types = required_types - existing_role_types
+        if missing_types:
+            needs_additional_roles = True
 
         # 构建参与方结构（保留所有用户输入的关键人物）
         parties_structure = [{
@@ -801,6 +825,24 @@ class AngelaAI:
                 "make_them_happy":
                 self.format_make_happy(make_happy)
             })
+
+        # 添加待补齐角色（如果需要）
+        if needs_additional_roles and missing_types:
+            for missing_type in missing_types:
+                role_name_mapping = {
+                    "需求方": "渠道客户源",
+                    "交付方": "专业服务方",
+                    "资金方": "投资合作方"
+                }
+                role_name = role_name_mapping.get(missing_type, "合作伙伴")
+                
+                parties_structure.append({
+                    "party": f"【待补齐】{role_name}",
+                    "role_type": missing_type,
+                    "resources": ["待确定的关键资源", "待匹配的合作能力"],
+                    "role_value": f"补齐{missing_type}角色，完善闭环结构，确保管道可持续运行",
+                    "make_them_happy": "通过互利共赢的合作模式，实现各方价值最大化"
+                })
 
         return {
             "overview": {

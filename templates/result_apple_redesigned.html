@@ -1563,8 +1563,8 @@
         {% endif %}
 
         <!-- 路径方案 -->
-        {% if result and result.paths %}
-        {% for path in result.paths %}
+        {% if result and result.pipelines %}
+        {% for path in result.pipelines %}
         <div class="path-card fade-in-up animate-delay-{{ loop.index + 2 }}">
             <div class="path-header">
                 <div class="path-title-section">
@@ -2006,7 +2006,7 @@
         
         <!-- 实施优先级和建议 -->
         {% if result and (result.implementation_priority or result.notes) %}
-        <div class="analysis-overview fade-in-up animate-delay-{{ (result.paths|length) + 3 }}">
+        <div class="analysis-overview fade-in-up animate-delay-{{ (result.pipelines|length) + 3 }}">
             <div class="overview-header">
                 <div class="overview-icon">
                     <i class="fas fa-list-alt"></i>

@@ -404,10 +404,10 @@ class AngelaAI:
       // 仅在确实缺口时填写；否则返回 []
     ]
   }},
-  "paths": [
+  "pipelines": [
     {{
-      "id": "path_1",
-      "name": "路径名（<=20字）",
+      "id": "pipeline_1",
+      "name": "管道名称（<=20字）",
       "income_mechanism": {{
         "type": "所属的非劳务收入类型（七大类之一或组合）",
         "trigger": "收益触发点（钱从哪来）",
@@ -510,11 +510,11 @@ class AngelaAI:
             logger.error(f"AI generation error: {e}")
             return self._get_fallback_result(form_data)
     
-    def refine_path(self, path_data: Dict[str, Any], refinement_data: Dict[str, Any], 
+    def refine_path(self, pipeline_data: Dict[str, Any], refinement_data: Dict[str, Any], 
                    db_session) -> Dict[str, Any]:
-        """细化指定路径（基于最新prompt要求）"""
+        """细化指定管道（基于最新prompt要求）"""
         try:
-            selected_path_id = refinement_data.get('selected_path_id')
+            selected_pipeline_id = refinement_data.get('selected_pipeline_id', refinement_data.get('selected_path_id'))
             add_personas = refinement_data.get('add_personas', [])
             constraints = refinement_data.get('constraints', '')
             tweaks = refinement_data.get('tweaks', '')
@@ -536,8 +536,8 @@ class AngelaAI:
 - 确保MVP更加可行
 - 降低劳动量估算"""
             
-            user_content = f"""【当前路径】
-{json.dumps(path_data, ensure_ascii=False, indent=2)}
+            user_content = f"""【当前管道】
+{json.dumps(pipeline_data, ensure_ascii=False, indent=2)}
 
 【补充人物】（需要整合到parties_structure中）
 {json.dumps(add_personas, ensure_ascii=False, indent=2)}
@@ -548,7 +548,7 @@ class AngelaAI:
 【调整要求】
 {tweaks}
 
-请严格按照最新JSON结构优化这条路径，重点完善framework_logic、parties_structure、MVP和防绕过机制。保持ID不变，但优化其他所有字段。"""
+请严格按照最新JSON结构优化这条管道，重点完善framework_logic、parties_structure、MVP和防绕过机制。保持ID不变，但优化其他所有字段。"""
             
             # 获取模型配置
             model_config = self.get_model_config('refinement')
@@ -565,36 +565,36 @@ class AngelaAI:
                 timeout=model_config['timeout']
             )
             
-            # 如果响应为None（网络错误），返回原路径
+            # 如果响应为None（网络错误），返回原管道
             if response is None:
-                logger.warning("Path refinement API返回None，保持原路径")
-                return path_data
+                logger.warning("Pipeline refinement API返回None，保持原管道")
+                return pipeline_data
             
             result_text = response.choices[0].message.content
             if not result_text:
-                return path_data
+                return pipeline_data
                 
             result = json.loads(result_text)
             
-            # 验证细化后的路径结构（简化验证）
+            # 验证细化后的管道结构（简化验证）
             if not result.get('id') or not result.get('name'):
-                logger.warning("Refined path missing basic fields, returning original")
-                return path_data
+                logger.warning("Refined pipeline missing basic fields, returning original")
+                return pipeline_data
                 
             return result
             
         except json.JSONDecodeError as e:
-            logger.error(f"Path refinement JSON parsing error: {e}")
-            return path_data
+            logger.error(f"Pipeline refinement JSON parsing error: {e}")
+            return pipeline_data
         except Exception as e:
-            logger.error(f"Path refinement error: {e}")
-            # 返回原路径作为后备
-            return path_data
+            logger.error(f"Pipeline refinement error: {e}")
+            # 返回原管道作为后备
+            return pipeline_data
     
     def _validate_result_structure(self, result: Dict[str, Any]) -> bool:
-        """验证返回结果的结构完整性（基于最新prompt要求）"""
+        """验证返回结果的结构完整性（基于最新pipelines结构）"""
         # 验证顶级结构
-        required_keys = ['overview', 'paths']
+        required_keys = ['overview', 'pipelines']
         if not all(key in result for key in required_keys):
             logger.warning(f"Missing top-level keys. Has: {list(result.keys())}, Required: {required_keys}")
             return False
@@ -606,58 +606,58 @@ class AngelaAI:
             logger.warning(f"Overview missing keys. Has: {list(overview.keys())}, Required: {required_overview_keys}")
             return False
             
-        # 验证paths结构
-        paths = result.get('paths', [])
-        if not paths:
-            logger.warning("No paths found")
+        # 验证pipelines结构
+        pipelines = result.get('pipelines', [])
+        if not pipelines:
+            logger.warning("No pipelines found")
             return False
             
-        for i, path in enumerate(paths):
-            # 验证path的必需字段（基于新的prompt结构）
-            required_path_keys = [
+        for i, pipeline in enumerate(pipelines):
+            # 验证pipeline的必需字段（基于新的prompt结构）
+            required_pipeline_keys = [
                 'id', 'name', 'income_mechanism', 'parties_structure', 'framework_logic',
                 'mvp', 'weak_link', 'revenue_trigger', 'risks_and_planB', 'first_step', 'labor_load_estimate'
             ]
-            if not all(key in path for key in required_path_keys):
-                logger.warning(f"Path {i} missing required keys. Has: {list(path.keys())}, Required: {required_path_keys}")
+            if not all(key in pipeline for key in required_pipeline_keys):
+                logger.warning(f"Pipeline {i} missing required keys. Has: {list(pipeline.keys())}, Required: {required_pipeline_keys}")
                 return False
                 
             # 验证income_mechanism结构
-            income_mechanism = path.get('income_mechanism', {})
+            income_mechanism = pipeline.get('income_mechanism', {})
             if not all(key in income_mechanism for key in ['type', 'trigger', 'settlement']):
-                logger.warning(f"Path {i} income_mechanism incomplete")
+                logger.warning(f"Pipeline {i} income_mechanism incomplete")
                 return False
                 
             # 验证parties_structure结构
-            parties = path.get('parties_structure', [])
+            parties = pipeline.get('parties_structure', [])
             if not parties:
-                logger.warning(f"Path {i} has empty parties_structure")
+                logger.warning(f"Pipeline {i} has empty parties_structure")
                 return False
                 
             # 验证每个参与方的结构
             for j, party in enumerate(parties):
                 required_party_keys = ['party', 'role_type', 'resources', 'role_value', 'make_them_happy']
                 if not all(key in party for key in required_party_keys):
-                    logger.warning(f"Path {i} party {j} missing keys. Has: {list(party.keys())}, Required: {required_party_keys}")
+                    logger.warning(f"Pipeline {i} party {j} missing keys. Has: {list(party.keys())}, Required: {required_party_keys}")
                     return False
                     
                 # 验证role_type值
                 valid_role_types = ['需求方', '交付方', '资金方', '统筹方']
                 if party.get('role_type') not in valid_role_types:
-                    logger.warning(f"Path {i} party {j} has invalid role_type: {party.get('role_type')}")
+                    logger.warning(f"Pipeline {i} party {j} has invalid role_type: {party.get('role_type')}")
                     return False
                     
             # 验证framework_logic结构
-            framework_logic = path.get('framework_logic', {})
+            framework_logic = pipeline.get('framework_logic', {})
             required_framework_keys = ['resource_chain', 'motivation_match', 'designer_position', 'designer_income']
             if not all(key in framework_logic for key in required_framework_keys):
-                logger.warning(f"Path {i} framework_logic incomplete")
+                logger.warning(f"Pipeline {i} framework_logic incomplete")
                 return False
                 
             # 验证labor_load_estimate结构
-            labor_load = path.get('labor_load_estimate', {})
+            labor_load = pipeline.get('labor_load_estimate', {})
             if not all(key in labor_load for key in ['hours_per_week', 'level', 'alternative']):
-                logger.warning(f"Path {i} labor_load_estimate incomplete")
+                logger.warning(f"Pipeline {i} labor_load_estimate incomplete")
                 return False
                 
         return True
@@ -718,9 +718,9 @@ class AngelaAI:
                     }
                 ]
             },
-            "paths": [
+            "pipelines": [
                 {
-                    "id": "path_1",
+                    "id": "pipeline_1",
                     "name": "资源整合撮合管道",
                     "income_mechanism": {
                         "type": "居间（撮合费）",

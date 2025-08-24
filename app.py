@@ -292,7 +292,6 @@ def _internal_check_analysis_status():
                 result_data=json.dumps(fallback_result, ensure_ascii=False),
                 project_name=form_data.get('projectName', ''),
                 project_description=form_data.get('projectDescription', ''),
-                project_stage=form_data.get('projectStage', ''),
                 team_size=len(form_data.get('keyPersons', [])),
                 analysis_type='fallback'
             )
@@ -378,7 +377,6 @@ def _handle_analysis_execution(form_data, session):
                 result_data=json.dumps(suggestions, ensure_ascii=False),
                 project_name=form_data.get('projectName', ''),
                 project_description=form_data.get('projectDescription', ''),
-                project_stage=form_data.get('projectStage', ''),
                 team_size=len(form_data.get('keyPersons', [])),
                 analysis_type='ai_analysis'
             )
@@ -449,7 +447,6 @@ def _handle_analysis_execution(form_data, session):
                     result_data=json.dumps(fallback_result, ensure_ascii=False),
                     project_name=form_data.get('projectName', ''),
                     project_description=form_data.get('projectDescription', ''),
-                    project_stage=form_data.get('projectStage', ''),
                     team_size=len(form_data.get('keyPersons', [])),
                     analysis_type='fallback'
                 )
@@ -735,7 +732,6 @@ def results():
                             result_data=json.dumps(fallback_result, ensure_ascii=False),
                             project_name=form_data.get('projectName', ''),
                             project_description=form_data.get('projectDescription', ''),
-                            project_stage=form_data.get('projectStage', ''),
                             team_size=len(form_data.get('keyPersons', [])),
                             analysis_type='fallback'
                         )
@@ -805,7 +801,6 @@ def results():
                         result_data=json.dumps(fallback_result, ensure_ascii=False),
                         project_name=form_data.get('projectName', ''),
                         project_description=form_data.get('projectDescription', ''),
-                        project_stage=form_data.get('projectStage', ''),
                         team_size=len(form_data.get('keyPersons', [])),
                         analysis_type='emergency_fallback'
                     )
@@ -938,7 +933,6 @@ def generate_ai_suggestions(form_data, session=None):
         converted_data = {
             'projectName': form_data.get('projectName', form_data.get('project_name', '')),
             'projectDescription': form_data.get('projectDescription', form_data.get('project_description', '')),
-            'projectStage': form_data.get('projectStage', form_data.get('project_stage', '')),
             'keyPersons': form_data.get('keyPersons', form_data.get('key_persons', [])),
             'externalResources': form_data.get('externalResources', form_data.get('external_resources', []))
         }

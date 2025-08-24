@@ -214,7 +214,6 @@ class AngelaAI:
             # 提取表单数据
             project_name = form_data.get('projectName', '未命名项目')
             project_description = form_data.get('projectDescription', '')
-            project_stage = form_data.get('projectStage', '初期阶段')
             key_persons = form_data.get('keyPersons', [])
             external_resources = form_data.get('externalResources', [])
             
@@ -305,7 +304,6 @@ class AngelaAI:
             # 构造用户提示
             user_content = f"""【项目名称】{project_name}
 【项目背景】{project_description}
-【当前阶段】{project_stage}
 
 【关键人物】（含角色、资源、动机）"""
             

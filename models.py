@@ -119,7 +119,6 @@ class AnalysisResult(db.Model):
     result_data = db.Column(db.Text, nullable=False)  # JSON格式的分析结果
     project_name = db.Column(db.String(200), nullable=False, index=True)
     project_description = db.Column(db.Text)
-    project_stage = db.Column(db.String(100))
     team_size = db.Column(db.Integer, default=0)
     analysis_type = db.Column(db.String(50), default='ai_analysis')  # ai_analysis, fallback, emergency_fallback
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)

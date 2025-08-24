@@ -21,7 +21,6 @@ def test_analysis_workflow():
     test_form_data = {
         'project_name': '测试项目',
         'project_description': '这是一个测试项目的描述，用于验证AI分析功能是否正常工作。',
-        'project_stage': 'planning',
         'person_name[]': ['测试人员A', '测试人员B'],
         'person_role[]': ['测试角色1', '测试角色2'],
         'person_resources[]': ['测试资源1,测试资源2', '测试资源3,测试资源4'],

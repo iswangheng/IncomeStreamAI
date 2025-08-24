@@ -15,7 +15,6 @@ print("Testing full AI service with actual project data...")
 test_data = {
     "projectName": "Angela临街商铺二房东管道",
     "projectDescription": "我打了20多个电话调研发现一个房东有临街双层商铺，挂了两三个月都租不出去",
-    "projectStage": "testing",
     "keyPersons": [
         {
             "name": "社恐房东",

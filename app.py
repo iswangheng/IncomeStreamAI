@@ -196,6 +196,31 @@ def thinking_process():
     app.logger.info(f"Thinking page loaded with status: {session.get('analysis_status')}")
     return render_template('thinking_process.html')
 
+@app.route('/get_session_data')
+@login_required
+def get_session_data():
+    """获取session中的表单数据，供thinking页面使用"""
+    try:
+        form_data = session.get('analysis_form_data')
+        if form_data:
+            logger.info(f"Session data found for thinking page: {form_data.get('projectName', 'unnamed')}")
+            return jsonify({
+                'success': True,
+                'form_data': form_data
+            })
+        else:
+            logger.warning("No form data found in session for thinking page")
+            return jsonify({
+                'success': False,
+                'message': 'No session data available'
+            })
+    except Exception as e:
+        logger.error(f"Error getting session data: {e}")
+        return jsonify({
+            'success': False, 
+            'message': str(e)
+        })
+
 @app.route('/analysis_status', methods=['GET'])
 @login_required
 def analysis_status():

@@ -466,36 +466,41 @@
             
 
         
-        // AI Thinking Process with Real Backend Sync
-        const genericThinkingSteps = [
-            { type: 'system', text: '>>> 启动 Angela AI 神经网络分析引擎...', duration: 800 },
-            { type: 'system', text: '>>> 加载非劳务收入知识库... [✓]', duration: 600 },
-            { type: 'system', text: '>>> 初始化项目分析模块... [✓]', duration: 500 },
-            { type: 'process', text: 'def analyze_project_data():', duration: 400 },
-            { type: 'analysis', text: '# 解析项目背景和核心问题...', duration: 800 },
-            { type: 'analysis', text: '# 识别关键利益相关方...', duration: 700 },
-            { type: 'analysis', text: '# 检测潜在商业机会...', duration: 600 },
-            { type: 'process', text: 'def evaluate_key_persons():', duration: 400 },
-            { type: 'analysis', text: '# 分析关键人物资源配置...', duration: 900 },
-            { type: 'analysis', text: '# 评估资源匹配度和协同潜力...', duration: 800 },
-            { type: 'process', text: 'def search_income_patterns():', duration: 400 },
-            { type: 'analysis', text: '# 查询知识库中的成功案例...', duration: 1000 },
-            { type: 'analysis', text: '# 匹配适合的收入模式类型...', duration: 900 },
-            { type: 'analysis', text: '# 识别核心价值创造机制...', duration: 700 },
-            { type: 'process', text: 'def design_revenue_pipeline():', duration: 400 },
-            { type: 'analysis', text: '# 设计三方及以上闭环结构...', duration: 1200 },
-            { type: 'analysis', text: '# 制定具体收入触发机制...', duration: 800 },
-            { type: 'analysis', text: '# 设计MVP验证方案...', duration: 600 },
-            { type: 'process', text: 'def generate_action_plan():', duration: 400 },
-            { type: 'analysis', text: '# 制定详细执行步骤...', duration: 1000 },
-            { type: 'analysis', text: '# 设计风险防控措施...', duration: 700 },
-            { type: 'analysis', text: '# 评估规模化扩展潜力...', duration: 600 }
-        ];
+        // Real AI Analysis Process - 真正的AI分析过程
+        function generateRealThinkingSteps(projectData) {
+            const projectName = projectData?.projectName || '您的项目';
+            const keyPersons = projectData?.keyPersons || [];
+            const keyPersonsNames = keyPersons.map(p => p.name).join('、') || '关键参与者';
+            
+            return [
+                { type: 'system', text: '>>> 启动 Angela AI 非劳务收入管道分析引擎...', duration: 600 },
+                { type: 'system', text: '>>> 加载核心原理：意识+能量+能力=结果 [✓]', duration: 500 },
+                { type: 'system', text: '>>> 初始化七大收入类型框架 [✓]', duration: 400 },
+                { type: 'process', text: 'def analyze_project_structure():', duration: 300 },
+                { type: 'analysis', text: `# 正在分析项目："${projectName}"`, duration: 800 },
+                { type: 'analysis', text: '# 应用框架思维：寻找资源串联闭环机会...', duration: 700 },
+                { type: 'analysis', text: '# 识别非劳务收入触发点...', duration: 600 },
+                { type: 'process', text: 'def evaluate_key_stakeholders():', duration: 300 },
+                { type: 'analysis', text: `# 分析关键人物：${keyPersonsNames}`, duration: 900 },
+                { type: 'analysis', text: '# 评估各方资源价值和动机匹配...', duration: 800 },
+                { type: 'analysis', text: '# 检测潜在的资源互补性...', duration: 700 },
+                { type: 'process', text: 'def design_income_pipeline():', duration: 300 },
+                { type: 'analysis', text: '# 运用七大类型：租金/利息/股份/版权/居间/连锁/团队...', duration: 1000 },
+                { type: 'analysis', text: '# 设计让所有关键人物都高兴的闭环结构...', duration: 900 },
+                { type: 'analysis', text: '# 确定设计者统筹位置和防绕行机制...', duration: 800 },
+                { type: 'process', text: 'def generate_framework_solution():', duration: 300 },
+                { type: 'analysis', text: '# 构建最小闭环（MVP）验证方案...', duration: 800 },
+                { type: 'analysis', text: '# 识别关键风险点和应对策略...', duration: 700 },
+                { type: 'analysis', text: '# 评估劳动投入与收益比例...', duration: 600 },
+                { type: 'analysis', text: '# 生成框架级收入管道设计方案...', duration: 1000 }
+            ];
+        }
         
         let currentStep = 0;
         let startTime = Date.now();
         let analysisStarted = false;
         let realAnalysisCompleted = false;
+        let genericThinkingSteps = []; // 将在页面加载时根据真实数据生成
         
         function addThinkingLine(text, type) {
             const content = document.getElementById('thinkingContent');
@@ -737,17 +742,44 @@
             // Initialize simple sci-fi background
             createSciFiBackground();
             
-            // Start thinking process immediately
-            setTimeout(() => {
-                console.log('Starting thinking process...');
-                showGenericThinking();
-            }, 100);
-            
-            // Start real analysis polling with shorter delay
-            setTimeout(() => {
-                console.log('Starting real analysis polling...');
-                startRealAnalysisPolling();
-            }, 2000); // 缩短延迟，更快开始真实分析
+            // 获取用户项目数据生成真实的思考步骤
+            fetch('/get_session_data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.form_data) {
+                        genericThinkingSteps = generateRealThinkingSteps(data.form_data);
+                        console.log('Generated real thinking steps based on user data:', data.form_data);
+                    } else {
+                        // fallback
+                        genericThinkingSteps = generateRealThinkingSteps({});
+                        console.log('Using fallback thinking steps');
+                    }
+                    
+                    // Start thinking process immediately
+                    setTimeout(() => {
+                        console.log('Starting thinking process...');
+                        showGenericThinking();
+                    }, 100);
+                    
+                    // Start real analysis polling with shorter delay
+                    setTimeout(() => {
+                        console.log('Starting real analysis polling...');
+                        startRealAnalysisPolling();
+                    }, 2000);
+                })
+                .catch(error => {
+                    console.error('Failed to get session data:', error);
+                    // 使用fallback
+                    genericThinkingSteps = generateRealThinkingSteps({});
+                    setTimeout(() => {
+                        console.log('Starting thinking process...');
+                        showGenericThinking();
+                    }, 100);
+                    setTimeout(() => {
+                        console.log('Starting real analysis polling...');
+                        startRealAnalysisPolling();
+                    }, 2000);
+                });
         });
     </script>
 </body>

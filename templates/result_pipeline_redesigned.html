@@ -887,10 +887,6 @@
                 <i class="fas fa-download"></i>
                 导出PDF
             </button>
-            <button class="action-btn secondary" onclick="shareResults()">
-                <i class="fas fa-share"></i>
-                分享方案
-            </button>
             <a href="{{ url_for('index') }}" class="action-btn secondary">
                 <i class="fas fa-plus"></i>
                 设计新管道
@@ -939,21 +935,7 @@
             doc.save('非劳务收入管道设计方案.pdf');
         }
         
-        // 分享功能
-        function shareResults() {
-            if (navigator.share) {
-                navigator.share({
-                    title: '非劳务收入管道设计方案',
-                    text: '查看我的AI生成的非劳务收入管道设计方案',
-                    url: window.location.href
-                });
-            } else {
-                // 复制链接到剪贴板
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    alert('链接已复制到剪贴板！');
-                });
-            }
-        }
+        
         
         // 页面加载动画
         document.addEventListener('DOMContentLoaded', function() {

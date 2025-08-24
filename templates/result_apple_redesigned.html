@@ -2198,76 +2198,10 @@
                 <i class="fas fa-download"></i>
                 导出PDF报告
             </button>
-            <button class="action-btn btn-secondary-custom" onclick="shareResult()">
-                <i class="fas fa-share-alt"></i>
-                分享方案
-            </button>
         </div>
     </div>
 
-    <!-- 分享模态框 -->
-    <div class="share-overlay" id="shareOverlay" onclick="hideShareModal()"></div>
-    <div class="share-modal" id="shareModal">
-        <div class="share-header">
-            <h3 class="share-title">分享方案</h3>
-            <button class="close-btn" onclick="hideShareModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="share-options">
-            <!-- 复制链接 -->
-            <div class="share-section">
-                <div class="section-title">
-                    <i class="fas fa-link me-2"></i>
-                    复制链接
-                </div>
-                <div class="copy-link-section">
-                    <button class="copy-link-btn" onclick="copyShareLink()">
-                        <i class="fas fa-copy me-2"></i>
-                        复制链接到剪贴板
-                    </button>
-                </div>
-            </div>
-
-            <!-- 社交媒体分享 -->
-            <div class="share-section">
-                <div class="section-title">
-                    <i class="fas fa-share-alt me-2"></i>
-                    社交媒体分享
-                </div>
-                <div class="social-buttons">
-                    <div class="social-btn" onclick="shareToSocial('wechat')">
-                        <div class="social-icon wechat">
-                            <i class="fab fa-weixin"></i>
-                        </div>
-                        <span>微信</span>
-                    </div>
-                    <div class="social-btn" onclick="shareToSocial('weibo')">
-                        <div class="social-icon weibo">
-                            <i class="fab fa-weibo"></i>
-                        </div>
-                        <span>微博</span>
-                    </div>
-                    <div class="social-btn" onclick="shareToSocial('qq')">
-                        <div class="social-icon qq">
-                            <i class="fab fa-qq"></i>
-                        </div>
-                        <span>QQ</span>
-                    </div>
-                    <div class="social-btn" onclick="shareToSocial('qzone')">
-                        <div class="social-icon qzone">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <span>QQ空间</span>
-                    </div>
-                </div>
-                
-                <!-- 微信二维码区域 -->
-                <div class="wechat-qr" id="wechatQR"></div>
-            </div>
-        </div>
-    </div>
+    
 
     {% endif %}
 
@@ -2466,90 +2400,7 @@
             return container;
         }
 
-        function shareResult() {
-            showShareModal();
-        }
-
-        function showShareModal() {
-            const modal = document.getElementById('shareModal');
-            const overlay = document.getElementById('shareOverlay');
-            modal.style.display = 'block';
-            overlay.style.display = 'block';
-            setTimeout(() => {
-                modal.classList.add('show');
-                overlay.classList.add('show');
-            }, 10);
-        }
-
-        function hideShareModal() {
-            const modal = document.getElementById('shareModal');
-            const overlay = document.getElementById('shareOverlay');
-            modal.classList.remove('show');
-            overlay.classList.remove('show');
-            setTimeout(() => {
-                modal.style.display = 'none';
-                overlay.style.display = 'none';
-            }, 300);
-        }
-
-        function copyShareLink() {
-            const shareUrl = window.location.href;
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                const copyBtn = document.querySelector('.copy-link-btn');
-                const originalText = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<i class="fas fa-check me-2"></i>已复制';
-                copyBtn.style.background = 'var(--color-success)';
-                setTimeout(() => {
-                    copyBtn.innerHTML = originalText;
-                    copyBtn.style.background = '';
-                }, 2000);
-            });
-        }
-
-        function shareToSocial(platform) {
-            const shareUrl = encodeURIComponent(window.location.href);
-            const shareTitle = encodeURIComponent('Angela AI - 我的非劳务收入设计方案');
-            const shareText = encodeURIComponent('通过AI智能分析生成的个性化收入路径方案');
-            
-            let url = '';
-            switch(platform) {
-                case 'wechat':
-                    // 微信分享需要特殊处理，显示二维码
-                    showWechatQR();
-                    return;
-                case 'weibo':
-                    url = `https://service.weibo.com/share/share.php?url=${shareUrl}&title=${shareText}&pic=`;
-                    break;
-                case 'qq':
-                    url = `https://connect.qq.com/widget/shareqq/index.html?url=${shareUrl}&title=${shareTitle}&summary=${shareText}`;
-                    break;
-                case 'qzone':
-                    url = `https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=${shareUrl}&title=${shareTitle}&summary=${shareText}`;
-                    break;
-            }
-            
-            if (url) {
-                window.open(url, '_blank', 'width=600,height=400');
-            }
-        }
-
-        function showWechatQR() {
-            const qrContainer = document.getElementById('wechatQR');
-            const shareUrl = window.location.href;
-            
-            // 使用免费的二维码API生成二维码
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
-            
-            qrContainer.innerHTML = `
-                <div style="text-align: center; padding: var(--space-4);">
-                    <img src="${qrUrl}" alt="二维码" style="width: 200px; height: 200px; border-radius: var(--radius-lg);">
-                    <p style="margin-top: var(--space-3); color: var(--color-text-secondary);">
-                        使用微信扫描二维码分享
-                    </p>
-                </div>
-            `;
-            qrContainer.style.display = 'block';
-        }
+        
 
         // 页面加载动画
         document.addEventListener('DOMContentLoaded', function() {

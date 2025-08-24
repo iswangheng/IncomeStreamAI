@@ -289,8 +289,9 @@
     border-bottom: 0.5px solid var(--elegant-gray-200);
     display: flex;
     align-items: center;
-    gap: var(--elegant-space-4);
+    gap: var(--elegant-space-5);
     position: relative;
+    min-height: 80px;
 }
 
 .user-avatar {
@@ -316,16 +317,18 @@
 
 .user-info {
     flex: 1;
-    padding: 0 var(--elegant-space-4);
+    padding: 0 var(--elegant-space-6) 0 var(--elegant-space-4);
+    margin-right: var(--elegant-space-4);
 }
 
 .user-name {
     font-size: var(--elegant-text-lg);
     font-weight: 600;
     color: var(--elegant-text-primary);
-    margin-bottom: var(--elegant-space-2);
+    margin-bottom: var(--elegant-space-3);
     line-height: 1.4;
-    padding: var(--elegant-space-1) 0;
+    padding: var(--elegant-space-1) var(--elegant-space-2) var(--elegant-space-1) 0;
+    margin-right: var(--elegant-space-5);
 }
 
 .user-phone {
@@ -333,12 +336,14 @@
     color: var(--elegant-text-secondary);
     display: flex;
     align-items: center;
-    gap: var(--elegant-space-1);
+    gap: var(--elegant-space-2);
+    padding-right: var(--elegant-space-4);
 }
 
 .user-phone::before {
     content: '📱';
     font-size: 12px;
+    margin-right: var(--elegant-space-1);
 }
 
 .current-user-badge {
@@ -359,6 +364,8 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    margin-left: var(--elegant-space-4);
+    padding: var(--elegant-space-2);
 }
 
 .status-indicator.active {

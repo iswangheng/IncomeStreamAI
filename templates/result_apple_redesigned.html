@@ -2040,13 +2040,18 @@
                 <div class="detail-card labor-load-highlight">
                     <div class="detail-title">
                         <i class="fas fa-clock"></i>
-                        劳动负担估算
+                        时间投入估算（每周）
                     </div>
                     <div class="labor-load-content">
                         <div class="labor-hours">
-                            <span class="hours-number">{{ path.labor_load_estimate.hours_per_week }}</span>
-                            <span class="hours-unit">小时/周</span>
-                            <span class="load-level level-{{ path.labor_load_estimate.level.split('(')[0] if '(' in path.labor_load_estimate.level else path.labor_load_estimate.level }}">{{ path.labor_load_estimate.level }}</span>
+                            <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);">
+                                <span class="hours-number">{{ path.labor_load_estimate.hours_per_week }}</span>
+                                <span class="hours-unit">小时/周</span>
+                                <span class="load-level level-{{ path.labor_load_estimate.level.split('(')[0] if '(' in path.labor_load_estimate.level else path.labor_load_estimate.level }}">{{ path.labor_load_estimate.level }}</span>
+                            </div>
+                            <div style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-bottom: var(--space-3);">
+                                预计每周需要投入的时间成本
+                            </div>
                         </div>
                         {% if path.labor_load_estimate.alternative %}
                         <div class="labor-alternative">

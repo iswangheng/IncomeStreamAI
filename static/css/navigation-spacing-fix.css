@@ -22,7 +22,7 @@ body {
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
-    margin: 0 !important;
+    margin: 0 0 0 0 !important;
     box-sizing: border-box !important;
 }
 
@@ -45,7 +45,7 @@ body {
 .content,
 .admin-main-full {
     margin-top: 0 !important;
-    padding-top: 20px !important;
+    padding-top: 0 !important;
 }
 
 /* 页面内容直接从导航栏下方开始 */
@@ -73,7 +73,7 @@ body.admin-layout {
     
     .main-content,
     .admin-main-full {
-        padding-top: 16px !important;
+        padding-top: 0 !important;
     }
 }
 
@@ -84,7 +84,7 @@ body.admin-layout {
     
     .main-content,
     .admin-main-full {
-        padding-top: 12px !important;
+        padding-top: 0 !important;
     }
 }
 

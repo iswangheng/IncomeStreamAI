@@ -1635,14 +1635,19 @@
                         <!-- 围绕节点（其他参与方） -->
                         <div class="surrounding-nodes">
                             {% for party in other_parties %}
-                            {% set angle = (loop.index0 * 360 / other_parties|length) %}
-                            {% set radius = 200 %}
-                            {% set x = 50 + (radius * cos(angle * 3.14159 / 180) / 8) %}
-                            {% set y = 50 + (radius * sin(angle * 3.14159 / 180) / 8) %}
+                            {% set positions = [
+                                {'x': 75, 'y': 25},   {# 右上 #}
+                                {'x': 25, 'y': 25},   {# 左上 #}
+                                {'x': 75, 'y': 75},   {# 右下 #}
+                                {'x': 25, 'y': 75},   {# 左下 #}
+                                {'x': 90, 'y': 50},   {# 右中 #}
+                                {'x': 10, 'y': 50}    {# 左中 #}
+                            ] %}
+                            {% set position = positions[loop.index0 % positions|length] %}
                             
                             <div class="party-node participant surrounding-node" 
                                  data-node-id="party{{ loop.index }}"
-                                 style="left: {{ x }}%; top: {{ y }}%;">
+                                 style="left: {{ position.x }}%; top: {{ position.y }}%;">
                                 <div class="party-indicator"></div>
                                 <div class="party-name">{{ party.party }}</div>
                                 <div class="party-resources">

@@ -193,6 +193,63 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// 导出用户数据功能
+function exportUsers() {
+    // 获取当前显示的用户数据
+    const users = currentUsersData || [];
+    
+    if (users.length === 0) {
+        showToast('暂无用户数据可导出', 'error');
+        return;
+    }
+    
+    // 构建CSV数据
+    const headers = ['用户ID', '姓名', '手机号', '角色', '状态', '注册时间', '最后登录'];
+    const csvData = [headers];
+    
+    users.forEach(user => {
+        csvData.push([
+            user.id,
+            user.name || '',
+            user.phone || '',
+            user.is_admin ? '管理员' : '普通用户',
+            user.active ? '活跃' : '停用',
+            user.created_at || '',
+            user.last_login || '从未登录'
+        ]);
+    });
+    
+    // 转换为CSV格式
+    const csvContent = csvData.map(row => 
+        row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+    
+    // 添加BOM以支持中文
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // 创建下载链接
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    
+    // 生成文件名（包含当前日期）
+    const now = new Date();
+    const dateStr = now.getFullYear() + 
+        String(now.getMonth() + 1).padStart(2, '0') + 
+        String(now.getDate()).padStart(2, '0');
+    link.setAttribute('download', `用户数据导出_${dateStr}.csv`);
+    
+    // 触发下载
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast(`成功导出 ${users.length} 个用户数据`, 'success');
+}
+
 // 确保函数全局可访问
 window.loadUsersData = loadUsersData;
 window.filterUsers = filterUsers;
+window.exportUsers = exportUsers;

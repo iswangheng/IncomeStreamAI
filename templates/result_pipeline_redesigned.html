@@ -712,7 +712,13 @@
             <!-- 管道标题 -->
             <div class="pipeline-header">
                 <div class="pipeline-title-section">
-                    <div class="pipeline-id">{{ pipeline.id }}</div>
+                    <div class="pipeline-id">
+                        {% if pipeline.id and not pipeline.id.startswith('pipeline_') %}
+                            {{ pipeline.id }}
+                        {% else %}
+                            管道{{ ['一', '二', '三', '四', '五'][loop.index0] if loop.index0 < 5 else loop.index|string }}
+                        {% endif %}
+                    </div>
                     <h2 class="pipeline-name">{{ pipeline.name }}</h2>
                 </div>
                 {% if pipeline.income_mechanism %}

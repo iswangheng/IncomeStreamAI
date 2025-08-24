@@ -1600,56 +1600,137 @@
                     
                     <!-- 节点层 -->
                     <div class="network-nodes">
-                        <!-- 设计者节点 - 固定中心位置 -->
+                        <!-- 先找出设计者 -->
+                        {% set designer_party = None %}
+                        {% set participants = [] %}
                         {% for party in path.parties_structure %}
                             {% if party.party == '设计者（你）' or '你' in party.party %}
-                            <div class="party-node designer" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3;" data-node-id="designer">
-                                <div class="party-indicator"></div>
-                                <div class="party-name">{{ party.party }}</div>
-                                <div class="party-resources">
-                                    <strong>核心资源：</strong>
-                                    {% if party.resources %}
-                                        {% for resource in party.resources %}
-                                        <span class="resource-tag">{{ resource }}</span>
-                                        {% endfor %}
-                                    {% endif %}
-                                </div>
-                                <div class="party-value">{{ party.role_value }}</div>
-                                <div class="party-happiness">
-                                    <i class="fas fa-crown"></i>
-                                    {{ party.make_them_happy }}
-                                </div>
-                            </div>
+                                {% set designer_party = party %}
+                            {% else %}
+                                {% set _ = participants.append(party) %}
                             {% endif %}
                         {% endfor %}
                         
-                        <!-- 其他参与方 - 固定位置 -->
-                        {% set participant_positions = ['15%', '85%'] %}
-                        {% set participant_count = 0 %}
-                        {% for party in path.parties_structure %}
-                            {% if not (party.party == '设计者（你）' or '你' in party.party) %}
+                        <!-- 渲染设计者节点（中心） -->
+                        {% if designer_party %}
+                        <div class="party-node designer" 
+                             style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10; width: 280px;" 
+                             data-node-id="designer">
+                            <div class="party-indicator"></div>
+                            <div class="party-name">{{ designer_party.party }}</div>
+                            <div class="party-resources">
+                                <strong>核心资源：</strong>
+                                {% if designer_party.resources %}
+                                    {% for resource in designer_party.resources %}
+                                    <span class="resource-tag">{{ resource }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="party-value">{{ designer_party.role_value }}</div>
+                            <div class="party-happiness">
+                                <i class="fas fa-crown"></i>
+                                {{ designer_party.make_them_happy }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- 渲染其他参与方（围绕布局） -->
+                        {% if participants|length == 1 %}
+                            <!-- 只有1个参与方：放在左侧 -->
                             <div class="party-node participant" 
-                                 style="position: absolute; left: {{ participant_positions[participant_count] }}; top: 50%; transform: translate(-50%, -50%);" 
-                                 data-node-id="party{{ loop.index }}">
+                                 style="position: absolute; left: 10%; top: 50%; transform: translate(0, -50%); width: 260px;" 
+                                 data-node-id="participant0">
                                 <div class="party-indicator"></div>
-                                <div class="party-name">{{ party.party }}</div>
+                                <div class="party-name">{{ participants[0].party }}</div>
                                 <div class="party-resources">
                                     <strong>资源：</strong>
-                                    {% if party.resources %}
-                                        {% for resource in party.resources %}
+                                    {% if participants[0].resources %}
+                                        {% for resource in participants[0].resources %}
                                         <span class="resource-tag">{{ resource }}</span>
                                         {% endfor %}
                                     {% endif %}
                                 </div>
-                                <div class="party-value">{{ party.role_value }}</div>
+                                <div class="party-value">{{ participants[0].role_value }}</div>
                                 <div class="party-happiness">
                                     <i class="fas fa-handshake"></i>
-                                    {{ party.make_them_happy }}
+                                    {{ participants[0].make_them_happy }}
                                 </div>
                             </div>
-                            {% set participant_count = participant_count + 1 %}
-                            {% endif %}
-                        {% endfor %}
+                        {% elif participants|length == 2 %}
+                            <!-- 有2个参与方：左右对称 -->
+                            <div class="party-node participant" 
+                                 style="position: absolute; left: 10%; top: 50%; transform: translate(0, -50%); width: 260px;" 
+                                 data-node-id="participant0">
+                                <div class="party-indicator"></div>
+                                <div class="party-name">{{ participants[0].party }}</div>
+                                <div class="party-resources">
+                                    <strong>资源：</strong>
+                                    {% if participants[0].resources %}
+                                        {% for resource in participants[0].resources %}
+                                        <span class="resource-tag">{{ resource }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <div class="party-value">{{ participants[0].role_value }}</div>
+                                <div class="party-happiness">
+                                    <i class="fas fa-handshake"></i>
+                                    {{ participants[0].make_them_happy }}
+                                </div>
+                            </div>
+                            
+                            <div class="party-node participant" 
+                                 style="position: absolute; right: 10%; top: 50%; transform: translate(0, -50%); width: 260px;" 
+                                 data-node-id="participant1">
+                                <div class="party-indicator"></div>
+                                <div class="party-name">{{ participants[1].party }}</div>
+                                <div class="party-resources">
+                                    <strong>资源：</strong>
+                                    {% if participants[1].resources %}
+                                        {% for resource in participants[1].resources %}
+                                        <span class="resource-tag">{{ resource }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <div class="party-value">{{ participants[1].role_value }}</div>
+                                <div class="party-happiness">
+                                    <i class="fas fa-handshake"></i>
+                                    {{ participants[1].make_them_happy }}
+                                </div>
+                            </div>
+                        {% elif participants|length >= 3 %}
+                            <!-- 有3个或更多参与方：环形布局 -->
+                            {% for participant in participants %}
+                                {% if loop.index0 == 0 %}
+                                    {% set pos_style = "left: 10%; top: 30%; transform: translate(0, -50%); width: 250px;" %}
+                                {% elif loop.index0 == 1 %}
+                                    {% set pos_style = "right: 10%; top: 30%; transform: translate(0, -50%); width: 250px;" %}
+                                {% elif loop.index0 == 2 %}
+                                    {% set pos_style = "left: 10%; top: 70%; transform: translate(0, -50%); width: 250px;" %}
+                                {% else %}
+                                    {% set pos_style = "right: 10%; top: 70%; transform: translate(0, -50%); width: 250px;" %}
+                                {% endif %}
+                                
+                                <div class="party-node participant" 
+                                     style="position: absolute; {{ pos_style }}" 
+                                     data-node-id="participant{{ loop.index0 }}">
+                                    <div class="party-indicator"></div>
+                                    <div class="party-name">{{ participant.party }}</div>
+                                    <div class="party-resources">
+                                        <strong>资源：</strong>
+                                        {% if participant.resources %}
+                                            {% for resource in participant.resources %}
+                                            <span class="resource-tag">{{ resource }}</span>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                    <div class="party-value">{{ participant.role_value }}</div>
+                                    <div class="party-happiness">
+                                        <i class="fas fa-handshake"></i>
+                                        {{ participant.make_them_happy }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
                 

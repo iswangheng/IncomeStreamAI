@@ -329,6 +329,13 @@ class AngelaAI:
 {kb_snippets}"""
             
             assistant_prompt = """请严格按照非劳务收入管道设计原理，输出以下JSON格式：
+
+【重要要求】
+1. parties_structure 必须包含用户输入的所有关键人物，不得遗漏任何一个
+2. 每个参与方都必须标注角色类型：role_type 字段必须是 "需求方"、"交付方" 或 "资金方" 之一
+3. 如果需要补充其他关键人物，也必须明确标注角色类型
+4. 设计者始终是整个闭环的统筹者，角色类型为 "统筹方"
+
 {
   "overview": {
     "situation": "运用【意识+能量+能力=结果】公式分析当前情况（<=150字），必须包含设计者自己的位置",
@@ -338,6 +345,7 @@ class AngelaAI:
     "suggested_roles_to_hunt": [
       {
         "role":"建议补齐的角色",
+        "role_type":"需求方/交付方/资金方",
         "why":"为什么需要",
         "where_to_find":"去哪找",
         "outreach_script":"切实可行的话术（包含交换逻辑：你给什么/对方得什么）"
@@ -356,18 +364,21 @@ class AngelaAI:
       "parties_structure": [
         {
           "party": "设计者（你）",
+          "role_type": "统筹方",
           "resources": ["你提供的资源或规则"],
           "role_value": "你在闭环中的价值（统筹/撮合/规则制定等）",
           "make_them_happy": "如何让自己在闭环中不被跳过并持续获利"
         },
         {
-          "party": "关键人物A",
+          "party": "【必须包含用户输入的每个关键人物】",
+          "role_type": "需求方/交付方/资金方",
           "resources": ["他能提供的资源"],
           "role_value": "他在闭环中的位置/作用",
           "make_them_happy": "如何让他高兴（满足的需求/动机）"
         },
         {
-          "party": "关键人物B",
+          "party": "【如需补充的关键人物】",
+          "role_type": "需求方/交付方/资金方",
           "resources": ["..."],
           "role_value": "...",
           "make_them_happy": "..."

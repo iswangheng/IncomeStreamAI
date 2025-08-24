@@ -1639,7 +1639,7 @@
                         <div class="demand-parties">
                             {% for party in path.parties_structure %}
                                 {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
-                                    {% if '需求' in party.role_value or '客户' in party.role_value or '用户' in party.role_value or '学生' in party.role_value or '家长' in party.role_value or '购买' in party.role_value %}
+                                    {% if (party.role_type and '需求方' in party.role_type) or (not party.role_type and ('需求' in party.role_value or '客户' in party.role_value or '用户' in party.role_value or '学生' in party.role_value or '家长' in party.role_value or '购买' in party.role_value)) %}
                                     <div class="party-card" style="background: white; border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 3px 8px rgba(33, 150, 243, 0.1);">
                                         <div class="party-header" style="display: flex; align-items: center; margin-bottom: 10px;">
                                             <div class="party-icon" style="width: 35px; height: 35px; background: linear-gradient(135deg, #2196f3, #64b5f6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.9rem;">
@@ -1647,7 +1647,7 @@
                                             </div>
                                             <div style="flex: 1;">
                                                 <h6 style="font-weight: 600; margin: 0; color: #333; font-size: 0.95rem;">{{ party.party }}</h6>
-                                                <small style="color: #666; font-size: 0.8rem;">{{ party.role_value }}</small>
+                                                <small style="color: #666; font-size: 0.8rem;">{{ party.role_type or party.role_value }}</small>
                                             </div>
                                         </div>
                                         <div class="party-resources" style="margin-bottom: 8px;">
@@ -1678,7 +1678,7 @@
                         <div class="delivery-parties">
                             {% for party in path.parties_structure %}
                                 {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
-                                    {% if '交付' in party.role_value or '提供' in party.role_value or '服务' in party.role_value or '老师' in party.role_value or '教练' in party.role_value or '外教' in party.role_value or '规划' in party.role_value or '专业' in party.role_value %}
+                                    {% if (party.role_type and '交付方' in party.role_type) or (not party.role_type and ('交付' in party.role_value or '提供' in party.role_value or '服务' in party.role_value or '老师' in party.role_value or '教练' in party.role_value or '外教' in party.role_value or '规划' in party.role_value or '专业' in party.role_value)) %}
                                     <div class="party-card" style="background: white; border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 3px 8px rgba(156, 39, 176, 0.1);">
                                         <div class="party-header" style="display: flex; align-items: center; margin-bottom: 10px;">
                                             <div class="party-icon" style="width: 35px; height: 35px; background: linear-gradient(135deg, #9c27b0, #ba68c8); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.9rem;">
@@ -1686,7 +1686,7 @@
                                             </div>
                                             <div style="flex: 1;">
                                                 <h6 style="font-weight: 600; margin: 0; color: #333; font-size: 0.95rem;">{{ party.party }}</h6>
-                                                <small style="color: #666; font-size: 0.8rem;">{{ party.role_value }}</small>
+                                                <small style="color: #666; font-size: 0.8rem;">{{ party.role_type or party.role_value }}</small>
                                             </div>
                                         </div>
                                         <div class="party-resources" style="margin-bottom: 8px;">
@@ -1717,7 +1717,7 @@
                         <div class="funding-parties">
                             {% for party in path.parties_structure %}
                                 {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
-                                    {% if '资金' in party.role_value or '投资' in party.role_value or '付费' in party.role_value or '赞助' in party.role_value or '广告' in party.role_value or '支付' in party.role_value %}
+                                    {% if (party.role_type and '资金方' in party.role_type) or (not party.role_type and ('资金' in party.role_value or '投资' in party.role_value or '付费' in party.role_value or '赞助' in party.role_value or '广告' in party.role_value or '支付' in party.role_value)) %}
                                     <div class="party-card" style="background: white; border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 3px 8px rgba(255, 152, 0, 0.1);">
                                         <div class="party-header" style="display: flex; align-items: center; margin-bottom: 10px;">
                                             <div class="party-icon" style="width: 35px; height: 35px; background: linear-gradient(135deg, #ff9800, #ffb74d); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.9rem;">
@@ -1725,7 +1725,7 @@
                                             </div>
                                             <div style="flex: 1;">
                                                 <h6 style="font-weight: 600; margin: 0; color: #333; font-size: 0.95rem;">{{ party.party }}</h6>
-                                                <small style="color: #666; font-size: 0.8rem;">{{ party.role_value }}</small>
+                                                <small style="color: #666; font-size: 0.8rem;">{{ party.role_type or party.role_value }}</small>
                                             </div>
                                         </div>
                                         <div class="party-resources" style="margin-bottom: 8px;">

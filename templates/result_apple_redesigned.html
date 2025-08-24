@@ -1625,28 +1625,90 @@
                             {% endif %}
                         {% endfor %}
                         
-                        <!-- 其他参与方 - 简单循环，每个完整渲染 -->
-                        {% set ns = namespace(count=0) %}
+                        <!-- 其他参与方 - 智能圆形布局，避免重叠 -->
+                        {% set ns = namespace(count=0, total_participants=0) %}
+                        <!-- 先计算参与方总数 -->
                         {% for party in path.parties_structure %}
                             {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
-                                {% if ns.count == 0 %}
-                                    {% set node_style = "left: 2%; top: 38%; width: 260px;" %}
-                                {% elif ns.count == 1 %}
-                                    {% set node_style = "left: 72%; top: 38%; width: 260px;" %}
-                                {% elif ns.count == 2 %}
-                                    {% set node_style = "left: 35%; top: 5%; width: 260px;" %}
-                                {% elif ns.count == 3 %}
-                                    {% set node_style = "left: 35%; top: 75%; width: 260px;" %}
-                                {% elif ns.count == 4 %}
-                                    {% set node_style = "left: 5%; top: 10%; width: 250px;" %}
-                                {% elif ns.count == 5 %}
-                                    {% set node_style = "left: 65%; top: 10%; width: 250px;" %}
-                                {% elif ns.count == 6 %}
-                                    {% set node_style = "left: 5%; top: 65%; width: 250px;" %}
-                                {% elif ns.count == 7 %}
-                                    {% set node_style = "left: 65%; top: 65%; width: 250px;" %}
+                                {% set ns.total_participants = ns.total_participants + 1 %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% for party in path.parties_structure %}
+                            {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
+                                <!-- 根据参与方总数决定布局策略 -->
+                                {% if ns.total_participants <= 2 %}
+                                    <!-- 1-2个参与方：左右布局 -->
+                                    {% if ns.count == 0 %}
+                                        {% set node_style = "left: 2%; top: 38%; width: 250px;" %}
+                                    {% else %}
+                                        {% set node_style = "left: 72%; top: 38%; width: 250px;" %}
+                                    {% endif %}
+                                {% elif ns.total_participants <= 4 %}
+                                    <!-- 3-4个参与方：十字布局 -->
+                                    {% if ns.count == 0 %}
+                                        {% set node_style = "left: 2%; top: 38%; width: 240px;" %}
+                                    {% elif ns.count == 1 %}
+                                        {% set node_style = "left: 73%; top: 38%; width: 240px;" %}
+                                    {% elif ns.count == 2 %}
+                                        {% set node_style = "left: 37%; top: 5%; width: 240px;" %}
+                                    {% else %}
+                                        {% set node_style = "left: 37%; top: 72%; width: 240px;" %}
+                                    {% endif %}
+                                {% elif ns.total_participants <= 6 %}
+                                    <!-- 5-6个参与方：六边形布局 -->
+                                    {% if ns.count == 0 %}
+                                        {% set node_style = "left: 2%; top: 20%; width: 230px;" %}
+                                    {% elif ns.count == 1 %}
+                                        {% set node_style = "left: 73%; top: 20%; width: 230px;" %}
+                                    {% elif ns.count == 2 %}
+                                        {% set node_style = "left: 2%; top: 55%; width: 230px;" %}
+                                    {% elif ns.count == 3 %}
+                                        {% set node_style = "left: 73%; top: 55%; width: 230px;" %}
+                                    {% elif ns.count == 4 %}
+                                        {% set node_style = "left: 37%; top: 2%; width: 230px;" %}
+                                    {% else %}
+                                        {% set node_style = "left: 37%; top: 75%; width: 230px;" %}
+                                    {% endif %}
+                                {% elif ns.total_participants <= 8 %}
+                                    <!-- 7-8个参与方：八边形布局 -->
+                                    {% if ns.count == 0 %}
+                                        {% set node_style = "left: 2%; top: 15%; width: 220px;" %}
+                                    {% elif ns.count == 1 %}
+                                        {% set node_style = "left: 74%; top: 15%; width: 220px;" %}
+                                    {% elif ns.count == 2 %}
+                                        {% set node_style = "left: 2%; top: 38%; width: 220px;" %}
+                                    {% elif ns.count == 3 %}
+                                        {% set node_style = "left: 74%; top: 38%; width: 220px;" %}
+                                    {% elif ns.count == 4 %}
+                                        {% set node_style = "left: 2%; top: 61%; width: 220px;" %}
+                                    {% elif ns.count == 5 %}
+                                        {% set node_style = "left: 74%; top: 61%; width: 220px;" %}
+                                    {% elif ns.count == 6 %}
+                                        {% set node_style = "left: 38%; top: 2%; width: 220px;" %}
+                                    {% else %}
+                                        {% set node_style = "left: 38%; top: 76%; width: 220px;" %}
+                                    {% endif %}
+                                {% elif ns.total_participants <= 12 %}
+                                    <!-- 9-12个参与方：三层布局 -->
+                                    {% if ns.count < 4 %}
+                                        <!-- 内层：4个 -->
+                                        {% set pos = ns.count * 25 %}
+                                        {% set node_style = "left: " + (10 + pos)|string + "%; top: " + (25 if ns.count % 2 == 0 else 50)|string + "%; width: 200px;" %}
+                                    {% elif ns.count < 8 %}
+                                        <!-- 中层：4个 -->
+                                        {% set pos = (ns.count - 4) * 25 %}
+                                        {% set node_style = "left: " + (5 + pos)|string + "%; top: " + (10 if (ns.count - 4) % 2 == 0 else 70)|string + "%; width: 200px;" %}
+                                    {% else %}
+                                        <!-- 外层：4个 -->
+                                        {% set pos = (ns.count - 8) * 25 %}
+                                        {% set node_style = "left: " + (2 + pos)|string + "%; top: " + (2 if (ns.count - 8) % 2 == 0 else 82)|string + "%; width: 190px;" %}
+                                    {% endif %}
                                 {% else %}
-                                    {% set node_style = "left: " + ((10 + (ns.count - 8) * 15) % 70)|string + "%; top: " + ((85 + (ns.count - 8) * 5) % 10 + 80)|string + "%; width: 230px;" %}
+                                    <!-- 超过12个：网格布局 -->
+                                    {% set row = (ns.count // 4) %}
+                                    {% set col = (ns.count % 4) %}
+                                    {% set node_style = "left: " + (2 + col * 24)|string + "%; top: " + (2 + row * 20)|string + "%; width: 180px; font-size: 0.9em;" %}
                                 {% endif %}
                                 
                                 <div class="party-node participant" 

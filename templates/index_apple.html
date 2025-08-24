@@ -1325,83 +1325,24 @@
             }
 
 
-            // 清空现有人物卡片并重置计数器
-            const personsContainer = document.getElementById('personsContainer');
-            if (personsContainer) {
-                personsContainer.innerHTML = '';
-                personCount = 0; // 重置人物计数器
+            // 清空现有关键人物清单数据
+            personnelData = [];
 
-                // 确保容器可见
-                personsContainer.style.display = 'block';
-                personsContainer.style.opacity = '1';
-                personsContainer.style.visibility = 'visible';
-            }
-
-            // 添加测试案例中的人物
+            // 添加测试案例中的人物到关键人物清单
             if (caseData.persons && caseData.persons.length > 0) {
                 caseData.persons.forEach((person, index) => {
-                    addPerson();
-                    const personCards = document.querySelectorAll('.person-card');
-                    const currentCard = personCards[personCards.length - 1];
-
-                    if (!currentCard) return;
-
-                    // 强制显示人物卡片（移除动画类）
-                    currentCard.classList.remove('fade-in', 'slide-up');
-                    currentCard.style.opacity = '1';
-                    currentCard.style.transform = 'translateY(0)';
-                    currentCard.style.visibility = 'visible';
-                    currentCard.style.display = 'block';
-
-                    // 填充人物信息
-                    const nameInput = currentCard.querySelector('input[name="person_name[]"]');
-                    if (nameInput) {
-                        nameInput.value = person.name || '';
-                        nameInput.setAttribute('value', person.name || '');
-                        // 强制显示输入框内容
-                        nameInput.style.opacity = '1';
-                        nameInput.style.visibility = 'visible';
-                    }
-
-                    // 选择角色
-                    if (person.roles) {
-                        person.roles.forEach(role => {
-                            const roleCheckbox = currentCard.querySelector(`input[name="person_role[]"][value="${role}"]`);
-                            if (roleCheckbox) {
-                                roleCheckbox.checked = true;
-                            }
-                        });
-                        updateRolesSummary(currentCard);
-                        updateResourceSuggestions(currentCard.dataset.personId); // Pass personId
-                    }
-
-                    // 添加资源
-                    if (person.resources) {
-                        person.resources.forEach(resource => {
-                            const personId = currentCard.querySelector('.resource-input').dataset.personId;
-                            addSelectedResource(resource, personId);
-                        });
-                    }
-
-                    // 选择需求选项
-                    if (person.makeHappy) {
-                        person.makeHappy.forEach(need => {
-                            const needCheckbox = currentCard.querySelector(`input[name="person_needs[]"][value="${need}"]`);
-                            if (needCheckbox) {
-                                needCheckbox.checked = true;
-                            }
-                        });
-                    }
-
-                    // 填充备注
-                    const notesTextarea = currentCard.querySelector('textarea[name="person_notes[]"]');
-                    if (notesTextarea) notesTextarea.value = person.notes || '';
-
-                    // 在最后一个人物加载完成后更新编号
-                    if (index === caseData.persons.length - 1) {
-                        updatePersonNumbers();
-                    }
+                    const newPerson = {
+                        id: Date.now() + index, // 确保每个人物有唯一ID
+                        name: person.name || '未命名',
+                        roles: person.roles || [],
+                        resources: person.resources || [],
+                        needs: person.makeHappy || [] // 注意这里是makeHappy字段
+                    };
+                    personnelData.push(newPerson);
                 });
+
+                // 更新关键人物清单表格显示
+                updatePersonnelTable();
             }
 
 
@@ -1412,11 +1353,9 @@
             document.getElementById('project_name').value = '';
             document.getElementById('project_description').value = '';
 
-            document.getElementById('personsContainer').innerHTML = '';
-            personCount = 0; // 重置计数器
-            addPerson();
-
-
+            // 清空关键人物清单
+            personnelData = [];
+            updatePersonnelTable();
         }
 
         // 滚动到表单区域

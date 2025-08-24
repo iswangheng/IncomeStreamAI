@@ -417,23 +417,6 @@
             position: relative;
         }
 
-        /* 连接线效果 */
-        .business-flow-grid::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--pipeline-primary), transparent);
-            z-index: 1;
-        }
-
-        @media (max-width: 768px) {
-            .business-flow-grid::before {
-                display: none;
-            }
-        }
 
         .party-card {
             background: white;

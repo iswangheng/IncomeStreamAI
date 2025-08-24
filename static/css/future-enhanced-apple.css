@@ -3083,3 +3083,38 @@ body {
     color: white;
     transform: translateY(-1px);
 }
+
+/* ==== 参与方结构图连线动画 ==== */
+.network-connection {
+    stroke: #007AFF;
+    stroke-width: 2;
+    stroke-dasharray: 5,5;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.parties-network:hover .network-connection {
+    opacity: 1;
+    stroke-width: 3;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: -10;
+    }
+}
+
+/* 设计者节点强化样式 */
+.party-node.designer {
+    border: 3px solid #007AFF !important;
+    z-index: 10 !important;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+}
+
+.parties-network {
+    height: 450px;
+}
+
+.network-svg {
+    pointer-events: none;
+}

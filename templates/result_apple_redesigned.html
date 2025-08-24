@@ -1694,10 +1694,10 @@
                     if (!networkContainer || !svg) return;
                     
                     function drawConnections() {
-                        const centerNode = networkContainer.querySelector('.center-node');
-                        const surroundingNodes = networkContainer.querySelectorAll('.surrounding-node');
+                        const centerNode = networkContainer.querySelector('.designer');
+                        const participantNodes = networkContainer.querySelectorAll('.participant');
                         
-                        if (!centerNode) return;
+                        if (!centerNode || participantNodes.length === 0) return;
                         
                         // 清除现有连线
                         svg.innerHTML = '';
@@ -1707,7 +1707,7 @@
                         const centerX = (centerRect.left + centerRect.width/2 - containerRect.left) / containerRect.width * 100;
                         const centerY = (centerRect.top + centerRect.height/2 - containerRect.top) / containerRect.height * 100;
                         
-                        surroundingNodes.forEach(node => {
+                        participantNodes.forEach((node, index) => {
                             const nodeRect = node.getBoundingClientRect();
                             const nodeX = (nodeRect.left + nodeRect.width/2 - containerRect.left) / containerRect.width * 100;
                             const nodeY = (nodeRect.top + nodeRect.height/2 - containerRect.top) / containerRect.height * 100;
@@ -1718,16 +1718,26 @@
                             line.setAttribute('y1', centerY + '%');
                             line.setAttribute('x2', nodeX + '%');
                             line.setAttribute('y2', nodeY + '%');
-                            line.setAttribute('class', 'network-line');
+                            line.setAttribute('stroke', '#007AFF');
+                            line.setAttribute('stroke-width', '2');
+                            line.setAttribute('stroke-dasharray', '5,5');
+                            line.setAttribute('opacity', '0.7');
+                            line.classList.add('network-connection');
                             svg.appendChild(line);
+                            
+                            // 添加动画
+                            line.style.strokeDashoffset = '10';
+                            line.style.animation = 'dash 2s linear infinite';
                         });
                     }
                     
                     // 延迟绘制确保布局完成
-                    setTimeout(drawConnections, 100);
+                    setTimeout(drawConnections, 200);
                     
                     // 响应式重绘
-                    window.addEventListener('resize', drawConnections);
+                    window.addEventListener('resize', () => {
+                        setTimeout(drawConnections, 100);
+                    });
                 });
                 </script>
             </div>

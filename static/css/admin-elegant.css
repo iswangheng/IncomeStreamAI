@@ -317,21 +317,24 @@
 
 .user-info {
     flex: 1;
+    padding-left: var(--elegant-space-2);
 }
 
 .user-name {
     font-size: var(--elegant-text-lg);
     font-weight: 600;
     color: var(--elegant-text-primary);
-    margin-bottom: var(--elegant-space-1);
+    margin-bottom: var(--elegant-space-3);
     display: flex;
     align-items: center;
     gap: var(--elegant-space-2);
+    line-height: 1.4;
 }
 
 .user-phone {
     font-size: var(--elegant-text-sm);
     color: var(--elegant-text-secondary);
+    margin-top: var(--elegant-space-1);
 }
 
 .current-user-badge {
@@ -375,6 +378,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--elegant-space-4);
+    margin-top: var(--elegant-space-5);
 }
 
 @media (max-width: 480px) {

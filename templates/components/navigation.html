@@ -7,12 +7,6 @@
             Angela
         </a>
         <div class="nav-actions">
-            {% if current_user.is_admin %}
-            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
-                <i class="fas fa-cog"></i>管理中心
-            </a>
-            {% endif %}
-
             <!-- 移动端汉堡菜单按钮 -->
             <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars"></i>

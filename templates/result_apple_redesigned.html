@@ -532,17 +532,20 @@
             font-weight: var(--font-medium);
         }
 
-        .level-轻度 {
+        .level-轻度,
+        .level-轻度\(<5小时\) {
             background: rgba(40, 167, 69, 0.1);
             color: var(--color-success);
         }
 
-        .level-中度 {
+        .level-中度,
+        .level-中度\(5-10小时\) {
             background: rgba(255, 193, 7, 0.1);
             color: #cc8800;
         }
 
-        .level-过高 {
+        .level-过高,
+        .level-过高\(>10小时\) {
             background: rgba(220, 53, 69, 0.1);
             color: var(--color-danger);
         }
@@ -2047,7 +2050,7 @@
                             <div style="display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2);">
                                 <span class="hours-number">{{ path.labor_load_estimate.hours_per_week }}</span>
                                 <span class="hours-unit">小时/周</span>
-                                <span class="load-level level-{{ path.labor_load_estimate.level.split('(')[0] if '(' in path.labor_load_estimate.level else path.labor_load_estimate.level }}">{{ path.labor_load_estimate.level }}</span>
+                                <span class="load-level level-{{ path.labor_load_estimate.level.replace('<5h', '<5小时').replace('5-10h', '5-10小时').replace('>10h', '>10小时').split('(')[0] if '(' in path.labor_load_estimate.level else path.labor_load_estimate.level.replace('<5h', '<5小时').replace('5-10h', '5-10小时').replace('>10h', '>10小时') }}">{{ path.labor_load_estimate.level.replace('<5h', '<5小时').replace('5-10h', '5-10小时').replace('>10h', '>10小时') }}</span>
                             </div>
                             <div style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-bottom: var(--space-3);">
                                 预计每周需要投入的时间成本

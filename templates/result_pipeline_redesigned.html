@@ -865,7 +865,7 @@
                 </div>
                 <div class="labor-level">
                     <i class="fas fa-gauge-high"></i>
-                    {{ pipeline.labor_load_estimate.level }}
+                    {{ pipeline.labor_load_estimate.level.replace('<5h', '<5小时').replace('5-10h', '5-10小时').replace('>10h', '>10小时') }}
                 </div>
                 <div style="margin-top: var(--space-3); font-size: var(--text-sm); color: var(--color-text-secondary);">
                     <strong>降低劳动量方案：</strong>{{ pipeline.labor_load_estimate.alternative }}

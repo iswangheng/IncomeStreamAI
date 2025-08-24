@@ -87,7 +87,6 @@ function renderUsersTable(users) {
                     <div class="user-info">
                         <div class="user-name">
                             ${user.name}
-                            ${isCurrentUser ? '<span class="current-user-badge">当前用户</span>' : ''}
                         </div>
                         <div class="user-phone">${user.phone}</div>
                     </div>
@@ -138,7 +137,7 @@ function renderUsersTable(users) {
                                 <i class="fas fa-trash"></i>
                                 <span>删除</span>
                             </button>
-                        ` : '<div class="current-user-label"><i class="fas fa-star"></i> 当前用户</div>'}
+                        ` : ''}
                     </div>
                 </div>
             </div>

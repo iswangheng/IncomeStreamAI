@@ -114,7 +114,7 @@ class AnalysisResult(db.Model):
     __tablename__ = 'analysis_results'
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    sequence_id = db.Column(db.Integer, nullable=False, autoincrement=True, index=True, comment='自增数字ID，用于排序和索引')
+    sequence_id = db.Column(db.Integer, nullable=False, index=True, server_default=db.text("nextval('analysis_results_sequence_id_seq')"), comment='自增数字ID，用于排序和索引')
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # 允许null以支持历史数据
     form_data = db.Column(db.Text, nullable=False)  # JSON格式的表单数据
     result_data = db.Column(db.Text, nullable=False)  # JSON格式的分析结果

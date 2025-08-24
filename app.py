@@ -1223,7 +1223,7 @@ def admin_dashboard():
     # 按上传时间倒序排列，只显示未删除的文件
     knowledge_items = query.filter(KnowledgeItem.status != 'deleted').order_by(KnowledgeItem.upload_time.desc()).all()
 
-    return render_template('admin/dashboard_unified.html', 
+    return render_template('admin/dashboard.html', 
                          knowledge_items=knowledge_items,
                          status_filter=status_filter,
                          search_query=search_query)

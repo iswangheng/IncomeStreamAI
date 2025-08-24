@@ -1625,44 +1625,58 @@
                             {% endif %}
                         {% endfor %}
                         
-                        <!-- 其他参与方 - 精确定位避免重叠 -->
+                        <!-- 其他参与方 - 使用绝对的left位置，避免right导致的重叠 -->
                         {% set participant_count = 0 %}
                         {% for party in path.parties_structure %}
                             {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
-                                <!-- 精确定位：避免transform造成的重叠 -->
+                                <!-- 使用固定的left位置，完全避免重叠 -->
                                 {% if participant_count == 0 %}
-                                    {% set pos_style = "left: 5%; top: 40%; width: 280px;" %}
+                                    <!-- 第一个参与方：左侧 -->
+                                    <div class="party-node participant" 
+                                         style="position: absolute; left: 2%; top: 35%; width: 280px;" 
+                                         data-node-id="participant0">
                                 {% elif participant_count == 1 %}
-                                    {% set pos_style = "right: 5%; top: 40%; width: 280px;" %}
+                                    <!-- 第二个参与方：右侧 -->
+                                    <div class="party-node participant" 
+                                         style="position: absolute; left: 68%; top: 35%; width: 280px;" 
+                                         data-node-id="participant1">
                                 {% elif participant_count == 2 %}
-                                    {% set pos_style = "left: 30%; top: 10%; width: 260px;" %}
+                                    <!-- 第三个参与方：上方 -->
+                                    <div class="party-node participant" 
+                                         style="position: absolute; left: 35%; top: 5%; width: 260px;" 
+                                         data-node-id="participant2">
                                 {% elif participant_count == 3 %}
-                                    {% set pos_style = "right: 30%; top: 10%; width: 260px;" %}
+                                    <!-- 第四个参与方：下方 -->
+                                    <div class="party-node participant" 
+                                         style="position: absolute; left: 35%; top: 75%; width: 260px;" 
+                                         data-node-id="participant3">
                                 {% elif participant_count == 4 %}
-                                    {% set pos_style = "left: 30%; top: 80%; width: 260px;" %}
+                                    <!-- 第五个参与方：左上 -->
+                                    <div class="party-node participant" 
+                                         style="position: absolute; left: 5%; top: 10%; width: 250px;" 
+                                         data-node-id="participant4">
                                 {% elif participant_count == 5 %}
-                                    {% set pos_style = "right: 30%; top: 80%; width: 260px;" %}
+                                    <!-- 第六个参与方：右上 -->
+                                    <div class="party-node participant" 
+                                         style="position: absolute; left: 65%; top: 10%; width: 250px;" 
+                                         data-node-id="participant5">
                                 {% elif participant_count == 6 %}
-                                    {% set pos_style = "left: 10%; top: 70%; width: 240px;" %}
+                                    <!-- 第七个参与方：左下 -->
+                                    <div class="party-node participant" 
+                                         style="position: absolute; left: 5%; top: 65%; width: 250px;" 
+                                         data-node-id="participant6">
                                 {% elif participant_count == 7 %}
-                                    {% set pos_style = "right: 10%; top: 70%; width: 240px;" %}
+                                    <!-- 第八个参与方：右下 -->
+                                    <div class="party-node participant" 
+                                         style="position: absolute; left: 65%; top: 65%; width: 250px;" 
+                                         data-node-id="participant7">
                                 {% else %}
-                                    <!-- 超过8个参与方时，继续外围分布 -->
-                                    {% set outer_pos = (participant_count - 8) % 4 %}
-                                    {% if outer_pos == 0 %}
-                                        {% set pos_style = "left: 2%; top: 20%; width: 220px;" %}
-                                    {% elif outer_pos == 1 %}
-                                        {% set pos_style = "right: 2%; top: 20%; width: 220px;" %}
-                                    {% elif outer_pos == 2 %}
-                                        {% set pos_style = "left: 2%; top: 60%; width: 220px;" %}
-                                    {% else %}
-                                        {% set pos_style = "right: 2%; top: 60%; width: 220px;" %}
-                                    {% endif %}
+                                    <!-- 超过8个参与方 -->
+                                    {% set overflow_index = participant_count - 8 %}
+                                    <div class="party-node participant" 
+                                         style="position: absolute; left: {{ 10 + (overflow_index * 15) % 70 }}%; top: {{ 85 + (overflow_index * 5) % 10 }}%; width: 230px;" 
+                                         data-node-id="participant{{ participant_count }}">
                                 {% endif %}
-                                
-                                <div class="party-node participant" 
-                                     style="position: absolute; {{ pos_style }}" 
-                                     data-node-id="participant{{ participant_count }}">
                                     <div class="party-indicator"></div>
                                     <div class="party-name">{{ party.party }}</div>
                                     <div class="party-resources">

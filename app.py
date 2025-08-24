@@ -698,14 +698,14 @@ def results():
 
             # 如果有任何结果数据，显示结果页面
             if suggestions:
-                return render_template('result_apple_redesigned.html', 
+                return render_template('result_pipeline_redesigned.html', 
                                      form_data=form_data, 
                                      result=suggestions,
                                      status='completed')
             else:
                 # 分析标记为完成但没有结果数据，显示错误状态
                 app.logger.error("Analysis completed but no result data available")
-                return render_template('result_apple_redesigned.html',
+                return render_template('result_pipeline_redesigned.html',
                                      form_data=form_data,
                                      status='error',
                                      error_message='分析完成但结果数据丢失，请重新分析')
@@ -742,7 +742,7 @@ def results():
                     except Exception as db_error:
                         app.logger.error(f"Failed to save fallback result: {str(db_error)}")
 
-                    return render_template('result_apple_redesigned.html',
+                    return render_template('result_pipeline_redesigned.html',
                                          form_data=form_data,
                                          result=fallback_result,
                                          status='completed',
@@ -750,7 +750,7 @@ def results():
                 except Exception as e:
                     app.logger.error(f"Fallback generation failed: {str(e)}")
 
-            return render_template('result_apple_redesigned.html',
+            return render_template('result_pipeline_redesigned.html',
                                  form_data=form_data,
                                  status='error',
                                  error_message=error_msg)
@@ -777,7 +777,7 @@ def results():
                     if analysis_record and analysis_record.result_data:
                         suggestions = json.loads(analysis_record.result_data)
                         app.logger.info(f"Found existing result in database for ID: {result_id}")
-                        return render_template('result_apple_redesigned.html', 
+                        return render_template('result_pipeline_redesigned.html', 
                                              form_data=form_data, 
                                              result=suggestions,
                                              status='completed')
@@ -817,7 +817,7 @@ def results():
                 except Exception as db_error:
                     app.logger.error(f"Failed to save emergency fallback: {str(db_error)}")
 
-                return render_template('result_apple_redesigned.html',
+                return render_template('result_pipeline_redesigned.html',
                                      form_data=form_data,
                                      result=fallback_result,
                                      status='completed',
@@ -825,7 +825,7 @@ def results():
 
             except Exception as fallback_error:
                 app.logger.error(f"Emergency fallback generation failed: {str(fallback_error)}")
-                return render_template('result_apple_redesigned.html',
+                return render_template('result_pipeline_redesigned.html',
                                      form_data=form_data,
                                      status='error',
                                      error_message='系统无法生成分析结果，请重新尝试')
@@ -1166,7 +1166,7 @@ def view_analysis_record(record_id):
 
         app.logger.info(f"User {current_user.id} viewing analysis record: {record_id}")
 
-        return render_template('result_apple_redesigned.html',
+        return render_template('result_pipeline_redesigned.html',
                              form_data=form_data,
                              result=result_data,
                              status='completed',

@@ -5,7 +5,7 @@ from openai import OpenAI
 from typing import Dict, List, Any, Optional
 
 # OpenAI客户端初始化
-# the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
+# the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
 # do not change this unless explicitly requested by the user
 import httpx
 import time
@@ -18,13 +18,14 @@ client = OpenAI(
 
 logger = logging.getLogger(__name__)
 
+
 class AngelaAI:
-    """Angela - 非劳务收入路径设计AI服务"""
-    
+    """Angela - 非劳务收入管道设计AI服务"""
+
     def __init__(self):
-        self.default_model = "gpt-4o-mini"  # 默认模型
+        self.default_model = "gpt-4o"  # 默认模型
         self.default_max_tokens = 2500  # 默认token数量
-    
+
     def get_model_config(self, config_type='main_analysis'):
         """从数据库获取模型配置"""
         try:
@@ -39,18 +40,23 @@ class AngelaAI:
                 'max_tokens': self.default_max_tokens,
                 'timeout': 45
             }
-    
+
     def _call_openai_with_retry(self, **kwargs):
         """调用OpenAI API，带简单重试机制"""
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                logger.info(f"正在调用OpenAI API (尝试 {attempt + 1}/{max_retries})...")
+                logger.info(
+                    f"正在调用OpenAI API (尝试 {attempt + 1}/{max_retries})...")
                 return client.chat.completions.create(**kwargs)
-            except (httpx.TimeoutException, httpx.ConnectError, ConnectionError, httpx.ReadTimeout, httpx.ConnectTimeout) as e:
+            except (httpx.TimeoutException, httpx.ConnectError,
+                    ConnectionError, httpx.ReadTimeout,
+                    httpx.ConnectTimeout) as e:
                 if attempt < max_retries - 1:
                     wait_time = 3 * (attempt + 1)  # 线性退避: 3s, 6s, 9s
-                    logger.warning(f"OpenAI API调用失败 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试...")
+                    logger.warning(
+                        f"OpenAI API调用失败 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试..."
+                    )
                     time.sleep(wait_time)
                     continue
                 else:
@@ -61,18 +67,18 @@ class AngelaAI:
                 logger.error(f"OpenAI API调用遇到非网络错误: {str(e)}")
                 # 对于其他错误也返回None
                 return None
-        
+
     def format_make_happy(self, make_happy_data) -> str:
         """格式化动机标签数据"""
         if not make_happy_data:
             return "未指定"
-        
+
         # 如果是字符串，先分割成列表
         if isinstance(make_happy_data, str):
             make_happy_list = make_happy_data.split(',')
         else:
             make_happy_list = make_happy_data
-        
+
         # 映射值到显示文本（包含新的实际标签）
         label_map = {
             'recognition': '获得认可/名声',
@@ -91,73 +97,74 @@ class AngelaAI:
             'brand_exposure': '品牌曝光',
             'expand_network': '拓展网络/人脉'
         }
-        
-        return "、".join([label_map.get(item.strip(), item.strip()) for item in make_happy_list])
-    
+
+        return "、".join([
+            label_map.get(item.strip(), item.strip())
+            for item in make_happy_list
+        ])
+
     def format_external_resources(self, resources_data: List[str]) -> str:
         """格式化外部资源数据"""
         if not resources_data:
             return "无可用外部资源"
-            
+
         # 按资源类型分组
-        categories = {
-            '资金支持': [],
-            '市场渠道': [],
-            '执行能力': [],
-            '战略合作': []
-        }
-        
+        categories = {'资金支持': [], '市场渠道': [], '执行能力': [], '战略合作': []}
+
         # 根据资源内容分类（简化版，可以扩展）
         for resource in resources_data:
-            if any(keyword in resource for keyword in ['资金', '投资', '预算', '赞助']):
+            if any(keyword in resource
+                   for keyword in ['资金', '投资', '预算', '赞助']):
                 categories['资金支持'].append(resource)
-            elif any(keyword in resource for keyword in ['渠道', '平台', '媒体', '社群']):
+            elif any(keyword in resource
+                     for keyword in ['渠道', '平台', '媒体', '社群']):
                 categories['市场渠道'].append(resource)
-            elif any(keyword in resource for keyword in ['技术', '团队', '设备', '工具']):
+            elif any(keyword in resource
+                     for keyword in ['技术', '团队', '设备', '工具']):
                 categories['执行能力'].append(resource)
             else:
                 categories['战略合作'].append(resource)
-        
+
         result = []
         for category, items in categories.items():
             if items:
                 result.append(f"{category}: {', '.join(items)}")
-        
+
         return "; ".join(result) if result else "通用外部资源可用"
-    
-    def get_knowledge_base_snippets(self, project_description: str, key_persons: List[Dict], 
-                                  external_resources: List[str], db_session) -> str:
+
+    def get_knowledge_base_snippets(self, project_description: str,
+                                    key_persons: List[Dict],
+                                    external_resources: List[str],
+                                    db_session) -> str:
         """从知识库中检索相关片段"""
         try:
             from models import KnowledgeItem
-            
+
             # 获取活跃状态的知识库条目
             knowledge_items = db_session.query(KnowledgeItem).filter(
-                KnowledgeItem.status == 'active'
-            ).all()
-            
+                KnowledgeItem.status == 'active').all()
+
             if not knowledge_items:
                 return self.get_core_knowledge_fallback()
-            
+
             # 构建项目关键词，用于匹配知识库案例
-            project_keywords = self._extract_project_keywords(project_description, key_persons)
-            
+            project_keywords = self._extract_project_keywords(
+                project_description, key_persons)
+
             # 优先查找非劳务收入相关的知识库内容
-            non_labor_income_items = [item for item in knowledge_items 
-                                    if item.content_summary and ('非劳务收入' in item.content_summary or 
-                                                               '管道' in item.content_summary or
-                                                               '租金' in item.content_summary or
-                                                               '股份' in item.content_summary or
-                                                               '版权' in item.content_summary or
-                                                               'Bonnie' in item.content_summary or
-                                                               'Angela' in item.content_summary or
-                                                               '楚楚' in item.content_summary or
-                                                               '知了猴' in item.content_summary or
-                                                               '英语培训' in item.content_summary or
-                                                               '商铺' in item.content_summary)]
-            
+            non_labor_income_items = [
+                item for item in knowledge_items if item.content_summary and
+                ('非劳务收入' in item.content_summary or '管道' in
+                 item.content_summary or '租金' in item.content_summary or '股份'
+                 in item.content_summary or '版权' in item.content_summary
+                 or 'Bonnie' in item.content_summary or 'Angela' in
+                 item.content_summary or '楚楚' in item.content_summary or '知了猴'
+                 in item.content_summary or '英语培训' in item.content_summary
+                 or '商铺' in item.content_summary)
+            ]
+
             relevant_snippets = []
-            
+
             # 如果找到非劳务收入相关内容，优先使用
             if non_labor_income_items:
                 for item in non_labor_income_items[:2]:  # 最多2个核心条目
@@ -166,37 +173,41 @@ class AngelaAI:
                         summary = item.content_summary[:800]  # 增加到800字符获取更多信息
                         relevant_snippets.append(f"• {summary}")
                         item.usage_count += 1
-            
+
             # 补充其他相关条目
-            other_items = [item for item in knowledge_items if item not in non_labor_income_items]
+            other_items = [
+                item for item in knowledge_items
+                if item not in non_labor_income_items
+            ]
             for item in other_items[:2]:  # 最多再补充2个
                 if item.content_summary and len(relevant_snippets) < 4:
                     summary = item.content_summary[:300]
                     relevant_snippets.append(f"• {summary}")
                     item.usage_count += 1
-            
+
             # 如果没有找到相关内容，返回核心知识要点
             if not relevant_snippets:
                 return self.get_core_knowledge_fallback()
-            
+
             return "\n".join(relevant_snippets)
-            
+
         except Exception as e:
             logger.error(f"Knowledge base retrieval error: {e}")
             return self.get_core_knowledge_fallback()
 
-    def _extract_project_keywords(self, project_description: str, key_persons: List[Dict]) -> List[str]:
+    def _extract_project_keywords(self, project_description: str,
+                                  key_persons: List[Dict]) -> List[str]:
         """提取项目关键词用于知识库匹配"""
         keywords = []
-        
+
         # 从项目描述中提取关键词
         if '英语' in project_description or '培训' in project_description:
             keywords.extend(['英语培训', 'Bonnie', '升学规划'])
         if '商铺' in project_description or '房东' in project_description or '租' in project_description:
-            keywords.extend(['商铺', '租金', 'Angela', '二房东'])  
+            keywords.extend(['商铺', '租金', 'Angela', '二房东'])
         if '知了猴' in project_description or '养殖' in project_description:
             keywords.extend(['知了猴', '楚楚', '养殖'])
-            
+
         return keywords
 
     def get_core_knowledge_fallback(self) -> str:
@@ -207,8 +218,9 @@ class AngelaAI:
 • 核心原则：让关键环节的关键人物都高兴，严格区分需换取的人物资源vs可直接动用的外部资源
 • 成功要素：1)设计共赢机制 2)掌握核心信息+筛选规则 3)前置合作规则
 • 成功案例参考：Bonnie英语培训管道（连接规划师+机构，年40万收入）、Angela商铺二房东（1万启动，8年72万收入）、楚楚知了猴管道（7条管道，年70万收入）"""
-    
-    def generate_income_paths(self, form_data: Dict[str, Any], db_session) -> Dict[str, Any]:
+
+    def generate_income_paths(self, form_data: Dict[str, Any],
+                              db_session) -> Dict[str, Any]:
         """生成非劳务收入路径"""
         try:
             # 提取表单数据
@@ -216,19 +228,19 @@ class AngelaAI:
             project_description = form_data.get('projectDescription', '')
             key_persons = form_data.get('keyPersons', [])
             external_resources = form_data.get('externalResources', [])
-            
+
             # 获取知识库片段 - 简化以减少prompt长度
             try:
                 kb_snippets = self.get_knowledge_base_snippets(
-                    project_description, key_persons, external_resources, db_session
-                )
+                    project_description, key_persons, external_resources,
+                    db_session)
                 # 限制知识库内容长度
                 if len(kb_snippets) > 500:
                     kb_snippets = kb_snippets[:500] + "..."
             except Exception as kb_error:
                 logger.warning(f"Knowledge base retrieval failed: {kb_error}")
                 kb_snippets = self.get_core_knowledge_fallback()
-            
+
             # 构造系统提示
             system_prompt = """你是 "Angela"，一位专精于 "非劳务收入管道设计" 的高级商业顾问与架构师。 你长期研究并实践 "如何利用别人手中的资源来创造收益"，擅长把复杂的利益关系拆解成低成本、低风险、快验证的合作路径。 你的任务是：根据用户提供的项目信息，生成 1–3 套切实可行的非劳务收入管道草案。
 
@@ -345,26 +357,27 @@ class AngelaAI:
 * 场景：县城托管班各自为战，缺品牌统一
 * 闭环：设计者搭建统一品牌，收加盟费+分成
 * 收益触发点：加盟费+分成"""
-            
+
             # 构造用户提示
             user_content = f"""【项目名称】{project_name}
 【项目背景】{project_description}
 
 【关键人物】（含角色、资源、动机）"""
-            
+
             for i, person in enumerate(key_persons):
                 name = person.get('name', f'人物{i+1}')
                 role = person.get('role', '')  # 修正：使用role而不是roles
                 resources = person.get('resources', [])
-                make_happy = person.get('make_happy', '')  # 修正：使用make_happy而不是makeHappy
+                make_happy = person.get('make_happy',
+                                        '')  # 修正：使用make_happy而不是makeHappy
                 notes = person.get('notes', '')
-                
+
                 user_content += f"""
 - 人物：{name}｜角色：{role if role else "未指定"}
   资源：{", ".join(resources) if resources else "无"}
   动机标签（如何让TA高兴）：{self.format_make_happy(make_happy)}
   备注：{notes if notes else "无"}"""
-            
+
             user_content += f"""
 
 【外部资源（可直接使用的资源池）】
@@ -372,10 +385,13 @@ class AngelaAI:
 
 【知识库要点】（只给要点，避免冗长）
 {kb_snippets}"""
-            
+
             # 构建关键人物列表用于提示
-            key_persons_names = ', '.join([person.get('name', f'人物{i+1}') for i, person in enumerate(key_persons)])
-            
+            key_persons_names = ', '.join([
+                person.get('name', f'人物{i+1}')
+                for i, person in enumerate(key_persons)
+            ])
+
             assistant_prompt = f"""请严格按照非劳务收入管道设计原理与系统提示词生成答案，并输出下述唯一 JSON 结构。注意：用户输入的关键人物数据已在 User Content 中提供（例如表单中"关键人物列表"字段）。你必须从 User Content 中读取这些人物并在输出中完整保留。
 
 【关键要求 - 必须严格执行】
@@ -453,10 +469,10 @@ class AngelaAI:
     }}
   ]
 }}"""
-            
+
             # 获取模型配置
             model_config = self.get_model_config('main_analysis')
-            
+
             # 打印prompt长度信息
             total_prompt = system_prompt + user_content + assistant_prompt
             logger.info(f"===== OpenAI API Request Info =====")
@@ -464,61 +480,72 @@ class AngelaAI:
             logger.info(f"Max tokens: {model_config['max_tokens']}")
             logger.info(f"System prompt length: {len(system_prompt)} chars")
             logger.info(f"User content length: {len(user_content)} chars")
-            logger.info(f"Assistant prompt length: {len(assistant_prompt)} chars")
+            logger.info(
+                f"Assistant prompt length: {len(assistant_prompt)} chars")
             logger.info(f"Total prompt length: {len(total_prompt)} chars")
             logger.info(f"===== Full Prompt Content =====")
-            logger.info(f"System: {system_prompt[:500]}..." if len(system_prompt) > 500 else f"System: {system_prompt}")
-            logger.info(f"User: {user_content[:500]}..." if len(user_content) > 500 else f"User: {user_content}")
-            logger.info(f"Assistant: {assistant_prompt[:500]}..." if len(assistant_prompt) > 500 else f"Assistant: {assistant_prompt}")
+            logger.info(f"System: {system_prompt[:500]}..." if len(
+                system_prompt) > 500 else f"System: {system_prompt}")
+            logger.info(f"User: {user_content[:500]}..." if len(user_content) >
+                        500 else f"User: {user_content}")
+            logger.info(f"Assistant: {assistant_prompt[:500]}..." if len(
+                assistant_prompt) > 500 else f"Assistant: {assistant_prompt}")
             logger.info(f"================================")
-            
+
             # 调用OpenAI API，带重试机制
             response = self._call_openai_with_retry(
                 model=model_config['model'],
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_content},
-                    {"role": "assistant", "content": assistant_prompt}
-                ],
+                messages=[{
+                    "role": "system",
+                    "content": system_prompt
+                }, {
+                    "role": "user",
+                    "content": user_content
+                }, {
+                    "role": "assistant",
+                    "content": assistant_prompt
+                }],
                 response_format={"type": "json_object"},
                 temperature=model_config['temperature'],
                 max_tokens=model_config['max_tokens'],
-                timeout=model_config['timeout']
-            )
-            
+                timeout=model_config['timeout'])
+
             # 如果响应为None（网络错误），返回备用方案
             if response is None:
                 logger.warning("OpenAI API返回None，使用备用方案")
                 return self._get_fallback_result(form_data)
-            
+
             # 解析响应
             result_text = response.choices[0].message.content
             if not result_text:
                 raise ValueError("AI返回内容为空")
             result = json.loads(result_text)
-            
+
             # 验证结果结构
             if not self._validate_result_structure(result):
                 raise ValueError("AI返回结构不完整")
-            
+
             return result
-            
+
         except json.JSONDecodeError as e:
             logger.error(f"JSON parsing error: {e}")
             return self._get_fallback_result(form_data)
         except Exception as e:
             logger.error(f"AI generation error: {e}")
             return self._get_fallback_result(form_data)
-    
-    def refine_path(self, pipeline_data: Dict[str, Any], refinement_data: Dict[str, Any], 
-                   db_session) -> Dict[str, Any]:
+
+    def refine_path(self, pipeline_data: Dict[str, Any],
+                    refinement_data: Dict[str,
+                                          Any], db_session) -> Dict[str, Any]:
         """细化指定管道（基于最新prompt要求）"""
         try:
-            selected_pipeline_id = refinement_data.get('selected_pipeline_id', refinement_data.get('selected_path_id'))
+            selected_pipeline_id = refinement_data.get(
+                'selected_pipeline_id',
+                refinement_data.get('selected_path_id'))
             add_personas = refinement_data.get('add_personas', [])
             constraints = refinement_data.get('constraints', '')
             tweaks = refinement_data.get('tweaks', '')
-            
+
             # 构造完整的系统提示（基于主要prompt的核心原则）
             system_prompt = """你是"Angela"，专精非劳务收入管道设计的高级商业顾问。现在需要细化优化一条现有路径。
 
@@ -535,7 +562,7 @@ class AngelaAI:
 - 优化防绕过机制和收益触发点
 - 确保MVP更加可行
 - 降低劳动量估算"""
-            
+
             user_content = f"""【当前管道】
 {json.dumps(pipeline_data, ensure_ascii=False, indent=2)}
 
@@ -549,40 +576,44 @@ class AngelaAI:
 {tweaks}
 
 请严格按照最新JSON结构优化这条管道，重点完善framework_logic、parties_structure、MVP和防绕过机制。保持ID不变，但优化其他所有字段。"""
-            
+
             # 获取模型配置
             model_config = self.get_model_config('refinement')
-            
+
             response = self._call_openai_with_retry(
                 model=model_config['model'],
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_content}
-                ],
+                messages=[{
+                    "role": "system",
+                    "content": system_prompt
+                }, {
+                    "role": "user",
+                    "content": user_content
+                }],
                 response_format={"type": "json_object"},
                 temperature=0.6,
                 max_tokens=model_config['max_tokens'],
-                timeout=model_config['timeout']
-            )
-            
+                timeout=model_config['timeout'])
+
             # 如果响应为None（网络错误），返回原管道
             if response is None:
                 logger.warning("Pipeline refinement API返回None，保持原管道")
                 return pipeline_data
-            
+
             result_text = response.choices[0].message.content
             if not result_text:
                 return pipeline_data
-                
+
             result = json.loads(result_text)
-            
+
             # 验证细化后的管道结构（简化验证）
             if not result.get('id') or not result.get('name'):
-                logger.warning("Refined pipeline missing basic fields, returning original")
+                logger.warning(
+                    "Refined pipeline missing basic fields, returning original"
+                )
                 return pipeline_data
-                
+
             return result
-            
+
         except json.JSONDecodeError as e:
             logger.error(f"Pipeline refinement JSON parsing error: {e}")
             return pipeline_data
@@ -590,172 +621,215 @@ class AngelaAI:
             logger.error(f"Pipeline refinement error: {e}")
             # 返回原管道作为后备
             return pipeline_data
-    
+
     def _validate_result_structure(self, result: Dict[str, Any]) -> bool:
         """验证返回结果的结构完整性（基于最新pipelines结构）"""
         # 验证顶级结构
         required_keys = ['overview', 'pipelines']
         if not all(key in result for key in required_keys):
-            logger.warning(f"Missing top-level keys. Has: {list(result.keys())}, Required: {required_keys}")
+            logger.warning(
+                f"Missing top-level keys. Has: {list(result.keys())}, Required: {required_keys}"
+            )
             return False
-            
+
         # 验证overview结构
         overview = result.get('overview', {})
-        required_overview_keys = ['situation', 'income_type', 'core_insight', 'gaps', 'suggested_roles_to_hunt']
+        required_overview_keys = [
+            'situation', 'income_type', 'core_insight', 'gaps',
+            'suggested_roles_to_hunt'
+        ]
         if not all(key in overview for key in required_overview_keys):
-            logger.warning(f"Overview missing keys. Has: {list(overview.keys())}, Required: {required_overview_keys}")
+            logger.warning(
+                f"Overview missing keys. Has: {list(overview.keys())}, Required: {required_overview_keys}"
+            )
             return False
-            
+
         # 验证pipelines结构
         pipelines = result.get('pipelines', [])
         if not pipelines:
             logger.warning("No pipelines found")
             return False
-            
+
         for i, pipeline in enumerate(pipelines):
             # 验证pipeline的必需字段（基于新的prompt结构）
             required_pipeline_keys = [
-                'id', 'name', 'income_mechanism', 'parties_structure', 'framework_logic',
-                'mvp', 'weak_link', 'revenue_trigger', 'risks_and_planB', 'first_step', 'labor_load_estimate'
+                'id', 'name', 'income_mechanism', 'parties_structure',
+                'framework_logic', 'mvp', 'weak_link', 'revenue_trigger',
+                'risks_and_planB', 'first_step', 'labor_load_estimate'
             ]
             if not all(key in pipeline for key in required_pipeline_keys):
-                logger.warning(f"Pipeline {i} missing required keys. Has: {list(pipeline.keys())}, Required: {required_pipeline_keys}")
+                logger.warning(
+                    f"Pipeline {i} missing required keys. Has: {list(pipeline.keys())}, Required: {required_pipeline_keys}"
+                )
                 return False
-                
+
             # 验证income_mechanism结构
             income_mechanism = pipeline.get('income_mechanism', {})
-            if not all(key in income_mechanism for key in ['type', 'trigger', 'settlement']):
+            if not all(key in income_mechanism
+                       for key in ['type', 'trigger', 'settlement']):
                 logger.warning(f"Pipeline {i} income_mechanism incomplete")
                 return False
-                
+
             # 验证parties_structure结构
             parties = pipeline.get('parties_structure', [])
             if not parties:
                 logger.warning(f"Pipeline {i} has empty parties_structure")
                 return False
-                
+
             # 验证每个参与方的结构
             for j, party in enumerate(parties):
-                required_party_keys = ['party', 'role_type', 'resources', 'role_value', 'make_them_happy']
+                required_party_keys = [
+                    'party', 'role_type', 'resources', 'role_value',
+                    'make_them_happy'
+                ]
                 if not all(key in party for key in required_party_keys):
-                    logger.warning(f"Pipeline {i} party {j} missing keys. Has: {list(party.keys())}, Required: {required_party_keys}")
+                    logger.warning(
+                        f"Pipeline {i} party {j} missing keys. Has: {list(party.keys())}, Required: {required_party_keys}"
+                    )
                     return False
-                    
+
                 # 验证role_type值
                 valid_role_types = ['需求方', '交付方', '资金方', '统筹方']
                 if party.get('role_type') not in valid_role_types:
-                    logger.warning(f"Pipeline {i} party {j} has invalid role_type: {party.get('role_type')}")
+                    logger.warning(
+                        f"Pipeline {i} party {j} has invalid role_type: {party.get('role_type')}"
+                    )
                     return False
-                    
+
             # 验证framework_logic结构
             framework_logic = pipeline.get('framework_logic', {})
-            required_framework_keys = ['resource_chain', 'motivation_match', 'designer_position', 'designer_income']
-            if not all(key in framework_logic for key in required_framework_keys):
+            required_framework_keys = [
+                'resource_chain', 'motivation_match', 'designer_position',
+                'designer_income'
+            ]
+            if not all(key in framework_logic
+                       for key in required_framework_keys):
                 logger.warning(f"Pipeline {i} framework_logic incomplete")
                 return False
-                
+
             # 验证labor_load_estimate结构
             labor_load = pipeline.get('labor_load_estimate', {})
-            if not all(key in labor_load for key in ['hours_per_week', 'level', 'alternative']):
+            if not all(key in labor_load
+                       for key in ['hours_per_week', 'level', 'alternative']):
                 logger.warning(f"Pipeline {i} labor_load_estimate incomplete")
                 return False
-                
+
         return True
-    
-    def _get_fallback_result(self, form_data: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _get_fallback_result(self, form_data: Dict[str,
+                                                   Any]) -> Dict[str, Any]:
         """降级返回结果（当AI调用失败时）- 基于最新prompt要求的完整结构"""
         project_name = form_data.get('projectName', '项目')
         project_description = form_data.get('projectDescription', '')
         key_persons = form_data.get('keyPersons', [])
-        
+
         # 智能判断是否需要补充角色
         needs_additional_roles = len(key_persons) < 2  # 简单规则：少于2个人物时建议补充
-        
+
         # 构建参与方结构（保留所有用户输入的关键人物）
-        parties_structure = [
-            {
-                "party": "设计者（你）",
-                "role_type": "统筹方",
-                "resources": ["统筹协调能力", "规则制定", "合作伙伴筛选标准", "结算管理"],
-                "role_value": "作为连接器和规则制定者，确保各方合作顺畅，控制核心环节",
-                "make_them_happy": "通过撮合服务获得稳定的非劳务收入，建立可持续的商业管道"
-            }
-        ]
-        
+        parties_structure = [{
+            "party":
+            "设计者（你）",
+            "role_type":
+            "统筹方",
+            "resources": ["统筹协调能力", "规则制定", "合作伙伴筛选标准", "结算管理"],
+            "role_value":
+            "作为连接器和规则制定者，确保各方合作顺畅，控制核心环节",
+            "make_them_happy":
+            "通过撮合服务获得稳定的非劳务收入，建立可持续的商业管道"
+        }]
+
         # 为每个关键人物分配合适的role_type
         role_type_mapping = {
             0: "需求方",  # 第一个人物默认为需求方
             1: "交付方",  # 第二个人物默认为交付方  
         }
-        
+
         for i, person in enumerate(key_persons):
             name = person.get('name', f'关键人物{i+1}')
             resources = person.get('resources', ['专业技能', '客户基础'])
             make_happy = person.get('make_happy', ['获得收益', '扩展业务'])
             role_type = role_type_mapping.get(i, "交付方")  # 超过2个的默认为交付方
-            
+
             parties_structure.append({
-                "party": name,
-                "role_type": role_type,
-                "resources": resources if resources else ["专业能力", "客户资源"],
-                "role_value": f"在闭环中提供{role_type}的核心价值，确保服务质量和客户满意度",
-                "make_them_happy": self.format_make_happy(make_happy)
+                "party":
+                name,
+                "role_type":
+                role_type,
+                "resources":
+                resources if resources else ["专业能力", "客户资源"],
+                "role_value":
+                f"在闭环中提供{role_type}的核心价值，确保服务质量和客户满意度",
+                "make_them_happy":
+                self.format_make_happy(make_happy)
             })
-        
+
         return {
             "overview": {
-                "situation": f"基于【意识+能量+能力=结果】公式分析：{project_name}具备初步资源基础，设计者作为统筹方整合现有关键人物资源，构建撮合型非劳务收入管道。意识来自设计者的规则设计，能量来自关键人物的积极参与，能力借用各方专业资源。",
-                "income_type": "居间（撮合费/中介费）",
-                "core_insight": "利用现有关键人物的专业能力和客户基础，设计者作为统筹方制定合作规则和质量标准，通过撮合服务建立持续的非劳务收入管道，关键在于防绕过机制和共管结算。",
-                "gaps": ["明确合作细则", "建立防绕过机制"] if not needs_additional_roles else ["补充渠道资源方", "建立合作标准"],
-                "suggested_roles_to_hunt": [] if not needs_additional_roles else [
-                    {
-                        "role": "渠道资源方",
-                        "role_type": "需求方",
-                        "why": "需要流量入口和客户获取渠道，确保业务可持续发展",
-                        "where_to_find": "行业协会、商会、同城企业家群、相关业务的朋友圈",
-                        "outreach_script": "我们有优质的服务团队和成熟的管理经验，正在寻求优质合作伙伴。可以先小规模合作试点，看看是否互利共赢，您觉得如何？"
-                    }
-                ]
+                "situation":
+                f"基于【意识+能量+能力=结果】公式分析：{project_name}具备初步资源基础，设计者作为统筹方整合现有关键人物资源，构建撮合型非劳务收入管道。意识来自设计者的规则设计，能量来自关键人物的积极参与，能力借用各方专业资源。",
+                "income_type":
+                "居间（撮合费/中介费）",
+                "core_insight":
+                "利用现有关键人物的专业能力和客户基础，设计者作为统筹方制定合作规则和质量标准，通过撮合服务建立持续的非劳务收入管道，关键在于防绕过机制和共管结算。",
+                "gaps": ["明确合作细则", "建立防绕过机制"]
+                if not needs_additional_roles else ["补充渠道资源方", "建立合作标准"],
+                "suggested_roles_to_hunt":
+                [] if not needs_additional_roles else [{
+                    "role":
+                    "渠道资源方",
+                    "role_type":
+                    "需求方",
+                    "why":
+                    "需要流量入口和客户获取渠道，确保业务可持续发展",
+                    "where_to_find":
+                    "行业协会、商会、同城企业家群、相关业务的朋友圈",
+                    "outreach_script":
+                    "我们有优质的服务团队和成熟的管理经验，正在寻求优质合作伙伴。可以先小规模合作试点，看看是否互利共赢，您觉得如何？"
+                }]
             },
-            "pipelines": [
-                {
-                    "id": "pipeline_1",
-                    "name": "资源整合撮合管道",
-                    "income_mechanism": {
-                        "type": "居间（撮合费）",
-                        "trigger": "成功撮合交易后的佣金分成",
-                        "settlement": "按单结算，交易完成确认后收取撮合费"
-                    },
-                    "parties_structure": parties_structure,
-                    "framework_logic": {
-                        "resource_chain": "设计者统筹规则制定和质量监督，关键人物提供专业服务和客户基础，形成供需匹配的撮合闭环",
-                        "motivation_match": "设计者获得撮合费，关键人物获得业务机会和客户扩展，最终客户获得专业服务",
-                        "designer_position": "控制合作标准制定和结算管理，通过共管账户和合同条款确保不被绕过",
-                        "designer_income": "居间类非劳务收入，通过撮合成功收取佣金，无需持续劳动投入"
-                    },
-                    "mvp": "连接现有关键人物资源，为1-2个客户提供撮合服务，验证收费模式和防绕过机制的可行性。",
-                    "weak_link": "关键人物的配合度和服务标准统一性，可能影响客户满意度和复购率",
-                    "revenue_trigger": "撮合费（按交易额3-8%收取），属于居间类非劳务收入",
-                    "risks_and_planB": [
-                        {
-                            "risk": "关键人物绕过设计者直接合作",
-                            "mitigation": "签署分佣协议，控制客户资源入口，建立共管结算机制"
-                        },
-                        {
-                            "risk": "服务质量不稳定影响口碑",
-                            "mitigation": "制定服务标准和评价体系，建立客户反馈和改进机制"
-                        }
-                    ],
-                    "first_step": "与现有关键人物深度沟通，确定合作模式和收益分配，签署初步合作协议，选择1-2个试点客户开始验证",
-                    "labor_load_estimate": {
-                        "hours_per_week": "4-6小时",
-                        "level": "轻度(<5h)",
-                        "alternative": "建立标准化SOP和自助服务平台，将日常协调工作外包给助理或兼职人员"
-                    }
+            "pipelines": [{
+                "id":
+                "pipeline_1",
+                "name":
+                "资源整合撮合管道",
+                "income_mechanism": {
+                    "type": "居间（撮合费）",
+                    "trigger": "成功撮合交易后的佣金分成",
+                    "settlement": "按单结算，交易完成确认后收取撮合费"
+                },
+                "parties_structure":
+                parties_structure,
+                "framework_logic": {
+                    "resource_chain":
+                    "设计者统筹规则制定和质量监督，关键人物提供专业服务和客户基础，形成供需匹配的撮合闭环",
+                    "motivation_match": "设计者获得撮合费，关键人物获得业务机会和客户扩展，最终客户获得专业服务",
+                    "designer_position": "控制合作标准制定和结算管理，通过共管账户和合同条款确保不被绕过",
+                    "designer_income": "居间类非劳务收入，通过撮合成功收取佣金，无需持续劳动投入"
+                },
+                "mvp":
+                "连接现有关键人物资源，为1-2个客户提供撮合服务，验证收费模式和防绕过机制的可行性。",
+                "weak_link":
+                "关键人物的配合度和服务标准统一性，可能影响客户满意度和复购率",
+                "revenue_trigger":
+                "撮合费（按交易额3-8%收取），属于居间类非劳务收入",
+                "risks_and_planB": [{
+                    "risk": "关键人物绕过设计者直接合作",
+                    "mitigation": "签署分佣协议，控制客户资源入口，建立共管结算机制"
+                }, {
+                    "risk": "服务质量不稳定影响口碑",
+                    "mitigation": "制定服务标准和评价体系，建立客户反馈和改进机制"
+                }],
+                "first_step":
+                "与现有关键人物深度沟通，确定合作模式和收益分配，签署初步合作协议，选择1-2个试点客户开始验证",
+                "labor_load_estimate": {
+                    "hours_per_week": "4-6小时",
+                    "level": "轻度(<5h)",
+                    "alternative": "建立标准化SOP和自助服务平台，将日常协调工作外包给助理或兼职人员"
                 }
-            ]
+            }]
         }
+
 
 # 创建全局实例
 angela_ai = AngelaAI()

@@ -1158,19 +1158,31 @@
             // 提交表单并处理重定向
             document.body.appendChild(form);
             
-            // 使用fetch提交表单，然后手动处理重定向
+            // 使用fetch提交表单，确保包含session cookie
             const submitFormData = new FormData(form);
             fetch('/generate', {
                 method: 'POST',
-                body: submitFormData
+                body: submitFormData,
+                credentials: 'same-origin', // 确保携带session cookie
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // 标记为AJAX请求
+                }
             })
             .then(response => {
                 if (response.redirected) {
                     // 处理重定向
                     window.location.href = response.url;
                 } else if (response.ok) {
-                    // 如果没有重定向，手动跳转到thinking页面
-                    window.location.href = '/thinking';
+                    // 检查是否是登录页面重定向
+                    return response.text().then(text => {
+                        if (text.includes('Redirecting') && text.includes('/login')) {
+                            // 重定向到登录页面
+                            window.location.href = '/login';
+                        } else {
+                            // 正常提交，跳转到thinking页面
+                            window.location.href = '/thinking';
+                        }
+                    });
                 } else {
                     throw new Error('表单提交失败');
                 }

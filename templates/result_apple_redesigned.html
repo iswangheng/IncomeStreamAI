@@ -1604,7 +1604,7 @@
                         {% for party in path.parties_structure %}
                             {% if party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party %}
                             <div class="party-node designer" 
-                                 style="position: absolute; left: 38%; top: 35%; width: 300px; z-index: 10;" 
+                                 style="position: absolute; left: 35%; top: 38%; width: 280px; z-index: 10;" 
                                  data-node-id="designer">
                                 <div class="party-indicator"></div>
                                 <div class="party-name">{{ party.party }}</div>
@@ -1630,9 +1630,9 @@
                         {% for party in path.parties_structure %}
                             {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
                                 {% if ns.count == 0 %}
-                                    {% set node_style = "left: 2%; top: 35%; width: 280px;" %}
+                                    {% set node_style = "left: 2%; top: 38%; width: 260px;" %}
                                 {% elif ns.count == 1 %}
-                                    {% set node_style = "left: 68%; top: 35%; width: 280px;" %}
+                                    {% set node_style = "left: 72%; top: 38%; width: 260px;" %}
                                 {% elif ns.count == 2 %}
                                     {% set node_style = "left: 35%; top: 5%; width: 260px;" %}
                                 {% elif ns.count == 3 %}

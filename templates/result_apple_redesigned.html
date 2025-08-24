@@ -1600,14 +1600,14 @@
                     
                     <!-- 节点层 -->
                     <div class="network-nodes">
-                        <!-- 预定义位置数组 -->
+                        <!-- 预定义位置数组 - 分散布局避免重叠 -->
                         {% set positions = [
-                            {'x': 75, 'y': 25},
-                            {'x': 25, 'y': 25},
-                            {'x': 75, 'y': 75},
-                            {'x': 25, 'y': 75},
-                            {'x': 90, 'y': 50},
-                            {'x': 10, 'y': 50}
+                            {'x': 20, 'y': 20},
+                            {'x': 80, 'y': 20},
+                            {'x': 80, 'y': 80},
+                            {'x': 20, 'y': 80},
+                            {'x': 50, 'y': 15},
+                            {'x': 50, 'y': 85}
                         ] %}
                         
                         <!-- 首先渲染设计者节点（中心） -->
@@ -1635,14 +1635,13 @@
                         
                         <!-- 然后渲染其他参与方节点（围绕） -->
                         <div class="surrounding-nodes">
-                            {% set surrounding_index = 0 %}
+                            {% set participant_counter = 0 %}
                             {% for party in path.parties_structure %}
                                 {% if not (party.party == '设计者（你）' or '你' in party.party) %}
-                                {% set position = positions[surrounding_index % positions|length] %}
                                 
                                 <div class="party-node participant surrounding-node" 
                                      data-node-id="party{{ loop.index }}"
-                                     style="left: {{ position.x }}%; top: {{ position.y }}%;">
+                                     style="left: {{ positions[participant_counter].x }}%; top: {{ positions[participant_counter].y }}%;">
                                     <div class="party-indicator"></div>
                                     <div class="party-name">{{ party.party }}</div>
                                     <div class="party-resources">
@@ -1659,7 +1658,7 @@
                                         {{ party.make_them_happy }}
                                     </div>
                                 </div>
-                                {% set surrounding_index = surrounding_index + 1 %}
+                                {% set participant_counter = participant_counter + 1 %}
                                 {% endif %}
                             {% endfor %}
                         </div>

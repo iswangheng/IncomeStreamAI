@@ -204,7 +204,10 @@ class ModelConfig(db.Model):
             db.session.add(config)
         
         db.session.commit()
-        return config_name, default_model='gpt-4o-mini'):
+        return config
+
+    @classmethod
+    def get_config(cls, config_name, default_model='gpt-4o-mini'):
         """获取指定配置，如果不存在则返回默认值"""
         config = cls.query.filter_by(config_name=config_name, is_active=True).first()
         if config:
@@ -221,25 +224,3 @@ class ModelConfig(db.Model):
             'timeout': 45
         }
 
-    @classmethod
-    def set_config(cls, config_name, model_name, temperature=0.7, max_tokens=2500, timeout=45):
-        """设置或更新配置"""
-        config = cls.query.filter_by(config_name=config_name).first()
-        if config:
-            config.model_name = model_name
-            config.temperature = temperature
-            config.max_tokens = max_tokens
-            config.timeout = timeout
-            config.updated_at = datetime.utcnow()
-        else:
-            config = cls(
-                config_name=config_name,
-                model_name=model_name,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                timeout=timeout
-            )
-            db.session.add(config)
-
-        db.session.commit()
-        return config

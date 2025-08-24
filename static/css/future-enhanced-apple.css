@@ -3112,7 +3112,8 @@ body {
 }
 
 .parties-network {
-    height: 450px;
+    height: 550px;
+    min-height: 550px;
 }
 
 .network-svg {

@@ -1604,7 +1604,7 @@
                         {% for party in path.parties_structure %}
                             {% if party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party %}
                             <div class="party-node designer" 
-                                 style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10; width: 300px; border: 3px solid #007AFF;" 
+                                 style="position: absolute; left: 38%; top: 35%; width: 300px; z-index: 10;" 
                                  data-node-id="designer">
                                 <div class="party-indicator"></div>
                                 <div class="party-name">{{ party.party }}</div>
@@ -1625,38 +1625,38 @@
                             {% endif %}
                         {% endfor %}
                         
-                        <!-- 其他参与方 - 智能围绕布局 -->
+                        <!-- 其他参与方 - 精确定位避免重叠 -->
                         {% set participant_count = 0 %}
                         {% for party in path.parties_structure %}
                             {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
-                                <!-- 计算位置：支持任意数量参与方的圆形分布 -->
+                                <!-- 精确定位：避免transform造成的重叠 -->
                                 {% if participant_count == 0 %}
-                                    {% set pos_style = "left: 15%; top: 50%; transform: translate(-50%, -50%); width: 280px;" %}
+                                    {% set pos_style = "left: 5%; top: 40%; width: 280px;" %}
                                 {% elif participant_count == 1 %}
-                                    {% set pos_style = "right: 15%; top: 50%; transform: translate(50%, -50%); width: 280px;" %}
+                                    {% set pos_style = "right: 5%; top: 40%; width: 280px;" %}
                                 {% elif participant_count == 2 %}
-                                    {% set pos_style = "left: 50%; top: 15%; transform: translate(-50%, -50%); width: 280px;" %}
+                                    {% set pos_style = "left: 30%; top: 10%; width: 260px;" %}
                                 {% elif participant_count == 3 %}
-                                    {% set pos_style = "left: 50%; top: 85%; transform: translate(-50%, -50%); width: 280px;" %}
+                                    {% set pos_style = "right: 30%; top: 10%; width: 260px;" %}
                                 {% elif participant_count == 4 %}
-                                    {% set pos_style = "left: 25%; top: 25%; transform: translate(-50%, -50%); width: 260px;" %}
+                                    {% set pos_style = "left: 30%; top: 80%; width: 260px;" %}
                                 {% elif participant_count == 5 %}
-                                    {% set pos_style = "right: 25%; top: 25%; transform: translate(50%, -50%); width: 260px;" %}
+                                    {% set pos_style = "right: 30%; top: 80%; width: 260px;" %}
                                 {% elif participant_count == 6 %}
-                                    {% set pos_style = "left: 25%; top: 75%; transform: translate(-50%, -50%); width: 260px;" %}
+                                    {% set pos_style = "left: 10%; top: 70%; width: 240px;" %}
                                 {% elif participant_count == 7 %}
-                                    {% set pos_style = "right: 25%; top: 75%; transform: translate(50%, -50%); width: 260px;" %}
+                                    {% set pos_style = "right: 10%; top: 70%; width: 240px;" %}
                                 {% else %}
-                                    <!-- 超过8个参与方时，在外圈多层分布 -->
+                                    <!-- 超过8个参与方时，继续外围分布 -->
                                     {% set outer_pos = (participant_count - 8) % 4 %}
                                     {% if outer_pos == 0 %}
-                                        {% set pos_style = "left: 5%; top: 35%; transform: translate(0, -50%); width: 240px;" %}
+                                        {% set pos_style = "left: 2%; top: 20%; width: 220px;" %}
                                     {% elif outer_pos == 1 %}
-                                        {% set pos_style = "right: 5%; top: 35%; transform: translate(0, -50%); width: 240px;" %}
+                                        {% set pos_style = "right: 2%; top: 20%; width: 220px;" %}
                                     {% elif outer_pos == 2 %}
-                                        {% set pos_style = "left: 5%; top: 65%; transform: translate(0, -50%); width: 240px;" %}
+                                        {% set pos_style = "left: 2%; top: 60%; width: 220px;" %}
                                     {% else %}
-                                        {% set pos_style = "right: 5%; top: 65%; transform: translate(0, -50%); width: 240px;" %}
+                                        {% set pos_style = "right: 2%; top: 60%; width: 220px;" %}
                                     {% endif %}
                                 {% endif %}
                                 

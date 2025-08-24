@@ -27,6 +27,8 @@ Angela is a Flask-based web application designed to help users generate non-labo
 - **UI Framework**: Bootstrap 5 with a custom warm theme for responsiveness.
 - **Design System**: Apple-level design system adhering to Apple Human Interface Guidelines.
     - **Color Palette**: iOS Blue (#007AFF), system gray cascade, semantic state colors.
+        - **Admin Center Colors**: 优雅紫色系配色方案，管理员角色使用优雅紫色渐变 (#5856D6 到 #AF52DE)，替代原有土黄色 (#FF9500)，实现更加优雅和谐的视觉效果
+        - **User Management**: 用户头像、角色标签、状态标签统一使用苹果紫粉色 (#AF52DE) 系列配色
     - **Layout**: Apple-style card system, frosted glass navigation bar, precise 8pt spacing grid.
     - **Typography**: Apple system font stack (-apple-system, SF Pro Display style).
     - **Animations**: Apple-level micro-interactions, elastic transitions, parallax scrolling effects.

@@ -83,15 +83,15 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(135deg, #007AFF, #5856D6);
+            background: linear-gradient(135deg, #007AFF, #5AC8FA);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
         .user-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 12px 40px rgba(0, 122, 255, 0.2);
-            border-color: rgba(0, 122, 255, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 122, 255, 0.15);
+            border-color: rgba(0, 122, 255, 0.2);
         }
 
         .user-card:hover::before {
@@ -111,7 +111,7 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #007AFF, #5856D6);
+            background: linear-gradient(135deg, #007AFF, #5AC8FA);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -119,7 +119,7 @@
             font-size: 20px;
             font-weight: 700;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
         }
 
         .user-info h3 {
@@ -149,13 +149,15 @@
         }
 
         .status-active {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(52, 199, 89, 0.1);
+            color: #34C759;
+            border: 1px solid rgba(52, 199, 89, 0.2);
         }
 
         .status-inactive {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(255, 69, 58, 0.1);
+            color: #FF453A;
+            border: 1px solid rgba(255, 69, 58, 0.2);
         }
 
         .user-details {
@@ -168,13 +170,13 @@
         .detail-item {
             text-align: center;
             padding: 12px;
-            background: #f8f9fa;
+            background: #F2F2F7;
             border-radius: 12px;
             transition: all 0.2s ease;
         }
 
         .detail-item:hover {
-            background: #e3f2fd;
+            background: rgba(0, 122, 255, 0.05);
         }
 
         .detail-label {
@@ -215,25 +217,27 @@
         }
 
         .btn-edit {
-            background: #e3f2fd;
-            color: #1976d2;
+            background: rgba(0, 122, 255, 0.1);
+            color: #007AFF;
+            border: 1px solid rgba(0, 122, 255, 0.2);
         }
 
         .btn-edit:hover {
-            background: #bbdefb;
+            background: rgba(0, 122, 255, 0.15);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
         }
 
         .btn-delete {
-            background: #ffebee;
-            color: #d32f2f;
+            background: rgba(255, 69, 58, 0.1);
+            color: #FF453A;
+            border: 1px solid rgba(255, 69, 58, 0.2);
         }
 
         .btn-delete:hover {
-            background: #ffcdd2;
+            background: rgba(255, 69, 58, 0.15);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
+            box-shadow: 0 4px 12px rgba(255, 69, 58, 0.2);
         }
 
         /* 搜索和筛选区域优化 */
@@ -258,7 +262,7 @@
         .search-filters .form-control:focus,
         .search-filters .form-select:focus {
             border-color: #007AFF;
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.08);
         }
 
         .search-filters .btn {
@@ -318,7 +322,7 @@
             font-weight: 700;
             color: #1d1d1f;
             margin-bottom: 8px;
-            background: linear-gradient(135deg, #007AFF, #5856D6);
+            background: linear-gradient(135deg, #007AFF, #5AC8FA);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;

@@ -7,7 +7,7 @@
     --elegant-primary-light: #40A9FF;
     --elegant-primary-dark: #0056CC;
     --elegant-secondary: #5856D6;
-    --elegant-accent: #FF9500;
+    --elegant-accent: #AF52DE;
     --elegant-success: #34C759;
     --elegant-warning: #FF9500;
     --elegant-error: #FF3B30;
@@ -107,7 +107,7 @@
 .header-icon {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--elegant-primary) 0%, var(--elegant-accent) 100%);
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
     border-radius: var(--elegant-radius-lg);
     display: flex;
     align-items: center;
@@ -308,7 +308,7 @@
 }
 
 .user-avatar.admin {
-    background: linear-gradient(135deg, var(--elegant-secondary) 0%, var(--elegant-accent) 100%);
+    background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
 }
 
 .user-avatar.user {
@@ -436,7 +436,7 @@
 }
 
 .role-badge.admin {
-    background: linear-gradient(135deg, var(--elegant-secondary) 0%, var(--elegant-accent) 100%);
+    background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
     color: var(--elegant-text-inverse);
 }
 

@@ -9,7 +9,7 @@
     
     /* 状态色彩 */
     --status-active: #34C759;
-    --status-paused: #FF9500;
+    --status-paused: #AF52DE;
     --status-deleted: #FF3B30;
     --status-draft: #8E8E93;
     
@@ -193,13 +193,13 @@
 }
 
 .status-badge.paused {
-    background: rgba(255, 149, 0, 0.1);
-    color: #FF9500;
+    background: rgba(175, 82, 222, 0.1);
+    color: #AF52DE;
 }
 
 .status-badge.admin {
-    background: rgba(255, 149, 0, 0.1);
-    color: #FF9500;
+    background: rgba(175, 82, 222, 0.1);
+    color: #AF52DE;
 }
 
 .status-badge.user {

@@ -524,9 +524,9 @@
                 {% for user in users %}
                 <div class="user-card">
                     <!-- 状态标签 -->
-                    <div class="user-status {{ 'status-active' if user.is_active else 'status-inactive' }}">
+                    <div class="user-status {{ 'status-active' if user.active else 'status-inactive' }}">
                         <i class="fas fa-circle"></i>
-                        {{ '活跃' if user.is_active else '非活跃' }}
+                        {{ '活跃' if user.active else '非活跃' }}
                     </div>
 
                     <!-- 用户头部信息 -->

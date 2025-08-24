@@ -88,7 +88,7 @@ function renderUsersTable(users) {
                         <div class="user-name">${user.name}</div>
                         <div class="user-phone">${user.phone}</div>
                     </div>
-                    <div class="status-indicator ${user.is_active ? 'active' : 'inactive'}" title="${user.is_active ? '用户正常' : '用户已禁用'}">
+                    <div class="status-indicator ${user.active ? 'active' : 'inactive'}" title="${user.active ? '用户正常' : '用户已禁用'}">
                         <i class="fas fa-circle"></i>
                     </div>
                 </div>
@@ -104,9 +104,9 @@ function renderUsersTable(users) {
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">状态</span>
-                            <span class="status-badge ${user.is_active ? 'active' : 'inactive'}">
-                                <i class="fas fa-${user.is_active ? 'check-circle' : 'times-circle'}"></i>
-                                ${user.is_active ? '正常' : '禁用'}
+                            <span class="status-badge ${user.active ? 'active' : 'inactive'}">
+                                <i class="fas fa-${user.active ? 'check-circle' : 'times-circle'}"></i>
+                                ${user.active ? '正常' : '禁用'}
                             </span>
                         </div>
                         <div class="detail-item">
@@ -127,9 +127,9 @@ function renderUsersTable(users) {
                             <span>编辑</span>
                         </button>
                         ${!isCurrentUser ? `
-                            <button class="action-btn ${user.is_active ? 'disable' : 'enable'}" onclick="toggleUserStatus(${user.id}, ${!user.is_active})" title="${user.is_active ? '禁用用户' : '启用用户'}">
-                                <i class="fas fa-${user.is_active ? 'ban' : 'check'}"></i>
-                                <span>${user.is_active ? '禁用' : '启用'}</span>
+                            <button class="action-btn ${user.active ? 'disable' : 'enable'}" onclick="toggleUserStatus(${user.id}, ${!user.active})" title="${user.active ? '禁用用户' : '启用用户'}">
+                                <i class="fas fa-${user.active ? 'ban' : 'check'}"></i>
+                                <span>${user.active ? '禁用' : '启用'}</span>
                             </button>
                             <button class="action-btn delete" onclick="deleteUser(${user.id})" title="删除用户">
                                 <i class="fas fa-trash"></i>
@@ -157,9 +157,9 @@ function filterUsers() {
 
         let matchesStatus = true;
         if (statusFilter === 'active') {
-            matchesStatus = user.is_active;
+            matchesStatus = user.active;
         } else if (statusFilter === 'inactive') {
-            matchesStatus = !user.is_active;
+            matchesStatus = !user.active;
         }
 
         return matchesSearch && matchesStatus;
@@ -281,7 +281,7 @@ function toggleUserStatus(userId, newStatus) {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: JSON.stringify({ is_active: newStatus })
+            body: JSON.stringify({ active: newStatus })
         })
         .then(response => response.json())
         .then(data => {

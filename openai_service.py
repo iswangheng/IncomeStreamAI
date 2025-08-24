@@ -512,20 +512,34 @@ class AngelaAI:
     
     def refine_path(self, path_data: Dict[str, Any], refinement_data: Dict[str, Any], 
                    db_session) -> Dict[str, Any]:
-        """细化指定路径"""
+        """细化指定路径（基于最新prompt要求）"""
         try:
             selected_path_id = refinement_data.get('selected_path_id')
             add_personas = refinement_data.get('add_personas', [])
             constraints = refinement_data.get('constraints', '')
             tweaks = refinement_data.get('tweaks', '')
             
-            # 构造细化提示
-            system_prompt = """你是"Angela"，正在细化一条非劳务收入路径。根据用户的补充信息和约束条件，优化现有路径。"""
+            # 构造完整的系统提示（基于主要prompt的核心原则）
+            system_prompt = """你是"Angela"，专精非劳务收入管道设计的高级商业顾问。现在需要细化优化一条现有路径。
+
+【核心原则】
+1. 遵循【意识+能量+能力=结果】公式
+2. 七大类型：租金/利息/股份/版权/居间/企业连锁/团队收益
+3. 设计者必须为"统筹方"，其他人物保持原有role_type
+4. 输出框架性方案，不写执行颗粒度
+5. 保持所有用户提供的关键人物，名称完全一致
+
+【优化要求】
+- 保持路径ID不变
+- 完善framework_logic的逻辑链条
+- 优化防绕过机制和收益触发点
+- 确保MVP更加可行
+- 降低劳动量估算"""
             
             user_content = f"""【当前路径】
 {json.dumps(path_data, ensure_ascii=False, indent=2)}
 
-【补充人物】
+【补充人物】（需要整合到parties_structure中）
 {json.dumps(add_personas, ensure_ascii=False, indent=2)}
 
 【约束条件】
@@ -534,12 +548,12 @@ class AngelaAI:
 【调整要求】
 {tweaks}
 
-请优化这条路径，保持相同的ID，但调整action_steps、resources使用、MVP等内容。"""
+请严格按照最新JSON结构优化这条路径，重点完善framework_logic、parties_structure、MVP和防绕过机制。保持ID不变，但优化其他所有字段。"""
             
             # 获取模型配置
             model_config = self.get_model_config('refinement')
             
-            response = client.chat.completions.create(
+            response = self._call_openai_with_retry(
                 model=model_config['model'],
                 messages=[
                     {"role": "system", "content": system_prompt},
@@ -547,104 +561,197 @@ class AngelaAI:
                 ],
                 response_format={"type": "json_object"},
                 temperature=0.6,
-                max_tokens=2000
+                max_tokens=model_config['max_tokens'],
+                timeout=model_config['timeout']
             )
+            
+            # 如果响应为None（网络错误），返回原路径
+            if response is None:
+                logger.warning("Path refinement API返回None，保持原路径")
+                return path_data
             
             result_text = response.choices[0].message.content
             if not result_text:
                 return path_data
+                
             result = json.loads(result_text)
+            
+            # 验证细化后的路径结构（简化验证）
+            if not result.get('id') or not result.get('name'):
+                logger.warning("Refined path missing basic fields, returning original")
+                return path_data
+                
             return result
             
+        except json.JSONDecodeError as e:
+            logger.error(f"Path refinement JSON parsing error: {e}")
+            return path_data
         except Exception as e:
             logger.error(f"Path refinement error: {e}")
             # 返回原路径作为后备
             return path_data
     
     def _validate_result_structure(self, result: Dict[str, Any]) -> bool:
-        """验证返回结果的结构完整性"""
+        """验证返回结果的结构完整性（基于最新prompt要求）"""
+        # 验证顶级结构
         required_keys = ['overview', 'paths']
         if not all(key in result for key in required_keys):
+            logger.warning(f"Missing top-level keys. Has: {list(result.keys())}, Required: {required_keys}")
             return False
             
+        # 验证overview结构
         overview = result.get('overview', {})
-        if not all(key in overview for key in ['situation', 'income_type', 'core_insight']):
+        required_overview_keys = ['situation', 'income_type', 'core_insight', 'gaps', 'suggested_roles_to_hunt']
+        if not all(key in overview for key in required_overview_keys):
+            logger.warning(f"Overview missing keys. Has: {list(overview.keys())}, Required: {required_overview_keys}")
             return False
             
+        # 验证paths结构
         paths = result.get('paths', [])
         if not paths:
+            logger.warning("No paths found")
             return False
             
-        for path in paths:
-            # 更新为新的必需字段
-            required_path_keys = ['id', 'name', 'income_mechanism', 'parties_structure', 'action_steps', 'mvp', 'revenue_trigger']
+        for i, path in enumerate(paths):
+            # 验证path的必需字段（基于新的prompt结构）
+            required_path_keys = [
+                'id', 'name', 'income_mechanism', 'parties_structure', 'framework_logic',
+                'mvp', 'weak_link', 'revenue_trigger', 'risks_and_planB', 'first_step', 'labor_load_estimate'
+            ]
             if not all(key in path for key in required_path_keys):
-                logger.warning(f"Path missing required keys. Has: {list(path.keys())}, Required: {required_path_keys}")
+                logger.warning(f"Path {i} missing required keys. Has: {list(path.keys())}, Required: {required_path_keys}")
+                return False
+                
+            # 验证income_mechanism结构
+            income_mechanism = path.get('income_mechanism', {})
+            if not all(key in income_mechanism for key in ['type', 'trigger', 'settlement']):
+                logger.warning(f"Path {i} income_mechanism incomplete")
+                return False
+                
+            # 验证parties_structure结构
+            parties = path.get('parties_structure', [])
+            if not parties:
+                logger.warning(f"Path {i} has empty parties_structure")
+                return False
+                
+            # 验证每个参与方的结构
+            for j, party in enumerate(parties):
+                required_party_keys = ['party', 'role_type', 'resources', 'role_value', 'make_them_happy']
+                if not all(key in party for key in required_party_keys):
+                    logger.warning(f"Path {i} party {j} missing keys. Has: {list(party.keys())}, Required: {required_party_keys}")
+                    return False
+                    
+                # 验证role_type值
+                valid_role_types = ['需求方', '交付方', '资金方', '统筹方']
+                if party.get('role_type') not in valid_role_types:
+                    logger.warning(f"Path {i} party {j} has invalid role_type: {party.get('role_type')}")
+                    return False
+                    
+            # 验证framework_logic结构
+            framework_logic = path.get('framework_logic', {})
+            required_framework_keys = ['resource_chain', 'motivation_match', 'designer_position', 'designer_income']
+            if not all(key in framework_logic for key in required_framework_keys):
+                logger.warning(f"Path {i} framework_logic incomplete")
+                return False
+                
+            # 验证labor_load_estimate结构
+            labor_load = path.get('labor_load_estimate', {})
+            if not all(key in labor_load for key in ['hours_per_week', 'level', 'alternative']):
+                logger.warning(f"Path {i} labor_load_estimate incomplete")
                 return False
                 
         return True
     
     def _get_fallback_result(self, form_data: Dict[str, Any]) -> Dict[str, Any]:
-        """降级返回结果（当AI调用失败时）"""
+        """降级返回结果（当AI调用失败时）- 基于最新prompt要求的完整结构"""
         project_name = form_data.get('projectName', '项目')
+        project_description = form_data.get('projectDescription', '')
         key_persons = form_data.get('keyPersons', [])
+        
+        # 智能判断是否需要补充角色
+        needs_additional_roles = len(key_persons) < 2  # 简单规则：少于2个人物时建议补充
+        
+        # 构建参与方结构（保留所有用户输入的关键人物）
+        parties_structure = [
+            {
+                "party": "设计者（你）",
+                "role_type": "统筹方",
+                "resources": ["统筹协调能力", "规则制定", "合作伙伴筛选标准", "结算管理"],
+                "role_value": "作为连接器和规则制定者，确保各方合作顺畅，控制核心环节",
+                "make_them_happy": "通过撮合服务获得稳定的非劳务收入，建立可持续的商业管道"
+            }
+        ]
+        
+        # 为每个关键人物分配合适的role_type
+        role_type_mapping = {
+            0: "需求方",  # 第一个人物默认为需求方
+            1: "交付方",  # 第二个人物默认为交付方  
+        }
+        
+        for i, person in enumerate(key_persons):
+            name = person.get('name', f'关键人物{i+1}')
+            resources = person.get('resources', ['专业技能', '客户基础'])
+            make_happy = person.get('make_happy', ['获得收益', '扩展业务'])
+            role_type = role_type_mapping.get(i, "交付方")  # 超过2个的默认为交付方
+            
+            parties_structure.append({
+                "party": name,
+                "role_type": role_type,
+                "resources": resources if resources else ["专业能力", "客户资源"],
+                "role_value": f"在闭环中提供{role_type}的核心价值，确保服务质量和客户满意度",
+                "make_them_happy": self.format_make_happy(make_happy)
+            })
         
         return {
             "overview": {
-                "situation": f"基于【意识+能量+能力=结果】公式，{project_name}具备初步资源基础，设计者需要统筹整合现有关键人物资源，构建非劳务收入管道",
+                "situation": f"基于【意识+能量+能力=结果】公式分析：{project_name}具备初步资源基础，设计者作为统筹方整合现有关键人物资源，构建撮合型非劳务收入管道。意识来自设计者的规则设计，能量来自关键人物的积极参与，能力借用各方专业资源。",
                 "income_type": "居间（撮合费/中介费）",
-                "core_insight": f"利用现有关键人物的资源和信任关系，设计者作为连接器和规则制定者，通过撮合服务获得持续的非劳务收入",
-                "gaps": ["明确收益模式", "扩展合作渠道", "制定执行计划"],
-                "suggested_roles_to_hunt": [
+                "core_insight": "利用现有关键人物的专业能力和客户基础，设计者作为统筹方制定合作规则和质量标准，通过撮合服务建立持续的非劳务收入管道，关键在于防绕过机制和共管结算。",
+                "gaps": ["明确合作细则", "建立防绕过机制"] if not needs_additional_roles else ["补充渠道资源方", "建立合作标准"],
+                "suggested_roles_to_hunt": [] if not needs_additional_roles else [
                     {
-                        "role": "渠道合作方",
-                        "why": "需要流量入口和变现渠道",
-                        "where_to_find": "行业群组、专业论坛、商业活动",
-                        "outreach_script": "我们有优质内容和用户基础，寻求互利合作机会，可先小规模试点。"
+                        "role": "渠道资源方",
+                        "role_type": "需求方",
+                        "why": "需要流量入口和客户获取渠道，确保业务可持续发展",
+                        "where_to_find": "行业协会、商会、同城企业家群、相关业务的朋友圈",
+                        "outreach_script": "我们有优质的服务团队和成熟的管理经验，正在寻求优质合作伙伴。可以先小规模合作试点，看看是否互利共赢，您觉得如何？"
                     }
                 ]
             },
             "paths": [
                 {
                     "id": "path_1",
-                    "name": "资源整合撮合变现",
+                    "name": "资源整合撮合管道",
                     "income_mechanism": {
                         "type": "居间（撮合费）",
-                        "trigger": "每次成功撮合交易的佣金分成",
-                        "settlement": "按单结算，交易完成后收取佣金"
+                        "trigger": "成功撮合交易后的佣金分成",
+                        "settlement": "按单结算，交易完成确认后收取撮合费"
                     },
-                    "parties_structure": [
-                        {
-                            "party": "设计者（你）",
-                            "resources": ["统筹协调能力", "规则制定", "质量监督"],
-                            "role_value": "作为连接器和质量保证方，确保各方合作顺畅",
-                            "make_them_happy": "获得稳定的佣金收入，建立可扩展的商业模式"
-                        }
-                    ] + [
-                        {
-                            "party": p.get('name', '关键人物'),
-                            "resources": p.get('resources', ['待确定']),
-                            "role_value": "提供专业服务或客户资源",
-                            "make_them_happy": ", ".join(p.get('make_happy', ['获得收益', '扩展业务']))
-                        } for p in key_persons[:2]
-                    ],
-                    "action_steps": [
-                        {"owner": "你", "action": "基于现有关键人物资源，设计1对1连接服务方案", "why_it_works": "充分利用已有资源，无需额外投入"},
-                        {"owner": "关键人物", "action": "提供渠道和信任背书，推广连接服务", "why_it_works": "发挥各自专业优势和客户基础"},
-                        {"owner": "最终用户", "action": "使用连接服务并支付费用", "why_it_works": "获得专业匹配的优质服务"}
-                    ],
-                    "mvp": "连接现有关键人物，为1-2个客户提供撮合服务，验证收费模式可行性",
-                    "weak_link": "关键人物的配合度和服务质量稳定性",
-                    "revenue_trigger": "撮合费（按交易额3-10%收取）",
+                    "parties_structure": parties_structure,
+                    "framework_logic": {
+                        "resource_chain": "设计者统筹规则制定和质量监督，关键人物提供专业服务和客户基础，形成供需匹配的撮合闭环",
+                        "motivation_match": "设计者获得撮合费，关键人物获得业务机会和客户扩展，最终客户获得专业服务",
+                        "designer_position": "控制合作标准制定和结算管理，通过共管账户和合同条款确保不被绕过",
+                        "designer_income": "居间类非劳务收入，通过撮合成功收取佣金，无需持续劳动投入"
+                    },
+                    "mvp": "连接现有关键人物资源，为1-2个客户提供撮合服务，验证收费模式和防绕过机制的可行性。",
+                    "weak_link": "关键人物的配合度和服务标准统一性，可能影响客户满意度和复购率",
+                    "revenue_trigger": "撮合费（按交易额3-8%收取），属于居间类非劳务收入",
                     "risks_and_planB": [
-                        {"risk": "关键人物不配合", "mitigation": "提前协商好合作规则和收益分配"},
-                        {"risk": "服务质量不稳定", "mitigation": "建立质量监督和客户反馈机制"}
+                        {
+                            "risk": "关键人物绕过设计者直接合作",
+                            "mitigation": "签署分佣协议，控制客户资源入口，建立共管结算机制"
+                        },
+                        {
+                            "risk": "服务质量不稳定影响口碑",
+                            "mitigation": "制定服务标准和评价体系，建立客户反馈和改进机制"
+                        }
                     ],
-                    "first_step": "与现有关键人物深度沟通，确定合作模式和收益分配，先从小规模试点开始",
+                    "first_step": "与现有关键人物深度沟通，确定合作模式和收益分配，签署初步合作协议，选择1-2个试点客户开始验证",
                     "labor_load_estimate": {
-                        "hours_per_week": "5-8小时",
-                        "level": "中度(5-10h)",
-                        "alternative": "建立标准化流程和自助平台，减少人工协调工作"
+                        "hours_per_week": "4-6小时",
+                        "level": "轻度(<5h)",
+                        "alternative": "建立标准化SOP和自助服务平台，将日常协调工作外包给助理或兼职人员"
                     }
                 }
             ]

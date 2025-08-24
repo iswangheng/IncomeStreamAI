@@ -1906,5 +1906,58 @@ def generate_fallback_suggestions(form_data):
         "notes": f"由于{reason}，以上为基础建议。建议您完善关键人物的动机信息后重新分析，可获得更精准的个性化方案。"
     }
 
+@app.route('/profile')
+@login_required  
+def user_profile():
+    """普通用户的个人信息页面"""
+    return render_template('user_profile_apple.html')
+
+@app.route('/profile/update', methods=['POST'])
+@login_required
+def update_user_profile():
+    """更新用户个人信息"""
+    try:
+        # 获取表单数据
+        new_name = request.form.get('name', '').strip()
+        action = request.form.get('action')
+        
+        if action == 'update_name':
+            # 更新姓名
+            current_user.name = new_name if new_name else None
+            db.session.commit()
+            flash('姓名更新成功', 'success')
+        
+        elif action == 'change_password':
+            # 修改密码
+            current_password = request.form.get('current_password', '').strip()
+            new_password = request.form.get('new_password', '').strip()
+            confirm_password = request.form.get('confirm_password', '').strip()
+            
+            # 验证当前密码
+            if not current_user.check_password(current_password):
+                flash('当前密码不正确', 'error')
+                return redirect(url_for('user_profile'))
+            
+            # 验证新密码
+            if len(new_password) < 6:
+                flash('新密码长度至少6位', 'error')
+                return redirect(url_for('user_profile'))
+                
+            if new_password != confirm_password:
+                flash('两次输入的密码不一致', 'error')
+                return redirect(url_for('user_profile'))
+            
+            # 更新密码
+            current_user.set_password(new_password)
+            db.session.commit()
+            flash('密码修改成功', 'success')
+        
+        return redirect(url_for('user_profile'))
+        
+    except Exception as e:
+        app.logger.error(f"Update profile error: {str(e)}")
+        flash('更新失败，请重试', 'error')
+        return redirect(url_for('user_profile'))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

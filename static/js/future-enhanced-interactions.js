@@ -290,8 +290,8 @@ function initLoadingAnimations() {
         element.style.animationDelay = (index * 0.1) + 's';
     });
 
-    // 为表单提交添加加载效果
-    const forms = document.querySelectorAll('form');
+    // 为表单提交添加加载效果，但排除特定表单
+    const forms = document.querySelectorAll('form:not(.no-loading-overlay)');
     forms.forEach(form => {
         form.addEventListener('submit', function() {
             showSimpleLoadingOverlay();

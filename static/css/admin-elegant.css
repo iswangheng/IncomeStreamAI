@@ -316,7 +316,7 @@
 
 .user-info {
     flex: 1;
-    padding-left: var(--elegant-space-3);
+    padding: 0 var(--elegant-space-4);
 }
 
 .user-name {
@@ -325,6 +325,7 @@
     color: var(--elegant-text-primary);
     margin-bottom: var(--elegant-space-2);
     line-height: 1.4;
+    padding: var(--elegant-space-1) 0;
 }
 
 .user-phone {

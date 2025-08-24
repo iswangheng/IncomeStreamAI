@@ -253,3 +253,14 @@ function exportUsers() {
 window.loadUsersData = loadUsersData;
 window.filterUsers = filterUsers;
 window.exportUsers = exportUsers;
+
+// 添加refreshUsers函数以处理刷新用户列表按钮
+function refreshUsers() {
+    if (typeof loadUsersData === 'function') {
+        loadUsersData();
+        showToast('用户列表已刷新', 'success');
+    }
+}
+
+// 确保refreshUsers函数全局可访问
+window.refreshUsers = refreshUsers;

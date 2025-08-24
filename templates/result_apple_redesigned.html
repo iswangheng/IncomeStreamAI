@@ -345,10 +345,111 @@
             margin: var(--space-6) 0;
         }
 
-        .parties-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--space-4);
+        /* 关系结构图样式 */
+        .parties-network {
+            position: relative;
+            width: 100%;
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: var(--space-8);
+        }
+
+        .network-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .network-line {
+            stroke: var(--color-primary);
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            opacity: 0.6;
+            animation: dashMove 3s linear infinite;
+        }
+
+        @keyframes dashMove {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 20; }
+        }
+
+        .network-nodes {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .center-node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+
+        .surrounding-nodes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .surrounding-node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+        }
+
+        .party-node {
+            background: white;
+            border-radius: var(--radius-3);
+            padding: var(--space-4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            max-width: 280px;
+            min-width: 240px;
+        }
+
+        .party-node:hover {
+            transform: translateY(-2px) translate(-50%, -50%);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .party-node.designer {
+            border-color: var(--color-primary);
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(88, 86, 214, 0.15));
+            box-shadow: 0 6px 25px rgba(0, 122, 255, 0.3);
+            min-width: 320px;
+        }
+
+        .party-node.participant {
+            border-color: rgba(88, 86, 214, 0.3);
+            background: linear-gradient(135deg, rgba(88, 86, 214, 0.08), rgba(175, 82, 222, 0.08));
+        }
+
+        .party-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px rgba(0, 122, 255, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px rgba(0, 122, 255, 0.6); }
+            50% { box-shadow: 0 0 20px rgba(0, 122, 255, 0.8); }
+            100% { box-shadow: 0 0 10px rgba(0, 122, 255, 0.6); }
         }
 
         .resource-tag {
@@ -1491,26 +1592,123 @@
             {% if path.parties_structure %}
             <div class="three-parties">
                 <h4 class="parties-title">关键参与方结构</h4>
-                <div class="parties-grid">
-                    {% for party in path.parties_structure %}
-                    <div class="party-box {% if party.party == '设计者（你）' or '你' in party.party %}your-role{% endif %}">
-                        <div class="party-name">{{ party.party }}</div>
-                        <div class="party-resources">
-                            <strong>资源：</strong>
-                            {% if party.resources %}
-                                {% for resource in party.resources %}
-                                <span class="resource-tag">{{ resource }}</span>
-                                {% endfor %}
+                <div class="parties-network" id="partiesNetwork{{ loop.index }}">
+                    <!-- SVG连线层 -->
+                    <svg class="network-svg" id="networkSvg{{ loop.index }}">
+                        <!-- 连线将通过JavaScript动态生成 -->
+                    </svg>
+                    
+                    <!-- 节点层 -->
+                    <div class="network-nodes">
+                        {% set designer_party = None %}
+                        {% set other_parties = [] %}
+                        
+                        {% for party in path.parties_structure %}
+                            {% if party.party == '设计者（你）' or '你' in party.party %}
+                                {% set designer_party = party %}
+                            {% else %}
+                                {% set _ = other_parties.append(party) %}
                             {% endif %}
+                        {% endfor %}
+                        
+                        <!-- 中心节点（设计者） -->
+                        {% if designer_party %}
+                        <div class="party-node designer center-node" data-node-id="designer">
+                            <div class="party-indicator"></div>
+                            <div class="party-name">{{ designer_party.party }}</div>
+                            <div class="party-resources">
+                                <strong>核心资源：</strong>
+                                {% if designer_party.resources %}
+                                    {% for resource in designer_party.resources %}
+                                    <span class="resource-tag">{{ resource }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="party-value">{{ designer_party.role_value }}</div>
+                            <div class="party-happiness">
+                                <i class="fas fa-crown"></i>
+                                {{ designer_party.make_them_happy }}
+                            </div>
                         </div>
-                        <div class="party-value">{{ party.role_value }}</div>
-                        <div class="party-happiness">
-                            <i class="fas fa-smile"></i>
-                            {{ party.make_them_happy }}
+                        {% endif %}
+                        
+                        <!-- 围绕节点（其他参与方） -->
+                        <div class="surrounding-nodes">
+                            {% for party in other_parties %}
+                            {% set angle = (loop.index0 * 360 / other_parties|length) %}
+                            {% set radius = 200 %}
+                            {% set x = 50 + (radius * cos(angle * 3.14159 / 180) / 8) %}
+                            {% set y = 50 + (radius * sin(angle * 3.14159 / 180) / 8) %}
+                            
+                            <div class="party-node participant surrounding-node" 
+                                 data-node-id="party{{ loop.index }}"
+                                 style="left: {{ x }}%; top: {{ y }}%;">
+                                <div class="party-indicator"></div>
+                                <div class="party-name">{{ party.party }}</div>
+                                <div class="party-resources">
+                                    <strong>资源：</strong>
+                                    {% if party.resources %}
+                                        {% for resource in party.resources %}
+                                        <span class="resource-tag">{{ resource }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <div class="party-value">{{ party.role_value }}</div>
+                                <div class="party-happiness">
+                                    <i class="fas fa-handshake"></i>
+                                    {{ party.make_them_happy }}
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
+                
+                <script>
+                // 动态绘制连线
+                document.addEventListener('DOMContentLoaded', function() {
+                    const networkContainer = document.getElementById('partiesNetwork{{ loop.index }}');
+                    const svg = document.getElementById('networkSvg{{ loop.index }}');
+                    
+                    if (!networkContainer || !svg) return;
+                    
+                    function drawConnections() {
+                        const centerNode = networkContainer.querySelector('.center-node');
+                        const surroundingNodes = networkContainer.querySelectorAll('.surrounding-node');
+                        
+                        if (!centerNode) return;
+                        
+                        // 清除现有连线
+                        svg.innerHTML = '';
+                        
+                        const containerRect = networkContainer.getBoundingClientRect();
+                        const centerRect = centerNode.getBoundingClientRect();
+                        const centerX = (centerRect.left + centerRect.width/2 - containerRect.left) / containerRect.width * 100;
+                        const centerY = (centerRect.top + centerRect.height/2 - containerRect.top) / containerRect.height * 100;
+                        
+                        surroundingNodes.forEach(node => {
+                            const nodeRect = node.getBoundingClientRect();
+                            const nodeX = (nodeRect.left + nodeRect.width/2 - containerRect.left) / containerRect.width * 100;
+                            const nodeY = (nodeRect.top + nodeRect.height/2 - containerRect.top) / containerRect.height * 100;
+                            
+                            // 创建连线
+                            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                            line.setAttribute('x1', centerX + '%');
+                            line.setAttribute('y1', centerY + '%');
+                            line.setAttribute('x2', nodeX + '%');
+                            line.setAttribute('y2', nodeY + '%');
+                            line.setAttribute('class', 'network-line');
+                            svg.appendChild(line);
+                        });
+                    }
+                    
+                    // 延迟绘制确保布局完成
+                    setTimeout(drawConnections, 100);
+                    
+                    // 响应式重绘
+                    window.addEventListener('resize', drawConnections);
+                });
+                </script>
             </div>
             {% elif path.three_parties_structure %}
             <div class="three-parties">

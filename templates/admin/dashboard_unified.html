@@ -182,7 +182,7 @@
                             </div>
                         </div>
                         
-                        <div id="users-content">
+                        <div id="usersTableContainer">
                             <div class="text-center p-4">
                                 <div class="loading-skeleton" style="height: 100px; border-radius: 12px;"></div>
                                 <p class="mt-3" style="color: var(--text-secondary);">正在加载用户数据...</p>
@@ -338,6 +338,7 @@
     <script src="{{ url_for('static', filename='js/future-enhanced-interactions.js') }}"></script>
     <script src="{{ url_for('static', filename='js/user-menu.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/admin-users.js') }}"></script>
     
     <script>
         // Tab切换功能
@@ -368,7 +369,11 @@
             
             // 如果切换到用户管理，加载用户数据
             if (tabName === 'users') {
-                loadUserData();
+                if (typeof loadUsersData === 'function') {
+                    loadUsersData();
+                } else {
+                    loadUserData();
+                }
             }
         }
         
@@ -600,6 +605,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('交互功能已初始化');
             switchTab('users');
+            
+            // 确保用户数据加载函数可用
+            if (typeof loadUsersData === 'function') {
+                console.log('使用 admin-users.js 中的 loadUsersData 函数');
+            }
         });
     </script>
 </body>

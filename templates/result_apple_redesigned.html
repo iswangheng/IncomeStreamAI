@@ -1588,153 +1588,168 @@
                 {% endif %}
             </div>
 
-            <!-- 关键参与方结构 -->
+            <!-- 关键参与方结构 - 按角色分区展示 -->
             {% if path.parties_structure %}
-            <div class="three-parties">
-                <h4 class="parties-title">关键参与方结构</h4>
-                <div class="parties-network" id="partiesNetwork{{ loop.index }}">
-                    <!-- SVG连线层 -->
-                    <svg class="network-svg" id="networkSvg{{ loop.index }}">
-                        <!-- 连线将通过JavaScript动态生成 -->
-                    </svg>
-                    
-                    <!-- 节点层 -->
-                    <div class="network-nodes">
-                        <!-- 设计者节点 - 始终在中心显示 -->
-                        {% for party in path.parties_structure %}
-                            {% if party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party %}
-                            <div class="party-node designer" 
-                                 style="position: absolute; left: 35%; top: 38%; width: 280px; z-index: 10;" 
-                                 data-node-id="designer">
-                                <div class="party-indicator"></div>
-                                <div class="party-name">{{ party.party }}</div>
-                                <div class="party-resources">
-                                    <strong>核心资源：</strong>
-                                    {% if party.resources %}
-                                        {% for resource in party.resources %}
-                                        <span class="resource-tag">{{ resource }}</span>
-                                        {% endfor %}
-                                    {% endif %}
-                                </div>
-                                <div class="party-value">{{ party.role_value }}</div>
-                                <div class="party-happiness">
-                                    <i class="fas fa-crown"></i>
-                                    {{ party.make_them_happy }}
-                                </div>
+            <div class="parties-structure-layout" style="margin-top: 30px;">
+                <h4 class="parties-title" style="text-align: center; margin-bottom: 30px; font-size: 1.3rem; color: #333;">
+                    <i class="fas fa-sitemap"></i> 关键参与方结构
+                </h4>
+                
+                <!-- 设计者卡片 - 最顶部 -->
+                <div class="designer-section" style="margin-bottom: 30px;">
+                    {% for party in path.parties_structure %}
+                        {% if party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party %}
+                        <div class="designer-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); text-align: center; margin: 0 auto; max-width: 500px;">
+                            <div class="designer-crown" style="font-size: 2rem; margin-bottom: 10px;">
+                                <i class="fas fa-crown" style="color: #ffd700;"></i>
                             </div>
-                            {% endif %}
-                        {% endfor %}
-                        
-                        <!-- 其他参与方 - 智能圆形布局，避免重叠 -->
-                        {% set ns = namespace(count=0, total_participants=0) %}
-                        <!-- 先计算参与方总数 -->
-                        {% for party in path.parties_structure %}
-                            {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
-                                {% set ns.total_participants = ns.total_participants + 1 %}
-                            {% endif %}
-                        {% endfor %}
-                        
-                        {% for party in path.parties_structure %}
-                            {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
-                                <!-- 根据参与方总数决定布局策略 -->
-                                {% if ns.total_participants <= 2 %}
-                                    <!-- 1-2个参与方：左右布局 -->
-                                    {% if ns.count == 0 %}
-                                        {% set node_style = "left: 2%; top: 38%; width: 250px;" %}
-                                    {% else %}
-                                        {% set node_style = "left: 72%; top: 38%; width: 250px;" %}
-                                    {% endif %}
-                                {% elif ns.total_participants <= 4 %}
-                                    <!-- 3-4个参与方：十字布局 -->
-                                    {% if ns.count == 0 %}
-                                        {% set node_style = "left: 2%; top: 38%; width: 240px;" %}
-                                    {% elif ns.count == 1 %}
-                                        {% set node_style = "left: 73%; top: 38%; width: 240px;" %}
-                                    {% elif ns.count == 2 %}
-                                        {% set node_style = "left: 37%; top: 5%; width: 240px;" %}
-                                    {% else %}
-                                        {% set node_style = "left: 37%; top: 72%; width: 240px;" %}
-                                    {% endif %}
-                                {% elif ns.total_participants <= 6 %}
-                                    <!-- 5-6个参与方：六边形布局 -->
-                                    {% if ns.count == 0 %}
-                                        {% set node_style = "left: 2%; top: 20%; width: 230px;" %}
-                                    {% elif ns.count == 1 %}
-                                        {% set node_style = "left: 73%; top: 20%; width: 230px;" %}
-                                    {% elif ns.count == 2 %}
-                                        {% set node_style = "left: 2%; top: 55%; width: 230px;" %}
-                                    {% elif ns.count == 3 %}
-                                        {% set node_style = "left: 73%; top: 55%; width: 230px;" %}
-                                    {% elif ns.count == 4 %}
-                                        {% set node_style = "left: 37%; top: 2%; width: 230px;" %}
-                                    {% else %}
-                                        {% set node_style = "left: 37%; top: 75%; width: 230px;" %}
-                                    {% endif %}
-                                {% elif ns.total_participants <= 8 %}
-                                    <!-- 7-8个参与方：八边形布局 -->
-                                    {% if ns.count == 0 %}
-                                        {% set node_style = "left: 2%; top: 15%; width: 220px;" %}
-                                    {% elif ns.count == 1 %}
-                                        {% set node_style = "left: 74%; top: 15%; width: 220px;" %}
-                                    {% elif ns.count == 2 %}
-                                        {% set node_style = "left: 2%; top: 38%; width: 220px;" %}
-                                    {% elif ns.count == 3 %}
-                                        {% set node_style = "left: 74%; top: 38%; width: 220px;" %}
-                                    {% elif ns.count == 4 %}
-                                        {% set node_style = "left: 2%; top: 61%; width: 220px;" %}
-                                    {% elif ns.count == 5 %}
-                                        {% set node_style = "left: 74%; top: 61%; width: 220px;" %}
-                                    {% elif ns.count == 6 %}
-                                        {% set node_style = "left: 38%; top: 2%; width: 220px;" %}
-                                    {% else %}
-                                        {% set node_style = "left: 38%; top: 76%; width: 220px;" %}
-                                    {% endif %}
-                                {% elif ns.total_participants <= 12 %}
-                                    <!-- 9-12个参与方：三层布局 -->
-                                    {% if ns.count < 4 %}
-                                        <!-- 内层：4个 -->
-                                        {% set pos = ns.count * 25 %}
-                                        {% set node_style = "left: " + (10 + pos)|string + "%; top: " + (25 if ns.count % 2 == 0 else 50)|string + "%; width: 200px;" %}
-                                    {% elif ns.count < 8 %}
-                                        <!-- 中层：4个 -->
-                                        {% set pos = (ns.count - 4) * 25 %}
-                                        {% set node_style = "left: " + (5 + pos)|string + "%; top: " + (10 if (ns.count - 4) % 2 == 0 else 70)|string + "%; width: 200px;" %}
-                                    {% else %}
-                                        <!-- 外层：4个 -->
-                                        {% set pos = (ns.count - 8) * 25 %}
-                                        {% set node_style = "left: " + (2 + pos)|string + "%; top: " + (2 if (ns.count - 8) % 2 == 0 else 82)|string + "%; width: 190px;" %}
-                                    {% endif %}
-                                {% else %}
-                                    <!-- 超过12个：网格布局 -->
-                                    {% set row = (ns.count // 4) %}
-                                    {% set col = (ns.count % 4) %}
-                                    {% set node_style = "left: " + (2 + col * 24)|string + "%; top: " + (2 + row * 20)|string + "%; width: 180px; font-size: 0.9em;" %}
+                            <h5 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 10px;">{{ party.party }}</h5>
+                            <div class="designer-resources" style="margin-bottom: 10px;">
+                                <strong style="display: block; margin-bottom: 8px;">核心资源：</strong>
+                                {% if party.resources %}
+                                    {% for resource in party.resources %}
+                                    <span style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 4px 10px; border-radius: 15px; margin: 3px; font-size: 0.85rem;">{{ resource }}</span>
+                                    {% endfor %}
                                 {% endif %}
-                                
-                                <div class="party-node participant" 
-                                     style="position: absolute; {{ node_style }}" 
-                                     data-node-id="participant{{ ns.count }}">
-                                    <div class="party-indicator"></div>
-                                    <div class="party-name">{{ party.party }}</div>
-                                    <div class="party-resources">
-                                        <strong>资源：</strong>
-                                        {% if party.resources %}
-                                            {% for resource in party.resources %}
-                                            <span class="resource-tag">{{ resource }}</span>
-                                            {% endfor %}
-                                        {% endif %}
-                                    </div>
-                                    <div class="party-value">{{ party.role_value }}</div>
-                                    <div class="party-happiness">
-                                        <i class="fas fa-handshake"></i>
-                                        {{ party.make_them_happy }}
-                                    </div>
-                                </div>
-                                {% set ns.count = ns.count + 1 %}
-                            {% endif %}
-                        {% endfor %}
+                            </div>
+                            <div class="designer-value" style="background: rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 8px; font-size: 0.95rem;">
+                                <i class="fas fa-star"></i> {{ party.role_value }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                <!-- 连接线装饰 -->
+                <div style="text-align: center; margin: 25px 0;">
+                    <div style="width: 2px; height: 30px; background: linear-gradient(180deg, #667eea 0%, transparent 100%); margin: 0 auto;"></div>
+                    <div style="font-size: 1.1rem; color: #667eea;">
+                        <i class="fas fa-arrows-alt-v"></i>
                     </div>
                 </div>
+                
+                <!-- 三大角色区域容器 -->
+                <div class="roles-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    
+                    <!-- 需求方区域 -->
+                    <div class="demand-section" style="background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%); border-radius: 12px; padding: 15px; border: 2px solid #2196f3;">
+                        <h5 style="color: #2196f3; font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; text-align: center;">
+                            <i class="fas fa-shopping-cart"></i> 需求方
+                        </h5>
+                        <div class="demand-parties">
+                            {% for party in path.parties_structure %}
+                                {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
+                                    {% if '需求' in party.role_value or '客户' in party.role_value or '用户' in party.role_value or '学生' in party.role_value or '家长' in party.role_value or '购买' in party.role_value %}
+                                    <div class="party-card" style="background: white; border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 3px 8px rgba(33, 150, 243, 0.1);">
+                                        <div class="party-header" style="display: flex; align-items: center; margin-bottom: 10px;">
+                                            <div class="party-icon" style="width: 35px; height: 35px; background: linear-gradient(135deg, #2196f3, #64b5f6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.9rem;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <h6 style="font-weight: 600; margin: 0; color: #333; font-size: 0.95rem;">{{ party.party }}</h6>
+                                                <small style="color: #666; font-size: 0.8rem;">{{ party.role_value }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="party-resources" style="margin-bottom: 8px;">
+                                            <strong style="color: #555; font-size: 0.85rem;">资源：</strong>
+                                            {% if party.resources %}
+                                                {% for resource in party.resources %}
+                                                <span style="display: inline-block; background: #e3f2fd; color: #2196f3; padding: 2px 6px; border-radius: 10px; margin: 2px; font-size: 0.8rem;">{{ resource }}</span>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                        <div class="party-happiness" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 6px; padding: 8px; font-size: 0.85rem;">
+                                            <i class="fas fa-smile" style="color: #4caf50; font-size: 0.8rem;"></i>
+                                            <strong style="color: #2e7d32;">如何让TA高兴：</strong>
+                                            <div style="margin-top: 3px; color: #555; font-size: 0.8rem;">{{ party.make_them_happy }}</div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- 交付方区域 -->
+                    <div class="delivery-section" style="background: linear-gradient(135deg, #f3e5f5 0%, #ffffff 100%); border-radius: 12px; padding: 15px; border: 2px solid #9c27b0;">
+                        <h5 style="color: #9c27b0; font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; text-align: center;">
+                            <i class="fas fa-truck"></i> 交付方
+                        </h5>
+                        <div class="delivery-parties">
+                            {% for party in path.parties_structure %}
+                                {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
+                                    {% if '交付' in party.role_value or '提供' in party.role_value or '服务' in party.role_value or '老师' in party.role_value or '教练' in party.role_value or '外教' in party.role_value or '规划' in party.role_value or '专业' in party.role_value %}
+                                    <div class="party-card" style="background: white; border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 3px 8px rgba(156, 39, 176, 0.1);">
+                                        <div class="party-header" style="display: flex; align-items: center; margin-bottom: 10px;">
+                                            <div class="party-icon" style="width: 35px; height: 35px; background: linear-gradient(135deg, #9c27b0, #ba68c8); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.9rem;">
+                                                <i class="fas fa-hands-helping"></i>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <h6 style="font-weight: 600; margin: 0; color: #333; font-size: 0.95rem;">{{ party.party }}</h6>
+                                                <small style="color: #666; font-size: 0.8rem;">{{ party.role_value }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="party-resources" style="margin-bottom: 8px;">
+                                            <strong style="color: #555; font-size: 0.85rem;">资源：</strong>
+                                            {% if party.resources %}
+                                                {% for resource in party.resources %}
+                                                <span style="display: inline-block; background: #f3e5f5; color: #9c27b0; padding: 2px 6px; border-radius: 10px; margin: 2px; font-size: 0.8rem;">{{ resource }}</span>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                        <div class="party-happiness" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 6px; padding: 8px; font-size: 0.85rem;">
+                                            <i class="fas fa-smile" style="color: #4caf50; font-size: 0.8rem;"></i>
+                                            <strong style="color: #2e7d32;">如何让TA高兴：</strong>
+                                            <div style="margin-top: 3px; color: #555; font-size: 0.8rem;">{{ party.make_them_happy }}</div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- 资金方区域 -->
+                    <div class="funding-section" style="background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%); border-radius: 12px; padding: 15px; border: 2px solid #ff9800;">
+                        <h5 style="color: #ff9800; font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; text-align: center;">
+                            <i class="fas fa-coins"></i> 资金方
+                        </h5>
+                        <div class="funding-parties">
+                            {% for party in path.parties_structure %}
+                                {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
+                                    {% if '资金' in party.role_value or '投资' in party.role_value or '付费' in party.role_value or '赞助' in party.role_value or '广告' in party.role_value or '支付' in party.role_value %}
+                                    <div class="party-card" style="background: white; border-radius: 10px; padding: 12px; margin-bottom: 12px; box-shadow: 0 3px 8px rgba(255, 152, 0, 0.1);">
+                                        <div class="party-header" style="display: flex; align-items: center; margin-bottom: 10px;">
+                                            <div class="party-icon" style="width: 35px; height: 35px; background: linear-gradient(135deg, #ff9800, #ffb74d); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-right: 10px; font-size: 0.9rem;">
+                                                <i class="fas fa-dollar-sign"></i>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <h6 style="font-weight: 600; margin: 0; color: #333; font-size: 0.95rem;">{{ party.party }}</h6>
+                                                <small style="color: #666; font-size: 0.8rem;">{{ party.role_value }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="party-resources" style="margin-bottom: 8px;">
+                                            <strong style="color: #555; font-size: 0.85rem;">资源：</strong>
+                                            {% if party.resources %}
+                                                {% for resource in party.resources %}
+                                                <span style="display: inline-block; background: #fff3e0; color: #ff9800; padding: 2px 6px; border-radius: 10px; margin: 2px; font-size: 0.8rem;">{{ resource }}</span>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                        <div class="party-happiness" style="background: linear-gradient(135deg, #e8f5e9, #c8e6c9); border-radius: 6px; padding: 8px; font-size: 0.85rem;">
+                                            <i class="fas fa-smile" style="color: #4caf50; font-size: 0.8rem;"></i>
+                                            <strong style="color: #2e7d32;">如何让TA高兴：</strong>
+                                            <div style="margin-top: 3px; color: #555; font-size: 0.8rem;">{{ party.make_them_happy }}</div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
                 
                 <script>
                 // 动态绘制连线

@@ -866,11 +866,16 @@ def generate():
 
         for i in range(len(person_names)):
             if person_names[i].strip():  # Only add if name is not empty
+                # 处理make_happy字段，将逗号分隔的字符串分割成数组
+                make_happy_list = []
+                if i < len(person_needs) and person_needs[i].strip():
+                    make_happy_list = [need.strip() for need in person_needs[i].split(',') if need.strip()]
+                
                 key_persons.append({
                     "name": person_names[i].strip(),
                     "role": person_roles[i].strip() if i < len(person_roles) else "",
                     "resources": [r.strip() for r in person_resources[i].split(',') if r.strip()] if i < len(person_resources) else [],
-                    "make_happy": person_needs[i].strip() if i < len(person_needs) else ""
+                    "make_happy": make_happy_list
                 })
 
         # Create JSON structure as per PRD

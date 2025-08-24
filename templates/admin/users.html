@@ -10,10 +10,12 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- 自定义样式 -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation-redesign.css') }}">
+    <!-- Apple级别设计系统 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/apple-design-system.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-apple-design.css') }}">
+    <!-- 世界一流导航设计 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation-redesign.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user-menu-dropdown.css') }}">
     <!-- 导航栏间距修复 - 解决顶部空白问题 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation-spacing-fix.css') }}">
 
@@ -412,64 +414,9 @@
         }
     </style>
 </head>
-<body>
-    <!-- 导航栏 -->
-    <div class="navigation-bar">
-        <div class="nav-content">
-            <a href="{{ url_for('admin_dashboard') }}" class="nav-brand">
-                <i class="fas fa-brain"></i>
-                Angela AI Tool
-            </a>
-
-            <div class="nav-actions">
-                <a href="{{ url_for('admin_dashboard') }}#users" class="btn btn-secondary">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>返回仪表盘</span>
-                </a>
-
-                <!-- 移动端汉堡菜单 -->
-                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-
-            <!-- 桌面端用户菜单 -->
-            <div class="user-menu">
-                <div class="user-info">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="user-name">{{ session.username }}</span>
-                </div>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>退出</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- 移动端下拉菜单 -->
-        <div class="mobile-dropdown">
-            <!-- 用户信息 -->
-            <div class="mobile-user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="user-details">
-                    <h4>{{ session.username }}</h4>
-                    <p>管理员用户</p>
-                </div>
-            </div>
-
-            <!-- 菜单项 -->
-            <a href="{{ url_for('admin_dashboard') }}#users" class="dropdown-item">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>返回仪表盘</span>
-            </a>
-            <a href="{{ url_for('logout') }}" class="dropdown-item">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>退出登录</span>
-            </a>
-        </div>
-    </div>
+<body class="admin-layout">
+    <!-- 引用公共导航栏组件 -->
+    {% include 'components/navigation.html' %}
 
     <!-- 主内容区域 -->
     <div class="admin-main-full" style="padding-top: 0; margin-top: 0;">

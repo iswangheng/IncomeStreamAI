@@ -85,9 +85,7 @@ function renderUsersTable(users) {
                         <i class="fas ${user.is_admin ? 'fa-user-shield' : 'fa-user'}"></i>
                     </div>
                     <div class="user-info">
-                        <div class="user-name">
-                            ${user.name}
-                        </div>
+                        <div class="user-name">${user.name}</div>
                         <div class="user-phone">${user.phone}</div>
                     </div>
                     <div class="status-indicator ${user.is_active ? 'active' : 'inactive'}" title="${user.is_active ? '用户正常' : '用户已禁用'}">

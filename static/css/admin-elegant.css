@@ -317,18 +317,23 @@
 
 .user-info {
     flex: 1;
-    padding: 0 var(--elegant-space-6) 0 var(--elegant-space-4);
-    margin-right: var(--elegant-space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--elegant-space-6);
+    padding: 0 var(--elegant-space-4);
+    margin-left: var(--elegant-space-2);
+    margin-right: var(--elegant-space-6);
 }
 
 .user-name {
     font-size: var(--elegant-text-lg);
     font-weight: 600;
     color: var(--elegant-text-primary);
-    margin-bottom: var(--elegant-space-3);
     line-height: 1.4;
-    padding: var(--elegant-space-1) var(--elegant-space-2) var(--elegant-space-1) 0;
-    margin-right: var(--elegant-space-5);
+    margin: 0;
+    padding: var(--elegant-space-2) 0;
+    flex-shrink: 0;
+    min-width: 120px;
 }
 
 .user-phone {
@@ -337,7 +342,9 @@
     display: flex;
     align-items: center;
     gap: var(--elegant-space-2);
-    padding-right: var(--elegant-space-4);
+    margin: 0;
+    padding: var(--elegant-space-2) 0;
+    flex-shrink: 0;
 }
 
 .user-phone::before {

@@ -501,29 +501,6 @@
             border: 1px dashed #9CA3AF;
         }
 
-        /* 流程步骤指示器 */
-        .flow-step-indicator {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--pipeline-primary);
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: var(--text-sm);
-            z-index: 3;
-            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-        }
-
-        .party-card.role-需求方 .flow-step-indicator { background: var(--role-need); }
-        .party-card.role-交付方 .flow-step-indicator { background: var(--role-deliver); }
-        .party-card.role-资金方 .flow-step-indicator { background: var(--role-fund); }
 
         .party-header {
             display: flex;
@@ -1014,7 +991,6 @@
                         {% for party in pipeline.parties_structure %}
                         {% if party.role_type == role_type %}
                         <div class="party-card role-{{ party.role_type }} {{ 'pending' if party.party.startswith('【待补齐】') else '' }}">
-                            <div class="flow-step-indicator">{{ outer_loop.index }}</div>
                             <div class="party-header">
                                 <div class="party-name">{{ party.party }}</div>
                                 <div class="party-role-badge {{ party.role_type }}">{{ party.role_type }}</div>

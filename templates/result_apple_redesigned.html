@@ -1635,13 +1635,28 @@
                         
                         <!-- 然后渲染其他参与方节点（围绕） -->
                         <div class="surrounding-nodes">
-                            {% set participant_counter = 0 %}
                             {% for party in path.parties_structure %}
                                 {% if not (party.party == '设计者（你）' or '你' in party.party) %}
+                                {% if loop.index == 2 %}
+                                    {% set pos_x = 20 %}
+                                    {% set pos_y = 20 %}
+                                {% elif loop.index == 3 %}
+                                    {% set pos_x = 80 %}
+                                    {% set pos_y = 20 %}
+                                {% elif loop.index == 4 %}
+                                    {% set pos_x = 80 %}
+                                    {% set pos_y = 80 %}
+                                {% elif loop.index == 5 %}
+                                    {% set pos_x = 20 %}
+                                    {% set pos_y = 80 %}
+                                {% else %}
+                                    {% set pos_x = 50 %}
+                                    {% set pos_y = 15 %}
+                                {% endif %}
                                 
                                 <div class="party-node participant surrounding-node" 
                                      data-node-id="party{{ loop.index }}"
-                                     style="left: {{ positions[participant_counter].x }}%; top: {{ positions[participant_counter].y }}%;">
+                                     style="left: {{ pos_x }}%; top: {{ pos_y }}%;">
                                     <div class="party-indicator"></div>
                                     <div class="party-name">{{ party.party }}</div>
                                     <div class="party-resources">
@@ -1658,7 +1673,6 @@
                                         {{ party.make_them_happy }}
                                     </div>
                                 </div>
-                                {% set participant_counter = participant_counter + 1 %}
                                 {% endif %}
                             {% endfor %}
                         </div>

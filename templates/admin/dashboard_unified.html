@@ -52,7 +52,7 @@
                     </div>
                 {% endif %}
             {% endwith %}
-            
+
             <!-- Tab 导航栏 -->
             <div class="admin-tabs">
                 <div class="admin-tab-nav">
@@ -63,6 +63,10 @@
                     <button class="admin-tab-btn" data-tab="knowledge" onclick="switchTab('knowledge')">
                         <i class="fas fa-database"></i>
                         知识库
+                    </button>
+                    <button class="admin-tab-btn" data-tab="models" onclick="switchTab('models')">
+                        <i class="fas fa-cogs"></i>
+                        模型管理
                     </button>
                 </div>
             </div>
@@ -166,7 +170,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="elegant-card-body">
                         <!-- 搜索和筛选 - 优雅设计 -->
                         <div class="search-section">
@@ -177,7 +181,7 @@
                                     </div>
                                     <input type="text" class="elegant-input" placeholder="搜索用户姓名或手机号..." id="user-search">
                                 </div>
-                                
+
                                 <div class="filter-group">
                                     <select class="elegant-select" id="user-role-filter">
                                         <option value="">所有角色</option>
@@ -191,7 +195,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- 用户卡片容器 -->
                         <div id="usersTableContainer" class="users-container">
                             <div class="loading-state">
@@ -343,43 +347,80 @@
                     <input type="file" id="fileInput" name="files" accept=".txt,.pdf,.doc,.docx,.xlsx,.csv,.md,.json" multiple>
                 </form>
             </div>
+
+            <!-- 模型管理 Tab 内容 -->
+            <div class="admin-tab-content" id="models-tab">
+                <div class="elegant-card">
+                    <div class="elegant-card-header">
+                        <div class="header-content">
+                            <div class="header-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="header-text">
+                                <h3 class="header-title">模型配置</h3>
+                                <p class="header-subtitle">选择和配置AI模型以适应不同场景</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="elegant-card-body">
+                        <form id="modelConfigForm">
+                            <div class="mb-4">
+                                <label for="modelSelection" class="form-label">默认模型选择</label>
+                                <select class="form-select" id="modelSelection" name="modelSelection">
+                                    <option value="gpt-4.1">gpt-4.1</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                    <option value="gpt-4o-mini">gpt-4o-mini</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="temperatureRange" class="form-label">Temperature (创造性)</label>
+                                <input type="range" class="form-range" id="temperatureRange" name="temperature" min="0" max="1" step="0.1" value="0.7">
+                                <span id="temperatureValue">0.7</span>
+                            </div>
+
+                            <button type="submit" class="btn-elegant">保存配置</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
-    
+
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/future-enhanced-interactions.js') }}"></script>
     <script src="{{ url_for('static', filename='js/user-menu.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
     <script src="{{ url_for('static', filename='js/admin-users.js') }}"></script>
-    
+
     <script>
         // Tab切换功能
         function switchTab(tabName) {
             console.log('Switching to tab:', tabName);
-            
+
             // 隐藏所有tab内容
             document.querySelectorAll('.admin-tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
+
             // 移除所有tab按钮的active状态
             document.querySelectorAll('.admin-tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // 显示对应tab内容
             const targetTab = document.getElementById(tabName + '-tab');
             if (targetTab) {
                 targetTab.classList.add('active');
             }
-            
+
             // 激活对应tab按钮
             const targetBtn = document.querySelector(`[data-tab="${tabName}"]`);
             if (targetBtn) {
                 targetBtn.classList.add('active');
             }
-            
+
             // 如果切换到用户管理，加载用户数据
             if (tabName === 'users') {
                 if (typeof loadUsersData === 'function') {
@@ -389,20 +430,20 @@
                 }
             }
         }
-        
+
         // 加载用户数据
         async function loadUserData() {
             try {
                 const response = await fetch('/admin/api/users');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     // 更新统计数据
                     document.getElementById('total-users').textContent = data.stats.total;
                     document.getElementById('active-users').textContent = data.stats.active;
                     document.getElementById('admin-users').textContent = data.stats.admin;
                     document.getElementById('recent-users').textContent = data.stats.recent;
-                    
+
                     // 更新用户表格
                     updateUserTable(data.users);
                 } else {
@@ -418,11 +459,11 @@
                 `;
             }
         }
-        
+
         // 更新用户表格
         function updateUserTable(users) {
             const content = document.getElementById('users-content');
-            
+
             if (users.length === 0) {
                 content.innerHTML = `
                     <div class="text-center py-5">
@@ -433,7 +474,7 @@
                 `;
                 return;
             }
-            
+
             let tableHTML = `
                 <div class="table-responsive p-4">
                     <table class="table table-hover">
@@ -449,7 +490,7 @@
                         </thead>
                         <tbody>
             `;
-            
+
             users.forEach(user => {
                 tableHTML += `
                     <tr>
@@ -490,25 +531,25 @@
                     </tr>
                 `;
             });
-            
+
             tableHTML += `
                         </tbody>
                     </table>
                 </div>
             `;
-            
+
             content.innerHTML = tableHTML;
         }
-        
+
         // 编辑用户
         function editUser(userId) {
             window.location.href = `/admin/users/${userId}/edit?redirect_to=dashboard`;
         }
-        
+
         // 切换用户状态
         async function toggleUserStatus(userId, active) {
             if (!confirm(`确定要${active ? '启用' : '禁用'}该用户吗？`)) return;
-            
+
             try {
                 const response = await fetch(`/admin/users/${userId}/toggle`, {
                     method: 'POST',
@@ -517,7 +558,7 @@
                     },
                     body: JSON.stringify({ active: active })
                 });
-                
+
                 const result = await response.json();
                 if (result.success) {
                     loadUserData(); // 重新加载数据
@@ -529,16 +570,16 @@
                 showToast('操作失败，请重试', 'error');
             }
         }
-        
+
         // 删除用户
         async function deleteUser(userId) {
             if (!confirm('确定要删除该用户吗？此操作不可恢复！')) return;
-            
+
             try {
                 const response = await fetch(`/admin/users/${userId}/delete`, {
                     method: 'POST'
                 });
-                
+
                 const result = await response.json();
                 if (result.success) {
                     loadUserData(); // 重新加载数据
@@ -550,7 +591,7 @@
                 showToast('删除失败，请重试', 'error');
             }
         }
-        
+
         // 知识库管理功能
         async function toggleKnowledgeStatus(itemId, status) {
             try {
@@ -561,7 +602,7 @@
                     },
                     body: JSON.stringify({ status: status })
                 });
-                
+
                 const result = await response.json();
                 if (result.success) {
                     location.reload(); // 刷新页面
@@ -572,15 +613,15 @@
                 showToast('操作失败，请重试', 'error');
             }
         }
-        
+
         async function deleteKnowledge(itemId) {
             if (!confirm('确定要删除该知识库文件吗？')) return;
-            
+
             try {
                 const response = await fetch(`/admin/knowledge/${itemId}/delete`, {
                     method: 'POST'
                 });
-                
+
                 const result = await response.json();
                 if (result.success) {
                     location.reload(); // 刷新页面
@@ -591,14 +632,14 @@
                 showToast('删除失败，请重试', 'error');
             }
         }
-        
+
         // 文件上传处理
         document.getElementById('fileInput').addEventListener('change', function() {
             if (this.files.length > 0) {
                 document.getElementById('uploadForm').submit();
             }
         });
-        
+
         // 提示信息
         function showToast(message, type) {
             const toast = document.createElement('div');
@@ -613,15 +654,80 @@
                 }
             }, 5000);
         }
-        
+
+        // 加载模型配置
+        async function loadModelConfig() {
+            try {
+                const response = await fetch('/admin/api/model_config');
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('modelSelection').value = data.config.model;
+                    document.getElementById('temperatureRange').value = data.config.temperature;
+                    if (document.getElementById('temperatureValue')) {
+                        document.getElementById('temperatureValue').textContent = data.config.temperature;
+                    }
+                } else {
+                    console.error('加载模型配置失败:', data.message);
+                    showToast('加载模型配置失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载模型配置失败:', error);
+                showToast('加载模型配置失败，请重试', 'error');
+            }
+        }
+
+        // 保存模型配置
+        async function saveModelConfig() {
+            const model = document.getElementById('modelSelection').value;
+            const temperature = document.getElementById('temperatureRange').value;
+
+            try {
+                const response = await fetch('/admin/api/model_config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ model: model, temperature: parseFloat(temperature) })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast('模型配置保存成功', 'success');
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('保存配置失败，请重试', 'error');
+            }
+        }
+
         // 页面加载时默认显示用户管理tab
         document.addEventListener('DOMContentLoaded', function() {
             console.log('交互功能已初始化');
             switchTab('users');
-            
+
             // 确保用户数据加载函数可用
             if (typeof loadUsersData === 'function') {
                 console.log('使用 admin-users.js 中的 loadUsersData 函数');
+            }
+
+            // 加载模型配置
+            loadModelConfig();
+
+            // Temperature滑块更新显示
+            if (document.getElementById('temperatureRange')) {
+                document.getElementById('temperatureRange').addEventListener('input', function() {
+                    document.getElementById('temperatureValue').textContent = this.value;
+                });
+            }
+
+            // 模型配置表单提交
+            if (document.getElementById('modelConfigForm')) {
+                document.getElementById('modelConfigForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    saveModelConfig();
+                });
             }
         });
     </script>

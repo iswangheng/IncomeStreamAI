@@ -22,8 +22,23 @@ class AngelaAI:
     """Angela - 非劳务收入路径设计AI服务"""
     
     def __init__(self):
-        self.model = "gpt-4o-mini"  # 使用更快的mini版本，响应速度更快
-        self.max_tokens = 2500  # 减少token数量，加快响应
+        self.default_model = "gpt-4o-mini"  # 默认模型
+        self.default_max_tokens = 2500  # 默认token数量
+    
+    def get_model_config(self, config_type='main_analysis'):
+        """从数据库获取模型配置"""
+        try:
+            from models import ModelConfig
+            config = ModelConfig.get_config(config_type, self.default_model)
+            return config
+        except Exception as e:
+            logger.warning(f"Failed to get model config: {e}, using defaults")
+            return {
+                'model': self.default_model,
+                'temperature': 0.7,
+                'max_tokens': self.default_max_tokens,
+                'timeout': 45
+            }
     
     def _call_openai_with_retry(self, **kwargs):
         """调用OpenAI API，带简单重试机制"""
@@ -404,18 +419,21 @@ class AngelaAI:
             logger.info(f"Assistant: {assistant_prompt[:500]}..." if len(assistant_prompt) > 500 else f"Assistant: {assistant_prompt}")
             logger.info(f"================================")
             
+            # 获取模型配置
+            model_config = self.get_model_config('main_analysis')
+            
             # 调用OpenAI API，带重试机制
             response = self._call_openai_with_retry(
-                model=self.model,
+                model=model_config['model'],
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_content},
                     {"role": "assistant", "content": assistant_prompt}
                 ],
                 response_format={"type": "json_object"},
-                temperature=0.7,
-                max_tokens=self.max_tokens,
-                timeout=45  # 添加明确的请求级超时
+                temperature=model_config['temperature'],
+                max_tokens=model_config['max_tokens'],
+                timeout=model_config['timeout']
             )
             
             # 如果响应为None（网络错误），返回备用方案

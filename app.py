@@ -59,7 +59,7 @@ login_manager.login_message_category = 'info'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # 导入所有模型
-from models import User, KnowledgeItem, AnalysisResult
+from models import User, KnowledgeItem, AnalysisResult, ModelConfig
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -97,6 +97,19 @@ with app.app_context():
         default_user.name = '系统管理员'
         db.session.commit()
         print("已将18302196515用户设置为管理员")
+    
+    # 初始化默认模型配置
+    default_configs = [
+        ('main_analysis', 'gpt-4o-mini', 0.7, 2500, 45),
+        ('chat', 'gpt-4o', 0.7, 1500, 30),
+        ('fallback', 'gpt-4o-mini', 0.5, 2000, 60)
+    ]
+    
+    for config_name, model_name, temperature, max_tokens, timeout in default_configs:
+        existing_config = ModelConfig.query.filter_by(config_name=config_name).first()
+        if not existing_config:
+            ModelConfig.set_config(config_name, model_name, temperature, max_tokens, timeout)
+            print(f"已创建默认模型配置: {config_name} -> {model_name}")
 
 @app.route('/')
 @login_required
@@ -1911,6 +1924,81 @@ def generate_fallback_suggestions(form_data):
 def user_profile():
     """普通用户的个人信息页面"""
     return render_template('user_profile_apple.html')
+
+@app.route('/admin/models/config', methods=['POST'])
+@login_required
+@admin_required
+def save_model_config():
+    """保存模型配置"""
+    try:
+        config = request.get_json()
+        
+        # 验证配置参数
+        valid_models = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini']
+        
+        main_model = config.get('main_analysis_model')
+        chat_model = config.get('chat_model')
+        fallback_model = config.get('fallback_model')
+        
+        if not all(model in valid_models for model in [main_model, chat_model, fallback_model]):
+            return jsonify({'success': False, 'message': '无效的模型选择'}), 400
+        
+        # 这里可以保存到数据库或配置文件
+        # 目前先更新 openai_service 中的配置
+        from openai_service import angela_ai
+        angela_ai.model = main_model
+        angela_ai.max_tokens = int(config.get('max_tokens', 2500))
+        
+        # 可以考虑将配置保存到数据库或环境变量
+        app.logger.info(f"模型配置已更新: 主模型={main_model}, 对话模型={chat_model}, 备用模型={fallback_model}")
+        
+        return jsonify({
+            'success': True,
+            'message': '模型配置保存成功',
+            'config': config
+        })
+        
+    except Exception as e:
+        app.logger.error(f"保存模型配置失败: {str(e)}")
+        return jsonify({'success': False, 'message': '保存失败，请重试'}), 500
+
+@app.route('/admin/models/test', methods=['POST'])
+@login_required
+@admin_required
+def test_model_connection():
+    """测试模型连接"""
+    try:
+        import time
+        from openai_service import client
+        
+        start_time = time.time()
+        
+        # 发送简单的测试请求
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": "请回复'连接测试成功'"}],
+            max_tokens=10,
+            temperature=0
+        )
+        
+        response_time = int((time.time() - start_time) * 1000)  # 转换为毫秒
+        
+        if response.choices[0].message.content:
+            return jsonify({
+                'success': True,
+                'message': '模型连接测试成功',
+                'response_time': response_time,
+                'model_response': response.choices[0].message.content.strip()
+            })
+        else:
+            return jsonify({'success': False, 'message': 'API连接成功但响应为空'}), 500
+            
+    except Exception as e:
+        app.logger.error(f"模型连接测试失败: {str(e)}")
+        return jsonify({
+            'success': False, 
+            'message': f'连接测试失败: {str(e)}'
+        }), 500
 
 @app.route('/profile/update', methods=['POST'])
 @login_required

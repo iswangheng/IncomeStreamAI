@@ -151,41 +151,52 @@
                     </div>
                 </div>
 
-                <!-- 用户表格 -->
-                <div class="content-card">
-                    <div class="content-card-header">
-                        <h3 class="content-card-title">
-                            <i class="fas fa-users"></i>
-                            用户列表
-                        </h3>
+                <!-- 用户列表 - 优雅卡片设计 -->
+                <div class="elegant-card">
+                    <div class="elegant-card-header">
+                        <div class="header-content">
+                            <div class="header-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="header-text">
+                                <h3 class="header-title">用户列表</h3>
+                                <p class="header-subtitle">管理系统中的所有用户账户</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="content-card-body">
-                        <!-- 搜索和筛选 -->
-                        <div class="search-filters">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <input type="text" class="form-control" placeholder="搜索用户姓名或手机号..." id="user-search">
+                    
+                    <div class="elegant-card-body">
+                        <!-- 搜索和筛选 - 优雅设计 -->
+                        <div class="search-section">
+                            <div class="search-container">
+                                <div class="search-input-group">
+                                    <div class="input-icon">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <input type="text" class="elegant-input" placeholder="搜索用户姓名或手机号..." id="user-search">
                                 </div>
-                                <div class="col-md-3">
-                                    <select class="form-control" id="user-role-filter">
+                                
+                                <div class="filter-group">
+                                    <select class="elegant-select" id="user-role-filter">
                                         <option value="">所有角色</option>
                                         <option value="admin">管理员</option>
                                         <option value="user">普通用户</option>
                                     </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <button class="btn-elegant" onclick="searchUsers()">
+                                    <button class="search-btn" onclick="searchUsers()">
                                         <i class="fas fa-search"></i>
-                                        搜索
+                                        <span>搜索</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                         
-                        <div id="usersTableContainer">
-                            <div class="text-center p-4">
-                                <div class="loading-skeleton" style="height: 100px; border-radius: 12px;"></div>
-                                <p class="mt-3" style="color: var(--text-secondary);">正在加载用户数据...</p>
+                        <!-- 用户卡片容器 -->
+                        <div id="usersTableContainer" class="users-container">
+                            <div class="loading-state">
+                                <div class="loading-animation">
+                                    <div class="loading-spinner"></div>
+                                </div>
+                                <p class="loading-text">正在加载用户数据...</p>
                             </div>
                         </div>
                     </div>

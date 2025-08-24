@@ -5,7 +5,7 @@ let currentUsersData = [];
 // 加载用户数据
 async function loadUsersData() {
     console.log('用户管理页面功能已初始化');
-    
+
     try {
         const response = await fetch('/admin/api/users', {
             method: 'GET',
@@ -30,7 +30,7 @@ async function loadUsersData() {
     } catch (error) {
         console.error('获取用户数据失败:', error);
         showToast('获取用户数据失败，请稍后重试', 'error');
-        
+
         // 显示错误状态
         document.getElementById('usersTableContainer').innerHTML = `
             <div class="empty-state">
@@ -56,122 +56,118 @@ function updateUserStats(stats) {
     document.getElementById('recent-users').textContent = stats.recent;
 }
 
-// 渲染用户表格
+// 渲染用户卡片列表
 function renderUsersTable(users) {
     const container = document.getElementById('usersTableContainer');
-    
+
     if (!users || users.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <div class="empty-icon">
                     <i class="fas fa-users"></i>
                 </div>
-                <h4 class="empty-title">暂无用户数据</h4>
-                <p class="empty-description">系统中还没有注册用户。</p>
+                <h3 class="empty-title">暂无用户数据</h3>
+                <p class="empty-description">系统中还没有注册用户，点击添加用户开始管理。</p>
             </div>
         `;
         return;
     }
 
-    let tableHTML = `
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>用户信息</th>
-                    <th>角色</th>
-                    <th>状态</th>
-                    <th>注册时间</th>
-                    <th>最后登录</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+    let cardsHTML = '<div class="users-grid">';
 
     users.forEach((user, index) => {
         const isCurrentUser = user.current_user_id === user.id;
-        
-        tableHTML += `
-            <tr class="slide-up" style="animation-delay: ${index * 0.05}s;">
-                <td>
-                    <div style="display: flex; align-items: center;">
-                        <div style="width: 40px; height: 40px; background: ${user.is_admin ? 'var(--color-accent)' : 'var(--color-primary)'}; color: var(--color-text-inverse); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-right: var(--space-3); font-weight: var(--font-semibold);">
-                            <i class="fas ${user.is_admin ? 'fa-user-shield' : 'fa-user'}"></i>
+
+        cardsHTML += `
+            <div class="user-card fade-in" style="animation-delay: ${index * 0.1}s;">
+                <div class="user-card-header">
+                    <div class="user-avatar ${user.is_admin ? 'admin' : 'user'}">
+                        <i class="fas ${user.is_admin ? 'fa-user-shield' : 'fa-user'}"></i>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">
+                            ${user.name}
+                            ${isCurrentUser ? '<span class="current-user-badge">当前用户</span>' : ''}
                         </div>
-                        <div>
-                            <div style="font-weight: var(--font-medium); color: var(--color-text-primary);">
-                                ${user.name}
-                                ${isCurrentUser ? '<span style="font-size: var(--text-xs); color: var(--color-primary); margin-left: var(--space-2);">(当前用户)</span>' : ''}
-                            </div>
-                            <div style="font-size: var(--text-xs); color: var(--color-text-secondary);">${user.phone}</div>
+                        <div class="user-phone">${user.phone}</div>
+                    </div>
+                    <div class="status-indicator ${user.is_active ? 'active' : 'inactive'}" title="${user.is_active ? '用户正常' : '用户已禁用'}">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                </div>
+
+                <div class="user-card-body">
+                    <div class="user-details">
+                        <div class="detail-item">
+                            <span class="detail-label">角色</span>
+                            <span class="role-badge ${user.is_admin ? 'admin' : 'user'}">
+                                <i class="fas ${user.is_admin ? 'fa-shield-alt' : 'fa-user'}"></i>
+                                ${user.is_admin ? '管理员' : '普通用户'}
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">状态</span>
+                            <span class="status-badge ${user.is_active ? 'active' : 'inactive'}">
+                                <i class="fas fa-${user.is_active ? 'check-circle' : 'times-circle'}"></i>
+                                ${user.is_active ? '正常' : '禁用'}
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">注册时间</span>
+                            <span class="detail-value">${user.created_at || '未知'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最后登录</span>
+                            <span class="detail-value">${user.last_login || '从未登录'}</span>
                         </div>
                     </div>
-                </td>
-                <td>
-                    ${user.is_admin ? 
-                        '<span class="status-badge admin">管理员</span>' : 
-                        '<span class="status-badge user">普通用户</span>'
-                    }
-                </td>
-                <td>
-                    ${user.active ? 
-                        '<span class="status-badge active">活跃</span>' : 
-                        '<span class="status-badge paused">停用</span>'
-                    }
-                </td>
-                <td style="color: var(--color-text-secondary);">
-                    ${user.created_at || '未知'}
-                </td>
-                <td style="color: var(--color-text-secondary);">
-                    ${user.last_login || '从未登录'}
-                </td>
-                <td>
+                </div>
+
+                <div class="user-card-footer">
                     <div class="action-buttons">
-                        <a href="/admin/users/${user.id}/edit?redirect_to=dashboard" class="action-btn edit" title="编辑用户">
+                        <button class="action-btn edit" onclick="editUser(${user.id})" title="编辑用户">
                             <i class="fas fa-edit"></i>
-                        </a>
-                        
+                            <span>编辑</span>
+                        </button>
                         ${!isCurrentUser ? `
-                        <form method="post" action="/admin/users/${user.id}/delete" 
-                              onsubmit="return confirm('确定要删除用户 ${user.name} 吗？此操作不可恢复！')" style="display: inline;">
-                            <button type="submit" class="action-btn delete" title="删除用户">
-                                <i class="fas fa-trash"></i>
+                            <button class="action-btn ${user.is_active ? 'disable' : 'enable'}" onclick="toggleUserStatus(${user.id}, ${!user.is_active})" title="${user.is_active ? '禁用用户' : '启用用户'}">
+                                <i class="fas fa-${user.is_active ? 'ban' : 'check'}"></i>
+                                <span>${user.is_active ? '禁用' : '启用'}</span>
                             </button>
-                        </form>
-                        ` : ''}
+                            <button class="action-btn delete" onclick="deleteUser(${user.id})" title="删除用户">
+                                <i class="fas fa-trash"></i>
+                                <span>删除</span>
+                            </button>
+                        ` : '<div class="current-user-label"><i class="fas fa-star"></i> 当前用户</div>'}
                     </div>
-                </td>
-            </tr>
+                </div>
+            </div>
         `;
     });
 
-    tableHTML += `
-            </tbody>
-        </table>
-    `;
-
-    container.innerHTML = tableHTML;
+    cardsHTML += '</div>';
+    container.innerHTML = cardsHTML;
 }
 
 // 过滤用户
 function filterUsers() {
     const searchTerm = document.getElementById('userSearch').value.toLowerCase();
     const statusFilter = document.getElementById('userStatusFilter').value;
-    
+
     let filteredUsers = currentUsersData.filter(user => {
         const matchesSearch = user.name.toLowerCase().includes(searchTerm) || 
                              user.phone.includes(searchTerm);
-        
+
         let matchesStatus = true;
         if (statusFilter === 'active') {
             matchesStatus = user.active;
         } else if (statusFilter === 'inactive') {
             matchesStatus = !user.active;
         }
-        
+
         return matchesSearch && matchesStatus;
     });
-    
+
     renderUsersTable(filteredUsers);
 }
 
@@ -183,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>添加中...';
-            
+
             // 如果提交失败，恢复按钮状态
             setTimeout(() => {
                 submitBtn.disabled = false;
@@ -197,16 +193,16 @@ document.addEventListener('DOMContentLoaded', function() {
 function exportUsers() {
     // 获取当前显示的用户数据
     const users = currentUsersData || [];
-    
+
     if (users.length === 0) {
         showToast('暂无用户数据可导出', 'error');
         return;
     }
-    
+
     // 构建CSV数据
     const headers = ['用户ID', '姓名', '手机号', '角色', '状态', '注册时间', '最后登录'];
     const csvData = [headers];
-    
+
     users.forEach(user => {
         csvData.push([
             user.id,
@@ -218,34 +214,34 @@ function exportUsers() {
             user.last_login || '从未登录'
         ]);
     });
-    
+
     // 转换为CSV格式
     const csvContent = csvData.map(row => 
         row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
     ).join('\n');
-    
+
     // 添加BOM以支持中文
     const bom = '\uFEFF';
     const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
-    
+
     // 创建下载链接
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    
+
     // 生成文件名（包含当前日期）
     const now = new Date();
     const dateStr = now.getFullYear() + 
         String(now.getMonth() + 1).padStart(2, '0') + 
         String(now.getDate()).padStart(2, '0');
     link.setAttribute('download', `用户数据导出_${dateStr}.csv`);
-    
+
     // 触发下载
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     showToast(`成功导出 ${users.length} 个用户数据`, 'success');
 }
 
@@ -264,3 +260,34 @@ function refreshUsers() {
 
 // 确保refreshUsers函数全局可访问
 window.refreshUsers = refreshUsers;
+
+// 优雅的Toast提示函数
+function showToast(message, type = 'info') {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+
+    // 创建toast元素
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; margin-left: auto;">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    // 添加到页面
+    document.body.appendChild(toast);
+
+    // 自动移除
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }
+    }, 5000);
+}

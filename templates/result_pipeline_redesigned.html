@@ -298,7 +298,7 @@
             color: var(--color-text-secondary);
         }
 
-        /* 参与方结构 */
+        /* 参与方结构 - 重新设计 */
         .parties-section {
             margin: var(--space-8) 0;
         }
@@ -313,10 +313,133 @@
             color: var(--color-text-primary);
         }
 
-        .parties-grid {
+        /* 设计者卡片 - 统筹全局 */
+        .designer-section {
+            margin-bottom: var(--space-8);
+        }
+
+        .designer-card {
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-6);
+            color: white;
+            box-shadow: 0 16px 32px rgba(255, 215, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .designer-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        }
+
+        .designer-crown {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-3);
+            color: #FFD700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .designer-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: var(--space-2);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .designer-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: var(--space-4);
+        }
+
+        .designer-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: var(--space-4);
+            text-align: left;
+        }
+
+        .designer-detail-item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: var(--radius-lg);
+            padding: var(--space-3);
+            backdrop-filter: blur(10px);
+        }
+
+        .designer-detail-title {
+            font-weight: 600;
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+
+        /* 业务流程区域 */
+        .business-flow-section {
+            position: relative;
+        }
+
+        .flow-title {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-6);
+            position: relative;
+        }
+
+        .flow-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--pipeline-primary);
+            border-radius: 2px;
+        }
+
+        .business-flow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-6);
+            position: relative;
+        }
+
+        /* 连接线效果 */
+        .business-flow-grid::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--pipeline-primary), transparent);
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            .business-flow-grid::before {
+                display: none;
+            }
         }
 
         .party-card {
@@ -327,20 +450,54 @@
             border: 2px solid transparent;
             position: relative;
             transition: all 0.3s ease;
+            z-index: 2;
         }
 
         .party-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.2);
         }
 
-        .party-card.role-需求方 { border-color: var(--role-need); }
-        .party-card.role-交付方 { border-color: var(--role-deliver); }
-        .party-card.role-资金方 { border-color: var(--role-fund); }
+        .party-card.role-需求方 { 
+            border-color: var(--role-need);
+            background: linear-gradient(135deg, #FFF5F5, #FFEBEE);
+        }
+        .party-card.role-交付方 { 
+            border-color: var(--role-deliver);
+            background: linear-gradient(135deg, #F0FDFF, #E0F7FA);
+        }
+        .party-card.role-资金方 { 
+            border-color: var(--role-fund);
+            background: linear-gradient(135deg, #F3F8FF, #E3F2FD);
+        }
         .party-card.role-统筹方 { 
             border-color: var(--role-coordinate);
             background: linear-gradient(135deg, #F8F9FA, #E8F5E8);
         }
+
+        /* 流程步骤指示器 */
+        .flow-step-indicator {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--pipeline-primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: var(--text-sm);
+            z-index: 3;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .party-card.role-需求方 .flow-step-indicator { background: var(--role-need); }
+        .party-card.role-交付方 .flow-step-indicator { background: var(--role-deliver); }
+        .party-card.role-资金方 .flow-step-indicator { background: var(--role-fund); }
 
         .party-header {
             display: flex;
@@ -599,8 +756,20 @@
                 gap: var(--space-4);
             }
             
-            .parties-grid {
+            .business-flow-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .designer-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .designer-card {
+                padding: var(--space-4);
+            }
+            
+            .designer-title {
+                font-size: 1.4rem;
             }
         }
 
@@ -768,33 +937,81 @@
                     <i class="fas fa-users"></i>
                     关键参与方结构
                 </div>
-                <div class="parties-grid">
-                    {% for party in pipeline.parties_structure %}
-                    <div class="party-card role-{{ party.role_type }}">
-                        <div class="party-header">
-                            <div class="party-name">{{ party.party }}</div>
-                            <div class="party-role-badge {{ party.role_type }}">{{ party.role_type }}</div>
-                        </div>
-                        <div class="party-content">
-                            <div class="party-section">
-                                <div class="party-section-title">提供资源</div>
+                
+                <!-- 设计者统筹区域 -->
+                {% for party in pipeline.parties_structure %}
+                {% if party.role_type == '统筹方' %}
+                <div class="designer-section">
+                    <div class="designer-card">
+                        <div class="designer-crown">👑</div>
+                        <div class="designer-title">{{ party.party }}</div>
+                        <div class="designer-subtitle">项目统筹设计者 • 全局掌控者</div>
+                        
+                        <div class="designer-details">
+                            <div class="designer-detail-item">
+                                <div class="designer-detail-title">🎯 核心资源</div>
                                 <div class="resources-list">
                                     {% for resource in party.resources %}
-                                    <span class="resource-tag">{{ resource }}</span>
+                                    <span class="resource-tag" style="background: rgba(255,255,255,0.3); color: white;">{{ resource }}</span>
                                     {% endfor %}
                                 </div>
                             </div>
-                            <div class="party-section">
-                                <div class="party-section-title">在闭环中的价值</div>
+                            <div class="designer-detail-item">
+                                <div class="designer-detail-title">💎 闭环价值</div>
                                 <div>{{ party.role_value }}</div>
                             </div>
-                            <div class="party-section">
-                                <div class="party-section-title">如何让TA高兴</div>
+                            <div class="designer-detail-item">
+                                <div class="designer-detail-title">🚀 价值实现</div>
                                 <div>{{ party.make_them_happy }}</div>
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <!-- 业务流程区域 -->
+                <div class="business-flow-section">
+                    <div class="flow-title">
+                        <i class="fas fa-arrow-right"></i> 业务价值流程 <i class="fas fa-arrow-left"></i>
+                    </div>
+                    
+                    <div class="business-flow-grid">
+                        {% set role_order = ['需求方', '交付方', '资金方'] %}
+                        
+                        {% for role_type in role_order %}
+                        {% set outer_loop = loop %}
+                        {% for party in pipeline.parties_structure %}
+                        {% if party.role_type == role_type %}
+                        <div class="party-card role-{{ party.role_type }}">
+                            <div class="flow-step-indicator">{{ outer_loop.index }}</div>
+                            <div class="party-header">
+                                <div class="party-name">{{ party.party }}</div>
+                                <div class="party-role-badge {{ party.role_type }}">{{ party.role_type }}</div>
+                            </div>
+                            <div class="party-content">
+                                <div class="party-section">
+                                    <div class="party-section-title">提供资源</div>
+                                    <div class="resources-list">
+                                        {% for resource in party.resources %}
+                                        <span class="resource-tag">{{ resource }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="party-section">
+                                    <div class="party-section-title">在闭环中的价值</div>
+                                    <div>{{ party.role_value }}</div>
+                                </div>
+                                <div class="party-section">
+                                    <div class="party-section-title">如何让TA高兴</div>
+                                    <div>{{ party.make_them_happy }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
             {% endif %}

@@ -332,8 +332,6 @@
         .path-id {
             font-size: var(--text-xs);
             color: var(--color-text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
             margin-bottom: var(--space-1);
         }
 
@@ -1628,7 +1626,7 @@
         <div class="path-card fade-in-up animate-delay-{{ loop.index + 2 }}">
             <div class="path-header">
                 <div class="path-title-section">
-                    <div class="path-id">{{ path.id or 'PATH_' + loop.index|string }}</div>
+                    <div class="path-id">{{ path.id or '管道' + ['一', '二', '三', '四', '五'][loop.index0] if loop.index0 < 5 else '管道' + loop.index|string }}</div>
                     <h3 class="path-name">{{ path.name }}</h3>
                     {% if path.income_mechanism %}
                     <div class="income-mechanism">

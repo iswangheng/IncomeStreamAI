@@ -790,7 +790,7 @@ class AngelaAI:
             },
             "pipelines": [{
                 "id":
-                "pipeline_1",
+                "管道一",
                 "name":
                 "资源整合撮合管道",
                 "income_mechanism": {

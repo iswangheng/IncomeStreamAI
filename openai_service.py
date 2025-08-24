@@ -68,6 +68,34 @@ class AngelaAI:
                 # 对于其他错误也返回None
                 return None
 
+    def format_role_to_chinese(self, role_identifier: str) -> str:
+        """将英文角色标识符转换为中文显示"""
+        role_mapping = {
+            # 需求方角色
+            'enterprise_owner': '企业主',
+            'store_owner': '实体店主', 
+            'department_head': '部门负责人',
+            'brand_manager': '主理人',
+            # 交付方角色
+            'product_provider': '产品方',
+            'service_provider': '服务方',
+            'traffic_provider': '流量方',
+            'other_provider': '其他资源方'
+        }
+        return role_mapping.get(role_identifier, role_identifier)
+
+    def get_role_type_by_identifier(self, role_identifier: str) -> str:
+        """根据角色标识符获取角色类型（需求方/交付方等）"""
+        demand_roles = ['enterprise_owner', 'store_owner', 'department_head', 'brand_manager']
+        delivery_roles = ['product_provider', 'service_provider', 'traffic_provider', 'other_provider']
+        
+        if role_identifier in demand_roles:
+            return '需求方'
+        elif role_identifier in delivery_roles:
+            return '交付方'
+        else:
+            return '其他方'
+
     def format_make_happy(self, make_happy_data) -> str:
         """格式化动机标签数据"""
         if not make_happy_data:
@@ -372,8 +400,12 @@ class AngelaAI:
                                         '')  # 修正：使用make_happy而不是makeHappy
                 notes = person.get('notes', '')
 
+                # 将英文角色标识符转换为中文显示名称
+                role_chinese = self.format_role_to_chinese(role) if role else "未指定"
+                role_type = self.get_role_type_by_identifier(role) if role else "其他方"
+
                 user_content += f"""
-- 人物：{name}｜角色：{role if role else "未指定"}
+- 人物：{name}｜角色：{role_chinese}（{role_type}）
   资源：{", ".join(resources) if resources else "无"}
   动机标签（如何让TA高兴）：{self.format_make_happy(make_happy)}
   备注：{notes if notes else "无"}"""
@@ -749,7 +781,13 @@ class AngelaAI:
             name = person.get('name', f'关键人物{i+1}')
             resources = person.get('resources', ['专业技能', '客户基础'])
             make_happy = person.get('make_happy', ['获得收益', '扩展业务'])
-            role_type = role_type_mapping.get(i, "交付方")  # 超过2个的默认为交付方
+            
+            # 如果有原始role信息，优先使用role类型判断，否则使用索引映射
+            original_role = person.get('role', '')
+            if original_role:
+                role_type = self.get_role_type_by_identifier(original_role)
+            else:
+                role_type = role_type_mapping.get(i, "交付方")  # 超过2个的默认为交付方
 
             parties_structure.append({
                 "party":

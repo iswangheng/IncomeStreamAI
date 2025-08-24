@@ -360,6 +360,7 @@ def _handle_analysis_execution(form_data, session):
             # 创建AnalysisResult实例
             analysis_result = AnalysisResult(
                 id=result_id,
+                user_id=current_user.id,  # 关联当前用户
                 form_data=json.dumps(form_data, ensure_ascii=False),
                 result_data=json.dumps(suggestions, ensure_ascii=False),
                 project_name=form_data.get('projectName', ''),
@@ -430,6 +431,7 @@ def _handle_analysis_execution(form_data, session):
                 fallback_id = str(uuid.uuid4())
                 analysis_result = AnalysisResult(
                     id=fallback_id,
+                    user_id=current_user.id,  # 关联当前用户
                     form_data=json.dumps(form_data, ensure_ascii=False),
                     result_data=json.dumps(fallback_result, ensure_ascii=False),
                     project_name=form_data.get('projectName', ''),
@@ -715,6 +717,7 @@ def results():
 
                         analysis_result = AnalysisResult(
                             id=fallback_id,
+                            user_id=current_user.id,  # 关联当前用户
                             form_data=json.dumps(form_data, ensure_ascii=False),
                             result_data=json.dumps(fallback_result, ensure_ascii=False),
                             project_name=form_data.get('projectName', ''),
@@ -1108,10 +1111,15 @@ def analysis_history():
     try:
         from models import AnalysisResult
 
-        # 获取所有分析记录，按创建时间倒序
-        analysis_records = AnalysisResult.query.order_by(AnalysisResult.created_at.desc()).all()
-
-        app.logger.info(f"Found {len(analysis_records)} analysis records")
+        # 根据用户身份显示不同的记录
+        if current_user.is_admin:
+            # 管理员可以看到所有分析记录
+            analysis_records = AnalysisResult.query.order_by(AnalysisResult.created_at.desc()).all()
+            app.logger.info(f"Admin user viewing {len(analysis_records)} analysis records")
+        else:
+            # 普通用户只能看到自己的分析记录
+            analysis_records = AnalysisResult.query.filter_by(user_id=current_user.id).order_by(AnalysisResult.created_at.desc()).all()
+            app.logger.info(f"User {current_user.id} viewing {len(analysis_records)} analysis records")
 
         return render_template('history_apple.html', analysis_records=analysis_records)
 
@@ -1135,11 +1143,16 @@ def view_analysis_record(record_id):
             flash('找不到指定的分析记录', 'error')
             return redirect(url_for('analysis_history'))
 
+        # 权限检查：普通用户只能查看自己的记录，管理员可以查看所有记录
+        if not current_user.is_admin and record.user_id != current_user.id:
+            flash('您没有权限查看此分析记录', 'error')
+            return redirect(url_for('analysis_history'))
+
         # 解析JSON数据
         form_data = json.loads(record.form_data) if record.form_data else {}
         result_data = json.loads(record.result_data) if record.result_data else {}
 
-        app.logger.info(f"Viewing analysis record: {record_id}")
+        app.logger.info(f"User {current_user.id} viewing analysis record: {record_id}")
 
         return render_template('result_apple_redesigned.html',
                              form_data=form_data,

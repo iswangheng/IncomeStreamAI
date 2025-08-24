@@ -114,6 +114,7 @@ class AnalysisResult(db.Model):
     __tablename__ = 'analysis_results'
     
     id = db.Column(db.String(36), primary_key=True)  # UUID
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # 关联用户
     form_data = db.Column(db.Text, nullable=False)  # JSON格式的表单数据
     result_data = db.Column(db.Text, nullable=False)  # JSON格式的分析结果
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -124,6 +125,9 @@ class AnalysisResult(db.Model):
     project_stage = db.Column(db.String(100), nullable=True)
     team_size = db.Column(db.Integer, nullable=True, default=0)
     analysis_type = db.Column(db.String(50), nullable=False, default='ai_analysis')  # ai_analysis, fallback
+    
+    # 添加关联关系
+    user = db.relationship('User', backref='analysis_results', lazy=True)
     
     def __repr__(self):
         return f'<AnalysisResult {self.project_name} - {self.created_at}>'

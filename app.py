@@ -1925,43 +1925,6 @@ def user_profile():
     """普通用户的个人信息页面"""
     return render_template('user_profile_apple.html')
 
-@app.route('/admin/models/config', methods=['POST'])
-@login_required
-@admin_required
-def save_model_config():
-    """保存模型配置"""
-    try:
-        config = request.get_json()
-        
-        # 验证配置参数
-        valid_models = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini']
-        
-        main_model = config.get('main_analysis_model')
-        chat_model = config.get('chat_model')
-        fallback_model = config.get('fallback_model')
-        
-        if not all(model in valid_models for model in [main_model, chat_model, fallback_model]):
-            return jsonify({'success': False, 'message': '无效的模型选择'}), 400
-        
-        # 这里可以保存到数据库或配置文件
-        # 目前先更新 openai_service 中的配置
-        from openai_service import angela_ai
-        angela_ai.model = main_model
-        angela_ai.max_tokens = int(config.get('max_tokens', 2500))
-        
-        # 可以考虑将配置保存到数据库或环境变量
-        app.logger.info(f"模型配置已更新: 主模型={main_model}, 对话模型={chat_model}, 备用模型={fallback_model}")
-        
-        return jsonify({
-            'success': True,
-            'message': '模型配置保存成功',
-            'config': config
-        })
-        
-    except Exception as e:
-        app.logger.error(f"保存模型配置失败: {str(e)}")
-        return jsonify({'success': False, 'message': '保存失败，请重试'}), 500
-
 @app.route('/admin/models/test', methods=['POST'])
 @login_required
 @admin_required
@@ -1999,6 +1962,78 @@ def test_model_connection():
             'success': False, 
             'message': f'连接测试失败: {str(e)}'
         }), 500
+
+@app.route('/admin/api/model_config', methods=['GET'])
+@login_required
+@admin_required
+def get_model_config():
+    """获取当前模型配置"""
+    try:
+        from models import ModelConfig
+        
+        # 获取主要配置
+        main_config = ModelConfig.get_config('main_analysis')
+        chat_config = ModelConfig.get_config('chat')
+        fallback_config = ModelConfig.get_config('fallback')
+        
+        return jsonify({
+            'success': True,
+            'config': {
+                'main_analysis_model': main_config['model'],
+                'chat_model': chat_config['model'],
+                'fallback_model': fallback_config['model'],
+                'temperature': main_config['temperature'],
+                'max_tokens': main_config['max_tokens'],
+                'timeout': main_config['timeout']
+            }
+        })
+    except Exception as e:
+        app.logger.error(f"获取模型配置失败: {str(e)}")
+        return jsonify({'success': False, 'message': '获取配置失败'}), 500
+
+@app.route('/admin/api/model_config', methods=['POST'])
+@login_required
+@admin_required
+def save_model_config_api():
+    """保存模型配置API"""
+    try:
+        data = request.get_json()
+        
+        # 验证数据
+        if not data:
+            return jsonify({'success': False, 'message': '无效的请求数据'}), 400
+        
+        model = data.get('model', 'gpt-4o-mini')
+        temperature = float(data.get('temperature', 0.7))
+        max_tokens = int(data.get('max_tokens', 2500))
+        timeout = int(data.get('timeout', 45))
+        
+        # 验证模型名称
+        valid_models = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini']
+        if model not in valid_models:
+            return jsonify({'success': False, 'message': '无效的模型选择'}), 400
+        
+        from models import ModelConfig
+        
+        # 更新主分析配置
+        ModelConfig.set_config('main_analysis', model, temperature, max_tokens, timeout)
+        
+        app.logger.info(f"模型配置已更新: {model}, temperature={temperature}, max_tokens={max_tokens}")
+        
+        return jsonify({
+            'success': True,
+            'message': '配置保存成功',
+            'config': {
+                'model': model,
+                'temperature': temperature,
+                'max_tokens': max_tokens,
+                'timeout': timeout
+            }
+        })
+        
+    except Exception as e:
+        app.logger.error(f"保存模型配置失败: {str(e)}")
+        return jsonify({'success': False, 'message': f'保存失败: {str(e)}'}), 500
 
 @app.route('/profile/update', methods=['POST'])
 @login_required

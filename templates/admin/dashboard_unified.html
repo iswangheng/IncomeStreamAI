@@ -350,6 +350,65 @@
 
             <!-- 模型管理 Tab 内容 -->
             <div class="admin-tab-content" id="models-tab">
+                <!-- 模型配置统计卡片 -->
+                <div class="stats-grid">
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--color-primary);">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="current-model">gpt-4o-mini</div>
+                        <div class="stats-label">当前主模型</div>
+                        <div class="stats-change">
+                            <i class="fas fa-cogs"></i>
+                            智能分析引擎
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--color-accent);">
+                                <i class="fas fa-thermometer-half"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="current-temperature">0.7</div>
+                        <div class="stats-label">创造性参数</div>
+                        <div class="stats-change">
+                            <i class="fas fa-adjust"></i>
+                            平衡创新与准确
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--status-active);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="model-status">正常</div>
+                        <div class="stats-label">连接状态</div>
+                        <div class="stats-change">
+                            <i class="fas fa-wifi"></i>
+                            API连接正常
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: var(--color-secondary);">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="response-time">--</div>
+                        <div class="stats-label">响应时间(ms)</div>
+                        <div class="stats-change">
+                            <i class="fas fa-stopwatch"></i>
+                            最近测试结果
+                        </div>
+                    </div>
+                </div>
+
                 <div class="elegant-card">
                     <div class="elegant-card-header">
                         <div class="header-content">
@@ -364,23 +423,57 @@
                     </div>
                     <div class="elegant-card-body">
                         <form id="modelConfigForm">
-                            <div class="mb-4">
-                                <label for="modelSelection" class="form-label">默认模型选择</label>
-                                <select class="form-select" id="modelSelection" name="modelSelection">
-                                    <option value="gpt-4.1">gpt-4.1</option>
-                                    <option value="gpt-4o">gpt-4o</option>
-                                    <option value="gpt-4o-mini">gpt-4o-mini</option>
-                                </select>
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="modelSelection" class="form-label">
+                                        <i class="fas fa-brain me-2"></i>主分析模型
+                                    </label>
+                                    <select class="form-select" id="modelSelection" name="modelSelection">
+                                        <option value="gpt-4.1">GPT-4.1 (最强性能)</option>
+                                        <option value="gpt-4o">GPT-4o (平衡性能)</option>
+                                        <option value="gpt-4o-mini" selected>GPT-4o-mini (快速响应)</option>
+                                    </select>
+                                    <div class="form-text">用于项目分析和路径生成的主要模型</div>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="temperatureRange" class="form-label">
+                                        <i class="fas fa-thermometer-half me-2"></i>创造性参数
+                                        <span class="badge bg-secondary ms-2" id="temperatureValue">0.7</span>
+                                    </label>
+                                    <input type="range" class="form-range" id="temperatureRange" name="temperature" min="0" max="1" step="0.1" value="0.7">
+                                    <div class="d-flex justify-content-between small text-muted">
+                                        <span>保守 (0.0)</span>
+                                        <span>平衡 (0.5)</span>
+                                        <span>创新 (1.0)</span>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="mb-4">
-                                <label for="temperatureRange" class="form-label">Temperature (创造性)</label>
-                                <input type="range" class="form-range" id="temperatureRange" name="temperature" min="0" max="1" step="0.1" value="0.7">
-                                <span id="temperatureValue">0.7</span>
+                            <div class="row">
+                                <div class="col-12 mb-4">
+                                    <div class="d-flex gap-3">
+                                        <button type="submit" class="btn-elegant">
+                                            <i class="fas fa-save me-2"></i>保存配置
+                                        </button>
+                                        <button type="button" class="btn-elegant-secondary" onclick="testModelConnection()">
+                                            <i class="fas fa-plug me-2"></i>测试连接
+                                        </button>
+                                        <button type="button" class="btn-elegant-secondary" onclick="resetToDefaults()">
+                                            <i class="fas fa-undo me-2"></i>恢复默认
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-
-                            <button type="submit" class="btn-elegant">保存配置</button>
                         </form>
+
+                        <!-- 测试结果显示区域 -->
+                        <div id="testResults" class="mt-4" style="display: none;">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-flask me-2"></i>连接测试结果</h6>
+                                <div id="testOutput"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -428,6 +521,11 @@
                 } else {
                     loadUserData();
                 }
+            }
+            
+            // 如果切换到模型管理，加载模型配置
+            if (tabName === 'models') {
+                loadModelConfig();
             }
         }
 
@@ -659,17 +757,30 @@
         async function loadModelConfig() {
             try {
                 const response = await fetch('/admin/api/model_config');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
 
                 if (data.success) {
-                    document.getElementById('modelSelection').value = data.config.model;
-                    document.getElementById('temperatureRange').value = data.config.temperature;
-                    if (document.getElementById('temperatureValue')) {
-                        document.getElementById('temperatureValue').textContent = data.config.temperature;
+                    const modelSelect = document.getElementById('modelSelection');
+                    const tempRange = document.getElementById('temperatureRange');
+                    const tempValue = document.getElementById('temperatureValue');
+                    
+                    if (modelSelect) {
+                        modelSelect.value = data.config.main_analysis_model || 'gpt-4o-mini';
+                    }
+                    if (tempRange) {
+                        tempRange.value = data.config.temperature || 0.7;
+                    }
+                    if (tempValue) {
+                        tempValue.textContent = data.config.temperature || 0.7;
                     }
                 } else {
                     console.error('加载模型配置失败:', data.message);
-                    showToast('加载模型配置失败', 'error');
+                    showToast('加载模型配置失败: ' + data.message, 'error');
                 }
             } catch (error) {
                 console.error('加载模型配置失败:', error);
@@ -679,8 +790,18 @@
 
         // 保存模型配置
         async function saveModelConfig() {
-            const model = document.getElementById('modelSelection').value;
-            const temperature = document.getElementById('temperatureRange').value;
+            const modelSelect = document.getElementById('modelSelection');
+            const tempRange = document.getElementById('temperatureRange');
+            
+            if (!modelSelect || !tempRange) {
+                showToast('页面元素未加载完成，请刷新重试', 'error');
+                return;
+            }
+            
+            const model = modelSelect.value;
+            const temperature = parseFloat(tempRange.value);
+            const maxTokens = 2500; // 默认值
+            const timeout = 45; // 默认值
 
             try {
                 const response = await fetch('/admin/api/model_config', {
@@ -688,16 +809,26 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ model: model, temperature: parseFloat(temperature) })
+                    body: JSON.stringify({ 
+                        model: model, 
+                        temperature: temperature,
+                        max_tokens: maxTokens,
+                        timeout: timeout
+                    })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
 
                 const result = await response.json();
                 if (result.success) {
                     showToast('模型配置保存成功', 'success');
                 } else {
-                    showToast(result.message, 'error');
+                    showToast(result.message || '保存失败', 'error');
                 }
             } catch (error) {
+                console.error('保存配置失败:', error);
                 showToast('保存配置失败，请重试', 'error');
             }
         }
@@ -730,6 +861,79 @@
                 });
             }
         });
+
+        // 测试模型连接
+        async function testModelConnection() {
+            const testResults = document.getElementById('testResults');
+            const testOutput = document.getElementById('testOutput');
+            const responseTimeElement = document.getElementById('response-time');
+            const statusElement = document.getElementById('model-status');
+            
+            testResults.style.display = 'block';
+            testOutput.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在测试连接...';
+            
+            try {
+                const response = await fetch('/admin/models/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    testOutput.innerHTML = `
+                        <div class="text-success">
+                            <i class="fas fa-check-circle me-2"></i>连接测试成功！
+                            <br><small>模型响应：${result.model_response}</small>
+                            <br><small>响应时间：${result.response_time}ms</small>
+                        </div>
+                    `;
+                    if (responseTimeElement) {
+                        responseTimeElement.textContent = result.response_time;
+                    }
+                    if (statusElement) {
+                        statusElement.textContent = '正常';
+                    }
+                } else {
+                    testOutput.innerHTML = `
+                        <div class="text-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>连接测试失败
+                            <br><small>${result.message}</small>
+                        </div>
+                    `;
+                    if (statusElement) {
+                        statusElement.textContent = '异常';
+                    }
+                }
+            } catch (error) {
+                testOutput.innerHTML = `
+                    <div class="text-danger">
+                        <i class="fas fa-times-circle me-2"></i>测试请求失败
+                        <br><small>${error.message}</small>
+                    </div>
+                `;
+                if (statusElement) {
+                    statusElement.textContent = '异常';
+                }
+            }
+        }
+
+        // 恢复默认配置
+        function resetToDefaults() {
+            if (confirm('确定要恢复到默认配置吗？')) {
+                const modelSelect = document.getElementById('modelSelection');
+                const tempRange = document.getElementById('temperatureRange');
+                const tempValue = document.getElementById('temperatureValue');
+                
+                if (modelSelect) modelSelect.value = 'gpt-4o-mini';
+                if (tempRange) tempRange.value = '0.7';
+                if (tempValue) tempValue.textContent = '0.7';
+                
+                showToast('已恢复默认配置，请点击保存生效', 'info');
+            }
+        }
     </script>
 </body>
 </html>

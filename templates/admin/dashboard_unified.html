@@ -14,12 +14,14 @@
 
     <!-- 优雅设计系统 - 参考首页风格 -->
     <link href="{{ url_for('static', filename='css/elegant-light.css') }}" rel="stylesheet">
-    <!-- 管理中心专用优雅设计 -->
-    <link href="{{ url_for('static', filename='css/admin-elegant.css') }}" rel="stylesheet">
-    <!-- 导航系统 -->
+    <!-- 导航系统 - 确保用户菜单样式优先级 -->
     <link href="{{ url_for('static', filename='css/navigation-redesign.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/user-menu-dropdown.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/navigation-spacing-fix.css') }}" rel="stylesheet">
+    <!-- 管理中心用户菜单增强样式 -->
+    <link href="{{ url_for('static', filename='css/admin-user-menu-enhanced.css') }}" rel="stylesheet">
+    <!-- 管理中心专用优雅设计 -->
+    <link href="{{ url_for('static', filename='css/admin-elegant.css') }}" rel="stylesheet">
 
     <!-- SEO优化 -->
     <meta name="description" content="管理中心 - 用户和知识库管理">

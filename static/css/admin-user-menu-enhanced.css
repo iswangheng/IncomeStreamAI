@@ -1,0 +1,280 @@
+
+/* ================================
+   管理中心用户菜单增强样式
+   确保与首页保持一致的优雅设计
+   ================================ */
+
+/* 管理中心页面用户菜单特殊优化 */
+.admin-container .navigation-bar .user-menu {
+    position: relative;
+    z-index: 999999;
+}
+
+/* 确保用户触发器的优雅样式 */
+.admin-container .user-trigger {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-2, 8px) !important;
+    padding: var(--space-2, 8px) var(--space-3, 12px) !important;
+    background: rgba(var(--color-gray-100-rgb, 245, 245, 247), 0.8) !important;
+    border: 1px solid rgba(var(--color-gray-200-rgb, 229, 229, 234), 0.8) !important;
+    border-radius: var(--radius-lg, 12px) !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    min-width: 160px !important;
+    justify-content: space-between !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.admin-container .user-trigger:hover {
+    background: rgba(var(--color-gray-100-rgb, 245, 245, 247), 0.95) !important;
+    border-color: var(--color-primary, #007AFF) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.15) !important;
+}
+
+/* 用户信息样式优化 */
+.admin-container .user-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-2, 8px) !important;
+    font-size: var(--text-sm, 14px) !important;
+    font-weight: 600 !important;
+    color: var(--color-text-primary, #1d1d1f) !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.admin-container .user-info i {
+    font-size: 18px !important;
+    color: var(--color-primary, #007AFF) !important;
+    flex-shrink: 0 !important;
+}
+
+.admin-container .user-name {
+    max-width: 100px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-weight: 600 !important;
+    color: var(--color-text-primary, #1d1d1f) !important;
+}
+
+/* 下拉箭头优化 */
+.admin-container .dropdown-arrow {
+    font-size: 12px !important;
+    color: var(--color-text-secondary, #8e8e93) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    flex-shrink: 0 !important;
+}
+
+.admin-container .user-trigger:hover .dropdown-arrow {
+    transform: rotate(180deg) !important;
+    color: var(--color-primary, #007AFF) !important;
+}
+
+/* 用户下拉菜单增强 */
+.admin-container .user-dropdown {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-radius: var(--radius-xl, 16px) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    border: 0.5px solid rgba(0, 0, 0, 0.08) !important;
+    min-width: 300px !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-10px) scale(0.95) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 999999 !important;
+    overflow: hidden !important;
+}
+
+.admin-container .user-menu:hover .user-dropdown {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
+}
+
+/* 下拉菜单头部优化 */
+.admin-container .dropdown-header {
+    padding: var(--space-4, 16px) !important;
+    border-bottom: 1px solid rgba(var(--color-gray-200-rgb, 229, 229, 234), 0.8) !important;
+    background: linear-gradient(135deg, rgba(var(--color-gray-50-rgb, 250, 250, 250), 0.9), rgba(var(--color-gray-100-rgb, 245, 245, 247), 0.7)) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.admin-container .user-profile {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-3, 12px) !important;
+}
+
+.admin-container .user-avatar {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, var(--color-primary, #007AFF), var(--color-primary-dark, #0056CC)) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3) !important;
+    flex-shrink: 0 !important;
+}
+
+.admin-container .user-details h4 {
+    margin: 0 !important;
+    font-size: var(--text-base, 16px) !important;
+    font-weight: 600 !important;
+    color: var(--color-text-primary, #1d1d1f) !important;
+    line-height: 1.4 !important;
+}
+
+.admin-container .user-details p {
+    margin: 0 !important;
+    font-size: var(--text-sm, 14px) !important;
+    color: var(--color-text-secondary, #8e8e93) !important;
+    line-height: 1.4 !important;
+    margin-top: 2px !important;
+}
+
+/* 菜单项优化 */
+.admin-container .dropdown-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-3, 12px) !important;
+    padding: var(--space-3, 12px) var(--space-4, 16px) !important;
+    color: var(--color-text-primary, #1d1d1f) !important;
+    text-decoration: none !important;
+    font-size: var(--text-sm, 14px) !important;
+    font-weight: 500 !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-bottom: 1px solid rgba(var(--color-gray-200-rgb, 229, 229, 234), 0.3) !important;
+    position: relative !important;
+    margin: 0 var(--space-2, 8px) !important;
+    border-radius: var(--radius-md, 8px) !important;
+}
+
+.admin-container .dropdown-item:last-child {
+    border-bottom: none !important;
+}
+
+.admin-container .dropdown-item:hover {
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.08), rgba(0, 122, 255, 0.12)) !important;
+    color: var(--color-primary, #007AFF) !important;
+    text-decoration: none !important;
+    transform: translateX(4px) !important;
+    border-bottom: 1px solid rgba(0, 122, 255, 0.2) !important;
+}
+
+.admin-container .dropdown-item i {
+    font-size: 16px !important;
+    width: 20px !important;
+    text-align: center !important;
+    color: inherit !important;
+    flex-shrink: 0 !important;
+}
+
+/* 退出登录特殊样式 */
+.admin-container .dropdown-item.logout {
+    color: var(--color-error, #dc3545) !important;
+    border-top: 1px solid rgba(var(--color-gray-200-rgb, 229, 229, 234), 0.8) !important;
+    margin-top: var(--space-2, 8px) !important;
+}
+
+.admin-container .dropdown-item.logout:hover {
+    background: rgba(220, 53, 69, 0.1) !important;
+    color: var(--color-error, #dc3545) !important;
+}
+
+/* 确保在管理中心页面中用户菜单始终可见 */
+.admin-container .nav-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-3, 12px) !important;
+    flex-shrink: 0 !important;
+}
+
+.admin-container .user-menu {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-3, 12px) !important;
+    padding-left: var(--space-3, 12px) !important;
+    border-left: 1px solid rgba(var(--color-gray-300-rgb, 209, 209, 214), 0.4) !important;
+    margin-left: var(--space-2, 8px) !important;
+    flex-shrink: 0 !important;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+    .admin-container .user-trigger {
+        min-width: 140px !important;
+        padding: var(--space-2, 8px) !important;
+    }
+    
+    .admin-container .user-dropdown {
+        min-width: 280px !important;
+        right: -20px !important;
+    }
+    
+    .admin-container .user-name {
+        max-width: 80px !important;
+    }
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+    .admin-container .user-trigger {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    .admin-container .user-trigger:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        border-color: rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .admin-container .user-dropdown {
+        background: rgba(28, 28, 30, 0.95) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    .admin-container .dropdown-header {
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-bottom-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    .admin-container .dropdown-item {
+        color: rgba(255, 255, 255, 0.9) !important;
+        border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .admin-container .dropdown-item:hover {
+        background: rgba(var(--color-primary-rgb, 0, 122, 255), 0.2) !important;
+        color: white !important;
+    }
+}
+
+/* 动画禁用支持 */
+@media (prefers-reduced-motion: reduce) {
+    .admin-container .user-trigger,
+    .admin-container .user-dropdown,
+    .admin-container .dropdown-arrow {
+        transition: none !important;
+    }
+    
+    .admin-container .user-trigger:hover .dropdown-arrow {
+        transform: none !important;
+    }
+}

@@ -324,28 +324,20 @@
     font-weight: 600;
     color: var(--elegant-text-primary);
     margin-bottom: var(--elegant-space-2);
-    display: flex;
-    align-items: center;
-    gap: var(--elegant-space-3);
     line-height: 1.4;
 }
 
 .user-phone {
     font-size: var(--elegant-text-sm);
     color: var(--elegant-text-secondary);
-    margin-top: var(--elegant-space-1);
-    position: relative;
-    padding-left: var(--elegant-space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--elegant-space-1);
 }
 
 .user-phone::before {
-    content: '•';
-    position: absolute;
-    left: 0;
-    color: var(--elegant-gray-400);
+    content: '📱';
     font-size: 12px;
-    top: 50%;
-    transform: translateY(-50%);
 }
 
 .current-user-badge {

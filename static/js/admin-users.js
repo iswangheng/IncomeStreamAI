@@ -86,10 +86,9 @@ function renderUsersTable(users) {
                     </div>
                     <div class="user-info">
                         <div class="user-name">
-                            <span class="name-text">${user.name}</span>
-                            <span class="phone-separator">•</span>
-                            <span class="phone-text">${user.phone}</span>
+                            ${user.name}
                         </div>
+                        <div class="user-phone">${user.phone}</div>
                     </div>
                     <div class="status-indicator ${user.is_active ? 'active' : 'inactive'}" title="${user.is_active ? '用户正常' : '用户已禁用'}">
                         <i class="fas fa-circle"></i>

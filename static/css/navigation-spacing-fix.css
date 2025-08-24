@@ -118,9 +118,9 @@ body.admin-layout {
         padding: 0 24px !important;
     }
     
-    /* PC端结果页面调整 */
+    /* PC端结果页面调整 - 匹配实际导航栏高度 */
     .result-page-container {
-        padding-top: 64px !important;
+        padding-top: 56px !important;
     }
     
     /* PC端导航元素优化 */

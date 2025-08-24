@@ -164,7 +164,47 @@ class ModelConfig(db.Model):
         return f'<ModelConfig {self.config_name}: {self.model_name}>'
 
     @classmethod
-    def get_config(cls, config_name, default_model='gpt-4o-mini'):
+    def get_config(cls, config_name):
+        """获取指定配置"""
+        config = cls.query.filter_by(config_name=config_name, is_active=True).first()
+        if config:
+            return {
+                'model': config.model_name,
+                'temperature': config.temperature,
+                'max_tokens': config.max_tokens,
+                'timeout': config.timeout
+            }
+        else:
+            # 返回默认配置
+            defaults = {
+                'main_analysis': {'model': 'gpt-4o-mini', 'temperature': 0.7, 'max_tokens': 2500, 'timeout': 45},
+                'chat': {'model': 'gpt-4o', 'temperature': 0.7, 'max_tokens': 1500, 'timeout': 30},
+                'fallback': {'model': 'gpt-4o-mini', 'temperature': 0.5, 'max_tokens': 2000, 'timeout': 60}
+            }
+            return defaults.get(config_name, defaults['main_analysis'])
+
+    @classmethod
+    def set_config(cls, config_name, model_name, temperature=0.7, max_tokens=2500, timeout=45):
+        """设置或更新配置"""
+        config = cls.query.filter_by(config_name=config_name).first()
+        if config:
+            config.model_name = model_name
+            config.temperature = temperature
+            config.max_tokens = max_tokens
+            config.timeout = timeout
+            config.updated_at = datetime.utcnow()
+        else:
+            config = cls(
+                config_name=config_name,
+                model_name=model_name,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=timeout
+            )
+            db.session.add(config)
+        
+        db.session.commit()
+        return config_name, default_model='gpt-4o-mini'):
         """获取指定配置，如果不存在则返回默认值"""
         config = cls.query.filter_by(config_name=config_name, is_active=True).first()
         if config:

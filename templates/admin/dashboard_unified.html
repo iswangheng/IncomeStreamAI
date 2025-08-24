@@ -756,35 +756,50 @@
         // 加载模型配置
         async function loadModelConfig() {
             try {
+                console.log('开始加载模型配置');
+                
                 const response = await fetch('/admin/api/model_config');
+                console.log('配置API响应状态:', response.status, response.statusText);
                 
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API响应错误:', errorText);
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
                 const data = await response.json();
+                console.log('配置数据:', data);
 
                 if (data.success) {
                     const modelSelect = document.getElementById('modelSelection');
                     const tempRange = document.getElementById('temperatureRange');
                     const tempValue = document.getElementById('temperatureValue');
                     
+                    const model = data.config.main_analysis_model || 'gpt-4o-mini';
+                    const temperature = data.config.temperature || 0.7;
+                    
                     if (modelSelect) {
-                        modelSelect.value = data.config.main_analysis_model || 'gpt-4o-mini';
+                        modelSelect.value = model;
                     }
                     if (tempRange) {
-                        tempRange.value = data.config.temperature || 0.7;
+                        tempRange.value = temperature;
                     }
                     if (tempValue) {
-                        tempValue.textContent = data.config.temperature || 0.7;
+                        tempValue.textContent = temperature;
                     }
+                    
+                    // 更新统计卡片显示
+                    document.getElementById('current-model').textContent = model;
+                    document.getElementById('current-temperature').textContent = temperature;
+                    
+                    console.log('模型配置加载完成');
                 } else {
                     console.error('加载模型配置失败:', data.message);
                     showToast('加载模型配置失败: ' + data.message, 'error');
                 }
             } catch (error) {
                 console.error('加载模型配置失败:', error);
-                showToast('加载模型配置失败，请重试', 'error');
+                showToast(`加载模型配置失败: ${error.message}`, 'error');
             }
         }
 
@@ -803,7 +818,11 @@
             const maxTokens = 2500; // 默认值
             const timeout = 45; // 默认值
 
+            console.log('准备保存配置:', { model, temperature, maxTokens, timeout });
+
             try {
+                showToast('正在保存配置...', 'info');
+                
                 const response = await fetch('/admin/api/model_config', {
                     method: 'POST',
                     headers: {
@@ -817,19 +836,28 @@
                     })
                 });
 
+                console.log('响应状态:', response.status, response.statusText);
+                
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('响应错误:', errorText);
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
                 const result = await response.json();
+                console.log('响应结果:', result);
+                
                 if (result.success) {
                     showToast('模型配置保存成功', 'success');
+                    // 更新显示的当前配置
+                    document.getElementById('current-model').textContent = model;
+                    document.getElementById('current-temperature').textContent = temperature;
                 } else {
                     showToast(result.message || '保存失败', 'error');
                 }
             } catch (error) {
                 console.error('保存配置失败:', error);
-                showToast('保存配置失败，请重试', 'error');
+                showToast(`保存配置失败: ${error.message}`, 'error');
             }
         }
 

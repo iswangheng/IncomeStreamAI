@@ -1970,18 +1970,18 @@ def get_model_config():
     """获取当前模型配置"""
     try:
         from models import ModelConfig
+        import traceback
+        
+        app.logger.info("开始获取模型配置")
         
         # 获取主要配置
         main_config = ModelConfig.get_config('main_analysis')
-        chat_config = ModelConfig.get_config('chat')
-        fallback_config = ModelConfig.get_config('fallback')
+        app.logger.info(f"主分析配置: {main_config}")
         
         return jsonify({
             'success': True,
             'config': {
                 'main_analysis_model': main_config['model'],
-                'chat_model': chat_config['model'],
-                'fallback_model': fallback_config['model'],
                 'temperature': main_config['temperature'],
                 'max_tokens': main_config['max_tokens'],
                 'timeout': main_config['timeout']
@@ -1989,7 +1989,8 @@ def get_model_config():
         })
     except Exception as e:
         app.logger.error(f"获取模型配置失败: {str(e)}")
-        return jsonify({'success': False, 'message': '获取配置失败'}), 500
+        app.logger.error(f"错误追踪: {traceback.format_exc()}")
+        return jsonify({'success': False, 'message': f'获取配置失败: {str(e)}'}), 500
 
 @app.route('/admin/api/model_config', methods=['POST'])
 @login_required
@@ -1997,10 +1998,17 @@ def get_model_config():
 def save_model_config_api():
     """保存模型配置API"""
     try:
+        import traceback
+        
+        app.logger.info("开始保存模型配置")
+        
+        # 获取请求数据
         data = request.get_json()
+        app.logger.info(f"接收到的数据: {data}")
         
         # 验证数据
         if not data:
+            app.logger.error("请求数据为空")
             return jsonify({'success': False, 'message': '无效的请求数据'}), 400
         
         model = data.get('model', 'gpt-4o-mini')
@@ -2008,15 +2016,20 @@ def save_model_config_api():
         max_tokens = int(data.get('max_tokens', 2500))
         timeout = int(data.get('timeout', 45))
         
+        app.logger.info(f"解析后的配置: model={model}, temp={temperature}, tokens={max_tokens}, timeout={timeout}")
+        
         # 验证模型名称
         valid_models = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini']
         if model not in valid_models:
+            app.logger.error(f"无效的模型名称: {model}")
             return jsonify({'success': False, 'message': '无效的模型选择'}), 400
         
         from models import ModelConfig
         
         # 更新主分析配置
+        app.logger.info("开始更新数据库配置")
         ModelConfig.set_config('main_analysis', model, temperature, max_tokens, timeout)
+        app.logger.info("数据库配置更新完成")
         
         app.logger.info(f"模型配置已更新: {model}, temperature={temperature}, max_tokens={max_tokens}")
         
@@ -2033,6 +2046,7 @@ def save_model_config_api():
         
     except Exception as e:
         app.logger.error(f"保存模型配置失败: {str(e)}")
+        app.logger.error(f"错误追踪: {traceback.format_exc()}")
         return jsonify({'success': False, 'message': f'保存失败: {str(e)}'}), 500
 
 @app.route('/profile/update', methods=['POST'])

@@ -1625,58 +1625,33 @@
                             {% endif %}
                         {% endfor %}
                         
-                        <!-- 其他参与方 - 使用绝对的left位置，避免right导致的重叠 -->
-                        {% set participant_count = 0 %}
+                        <!-- 其他参与方 - 简单循环，每个完整渲染 -->
+                        {% set ns = namespace(count=0) %}
                         {% for party in path.parties_structure %}
                             {% if not (party.party == '设计者（你）' or '你' in party.party or 'designer' in party.party.lower() or 'Designer' in party.party) %}
-                                <!-- 使用固定的left位置，完全避免重叠 -->
-                                {% if participant_count == 0 %}
-                                    <!-- 第一个参与方：左侧 -->
-                                    <div class="party-node participant" 
-                                         style="position: absolute; left: 2%; top: 35%; width: 280px;" 
-                                         data-node-id="participant0">
-                                {% elif participant_count == 1 %}
-                                    <!-- 第二个参与方：右侧 -->
-                                    <div class="party-node participant" 
-                                         style="position: absolute; left: 68%; top: 35%; width: 280px;" 
-                                         data-node-id="participant1">
-                                {% elif participant_count == 2 %}
-                                    <!-- 第三个参与方：上方 -->
-                                    <div class="party-node participant" 
-                                         style="position: absolute; left: 35%; top: 5%; width: 260px;" 
-                                         data-node-id="participant2">
-                                {% elif participant_count == 3 %}
-                                    <!-- 第四个参与方：下方 -->
-                                    <div class="party-node participant" 
-                                         style="position: absolute; left: 35%; top: 75%; width: 260px;" 
-                                         data-node-id="participant3">
-                                {% elif participant_count == 4 %}
-                                    <!-- 第五个参与方：左上 -->
-                                    <div class="party-node participant" 
-                                         style="position: absolute; left: 5%; top: 10%; width: 250px;" 
-                                         data-node-id="participant4">
-                                {% elif participant_count == 5 %}
-                                    <!-- 第六个参与方：右上 -->
-                                    <div class="party-node participant" 
-                                         style="position: absolute; left: 65%; top: 10%; width: 250px;" 
-                                         data-node-id="participant5">
-                                {% elif participant_count == 6 %}
-                                    <!-- 第七个参与方：左下 -->
-                                    <div class="party-node participant" 
-                                         style="position: absolute; left: 5%; top: 65%; width: 250px;" 
-                                         data-node-id="participant6">
-                                {% elif participant_count == 7 %}
-                                    <!-- 第八个参与方：右下 -->
-                                    <div class="party-node participant" 
-                                         style="position: absolute; left: 65%; top: 65%; width: 250px;" 
-                                         data-node-id="participant7">
+                                {% if ns.count == 0 %}
+                                    {% set node_style = "left: 2%; top: 35%; width: 280px;" %}
+                                {% elif ns.count == 1 %}
+                                    {% set node_style = "left: 68%; top: 35%; width: 280px;" %}
+                                {% elif ns.count == 2 %}
+                                    {% set node_style = "left: 35%; top: 5%; width: 260px;" %}
+                                {% elif ns.count == 3 %}
+                                    {% set node_style = "left: 35%; top: 75%; width: 260px;" %}
+                                {% elif ns.count == 4 %}
+                                    {% set node_style = "left: 5%; top: 10%; width: 250px;" %}
+                                {% elif ns.count == 5 %}
+                                    {% set node_style = "left: 65%; top: 10%; width: 250px;" %}
+                                {% elif ns.count == 6 %}
+                                    {% set node_style = "left: 5%; top: 65%; width: 250px;" %}
+                                {% elif ns.count == 7 %}
+                                    {% set node_style = "left: 65%; top: 65%; width: 250px;" %}
                                 {% else %}
-                                    <!-- 超过8个参与方 -->
-                                    {% set overflow_index = participant_count - 8 %}
-                                    <div class="party-node participant" 
-                                         style="position: absolute; left: {{ 10 + (overflow_index * 15) % 70 }}%; top: {{ 85 + (overflow_index * 5) % 10 }}%; width: 230px;" 
-                                         data-node-id="participant{{ participant_count }}">
+                                    {% set node_style = "left: " + ((10 + (ns.count - 8) * 15) % 70)|string + "%; top: " + ((85 + (ns.count - 8) * 5) % 10 + 80)|string + "%; width: 230px;" %}
                                 {% endif %}
+                                
+                                <div class="party-node participant" 
+                                     style="position: absolute; {{ node_style }}" 
+                                     data-node-id="participant{{ ns.count }}">
                                     <div class="party-indicator"></div>
                                     <div class="party-name">{{ party.party }}</div>
                                     <div class="party-resources">
@@ -1693,7 +1668,7 @@
                                         {{ party.make_them_happy }}
                                     </div>
                                 </div>
-                                {% set participant_count = participant_count + 1 %}
+                                {% set ns.count = ns.count + 1 %}
                             {% endif %}
                         {% endfor %}
                     </div>

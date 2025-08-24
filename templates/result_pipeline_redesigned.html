@@ -315,16 +315,16 @@
 
         /* 设计者卡片 - 统筹全局 */
         .designer-section {
-            margin-bottom: var(--space-8);
+            margin-bottom: var(--space-6);
         }
 
         .designer-card {
-            background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00);
-            border-radius: var(--radius-2xl);
-            padding: var(--space-6);
-            color: white;
-            box-shadow: 0 16px 32px rgba(255, 215, 0, 0.3);
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, #F8F9FA, #E8F5F0);
+            border-radius: var(--radius-xl);
+            padding: var(--space-4);
+            color: var(--color-text-primary);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+            border: 2px solid rgba(102, 126, 234, 0.2);
             position: relative;
             overflow: hidden;
             text-align: center;
@@ -333,62 +333,55 @@
         .designer-card::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes shine {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--pipeline-primary), var(--pipeline-secondary));
         }
 
         .designer-crown {
-            font-size: 2.5rem;
-            margin-bottom: var(--space-3);
-            color: #FFD700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: 1.5rem;
+            margin-bottom: var(--space-2);
+            color: var(--pipeline-primary);
         }
 
         .designer-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: var(--space-2);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: var(--space-1);
+            color: var(--color-text-primary);
         }
 
         .designer-subtitle {
-            font-size: 1rem;
-            opacity: 0.9;
-            margin-bottom: var(--space-4);
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-3);
+            font-weight: 500;
         }
 
         .designer-details {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--space-4);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-3);
             text-align: left;
         }
 
         .designer-detail-item {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(102, 126, 234, 0.06);
             border-radius: var(--radius-lg);
             padding: var(--space-3);
-            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 126, 234, 0.1);
         }
 
         .designer-detail-title {
             font-weight: 600;
             font-size: var(--text-sm);
             margin-bottom: var(--space-1);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
+            color: var(--pipeline-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
         }
 
         /* 业务流程区域 */
@@ -765,11 +758,15 @@
             }
             
             .designer-card {
-                padding: var(--space-4);
+                padding: var(--space-3);
             }
             
             .designer-title {
-                font-size: 1.4rem;
+                font-size: 1.2rem;
+            }
+            
+            .designer-section {
+                margin-bottom: var(--space-4);
             }
         }
 
@@ -952,7 +949,7 @@
                                 <div class="designer-detail-title">🎯 核心资源</div>
                                 <div class="resources-list">
                                     {% for resource in party.resources %}
-                                    <span class="resource-tag" style="background: rgba(255,255,255,0.3); color: white;">{{ resource }}</span>
+                                    <span class="resource-tag" style="background: rgba(102, 126, 234, 0.15); color: var(--pipeline-primary); border: 1px solid rgba(102, 126, 234, 0.2);">{{ resource }}</span>
                                     {% endfor %}
                                 </div>
                             </div>

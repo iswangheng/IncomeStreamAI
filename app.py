@@ -1313,14 +1313,14 @@ def admin_edit_user(user_id):
             return render_template('admin/edit_user.html', user=user)
 
         try:
-            current_user.name = name
-            current_user.phone = phone
-            current_user.is_admin = is_admin
+            user.name = name
+            user.phone = phone
+            user.is_admin = is_admin
             db.session.commit()
 
             # 如果提供了新密码，则更新密码
             if password:
-                current_user.set_password(password)
+                user.set_password(password)
                 db.session.commit() # Commit again if password was changed
 
             flash('用户信息更新成功！', 'success')

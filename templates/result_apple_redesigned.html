@@ -1636,12 +1636,12 @@
                         <div class="surrounding-nodes">
                             {% for party in other_parties %}
                             {% set positions = [
-                                {'x': 75, 'y': 25},   {# 右上 #}
-                                {'x': 25, 'y': 25},   {# 左上 #}
-                                {'x': 75, 'y': 75},   {# 右下 #}
-                                {'x': 25, 'y': 75},   {# 左下 #}
-                                {'x': 90, 'y': 50},   {# 右中 #}
-                                {'x': 10, 'y': 50}    {# 左中 #}
+                                {'x': 75, 'y': 25},
+                                {'x': 25, 'y': 25},
+                                {'x': 75, 'y': 75},
+                                {'x': 25, 'y': 75},
+                                {'x': 90, 'y': 50},
+                                {'x': 10, 'y': 50}
                             ] %}
                             {% set position = positions[loop.index0 % positions|length] %}
                             

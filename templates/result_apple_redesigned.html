@@ -345,6 +345,129 @@
             margin: var(--space-6) 0;
         }
 
+        .parties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .resource-tag {
+            display: inline-block;
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--color-primary);
+            padding: 2px 8px;
+            border-radius: var(--radius-1);
+            font-size: var(--text-xs);
+            margin: 2px;
+        }
+
+        .party-resources, .party-value, .party-happiness {
+            margin-top: var(--space-2);
+            font-size: var(--text-sm);
+        }
+
+        .party-value {
+            font-weight: var(--font-medium);
+            color: var(--color-text-primary);
+        }
+
+        .party-happiness {
+            color: var(--color-success);
+        }
+
+        /* 劳动负担估算样式 */
+        .labor-load-highlight {
+            border-left: 4px solid #ff6b6b;
+            background: rgba(255, 107, 107, 0.05);
+        }
+
+        .labor-load-content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .labor-hours {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .hours-number {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            color: var(--color-primary);
+        }
+
+        .hours-unit {
+            font-size: var(--text-lg);
+            color: var(--color-text-secondary);
+        }
+
+        .load-level {
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--text-xs);
+            font-weight: var(--font-medium);
+        }
+
+        .level-轻度 {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--color-success);
+        }
+
+        .level-中度 {
+            background: rgba(255, 193, 7, 0.1);
+            color: #cc8800;
+        }
+
+        .level-过高 {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--color-danger);
+        }
+
+        .labor-alternative {
+            background: var(--color-gray-50);
+            border-radius: var(--radius-2);
+            padding: var(--space-3);
+            font-size: var(--text-sm);
+        }
+
+        /* 薄弱环节样式 */
+        .weak-link-highlight {
+            border-left: 4px solid #ff9500;
+            background: rgba(255, 149, 0, 0.05);
+        }
+
+        /* 风险应对样式 */
+        .risk-item {
+            margin-bottom: var(--space-3);
+            padding: var(--space-3);
+            background: var(--color-gray-50);
+            border-radius: var(--radius-2);
+        }
+
+        .risk-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .risk-description {
+            margin-bottom: var(--space-2);
+            color: var(--color-text-primary);
+        }
+
+        .risk-mitigation {
+            color: var(--color-success);
+        }
+
+        .step-why {
+            font-style: italic;
+            background: rgba(0, 122, 255, 0.05);
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-1);
+            border-left: 2px solid var(--color-primary);
+        }
+
         .parties-title {
             text-align: center;
             font-size: var(--text-lg);
@@ -1349,7 +1472,10 @@
                     {% if path.income_mechanism %}
                     <div class="income-mechanism">
                         <i class="fas fa-money-bill-wave"></i>
-                        {{ path.income_mechanism }}
+                        {{ path.income_mechanism.type or path.income_mechanism }}
+                        {% if path.income_mechanism.trigger %}
+                        <div style="font-size: var(--text-xs); margin-top: var(--space-1); opacity: 0.8;">{{ path.income_mechanism.trigger }}</div>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </div>
@@ -1361,8 +1487,32 @@
                 {% endif %}
             </div>
 
-            <!-- 三方结构可视化 -->
-            {% if path.three_parties_structure %}
+            <!-- 关键参与方结构 -->
+            {% if path.parties_structure %}
+            <div class="three-parties">
+                <h4 class="parties-title">关键参与方结构</h4>
+                <div class="parties-grid">
+                    {% for party in path.parties_structure %}
+                    <div class="party-box {% if party.party == '设计者（你）' or '你' in party.party %}your-role{% endif %}">
+                        <div class="party-name">{{ party.party }}</div>
+                        <div class="party-resources">
+                            <strong>资源：</strong>
+                            {% if party.resources %}
+                                {% for resource in party.resources %}
+                                <span class="resource-tag">{{ resource }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="party-value">{{ party.role_value }}</div>
+                        <div class="party-happiness">
+                            <i class="fas fa-smile"></i>
+                            {{ party.make_them_happy }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% elif path.three_parties_structure %}
             <div class="three-parties">
                 <h4 class="parties-title">三方合作结构</h4>
                 <div class="parties-diagram">
@@ -1384,14 +1534,14 @@
             </div>
             {% endif %}
 
-            <!-- 启动策略 -->
-            {% if path.who_moves_first %}
+            <!-- 启动动作 -->
+            {% if path.first_step or path.who_moves_first %}
             <div style="background: rgba(0, 122, 255, 0.05); border-radius: var(--radius-3); padding: var(--space-4); margin: var(--space-4) 0; border-left: 4px solid var(--color-primary);">
                 <div style="display: flex; align-items: center; margin-bottom: var(--space-2);">
                     <i class="fas fa-play-circle" style="color: var(--color-primary); margin-right: var(--space-2);"></i>
-                    <strong>启动策略</strong>
+                    <strong>{{ '启动动作' if path.first_step else '启动策略' }}</strong>
                 </div>
-                <div>{{ path.who_moves_first }}</div>
+                <div>{{ path.first_step or path.who_moves_first }}</div>
             </div>
             {% endif %}
 
@@ -1409,7 +1559,10 @@
                         <div class="step-indicator"></div>
                         <div class="step-content">
                             <div class="step-owner">{{ step.owner }}</div>
-                            <div class="step-action">{{ step.step }}</div>
+                            <div class="step-action">{{ step.action or step.step }}</div>
+                            {% if step.why_it_works %}
+                            <div class="step-why" style="font-size: var(--text-xs); color: var(--color-text-secondary); margin-top: var(--space-1);">{{ step.why_it_works }}</div>
+                            {% endif %}
                             {% if step.make_who_happy %}
                             <div class="step-happiness">
                                 <i class="fas fa-smile me-1"></i>
@@ -1493,22 +1646,62 @@
                 </div>
                 {% endif %}
 
-                {% if path.risks %}
+                {% if path.weak_link %}
+                <div class="detail-card weak-link-highlight">
+                    <div class="detail-title">
+                        <i class="fas fa-chain-broken"></i>
+                        最薄弱环节
+                    </div>
+                    <div class="detail-content">{{ path.weak_link }}</div>
+                </div>
+                {% endif %}
+
+                {% if path.risks_and_planB or path.risks %}
                 <div class="detail-card">
                     <div class="detail-title">
                         <i class="fas fa-exclamation-triangle"></i>
                         风险与应对
                     </div>
-                    <ul class="detail-list">
-                        {% for risk in path.risks %}
-                        <li>{{ risk }}</li>
+                    {% if path.risks_and_planB %}
+                        {% for risk_item in path.risks_and_planB %}
+                        <div class="risk-item">
+                            <div class="risk-description"><strong>风险：</strong>{{ risk_item.risk }}</div>
+                            <div class="risk-mitigation"><strong>应对：</strong>{{ risk_item.mitigation }}</div>
+                        </div>
                         {% endfor %}
-                    </ul>
-                    {% if path.plan_b %}
-                    <div class="detail-content" style="margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid rgba(0, 0, 0, 0.1);">
-                        <strong>备选方案：</strong>{{ path.plan_b }}
-                    </div>
+                    {% elif path.risks %}
+                        <ul class="detail-list">
+                            {% for risk in path.risks %}
+                            <li>{{ risk }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% if path.plan_b %}
+                        <div class="detail-content" style="margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid rgba(0, 0, 0, 0.1);">
+                            <strong>备选方案：</strong>{{ path.plan_b }}
+                        </div>
+                        {% endif %}
                     {% endif %}
+                </div>
+                {% endif %}
+
+                {% if path.labor_load_estimate %}
+                <div class="detail-card labor-load-highlight">
+                    <div class="detail-title">
+                        <i class="fas fa-clock"></i>
+                        劳动负担估算
+                    </div>
+                    <div class="labor-load-content">
+                        <div class="labor-hours">
+                            <span class="hours-number">{{ path.labor_load_estimate.hours_per_week }}</span>
+                            <span class="hours-unit">小时/周</span>
+                            <span class="load-level level-{{ path.labor_load_estimate.level.split('(')[0] if '(' in path.labor_load_estimate.level else path.labor_load_estimate.level }}">{{ path.labor_load_estimate.level }}</span>
+                        </div>
+                        {% if path.labor_load_estimate.alternative %}
+                        <div class="labor-alternative">
+                            <strong>降低方案：</strong>{{ path.labor_load_estimate.alternative }}
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endif %}
             </div>

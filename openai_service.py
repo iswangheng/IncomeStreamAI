@@ -513,7 +513,7 @@ class AngelaAI:
             return False
             
         overview = result.get('overview', {})
-        if not all(key in overview for key in ['situation', 'gaps']):
+        if not all(key in overview for key in ['situation', 'income_type', 'core_insight']):
             return False
             
         paths = result.get('paths', [])
@@ -521,8 +521,10 @@ class AngelaAI:
             return False
             
         for path in paths:
-            required_path_keys = ['id', 'name', 'scene', 'action_steps', 'mvp']
+            # 更新为新的必需字段
+            required_path_keys = ['id', 'name', 'income_mechanism', 'parties_structure', 'action_steps', 'mvp', 'revenue_trigger']
             if not all(key in path for key in required_path_keys):
+                logger.warning(f"Path missing required keys. Has: {list(path.keys())}, Required: {required_path_keys}")
                 return False
                 
         return True
@@ -534,7 +536,9 @@ class AngelaAI:
         
         return {
             "overview": {
-                "situation": f"{project_name}处于初期阶段，需要整合现有资源并寻找收益化路径。",
+                "situation": f"基于【意识+能量+能力=结果】公式，{project_name}具备初步资源基础，设计者需要统筹整合现有关键人物资源，构建非劳务收入管道",
+                "income_type": "居间（撮合费/中介费）",
+                "core_insight": f"利用现有关键人物的资源和信任关系，设计者作为连接器和规则制定者，通过撮合服务获得持续的非劳务收入",
                 "gaps": ["明确收益模式", "扩展合作渠道", "制定执行计划"],
                 "suggested_roles_to_hunt": [
                     {
@@ -548,24 +552,47 @@ class AngelaAI:
             "paths": [
                 {
                     "id": "path_1",
-                    "name": "资源整合变现",
-                    "scene": "线上协作平台",
-                    "who_moves_first": "你先梳理现有资源清单",
-                    "action_steps": [
-                        {"owner": "你", "step": "整理现有资源和人脉清单", "why_it_works": "明确可用资产"},
-                        {"owner": "你", "step": "寻找1-2个初步合作伙伴", "why_it_works": "测试合作可能性"},
-                        {"owner": "合作方", "step": "提供渠道或资源支持", "why_it_works": "实现资源互补"}
+                    "name": "资源整合撮合变现",
+                    "income_mechanism": {
+                        "type": "居间（撮合费）",
+                        "trigger": "每次成功撮合交易的佣金分成",
+                        "settlement": "按单结算，交易完成后收取佣金"
+                    },
+                    "parties_structure": [
+                        {
+                            "party": "设计者（你）",
+                            "resources": ["统筹协调能力", "规则制定", "质量监督"],
+                            "role_value": "作为连接器和质量保证方，确保各方合作顺畅",
+                            "make_them_happy": "获得稳定的佣金收入，建立可扩展的商业模式"
+                        }
+                    ] + [
+                        {
+                            "party": p.get('name', '关键人物'),
+                            "resources": p.get('resources', ['待确定']),
+                            "role_value": "提供专业服务或客户资源",
+                            "make_them_happy": ", ".join(p.get('make_happy', ['获得收益', '扩展业务']))
+                        } for p in key_persons[:2]
                     ],
-                    "use_key_person_resources": [f"{p.get('name', '关键人物')}: {', '.join(p.get('resources', ['待确定']))}" for p in key_persons[:2]],
-                    "use_external_resources": ["现有网络资源", "行业关系"],
-                    "revenue_trigger": "合作分成或资源置换",
-                    "mvp": "完成一次小规模合作测试，验证合作模式可行性",
-                    "risks": ["合作方不积极", "资源对接困难"],
-                    "plan_b": "转为自主开发，寻求其他渠道支持",
-                    "kpis": ["合作洽谈成功率", "初步收益金额"]
+                    "action_steps": [
+                        {"owner": "你", "action": "基于现有关键人物资源，设计1对1连接服务方案", "why_it_works": "充分利用已有资源，无需额外投入"},
+                        {"owner": "关键人物", "action": "提供渠道和信任背书，推广连接服务", "why_it_works": "发挥各自专业优势和客户基础"},
+                        {"owner": "最终用户", "action": "使用连接服务并支付费用", "why_it_works": "获得专业匹配的优质服务"}
+                    ],
+                    "mvp": "连接现有关键人物，为1-2个客户提供撮合服务，验证收费模式可行性",
+                    "weak_link": "关键人物的配合度和服务质量稳定性",
+                    "revenue_trigger": "撮合费（按交易额3-10%收取）",
+                    "risks_and_planB": [
+                        {"risk": "关键人物不配合", "mitigation": "提前协商好合作规则和收益分配"},
+                        {"risk": "服务质量不稳定", "mitigation": "建立质量监督和客户反馈机制"}
+                    ],
+                    "first_step": "与现有关键人物深度沟通，确定合作模式和收益分配，先从小规模试点开始",
+                    "labor_load_estimate": {
+                        "hours_per_week": "5-8小时",
+                        "level": "中度(5-10h)",
+                        "alternative": "建立标准化流程和自助平台，减少人工协调工作"
+                    }
                 }
-            ],
-            "notes": "系统降级生成，建议手动优化各环节细节。"
+            ]
         }
 
 # 创建全局实例

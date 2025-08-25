@@ -340,8 +340,8 @@ window.refreshUsers = refreshUsers;
 // 搜索用户函数
 function searchUsers() {
     console.log('搜索用户被调用');
-    const searchInput = document.getElementById('user-search');
-    const roleSelect = document.getElementById('user-role-filter');
+    const searchInput = document.getElementById('user-search') || document.getElementById('userSearch');
+    const roleSelect = document.getElementById('user-role-filter') || document.getElementById('userStatusFilter');
     
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
     const roleFilter = roleSelect ? roleSelect.value : '';
@@ -362,6 +362,10 @@ function searchUsers() {
             matchesRole = user.is_admin;
         } else if (roleFilter === 'user') {
             matchesRole = !user.is_admin;
+        } else if (roleFilter === 'active') {
+            matchesRole = user.active;
+        } else if (roleFilter === 'inactive') {
+            matchesRole = !user.active;
         }
         
         return matchesSearch && matchesRole;
@@ -371,8 +375,9 @@ function searchUsers() {
     renderUsersTable(filteredUsers);
 }
 
-// 确保搜索函数全局可访问
+// 确保所有函数全局可访问
 window.searchUsers = searchUsers;
+window.filterUsers = searchUsers; // 提供别名以兼容不同的调用方式
 
 // 优雅的Toast提示函数
 function showToast(message, type = 'info') {

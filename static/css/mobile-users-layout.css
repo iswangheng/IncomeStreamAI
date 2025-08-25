@@ -506,13 +506,44 @@
     }
 }
 
-/* 确保在PC端不影响原有样式 */
+/* PC端用户卡片样式适配 */
 @media (min-width: 769px) {
-    .user-card {
-        display: none !important;
+    .users-container {
+        padding: 24px !important;
     }
 
     .users-grid {
-        display: none !important;
+        gap: 20px !important;
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+    }
+
+    .user-card {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        max-width: 100% !important;
+    }
+
+    .user-card-header {
+        padding: 20px !important;
+    }
+
+    .user-card-body {
+        padding: 20px !important;
+    }
+
+    .user-details {
+        grid-template-columns: 1fr 1fr 1fr 1fr !important;
+        gap: 16px !important;
+    }
+
+    .action-buttons {
+        gap: 12px !important;
+    }
+
+    .action-btn {
+        min-width: 100px !important;
+        padding: 10px 16px !important;
     }
 }

@@ -1,0 +1,453 @@
+/* 
+ * 响应式用户列表布局 - 优化PC端和移动端显示
+ * 解决用户卡片PC端过宽和移动端显示问题
+ */
+
+/* 用户容器基础样式 */
+.users-container {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    margin: 0;
+}
+
+/* PC端：网格布局，最佳宽度展示 */
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 平板端：双列布局 */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .users-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+}
+
+/* 移动端：单列布局 */
+@media (max-width: 768px) {
+    .users-container {
+        padding: 12px;
+    }
+    
+    .users-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+}
+
+/* 用户卡片基础样式 */
+.user-card {
+    background: var(--elegant-bg-primary, #ffffff);
+    border: 1px solid var(--elegant-gray-200, #e5e7eb);
+    border-radius: var(--elegant-radius-xl, 16px);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+    visibility: visible;
+    opacity: 1;
+}
+
+.user-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+    border-color: var(--elegant-gray-300, #d1d5db);
+}
+
+/* 用户卡片头部 */
+.user-card-header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--elegant-gray-50, #f9fafb) 0%, var(--elegant-bg-primary, #ffffff) 100%);
+    border-bottom: 1px solid var(--elegant-gray-200, #e5e7eb);
+    gap: 16px;
+    min-height: 80px;
+    position: relative;
+}
+
+/* 用户头像 */
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.user-avatar.admin {
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+}
+
+.user-avatar.user {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+/* 用户信息区域 */
+.user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.user-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--elegant-text-primary, #111827);
+    margin: 0;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-phone {
+    font-size: 14px;
+    color: var(--elegant-text-secondary, #6b7280);
+    margin: 0;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.user-phone::before {
+    content: '📱';
+    font-size: 12px;
+}
+
+/* 状态指示器 */
+.status-indicator {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-indicator.active {
+    background: #10b981;
+}
+
+.status-indicator.inactive {
+    background: #ef4444;
+}
+
+.status-indicator i {
+    font-size: 8px;
+    color: white;
+}
+
+/* 用户卡片主体 */
+.user-card-body {
+    padding: 20px;
+}
+
+/* 用户详情网格 */
+.user-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+/* 详情项目 */
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--elegant-gray-100, #f3f4f6);
+}
+
+.detail-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--elegant-text-secondary, #6b7280);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 14px;
+    color: var(--elegant-text-primary, #374151);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 角色和状态徽章 */
+.role-badge, .status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.role-badge.admin {
+    background: rgba(124, 58, 237, 0.12);
+    color: #7c3aed;
+    border: 1px solid rgba(124, 58, 237, 0.25);
+}
+
+.role-badge.user {
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.status-badge.active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-badge.inactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* 用户卡片底部 */
+.user-card-footer {
+    padding: 16px 20px;
+    background: var(--elegant-gray-50, #f9fafb);
+    border-top: 1px solid var(--elegant-gray-200, #e5e7eb);
+}
+
+/* 操作按钮组 */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 40px;
+    max-width: 140px;
+    white-space: nowrap;
+    background: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn.edit {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+.action-btn.edit:hover {
+    background: #2563eb;
+}
+
+.action-btn.disable,
+.action-btn.enable {
+    background: #f59e0b;
+    color: white;
+    border-color: #f59e0b;
+}
+
+.action-btn.disable:hover,
+.action-btn.enable:hover {
+    background: #d97706;
+}
+
+.action-btn.delete {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.action-btn.delete:hover {
+    background: #dc2626;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .user-card-header {
+        padding: 16px;
+        gap: 12px;
+        min-height: 76px;
+    }
+    
+    .user-card-body {
+        padding: 16px;
+    }
+    
+    .user-details {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .detail-item {
+        padding: 8px 0;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .detail-label {
+        min-width: 70px;
+    }
+    
+    .user-card-footer {
+        padding: 12px 16px;
+    }
+    
+    .action-buttons {
+        gap: 8px;
+    }
+    
+    .action-btn {
+        padding: 8px 12px;
+        min-height: 36px;
+        font-size: 12px;
+    }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 480px) {
+    .users-container {
+        padding: 8px;
+    }
+    
+    .users-grid {
+        gap: 12px;
+    }
+    
+    .user-card-header {
+        padding: 14px;
+        gap: 10px;
+    }
+    
+    .user-avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+    }
+    
+    .user-name {
+        font-size: 16px;
+    }
+    
+    .user-phone {
+        font-size: 13px;
+    }
+    
+    .user-details {
+        gap: 8px;
+    }
+    
+    .detail-item {
+        padding: 6px 0;
+    }
+    
+    .detail-label {
+        font-size: 11px;
+        min-width: 60px;
+    }
+    
+    .detail-value {
+        font-size: 13px;
+    }
+    
+    .role-badge, .status-badge {
+        font-size: 11px;
+        padding: 2px 8px;
+    }
+    
+    .action-btn {
+        padding: 6px 8px;
+        min-height: 32px;
+        font-size: 11px;
+    }
+    
+    /* 三按钮时隐藏文字，只显示图标 */
+    .action-buttons:has(.action-btn.delete) .action-btn span {
+        display: none;
+    }
+    
+    .action-buttons:has(.action-btn.delete) .action-btn {
+        min-width: 40px;
+        padding: 6px;
+    }
+}
+
+/* 淡入动画 */
+.fade-in {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 确保在所有情况下用户卡片都是可见的 */
+.user-card {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.users-grid .user-card {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}

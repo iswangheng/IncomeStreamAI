@@ -88,7 +88,7 @@ function renderUsersTable(users) {
     container.style.display = 'block';
     container.style.visibility = 'visible';
     
-    let cardsHTML = '<div class="users-grid" style="display: flex; flex-direction: column; gap: 16px; width: 100%;">';
+    let cardsHTML = '<div class="users-grid">';
 
     users.forEach((user, index) => {
         const isCurrentUser = user.current_user_id === user.id;

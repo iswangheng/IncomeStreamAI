@@ -610,7 +610,7 @@
                         <td>
                             ${user.active ? '<span class="badge bg-success">正常</span>' : '<span class="badge bg-secondary">禁用</span>'}
                         </td>
-                        <td>${user.last_login || '从未登录'}</td>
+                        <td>${user.last_login_display || '从未登录'}</td>
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <button class="btn btn-outline-primary btn-sm" onclick="editUser(${user.id})">

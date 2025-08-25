@@ -36,7 +36,9 @@
         background: #f8fafc !important;
         border-bottom: 1px solid #e5e7eb !important;
         gap: 12px !important;
-        min-height: 80px !important;
+        min-height: 88px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     
     /* 用户头像 */
@@ -52,6 +54,7 @@
         font-size: 20px !important;
         flex-shrink: 0 !important;
         box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
+        margin-top: 2px !important;
     }
     
     /* 用户基本信息容器 */
@@ -60,13 +63,15 @@
         min-width: 0 !important;
         display: flex !important;
         flex-direction: column !important;
-        gap: 6px !important;
+        gap: 8px !important;
         padding-top: 2px !important;
+        width: calc(100% - 60px) !important;
+        overflow: hidden !important;
     }
     
     /* 用户名 */
     .user-name {
-        font-size: 18px !important;
+        font-size: 17px !important;
         font-weight: 600 !important;
         color: #1f2937 !important;
         margin: 0 !important;
@@ -74,15 +79,20 @@
         word-break: break-word !important;
         overflow: hidden !important;
         display: -webkit-box !important;
-        -webkit-line-clamp: 2 !important;
+        -webkit-line-clamp: 1 !important;
         -webkit-box-orient: vertical !important;
+        max-width: 100% !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
     }
     
     /* 用户元数据 */
     .user-meta {
         display: flex !important;
         flex-direction: column !important;
-        gap: 4px !important;
+        gap: 6px !important;
+        width: 100% !important;
+        overflow: hidden !important;
     }
     
     .user-phone {
@@ -91,11 +101,16 @@
         display: flex !important;
         align-items: center !important;
         gap: 6px !important;
+        width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
     }
     
     .user-phone i {
         font-size: 12px !important;
         color: #9ca3af !important;
+        flex-shrink: 0 !important;
     }
     
     .user-status {
@@ -104,6 +119,7 @@
         display: flex !important;
         align-items: center !important;
         gap: 5px !important;
+        width: fit-content !important;
     }
     
     .user-status.active {
@@ -130,9 +146,12 @@
     .user-field {
         display: flex !important;
         justify-content: space-between !important;
-        align-items: center !important;
-        padding: 8px 0 !important;
+        align-items: flex-start !important;
+        padding: 10px 0 !important;
         border-bottom: 1px solid #f3f4f6 !important;
+        gap: 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     
     .user-field:last-child {
@@ -145,31 +164,34 @@
         color: #6b7280 !important;
         margin: 0 !important;
         flex-shrink: 0 !important;
-        width: 80px !important;
+        width: 72px !important;
+        line-height: 1.4 !important;
     }
     
     /* 角色徽章 */
     .role-badge {
-        padding: 4px 12px !important;
-        border-radius: 20px !important;
+        padding: 6px 12px !important;
+        border-radius: 16px !important;
         font-size: 12px !important;
         font-weight: 500 !important;
-        display: flex !important;
+        display: inline-flex !important;
         align-items: center !important;
         gap: 4px !important;
         white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        max-width: fit-content !important;
     }
     
     .role-badge.admin {
-        background: rgba(147, 51, 234, 0.1) !important;
+        background: rgba(147, 51, 234, 0.12) !important;
         color: #7c3aed !important;
-        border: 1px solid rgba(147, 51, 234, 0.2) !important;
+        border: 1px solid rgba(147, 51, 234, 0.25) !important;
     }
     
     .role-badge.user {
-        background: rgba(59, 130, 246, 0.1) !important;
+        background: rgba(59, 130, 246, 0.12) !important;
         color: #2563eb !important;
-        border: 1px solid rgba(59, 130, 246, 0.2) !important;
+        border: 1px solid rgba(59, 130, 246, 0.25) !important;
     }
     
     /* 状态徽章 */
@@ -205,11 +227,15 @@
         gap: 6px !important;
         flex: 1 !important;
         text-align: right !important;
+        justify-content: flex-end !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
     }
     
     .field-value i {
         font-size: 12px !important;
         color: #9ca3af !important;
+        flex-shrink: 0 !important;
     }
     
     /* 用户卡片操作区域 */
@@ -298,23 +324,37 @@
     /* 超小屏幕适配 */
     @media (max-width: 480px) {
         .user-card-header {
-            padding: 12px !important;
+            padding: 14px !important;
             gap: 10px !important;
-            min-height: 72px !important;
+            min-height: 80px !important;
         }
         
         .user-avatar {
-            width: 44px !important;
-            height: 44px !important;
-            font-size: 18px !important;
+            width: 42px !important;
+            height: 42px !important;
+            font-size: 17px !important;
+        }
+        
+        .user-basic-info {
+            width: calc(100% - 52px) !important;
         }
         
         .user-name {
             font-size: 16px !important;
+            -webkit-line-clamp: 1 !important;
+        }
+        
+        .user-phone {
+            font-size: 13px !important;
+        }
+        
+        .user-field {
+            padding: 8px 0 !important;
+            gap: 8px !important;
         }
         
         .user-field label {
-            width: 70px !important;
+            width: 64px !important;
             font-size: 13px !important;
         }
         
@@ -322,9 +362,15 @@
             font-size: 13px !important;
         }
         
+        .role-badge, .status-badge {
+            font-size: 11px !important;
+            padding: 4px 10px !important;
+        }
+        
         .action-btn {
             font-size: 13px !important;
             min-height: 40px !important;
+            padding: 6px 10px !important;
         }
     }
 }

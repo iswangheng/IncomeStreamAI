@@ -97,14 +97,14 @@ with app.app_context():
         default_user.name = '系统管理员'
         db.session.commit()
         print("已将18302196515用户设置为管理员")
-    
+
     # 初始化默认模型配置
     default_configs = [
         ('main_analysis', 'gpt-4o-mini', 0.7, 2500, 45),
         ('chat', 'gpt-4o', 0.7, 1500, 30),
         ('fallback', 'gpt-4o-mini', 0.5, 2000, 60)
     ]
-    
+
     for config_name, model_name, temperature, max_tokens, timeout in default_configs:
         existing_config = ModelConfig.query.filter_by(config_name=config_name).first()
         if not existing_config:
@@ -890,7 +890,7 @@ def generate():
                 make_happy_list = []
                 if i < len(person_needs) and person_needs[i].strip():
                     make_happy_list = [need.strip() for need in person_needs[i].split(',') if need.strip()]
-                
+
                 key_persons.append({
                     "name": person_names[i].strip(),
                     "role": person_roles[i].strip() if i < len(person_roles) else "",
@@ -1125,21 +1125,6 @@ def generate_fallback_result(form_data, reason=""):
         "notes": f"由于{reason}，以上为基础建议。建议您完善关键人物的动机信息后重新分析，可获得更精准的个性化方案。"
     }
 
-# Helper functions
-def allowed_file(filename):
-    """检查文件扩展名是否允许"""
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def get_file_size(file_obj):
-    """获取文件大小"""
-    if hasattr(file_obj, 'seek') and hasattr(file_obj, 'tell'):
-        file_obj.seek(0, 2)  # 移到文件末尾
-        size = file_obj.tell()
-        file_obj.seek(0)  # 回到文件开头
-        return size
-    return 0
-
 # Knowledge Base Management Routes
 @app.route('/history')
 @login_required
@@ -1211,42 +1196,45 @@ def view_analysis_record(record_id):
 @login_required
 @admin_required
 def api_users():
-    """用户数据API接口"""
+    """管理中心用户API - 返回用户列表数据"""
     try:
         users = User.query.all()
+        current_month = datetime.now().replace(day=1)
 
-        # 计算统计数据
-        total_users = len(users)
-        active_users = sum(1 for user in users if user.active)
-        admin_users = sum(1 for user in users if user.is_admin)
-        recent_users = sum(1 for user in users if user.created_at and (datetime.utcnow() - user.created_at).days <= 30)
-
-        # 准备用户数据
         users_data = []
         for user in users:
+            # 确保时间显示格式正确
+            created_at_display = user.created_at_display if user.created_at else '未知'
+            last_login_display = user.last_login_display if user.last_login else '从未登录'
+
             users_data.append({
                 'id': user.id,
-                'name': user.name,
+                'name': user.name or '未设置姓名',
                 'phone': user.phone,
                 'is_admin': user.is_admin,
                 'active': user.active,
-                'created_at': user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else None,
-                'last_login': user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else None,
+                'created_at': user.created_at.isoformat() if user.created_at else None,
+                'last_login': user.last_login.isoformat() if user.last_login else None,
+                'created_at_display': created_at_display,
+                'last_login_display': last_login_display,
                 'current_user_id': current_user.id
             })
 
+        # 统计数据
+        stats = {
+            'total': len(users),
+            'active': len([u for u in users if u.active]),
+            'admin': len([u for u in users if u.is_admin]),
+            'recent': len([u for u in users if u.created_at and u.created_at >= current_month])
+        }
+
         return jsonify({
             'success': True,
-            'stats': {
-                'total': total_users,
-                'active': active_users,
-                'admin': admin_users,
-                'recent': recent_users
-            },
-            'users': users_data
+            'users': users_data,
+            'stats': stats
         })
     except Exception as e:
-        app.logger.error(f"获取用户数据失败: {str(e)}")
+        print(f"获取用户数据失败: {e}")
         return jsonify({
             'success': False,
             'message': '获取用户数据失败'
@@ -1957,9 +1945,9 @@ def test_model_connection():
     try:
         import time
         from openai_service import client
-        
+
         start_time = time.time()
-        
+
         # 发送简单的测试请求
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -1967,9 +1955,9 @@ def test_model_connection():
             max_tokens=10,
             temperature=0
         )
-        
+
         response_time = int((time.time() - start_time) * 1000)  # 转换为毫秒
-        
+
         if response.choices[0].message.content:
             return jsonify({
                 'success': True,
@@ -1979,7 +1967,7 @@ def test_model_connection():
             })
         else:
             return jsonify({'success': False, 'message': 'API连接成功但响应为空'}), 500
-            
+
     except Exception as e:
         app.logger.error(f"模型连接测试失败: {str(e)}")
         return jsonify({
@@ -1995,13 +1983,13 @@ def get_model_config():
     try:
         from models import ModelConfig
         import traceback
-        
+
         app.logger.info("开始获取模型配置")
-        
+
         # 获取主要配置
         main_config = ModelConfig.get_config('main_analysis')
         app.logger.info(f"主分析配置: {main_config}")
-        
+
         return jsonify({
             'success': True,
             'config': {
@@ -2023,40 +2011,40 @@ def save_model_config_api():
     """保存模型配置API"""
     try:
         import traceback
-        
+
         app.logger.info("开始保存模型配置")
-        
+
         # 获取请求数据
         data = request.get_json()
         app.logger.info(f"接收到的数据: {data}")
-        
+
         # 验证数据
         if not data:
             app.logger.error("请求数据为空")
             return jsonify({'success': False, 'message': '无效的请求数据'}), 400
-        
+
         model = data.get('model', 'gpt-4o-mini')
         temperature = float(data.get('temperature', 0.7))
         max_tokens = int(data.get('max_tokens', 2500))
         timeout = int(data.get('timeout', 45))
-        
+
         app.logger.info(f"解析后的配置: model={model}, temp={temperature}, tokens={max_tokens}, timeout={timeout}")
-        
+
         # 验证模型名称
         valid_models = ['gpt-4.1', 'gpt-4o', 'gpt-4o-mini']
         if model not in valid_models:
             app.logger.error(f"无效的模型名称: {model}")
             return jsonify({'success': False, 'message': '无效的模型选择'}), 400
-        
+
         from models import ModelConfig
-        
+
         # 更新主分析配置
         app.logger.info("开始更新数据库配置")
         ModelConfig.set_config('main_analysis', model, temperature, max_tokens, timeout)
         app.logger.info("数据库配置更新完成")
-        
+
         app.logger.info(f"模型配置已更新: {model}, temperature={temperature}, max_tokens={max_tokens}")
-        
+
         return jsonify({
             'success': True,
             'message': '配置保存成功',
@@ -2067,7 +2055,7 @@ def save_model_config_api():
                 'timeout': timeout
             }
         })
-        
+
     except Exception as e:
         app.logger.error(f"保存模型配置失败: {str(e)}")
         app.logger.error(f"错误追踪: {traceback.format_exc()}")
@@ -2081,40 +2069,40 @@ def update_user_profile():
         # 获取表单数据
         new_name = request.form.get('name', '').strip()
         action = request.form.get('action')
-        
+
         if action == 'update_name':
             # 更新姓名
             current_user.name = new_name if new_name else None
             db.session.commit()
             flash('姓名更新成功', 'success')
-        
+
         elif action == 'change_password':
             # 修改密码
             current_password = request.form.get('current_password', '').strip()
             new_password = request.form.get('new_password', '').strip()
             confirm_password = request.form.get('confirm_password', '').strip()
-            
+
             # 验证当前密码
             if not current_user.check_password(current_password):
                 flash('当前密码不正确', 'error')
                 return redirect(url_for('user_profile'))
-            
+
             # 验证新密码
             if len(new_password) < 6:
                 flash('新密码长度至少6位', 'error')
                 return redirect(url_for('user_profile'))
-                
+
             if new_password != confirm_password:
                 flash('两次输入的密码不一致', 'error')
                 return redirect(url_for('user_profile'))
-            
+
             # 更新密码
             current_user.set_password(new_password)
             db.session.commit()
             flash('密码修改成功', 'success')
-        
+
         return redirect(url_for('user_profile'))
-        
+
     except Exception as e:
         app.logger.error(f"Update profile error: {str(e)}")
         flash('更新失败，请重试', 'error')

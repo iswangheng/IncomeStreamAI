@@ -60,6 +60,17 @@ function updateUserStats(stats) {
 function renderUsersTable(users) {
     const container = document.getElementById('usersTableContainer');
 
+    // 调试信息：检查用户数据
+    console.log('渲染用户数据:', users);
+    if (users && users.length > 0) {
+        console.log('第一个用户的时间数据:', {
+            created_at: users[0].created_at,
+            created_at_display: users[0].created_at_display,
+            last_login: users[0].last_login,
+            last_login_display: users[0].last_login_display
+        });
+    }
+
     if (!users || users.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -111,11 +122,11 @@ function renderUsersTable(users) {
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">注册时间</span>
-                            <span class="detail-value">${user.created_at_display || '未知'}</span>
+                            <span class="detail-value">${user.created_at_display}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">最后登录</span>
-                            <span class="detail-value">${user.last_login_display || '从未登录'}</span>
+                            <span class="detail-value">${user.last_login_display}</span>
                         </div>
                     </div>
                 </div>

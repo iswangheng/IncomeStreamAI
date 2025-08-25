@@ -73,18 +73,22 @@ function renderUsersTable(users) {
 
     if (!users || users.length === 0) {
         container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">
+            <div class="empty-state" style="text-align: center; padding: 40px; color: #6b7280;">
+                <div class="empty-icon" style="font-size: 48px; margin-bottom: 16px;">
                     <i class="fas fa-users"></i>
                 </div>
-                <h3 class="empty-title">暂无用户数据</h3>
-                <p class="empty-description">系统中还没有注册用户，点击添加用户开始管理。</p>
+                <h3 class="empty-title" style="margin: 0 0 8px 0; font-size: 18px; color: #374151;">暂无用户数据</h3>
+                <p class="empty-description" style="margin: 0; font-size: 14px;">系统中还没有注册用户，点击添加用户开始管理。</p>
             </div>
         `;
         return;
     }
 
-    let cardsHTML = '<div class="users-grid">';
+    // 确保容器可见
+    container.style.display = 'block';
+    container.style.visibility = 'visible';
+    
+    let cardsHTML = '<div class="users-grid" style="display: flex; flex-direction: column; gap: 16px; width: 100%;">';
 
     users.forEach((user, index) => {
         const isCurrentUser = user.current_user_id === user.id;
@@ -335,12 +339,23 @@ window.refreshUsers = refreshUsers;
 
 // 搜索用户函数
 function searchUsers() {
-    const searchTerm = document.getElementById('user-search')?.value?.toLowerCase() || '';
-    const roleFilter = document.getElementById('user-role-filter')?.value || '';
+    console.log('搜索用户被调用');
+    const searchInput = document.getElementById('user-search');
+    const roleSelect = document.getElementById('user-role-filter');
+    
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const roleFilter = roleSelect ? roleSelect.value : '';
+    
+    console.log('搜索条件:', { searchTerm, roleFilter });
+    
+    if (!currentUsersData || currentUsersData.length === 0) {
+        console.log('没有用户数据可搜索');
+        return;
+    }
     
     let filteredUsers = currentUsersData.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchTerm) || 
-                             user.phone.includes(searchTerm);
+        const matchesSearch = (user.name && user.name.toLowerCase().includes(searchTerm)) || 
+                             (user.phone && user.phone.includes(searchTerm));
         
         let matchesRole = true;
         if (roleFilter === 'admin') {
@@ -352,6 +367,7 @@ function searchUsers() {
         return matchesSearch && matchesRole;
     });
     
+    console.log('筛选后的用户:', filteredUsers);
     renderUsersTable(filteredUsers);
 }
 

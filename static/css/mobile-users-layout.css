@@ -1,484 +1,508 @@
-
 /* 
- * 移动端用户管理 - 用户卡片布局优化
+ * 移动端用户管理 - 用户卡片布局
  * 解决移动端用户列表重叠和超出问题
  */
 
-/* 移动端用户卡片容器 */
+/* 用户卡片容器 - 适用于所有设备 */
+.users-container {
+    padding: 16px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 用户网格布局 */
+.users-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 用户卡片基础样式 */
+.user-card {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 16px !important;
+    padding: 0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.user-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* 移动端特殊处理 */
 @media (max-width: 768px) {
     .users-container {
-        padding: 0 !important;
-        margin: 0 !important;
+        padding: 12px !important;
     }
-    
-    /* 用户网格布局 */
+
     .users-grid {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 16px !important;
-        padding: 0 !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+        gap: 12px !important;
     }
-    
-    /* 用户卡片基础样式 */
+
     .user-card {
-        background: white !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 16px !important;
-        padding: 0 !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-        overflow: hidden !important;
-        transition: all 0.3s ease !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        position: relative !important;
+        margin-bottom: 0 !important;
     }
-    
-    .user-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-        transform: translateY(-2px) !important;
-    }
-    
-    /* 用户卡片头部 - 头像和基本信息 */
-    .user-card-header {
-        display: flex !important;
-        align-items: center !important;
-        padding: 16px !important;
-        background: #f8fafc !important;
-        border-bottom: 1px solid #e5e7eb !important;
-        gap: 12px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        min-height: 80px !important;
-        position: relative !important;
-    }
-    
-    /* 用户头像 */
-    .user-avatar {
-        width: 48px !important;
-        height: 48px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        color: white !important;
-        font-size: 20px !important;
-        flex-shrink: 0 !important;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
-        position: relative !important;
-        z-index: 1 !important;
-    }
-    
-    .user-avatar.admin {
-        background: linear-gradient(135deg, #7c3aed, #a855f7) !important;
-    }
-    
-    .user-avatar.user {
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
-    }
-    
-    /* 用户信息容器 */
-    .user-info {
-        flex: 1 !important;
-        min-width: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 4px !important;
-        overflow: hidden !important;
-        padding-right: 8px !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* 用户名 */
-    .user-name {
-        font-size: 16px !important;
-        font-weight: 600 !important;
-        color: #1f2937 !important;
-        margin: 0 !important;
-        line-height: 1.4 !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        max-width: 100% !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* 用户手机号 */
-    .user-phone {
-        font-size: 14px !important;
-        color: #6b7280 !important;
-        margin: 0 !important;
-        line-height: 1.3 !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        max-width: 100% !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* 状态指示器 */
-    .status-indicator {
-        position: absolute !important;
-        top: 16px !important;
-        right: 16px !important;
-        width: 12px !important;
-        height: 12px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        flex-shrink: 0 !important;
-        z-index: 2 !important;
-    }
-    
-    .status-indicator.active {
-        background: #10b981 !important;
-        color: #10b981 !important;
-    }
-    
-    .status-indicator.inactive {
-        background: #ef4444 !important;
-        color: #ef4444 !important;
-    }
-    
-    .status-indicator i {
-        font-size: 8px !important;
-        color: white !important;
-    }
-    
-    /* 用户卡片内容区域 */
-    .user-card-body {
-        padding: 16px !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 0 !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* 用户详情 */
+}
+
+/* 用户卡片头部 - 头像和基本信息 */
+.user-card-header {
+    display: flex !important;
+    align-items: center !important;
+    padding: 16px !important;
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    gap: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-height: 80px !important;
+    position: relative !important;
+}
+
+/* 用户头像 */
+.user-avatar {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    flex-shrink: 0 !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
+}
+
+.user-avatar.admin {
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%) !important;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3) !important;
+}
+
+/* 用户信息区域 */
+.user-info {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    margin-right: 32px !important;
+    padding-right: 16px !important;
+}
+
+/* 用户姓名 */
+.user-name {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #111827 !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: block !important;
+}
+
+/* 用户手机号 */
+.user-phone {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    margin: 0 !important;
+    line-height: 1.3 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: block !important;
+}
+
+/* 状态指示器 */
+.status-indicator {
+    position: absolute !important;
+    top: 16px !important;
+    right: 16px !important;
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    z-index: 2 !important;
+}
+
+.status-indicator.active {
+    background: #10b981 !important;
+    color: #10b981 !important;
+}
+
+.status-indicator.inactive {
+    background: #ef4444 !important;
+    color: #ef4444 !important;
+}
+
+.status-indicator i {
+    font-size: 8px !important;
+    color: white !important;
+}
+
+/* 用户卡片内容区域 */
+.user-card-body {
+    padding: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 用户详情网格 */
+.user-details {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+@media (max-width: 480px) {
     .user-details {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* 详情项 */
-    .detail-item {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        padding: 8px 0 !important;
-        border-bottom: 1px solid #f3f4f6 !important;
-        gap: 12px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        min-height: 40px !important;
-    }
-    
-    .detail-item:last-child {
-        border-bottom: none !important;
-    }
-    
-    .detail-label {
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        color: #6b7280 !important;
-        margin: 0 !important;
-        flex-shrink: 0 !important;
-        width: 80px !important;
-        line-height: 1.4 !important;
-    }
-    
-    /* 角色徽章 */
-    .role-badge {
-        padding: 4px 12px !important;
-        border-radius: 16px !important;
-        font-size: 12px !important;
-        font-weight: 500 !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
-        max-width: fit-content !important;
-    }
-    
-    .role-badge.admin {
-        background: rgba(124, 58, 237, 0.12) !important;
-        color: #7c3aed !important;
-        border: 1px solid rgba(124, 58, 237, 0.25) !important;
-    }
-    
-    .role-badge.user {
-        background: rgba(59, 130, 246, 0.12) !important;
-        color: #2563eb !important;
-        border: 1px solid rgba(59, 130, 246, 0.25) !important;
-    }
-    
-    /* 状态徽章 */
-    .status-badge {
-        padding: 4px 12px !important;
-        border-radius: 20px !important;
-        font-size: 12px !important;
-        font-weight: 500 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
-    }
-    
-    .status-badge.active {
-        background: rgba(16, 185, 129, 0.1) !important;
-        color: #10b981 !important;
-        border: 1px solid rgba(16, 185, 129, 0.2) !important;
-    }
-    
-    .status-badge.inactive {
-        background: rgba(239, 68, 68, 0.1) !important;
-        color: #ef4444 !important;
-        border: 1px solid rgba(239, 68, 68, 0.2) !important;
-    }
-    
-    /* 字段值 */
-    .detail-value {
-        font-size: 14px !important;
-        color: #374151 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 6px !important;
-        flex: 1 !important;
-        text-align: right !important;
-        justify-content: flex-end !important;
-        min-width: 0 !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        max-width: calc(100% - 100px) !important;
-    }
-    
-    /* 用户卡片操作区域 */
-    .user-card-footer {
-        padding: 12px 16px !important;
-        background: #f9fafb !important;
-        border-top: 1px solid #e5e7eb !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* 操作按钮组 */
-    .action-buttons {
-        display: flex !important;
+        grid-template-columns: 1fr !important;
         gap: 8px !important;
-        flex-wrap: nowrap !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
     }
-    
-    /* 操作按钮 */
-    .action-btn {
-        flex: 1 !important;
-        min-height: 40px !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 4px !important;
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
-        padding: 8px 6px !important;
-        box-sizing: border-box !important;
-        min-width: 0 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-    }
-    
-    .action-btn span {
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }
-    
-    .action-btn.edit {
-        background: #3b82f6 !important;
-        color: white !important;
-    }
-    
-    .action-btn.edit:hover {
-        background: #2563eb !important;
-        transform: translateY(-1px) !important;
-    }
-    
-    .action-btn.disable,
-    .action-btn.enable {
-        background: #f59e0b !important;
-        color: white !important;
-    }
-    
-    .action-btn.disable:hover,
-    .action-btn.enable:hover {
-        background: #d97706 !important;
-        transform: translateY(-1px) !important;
-    }
-    
-    .action-btn.delete {
-        background: #ef4444 !important;
-        color: white !important;
-    }
-    
-    .action-btn.delete:hover {
-        background: #dc2626 !important;
-        transform: translateY(-1px) !important;
-    }
-    
-    /* 三按钮布局时的特殊处理 */
-    .action-buttons:has(.action-btn.delete) .action-btn {
-        flex: 0 1 calc(33.333% - 6px) !important;
-        min-width: 70px !important;
-    }
-    
-    /* 两按钮布局 */
-    .action-buttons:not(:has(.action-btn.delete)) .action-btn {
-        flex: 0 1 calc(50% - 4px) !important;
-        min-width: 90px !important;
-    }
-    
-    /* 淡入动画 */
-    .fade-in {
+}
+
+/* 详情项目 */
+.detail-item {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    padding: 8px 0 !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-height: 40px !important;
+}
+
+/* 详情标签 */
+.detail-label {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #6b7280 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    min-width: 50px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* 角色徽章 */
+.role-badge {
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.role-badge.admin {
+    background: rgba(124, 58, 237, 0.12) !important;
+    color: #7c3aed !important;
+    border: 1px solid rgba(124, 58, 237, 0.25) !important;
+}
+
+.role-badge.user {
+    background: rgba(59, 130, 246, 0.12) !important;
+    color: #2563eb !important;
+    border: 1px solid rgba(59, 130, 246, 0.25) !important;
+}
+
+/* 状态徽章 */
+.status-badge {
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.status-badge.active {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #10b981 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+
+.status-badge.inactive {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+}
+
+/* 字段值 */
+.detail-value {
+    font-size: 14px !important;
+    color: #374151 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex: 1 !important;
+    text-align: right !important;
+    justify-content: flex-end !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: calc(100% - 100px) !important;
+}
+
+/* 用户卡片底部 */
+.user-card-footer {
+    padding: 12px 16px !important;
+    background: #f8fafc !important;
+    border-top: 1px solid #e5e7eb !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 操作按钮组 */
+.action-buttons {
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-wrap: wrap !important;
+}
+
+/* 操作按钮 */
+.action-btn {
+    flex: 1 !important;
+    padding: 8px 12px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    text-align: center !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    min-height: 36px !important;
+    max-width: 120px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    background: #ffffff !important;
+    color: #374151 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.action-btn span {
+    display: inline !important;
+    font-size: 12px !important;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.action-btn.edit {
+    background: #3b82f6 !important;
+    color: white !important;
+}
+
+.action-btn.edit:hover {
+    background: #2563eb !important;
+}
+
+.action-btn.disable,
+.action-btn.enable {
+    background: #f59e0b !important;
+    color: white !important;
+}
+
+.action-btn.disable:hover,
+.action-btn.enable:hover {
+    background: #d97706 !important;
+}
+
+.action-btn.delete {
+    background: #ef4444 !important;
+    color: white !important;
+}
+
+.action-btn.delete:hover {
+    background: #dc2626 !important;
+}
+
+/* 三按钮布局时的特殊处理 */
+.action-buttons:has(.action-btn.delete) .action-btn {
+    flex: 0 1 calc(33.333% - 6px) !important;
+    min-width: 70px !important;
+}
+
+/* 两按钮布局 */
+.action-buttons:not(:has(.action-btn.delete)) .action-btn {
+    flex: 0 1 calc(50% - 4px) !important;
+    min-width: 90px !important;
+}
+
+/* 淡入动画 */
+.fade-in {
+    opacity: 0 !important;
+    animation: fadeInUp 0.6s ease-out forwards !important;
+}
+
+@keyframes fadeInUp {
+    from {
         opacity: 0 !important;
-        animation: fadeInUp 0.6s ease-out forwards !important;
+        transform: translateY(20px) !important;
     }
-    
-    @keyframes fadeInUp {
-        from {
-            opacity: 0 !important;
-            transform: translateY(20px) !important;
-        }
-        to {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-        }
+    to {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
     }
-    
-    /* 超小屏幕适配 */
-    @media (max-width: 480px) {
-        .user-card-header {
-            padding: 14px !important;
-            gap: 10px !important;
-            min-height: 76px !important;
-        }
-        
-        .user-avatar {
-            width: 44px !important;
-            height: 44px !important;
-            font-size: 18px !important;
-        }
-        
-        .user-name {
-            font-size: 15px !important;
-        }
-        
-        .user-phone {
-            font-size: 13px !important;
-        }
-        
-        .detail-item {
-            padding: 6px 0 !important;
-            gap: 8px !important;
-            min-height: 36px !important;
-        }
-        
-        .detail-label {
-            width: 70px !important;
-            font-size: 13px !important;
-        }
-        
-        .detail-value {
-            font-size: 13px !important;
-            max-width: calc(100% - 85px) !important;
-        }
-        
-        .role-badge,
-        .status-badge {
-            font-size: 11px !important;
-            padding: 3px 10px !important;
-        }
-        
-        .action-btn {
-            font-size: 12px !important;
-            min-height: 36px !important;
-            padding: 6px 4px !important;
-        }
-        
-        .action-buttons:has(.action-btn.delete) .action-btn {
-            min-width: 60px !important;
-        }
-        
-        .action-buttons:not(:has(.action-btn.delete)) .action-btn {
-            min-width: 80px !important;
-        }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 480px) {
+    .user-card-header {
+        padding: 14px !important;
+        gap: 10px !important;
+        min-height: 76px !important;
     }
-    
-    /* 极小屏幕适配 */
-    @media (max-width: 360px) {
-        .user-card-header {
-            padding: 12px !important;
-            gap: 8px !important;
-        }
-        
-        .user-avatar {
-            width: 40px !important;
-            height: 40px !important;
-            font-size: 16px !important;
-        }
-        
-        .user-name {
-            font-size: 14px !important;
-        }
-        
-        .user-phone {
-            font-size: 12px !important;
-        }
-        
-        .detail-label {
-            width: 60px !important;
-            font-size: 12px !important;
-        }
-        
-        .detail-value {
-            font-size: 12px !important;
-            max-width: calc(100% - 75px) !important;
-        }
-        
-        .action-btn {
-            font-size: 11px !important;
-            padding: 5px 3px !important;
-        }
-        
-        .action-btn span {
-            display: none !important;
-        }
-        
-        .action-btn i {
-            font-size: 14px !important;
-        }
-        
-        .action-buttons:has(.action-btn.delete) .action-btn {
-            min-width: 50px !important;
-        }
-        
-        .action-buttons:not(:has(.action-btn.delete)) .action-btn {
-            min-width: 70px !important;
-        }
+
+    .user-avatar {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 18px !important;
+    }
+
+    .user-name {
+        font-size: 15px !important;
+    }
+
+    .user-phone {
+        font-size: 13px !important;
+    }
+
+    .detail-item {
+        padding: 6px 0 !important;
+        gap: 8px !important;
+        min-height: 36px !important;
+    }
+
+    .detail-label {
+        width: 70px !important;
+        font-size: 13px !important;
+    }
+
+    .detail-value {
+        font-size: 13px !important;
+        max-width: calc(100% - 85px) !important;
+    }
+
+    .role-badge,
+    .status-badge {
+        font-size: 11px !important;
+        padding: 3px 10px !important;
+    }
+
+    .action-btn {
+        font-size: 12px !important;
+        min-height: 36px !important;
+        padding: 6px 4px !important;
+    }
+
+    .action-buttons:has(.action-btn.delete) .action-btn {
+        min-width: 60px !important;
+    }
+
+    .action-buttons:not(:has(.action-btn.delete)) .action-btn {
+        min-width: 80px !important;
+    }
+}
+
+/* 极小屏幕适配 */
+@media (max-width: 360px) {
+    .user-card-header {
+        padding: 12px !important;
+        gap: 8px !important;
+    }
+
+    .user-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 16px !important;
+    }
+
+    .user-name {
+        font-size: 14px !important;
+    }
+
+    .user-phone {
+        font-size: 12px !important;
+    }
+
+    .detail-label {
+        width: 60px !important;
+        font-size: 12px !important;
+    }
+
+    .detail-value {
+        font-size: 12px !important;
+        max-width: calc(100% - 75px) !important;
+    }
+
+    .action-btn {
+        font-size: 11px !important;
+        padding: 5px 3px !important;
+    }
+
+    .action-btn span {
+        display: none !important;
+    }
+
+    .action-btn i {
+        font-size: 14px !important;
+    }
+
+    .action-buttons:has(.action-btn.delete) .action-btn {
+        min-width: 50px !important;
+    }
+
+    .action-buttons:not(:has(.action-btn.delete)) .action-btn {
+        min-width: 70px !important;
     }
 }
 
@@ -487,7 +511,7 @@
     .user-card {
         display: none !important;
     }
-    
+
     .users-grid {
         display: none !important;
     }

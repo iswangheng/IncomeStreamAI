@@ -111,11 +111,11 @@ function renderUsersTable(users) {
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">注册时间</span>
-                            <span class="detail-value">${user.created_at || '未知'}</span>
+                            <span class="detail-value">${user.created_at_display || (user.created_at ? new Date(user.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Shanghai' }) : '未知')}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">最后登录</span>
-                            <span class="detail-value">${user.last_login || '从未登录'}</span>
+                            <span class="detail-value">${user.last_login_display || (user.last_login ? new Date(user.last_login).toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Shanghai' }) : '从未登录')}</span>
                         </div>
                     </div>
                 </div>
@@ -207,8 +207,8 @@ function exportUsers() {
             user.phone || '',
             user.is_admin ? '管理员' : '普通用户',
             user.active ? '活跃' : '停用',
-            user.created_at || '',
-            user.last_login || '从未登录'
+            user.created_at_display || user.created_at || '',
+            user.last_login_display || (user.last_login || '从未登录')
         ]);
     });
 

@@ -68,6 +68,26 @@
             color: var(--color-text-primary);
             font-size: var(--text-xl);
             font-weight: 600;
+            margin-bottom: var(--space-3);
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .profile-meta .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .profile-meta .meta-item i {
+            color: var(--color-primary);
         }
 
         .profile-sections {
@@ -248,6 +268,16 @@
             </div>
             <div class="profile-info">{{ current_user.name or '未设置姓名' }}</div>
             <div class="profile-phone">{{ current_user.phone }}</div>
+            <div class="profile-meta">
+                <div class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    注册时间：{{ current_user.created_at_display }}
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    最后登录：{{ current_user.last_login_display }}
+                </div>
+            </div>
         </div>
 
         <!-- 消息提示 -->

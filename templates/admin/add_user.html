@@ -500,6 +500,21 @@ document.getElementById('confirm_password').addEventListener('input', function(e
     color: var(--color-primary);
 }
 
+.btn-secondary {
+    background: var(--color-gray-100);
+    color: var(--color-text-primary);
+    border: 2px solid var(--color-gray-300);
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background: var(--color-gray-200);
+    color: var(--color-text-primary);
+    border-color: var(--color-gray-400);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 @media (max-width: 768px) {
     .form-actions {
         flex-direction: column;

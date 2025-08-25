@@ -333,6 +333,31 @@ function refreshUsers() {
 // 确保refreshUsers函数全局可访问
 window.refreshUsers = refreshUsers;
 
+// 搜索用户函数
+function searchUsers() {
+    const searchTerm = document.getElementById('user-search')?.value?.toLowerCase() || '';
+    const roleFilter = document.getElementById('user-role-filter')?.value || '';
+    
+    let filteredUsers = currentUsersData.filter(user => {
+        const matchesSearch = user.name.toLowerCase().includes(searchTerm) || 
+                             user.phone.includes(searchTerm);
+        
+        let matchesRole = true;
+        if (roleFilter === 'admin') {
+            matchesRole = user.is_admin;
+        } else if (roleFilter === 'user') {
+            matchesRole = !user.is_admin;
+        }
+        
+        return matchesSearch && matchesRole;
+    });
+    
+    renderUsersTable(filteredUsers);
+}
+
+// 确保搜索函数全局可访问
+window.searchUsers = searchUsers;
+
 // 优雅的Toast提示函数
 function showToast(message, type = 'info') {
     console.log(`[${type.toUpperCase()}] ${message}`);

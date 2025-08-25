@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import traceback
+import uuid
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -12,6 +13,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class Base(DeclarativeBase):
     pass
@@ -28,10 +30,26 @@ if not database_url:
     database_url = "sqlite:///angela.db"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-}
+
+# Enhanced PostgreSQL SSL configuration for Replit
+if database_url and database_url.startswith('postgresql'):
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_recycle": 300,
+        "pool_pre_ping": True,
+        "pool_timeout": 20,
+        "pool_size": 5,
+        "max_overflow": 0,
+        "connect_args": {
+            "sslmode": "require",
+            "connect_timeout": 10,
+            "application_name": "replit_flask_app"
+        }
+    }
+else:
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_recycle": 300,
+        "pool_pre_ping": True,
+    }
 
 # 修复Session配置 - 确保session正常工作
 app.config['SESSION_COOKIE_SECURE'] = False  # 开发环境允许HTTP
@@ -57,6 +75,20 @@ login_manager.login_message_category = 'info'
 
 # Create upload folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Utility functions for file handling
+def allowed_file(filename):
+    """Check if uploaded file has an allowed extension"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def get_file_size(file_storage):
+    """Get the size of uploaded file in bytes"""
+    # Seek to end of file to get size
+    file_storage.seek(0, 2)  # Seek to end
+    size = file_storage.tell()
+    file_storage.seek(0)  # Reset to beginning
+    return size
 
 # 导入所有模型
 from models import User, KnowledgeItem, AnalysisResult, ModelConfig
@@ -85,7 +117,9 @@ with app.app_context():
     # 创建默认管理员账号
     default_user = User.query.filter_by(phone='18302196515').first()
     if not default_user:
-        default_user = User(phone='18302196515', name='系统管理员')
+        default_user = User()
+        default_user.phone = '18302196515'
+        default_user.name = '系统管理员'
         default_user.set_password('aibenzong9264')
         default_user.is_admin = True
         db.session.add(default_user)
@@ -308,18 +342,15 @@ def _internal_check_analysis_status():
             fallback_result = generate_fallback_suggestions(form_data)
 
             # 保存备用方案到数据库
-            import uuid
-
             fallback_id = str(uuid.uuid4())
-            analysis_result = AnalysisResult(
-                id=fallback_id,
-                form_data=json.dumps(form_data, ensure_ascii=False),
-                result_data=json.dumps(fallback_result, ensure_ascii=False),
-                project_name=form_data.get('projectName', ''),
-                project_description=form_data.get('projectDescription', ''),
-                team_size=len(form_data.get('keyPersons', [])),
-                analysis_type='fallback'
-            )
+            analysis_result = AnalysisResult()
+            analysis_result.id = fallback_id
+            analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+            analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
+            analysis_result.project_name = form_data.get('projectName', '')
+            analysis_result.project_description = form_data.get('projectDescription', '')
+            analysis_result.team_size = len(form_data.get('keyPersons', []))
+            analysis_result.analysis_type = 'fallback'
             db.session.add(analysis_result)
             db.session.commit()
 
@@ -395,16 +426,15 @@ def _handle_analysis_execution(form_data, session):
             result_id = str(uuid.uuid4())
 
             # 创建AnalysisResult实例
-            analysis_result = AnalysisResult(
-                id=result_id,
-                user_id=current_user.id,  # 关联当前用户
-                form_data=json.dumps(form_data, ensure_ascii=False),
-                result_data=json.dumps(suggestions, ensure_ascii=False),
-                project_name=form_data.get('projectName', ''),
-                project_description=form_data.get('projectDescription', ''),
-                team_size=len(form_data.get('keyPersons', [])),
-                analysis_type='ai_analysis'
-            )
+            analysis_result = AnalysisResult()
+            analysis_result.id = result_id
+            analysis_result.user_id = current_user.id  # 关联当前用户
+            analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+            analysis_result.result_data = json.dumps(suggestions, ensure_ascii=False)
+            analysis_result.project_name = form_data.get('projectName', '')
+            analysis_result.project_description = form_data.get('projectDescription', '')
+            analysis_result.team_size = len(form_data.get('keyPersons', []))
+            analysis_result.analysis_type = 'ai_analysis'
             db.session.add(analysis_result)
             db.session.commit()
 
@@ -465,16 +495,15 @@ def _handle_analysis_execution(form_data, session):
                 import uuid
 
                 fallback_id = str(uuid.uuid4())
-                analysis_result = AnalysisResult(
-                    id=fallback_id,
-                    user_id=current_user.id,  # 关联当前用户
-                    form_data=json.dumps(form_data, ensure_ascii=False),
-                    result_data=json.dumps(fallback_result, ensure_ascii=False),
-                    project_name=form_data.get('projectName', ''),
-                    project_description=form_data.get('projectDescription', ''),
-                    team_size=len(form_data.get('keyPersons', [])),
-                    analysis_type='fallback'
-                )
+                analysis_result = AnalysisResult()
+                analysis_result.id = fallback_id
+                analysis_result.user_id = current_user.id  # 关联当前用户
+                analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
+                analysis_result.project_name = form_data.get('projectName', '')
+                analysis_result.project_description = form_data.get('projectDescription', '')
+                analysis_result.team_size = len(form_data.get('keyPersons', []))
+                analysis_result.analysis_type = 'fallback'
                 db.session.add(analysis_result)
                 db.session.commit()
 
@@ -750,16 +779,15 @@ def results():
                         import uuid
                         fallback_id = str(uuid.uuid4())
 
-                        analysis_result = AnalysisResult(
-                            id=fallback_id,
-                            user_id=current_user.id,  # 关联当前用户
-                            form_data=json.dumps(form_data, ensure_ascii=False),
-                            result_data=json.dumps(fallback_result, ensure_ascii=False),
-                            project_name=form_data.get('projectName', ''),
-                            project_description=form_data.get('projectDescription', ''),
-                            team_size=len(form_data.get('keyPersons', [])),
-                            analysis_type='fallback'
-                        )
+                        analysis_result = AnalysisResult()
+                        analysis_result.id = fallback_id
+                        analysis_result.user_id = current_user.id  # 关联当前用户
+                        analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                        analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
+                        analysis_result.project_name = form_data.get('projectName', '')
+                        analysis_result.project_description = form_data.get('projectDescription', '')
+                        analysis_result.team_size = len(form_data.get('keyPersons', []))
+                        analysis_result.analysis_type = 'fallback'
 
                         db.session.add(analysis_result)
                         db.session.commit()
@@ -820,15 +848,14 @@ def results():
                     import uuid
 
                     emergency_id = str(uuid.uuid4())
-                    analysis_result = AnalysisResult(
-                        id=emergency_id,
-                        form_data=json.dumps(form_data, ensure_ascii=False),
-                        result_data=json.dumps(fallback_result, ensure_ascii=False),
-                        project_name=form_data.get('projectName', ''),
-                        project_description=form_data.get('projectDescription', ''),
-                        team_size=len(form_data.get('keyPersons', [])),
-                        analysis_type='emergency_fallback'
-                    )
+                    analysis_result = AnalysisResult()
+                    analysis_result.id = emergency_id
+                    analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                    analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
+                    analysis_result.project_name = form_data.get('projectName', '')
+                    analysis_result.project_description = form_data.get('projectDescription', '')
+                    analysis_result.team_size = len(form_data.get('keyPersons', []))
+                    analysis_result.analysis_type = 'emergency_fallback'
                     db.session.add(analysis_result)
                     db.session.commit()
 
@@ -1823,7 +1850,7 @@ def ai_chat():
             'error': f'AI服务暂时不可用: {str(e)}'
         })
 
-def generate_fallback_suggestions(form_data):
+def generate_fallback_suggestions(form_data, reason="AI服务暂时不可用"):
     """当AI服务不可用时生成基础建议"""
     # 修复字段名：使用正确的驼峰命名
     project_name = form_data.get('projectName', form_data.get('project_name', '您的项目'))

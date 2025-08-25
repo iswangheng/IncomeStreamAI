@@ -1,0 +1,337 @@
+
+/* 
+ * 移动端用户管理 - 用户卡片布局优化
+ * 专门解决移动端用户列表重叠问题
+ */
+
+/* 移动端用户卡片容器 */
+@media (max-width: 768px) {
+    .users-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* 用户卡片基础样式 */
+    .user-card {
+        background: white !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 16px !important;
+        margin-bottom: 16px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        overflow: hidden !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .user-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    /* 用户卡片头部 - 头像和基本信息 */
+    .user-card-header {
+        display: flex !important;
+        align-items: flex-start !important;
+        padding: 16px !important;
+        background: #f8fafc !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        gap: 12px !important;
+        min-height: 80px !important;
+    }
+    
+    /* 用户头像 */
+    .user-avatar {
+        width: 48px !important;
+        height: 48px !important;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        font-size: 20px !important;
+        flex-shrink: 0 !important;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
+    }
+    
+    /* 用户基本信息容器 */
+    .user-basic-info {
+        flex: 1 !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        padding-top: 2px !important;
+    }
+    
+    /* 用户名 */
+    .user-name {
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        color: #1f2937 !important;
+        margin: 0 !important;
+        line-height: 1.3 !important;
+        word-break: break-word !important;
+        overflow: hidden !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+    }
+    
+    /* 用户元数据 */
+    .user-meta {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+    }
+    
+    .user-phone {
+        font-size: 14px !important;
+        color: #6b7280 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+    
+    .user-phone i {
+        font-size: 12px !important;
+        color: #9ca3af !important;
+    }
+    
+    .user-status {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+    }
+    
+    .user-status.active {
+        color: #059669 !important;
+    }
+    
+    .user-status.inactive {
+        color: #dc2626 !important;
+    }
+    
+    .user-status i {
+        font-size: 8px !important;
+    }
+    
+    /* 用户卡片内容区域 */
+    .user-card-body {
+        padding: 16px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    
+    /* 用户字段 */
+    .user-field {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 8px 0 !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+    }
+    
+    .user-field:last-child {
+        border-bottom: none !important;
+    }
+    
+    .user-field label {
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #6b7280 !important;
+        margin: 0 !important;
+        flex-shrink: 0 !important;
+        width: 80px !important;
+    }
+    
+    /* 角色徽章 */
+    .role-badge {
+        padding: 4px 12px !important;
+        border-radius: 20px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        white-space: nowrap !important;
+    }
+    
+    .role-badge.admin {
+        background: rgba(147, 51, 234, 0.1) !important;
+        color: #7c3aed !important;
+        border: 1px solid rgba(147, 51, 234, 0.2) !important;
+    }
+    
+    .role-badge.user {
+        background: rgba(59, 130, 246, 0.1) !important;
+        color: #2563eb !important;
+        border: 1px solid rgba(59, 130, 246, 0.2) !important;
+    }
+    
+    /* 状态徽章 */
+    .status-badge {
+        padding: 4px 12px !important;
+        border-radius: 20px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        white-space: nowrap !important;
+    }
+    
+    .status-badge.active {
+        background: rgba(5, 150, 105, 0.1) !important;
+        color: #059669 !important;
+        border: 1px solid rgba(5, 150, 105, 0.2) !important;
+    }
+    
+    .status-badge.inactive {
+        background: rgba(220, 38, 38, 0.1) !important;
+        color: #dc2626 !important;
+        border: 1px solid rgba(220, 38, 38, 0.2) !important;
+    }
+    
+    /* 字段值 */
+    .field-value {
+        font-size: 14px !important;
+        color: #374151 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex: 1 !important;
+        text-align: right !important;
+    }
+    
+    .field-value i {
+        font-size: 12px !important;
+        color: #9ca3af !important;
+    }
+    
+    /* 用户卡片操作区域 */
+    .user-card-actions {
+        padding: 12px 16px !important;
+        background: #f9fafb !important;
+        border-top: 1px solid #e5e7eb !important;
+        display: flex !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+    }
+    
+    /* 操作按钮 */
+    .action-btn {
+        flex: 1 !important;
+        min-height: 44px !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        padding: 8px 12px !important;
+    }
+    
+    .action-btn.edit {
+        background: #3b82f6 !important;
+        color: white !important;
+    }
+    
+    .action-btn.edit:hover {
+        background: #2563eb !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    .action-btn.toggle {
+        background: #f59e0b !important;
+        color: white !important;
+    }
+    
+    .action-btn.toggle:hover {
+        background: #d97706 !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    .action-btn.delete {
+        background: #ef4444 !important;
+        color: white !important;
+    }
+    
+    .action-btn.delete:hover {
+        background: #dc2626 !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* 当前用户徽章 */
+    .current-user-badge {
+        background: rgba(16, 185, 129, 0.1) !important;
+        color: #059669 !important;
+        border: 1px solid rgba(16, 185, 129, 0.2) !important;
+        padding: 8px 16px !important;
+        border-radius: 20px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+    }
+    
+    /* 确保在三按钮布局时合理分配空间 */
+    .user-card-actions:has(.action-btn.delete) .action-btn {
+        flex: 0 1 calc(33.333% - 6px) !important;
+        min-width: 80px !important;
+    }
+    
+    /* 两按钮布局 */
+    .user-card-actions:not(:has(.action-btn.delete)) .action-btn {
+        flex: 0 1 calc(50% - 4px) !important;
+    }
+    
+    /* 超小屏幕适配 */
+    @media (max-width: 480px) {
+        .user-card-header {
+            padding: 12px !important;
+            gap: 10px !important;
+            min-height: 72px !important;
+        }
+        
+        .user-avatar {
+            width: 44px !important;
+            height: 44px !important;
+            font-size: 18px !important;
+        }
+        
+        .user-name {
+            font-size: 16px !important;
+        }
+        
+        .user-field label {
+            width: 70px !important;
+            font-size: 13px !important;
+        }
+        
+        .field-value {
+            font-size: 13px !important;
+        }
+        
+        .action-btn {
+            font-size: 13px !important;
+            min-height: 40px !important;
+        }
+    }
+}
+
+/* 确保在PC端不影响原有样式 */
+@media (min-width: 769px) {
+    .user-card {
+        display: none !important;
+    }
+}

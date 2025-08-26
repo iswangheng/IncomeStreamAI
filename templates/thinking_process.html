@@ -201,9 +201,15 @@
         }
         
         .thinking-line {
-            margin-bottom: 8px;
+            margin-bottom: 4px; /* 减少行间距，防止空行效果 */
             opacity: 0;
             animation: type-in 0.5s ease-out forwards;
+            min-height: 16px; /* 确保有内容的行有基础高度 */
+        }
+        
+        /* 确保空行被隐藏 */
+        .thinking-line:empty {
+            display: none;
         }
         
         .thinking-line.system {
@@ -558,23 +564,44 @@
         let genericThinkingSteps = []; // 将在页面加载时根据真实数据生成
         
         function addThinkingLine(text, type) {
-            // 防止添加空行或重复内容
-            if (!text || text.trim() === '') {
-                console.log('跳过空行或空内容');
-                return;
+            // 强化空行检测 - 防止各种类型的空内容
+            if (!text || 
+                text.trim() === '' || 
+                text.trim() === 'undefined' || 
+                text.trim() === 'null' ||
+                text.length === 0) {
+                console.log('🚫 跳过空行或无效内容:', text);
+                return false; // 明确返回false表示跳过
             }
             
             // 防止短时间内重复添加相同内容
-            if (window.lastThinkingLine === text.trim()) {
-                console.log('跳过重复内容:', text.trim());
-                return;
+            const trimmedText = text.trim();
+            if (window.lastThinkingLine === trimmedText) {
+                console.log('🚫 跳过重复内容:', trimmedText);
+                return false;
             }
-            window.lastThinkingLine = text.trim();
+            
+            // 防止过于频繁的添加（防抖机制）
+            const now = Date.now();
+            if (window.lastAddTime && (now - window.lastAddTime) < 100) {
+                console.log('🚫 防抖：跳过过于频繁的添加');
+                return false;
+            }
+            
+            window.lastThinkingLine = trimmedText;
+            window.lastAddTime = now;
             
             const content = document.getElementById('thinkingContent');
             const line = document.createElement('div');
             line.className = `thinking-line ${type}`;
-            line.textContent = text.trim(); // 确保清除多余空格
+            line.textContent = trimmedText; // 确保使用已trim的内容
+            
+            // 确保line有内容后再添加到DOM
+            if (line.textContent.length === 0) {
+                console.log('🚫 创建的line内容为空，跳过添加');
+                return false;
+            }
+            
             content.appendChild(line);
             
             // Auto scroll to bottom
@@ -594,6 +621,9 @@
                     prevCursor.remove();
                 }
             }
+            
+            console.log('✅ 成功添加思考行:', trimmedText);
+            return true; // 返回true表示成功添加
         }
         
         function updateStatusDisplay(realProgress = null, realStage = null) {
@@ -640,8 +670,11 @@
                 const simulationProgress = Math.min((currentStep / genericThinkingSteps.length) * 85, 85);
                 
                 // 只有在模拟进度还没到达85%时才显示步骤
-                if (simulationProgress < 85) {
-                    addThinkingLine(step.text, step.type);
+                if (simulationProgress < 85 && step.text) {
+                    const success = addThinkingLine(step.text, step.type);
+                    if (!success) {
+                        console.log('⚠️ 跳过无效步骤:', step);
+                    }
                 }
                 
                 // 如果有真实进度，使用真实进度；否则使用模拟进度
@@ -702,10 +735,12 @@
                     .then(data => {
                         console.log('AI思考流数据:', data);
                         
-                        if (data.status === 'available' && data.content) {
+                        if (data.status === 'available' && data.content && data.content.trim()) {
                             // 展示AI的真实思考内容，使用独特的样式
-                            addThinkingLine(data.content, 'ai-stream');
-                            console.log('显示AI思考内容:', data.content);
+                            const success = addThinkingLine(data.content, 'ai-stream');
+                            if (success) {
+                                console.log('✅ 显示AI思考内容:', data.content);
+                            }
                             
                             // 继续获取下一条思考内容，更频繁的更新
                             if (!realAnalysisCompleted) {
@@ -716,12 +751,11 @@
                             // 如果没有可用内容，减少等待消息频率，避免刷屏
                             if (!realAnalysisCompleted) {
                                 // 只在偶尔显示等待消息，避免过多内容
-                                if (Math.random() < 0.3) { // 30%概率显示等待消息
+                                if (Math.random() < 0.2) { // 降低到20%概率显示等待消息
                                     const waitingMessages = [
                                         '🧠 AI正在深度思考项目可行性...',
                                         '⚡ 分析市场机会与风险评估...',
-                                        '💡 构建创新收入管道模型...',
-                                        '🔍 挖掘隐藏的盈利机会...'
+                                        '💡 构建创新收入管道模型...'
                                     ];
                                     const randomMessage = waitingMessages[Math.floor(Math.random() * waitingMessages.length)];
                                     addThinkingLine(randomMessage, 'ai-stream');

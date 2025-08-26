@@ -654,10 +654,15 @@
             
             console.log('✅ 成功添加思考行:', cleanedText, '类型:', type);
             
-            // 如果是AI思考流，立即验证其可见性
+            // 如果是AI思考流，立即验证其可见性并确保可见
             if (type === 'ai-stream') {
+                // 添加特殊标记以便调试
+                line.style.border = '1px solid #00d4ff';
+                line.style.boxShadow = '0 0 10px rgba(0, 212, 255, 0.5)';
+                
                 setTimeout(() => {
                     const computedStyle = window.getComputedStyle(line);
+                    const rect = line.getBoundingClientRect();
                     console.log('🔍 AI思考流元素样式检查:', {
                         display: computedStyle.display,
                         visibility: computedStyle.visibility,
@@ -665,8 +670,19 @@
                         height: computedStyle.height,
                         color: computedStyle.color,
                         className: line.className,
-                        textContent: line.textContent
+                        textContent: line.textContent,
+                        位置: {
+                            top: rect.top,
+                            left: rect.left,
+                            width: rect.width,
+                            height: rect.height,
+                            可见: rect.top >= 0 && rect.left >= 0 && rect.width > 0 && rect.height > 0
+                        }
                     });
+                    
+                    // 强制滚动到AI思考流内容
+                    line.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
                 }, 20);
             }
             

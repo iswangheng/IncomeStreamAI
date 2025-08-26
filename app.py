@@ -442,6 +442,9 @@ def _internal_check_analysis_status():
             fallback_result = generate_fallback_suggestions(form_data)
 
             # 保存备用方案到数据库
+            import uuid
+            import json
+            from models import AnalysisResult
             fallback_id = str(uuid.uuid4())
             analysis_result = AnalysisResult()
             analysis_result.id = fallback_id
@@ -907,6 +910,7 @@ def results():
                     try:
                         import uuid
                         import json
+                        from models import AnalysisResult
                         fallback_id = str(uuid.uuid4())
 
                         analysis_result = AnalysisResult()
@@ -956,6 +960,8 @@ def results():
             if result_id:
                 try:
 
+                    import json
+                    from models import AnalysisResult
                     analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
                     if analysis_record and analysis_record.result_data:
                         suggestions = json.loads(analysis_record.result_data)
@@ -976,6 +982,8 @@ def results():
                 # 保存到数据库
                 try:
                     import uuid
+                    import json
+                    from models import AnalysisResult
 
                     emergency_id = str(uuid.uuid4())
                     analysis_result = AnalysisResult()
@@ -2235,6 +2243,7 @@ def save_model_config_api():
         })
 
     except Exception as e:
+        import traceback
         app.logger.error(f"保存模型配置失败: {str(e)}")
         app.logger.error(f"错误追踪: {traceback.format_exc()}")
         return jsonify({'success': False, 'message': f'保存失败: {str(e)}'}), 500

@@ -154,95 +154,7 @@ class AngelaAI:
             for item in make_happy_list
         ])
 
-    def format_external_resources(self, resources_data: List[str]) -> str:
-        """格式化外部资源数据"""
-        if not resources_data:
-            return "无可用外部资源"
 
-        # 按资源类型分组
-        categories = {'资金支持': [], '市场渠道': [], '执行能力': [], '战略合作': []}
-
-        # 根据资源内容分类（简化版）
-        for resource in resources_data:
-            if any(keyword in resource
-                   for keyword in ['资金', '投资', '预算', '赞助']):
-                categories['资金支持'].append(resource)
-            elif any(keyword in resource
-                     for keyword in ['渠道', '平台', '媒体', '社群']):
-                categories['市场渠道'].append(resource)
-            elif any(keyword in resource
-                     for keyword in ['技术', '团队', '设备', '工具']):
-                categories['执行能力'].append(resource)
-            else:
-                categories['战略合作'].append(resource)
-
-        result = []
-        for category, items in categories.items():
-            if items:
-                result.append(f"{category}: {', '.join(items)}")
-
-        return "; ".join(result) if result else "通用外部资源可用"
-
-    def get_knowledge_base_snippets(self, project_description: str,
-                                    key_persons: List[Dict],
-                                    external_resources: List[str],
-                                    db_session) -> str:
-        """从知识库中检索相关片段"""
-        try:
-            import importlib
-            models_module = importlib.import_module('models')
-            KnowledgeItem = getattr(models_module, 'KnowledgeItem')
-
-            # 获取活跃状态的知识库条目
-            knowledge_items = db_session.query(KnowledgeItem).filter(
-                KnowledgeItem.status == 'active').all()
-
-            if not knowledge_items:
-                return self.get_core_knowledge_fallback()
-
-            # 优先查找非劳务收入相关的知识库内容
-            non_labor_income_items = [
-                item for item in knowledge_items if item.content_summary and
-                ('非劳务收入' in item.content_summary or '管道' in
-                 item.content_summary or '租金' in item.content_summary or '股份'
-                 in item.content_summary or '版权' in item.content_summary
-                 or 'Bonnie' in item.content_summary or 'Angela' in
-                 item.content_summary or '楚楚' in item.content_summary or '知了猴'
-                 in item.content_summary or '英语培训' in item.content_summary
-                 or '商铺' in item.content_summary)
-            ]
-
-            relevant_snippets = []
-
-            # 如果找到非劳务收入相关内容，优先使用
-            if non_labor_income_items:
-                for item in non_labor_income_items[:2]:  # 最多2个核心条目
-                    if item.content_summary:
-                        # 提取更多有用信息，特别关注核心原理和案例
-                        summary = item.content_summary[:800]  # 增加到800字符获取更多信息
-                        relevant_snippets.append(f"• {summary}")
-                        item.usage_count += 1
-
-            # 补充其他相关条目
-            other_items = [
-                item for item in knowledge_items
-                if item not in non_labor_income_items
-            ]
-            for item in other_items[:2]:  # 最多再补充2个
-                if item.content_summary and len(relevant_snippets) < 4:
-                    summary = item.content_summary[:300]
-                    relevant_snippets.append(f"• {summary}")
-                    item.usage_count += 1
-
-            # 如果没有找到相关内容，返回核心知识要点
-            if not relevant_snippets:
-                return self.get_core_knowledge_fallback()
-
-            return "\n".join(relevant_snippets)
-
-        except Exception as e:
-            logger.error(f"Knowledge base retrieval error: {e}")
-            return self.get_core_knowledge_fallback()
 
     def get_core_knowledge_fallback(self) -> str:
         """当知识库检索失败时的核心知识要点"""
@@ -250,8 +162,7 @@ class AngelaAI:
 • 七大类型：租金（万物皆可租）、利息、股份/红利、版权、专利、企业连锁、团队收益
 • 三步法则：盘资源→搭管道→动真格
 • 核心原则：让关键环节的关键人物都高兴，严格区分需换取的人物资源vs可直接动用的外部资源
-• 成功要素：1)设计共赢机制 2)掌握核心信息+筛选规则 3)前置合作规则
-• 成功案例参考：Bonnie英语培训管道（连接规划师+机构，年40万收入）、Angela商铺二房东（1万启动，8年72万收入）、楚楚知了猴管道（7条管道，年70万收入）"""
+• 成功要素：1)设计共赢机制 2)掌握核心信息+筛选规则 3)前置合作规则"""
 
     def generate_income_paths(self, form_data: Dict[str, Any],
                               db_session) -> Dict[str, Any]:
@@ -264,18 +175,6 @@ class AngelaAI:
             project_description = form_data.get('projectDescription', '')
             key_persons = form_data.get('keyPersons', [])
             external_resources = form_data.get('externalResources', [])
-
-            # 获取知识库片段 - 简化以减少prompt长度
-            try:
-                kb_snippets = self.get_knowledge_base_snippets(
-                    project_description, key_persons, external_resources,
-                    db_session)
-                # 限制知识库内容长度
-                if len(kb_snippets) > 500:
-                    kb_snippets = kb_snippets[:500] + "..."
-            except Exception as kb_error:
-                logger.warning(f"Knowledge base retrieval failed: {kb_error}")
-                kb_snippets = self.get_core_knowledge_fallback()
 
             # 简化系统提示 - 专注于个性化分析  
             system_prompt = """你是Angela，专业的非劳务收入管道设计师。
@@ -323,14 +222,6 @@ class AngelaAI:
   资源：{", ".join(resources) if resources else "无"}
   动机标签（如何让TA高兴）：{self.format_make_happy(make_happy)}
   备注：{notes if notes else "无"}"""
-
-            user_content += f"""
-
-【外部资源（可直接使用的资源池）】
-{self.format_external_resources(external_resources)}
-
-【知识库要点】（只给要点，避免冗长）
-{kb_snippets}"""
 
             # 构建关键人物列表用于提示
             key_persons_names = ', '.join([

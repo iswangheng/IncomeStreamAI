@@ -194,7 +194,9 @@ class AngelaAI:
                                     db_session) -> str:
         """从知识库中检索相关片段"""
         try:
-            from models import KnowledgeItem
+            import importlib
+            models_module = importlib.import_module('models')
+            KnowledgeItem = getattr(models_module, 'KnowledgeItem')
 
             # 获取活跃状态的知识库条目
             knowledge_items = db_session.query(KnowledgeItem).filter(

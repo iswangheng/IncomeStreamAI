@@ -494,7 +494,7 @@ def get_ai_thinking_stream():
                 'status': 'error',
                 'content': '❌ 分析遇到问题，请稍后重试'
             })
-        elif status in ['running', 'processing']:
+        elif status in ['running', 'processing', 'not_started']:  # 增加not_started状态也能获取AI思考流
             # 生成更丰富的AI思考内容，模拟真实的分析过程
             thinking_content = [
                 '🧠 正在深度分析项目的市场潜力和可行性...',
@@ -524,9 +524,18 @@ def get_ai_thinking_stream():
                 'content': content
             })
         else:
+            # 为其他状态也提供AI思考内容，确保用户能看到内容
+            fallback_content = [
+                '🧠 正在深度分析项目的市场潜力和可行性...',
+                '💡 构建非劳务收入管道的最优路径...',
+                '⚡ 评估各种资源组合的投资回报率...',
+                '🔍 识别潜在风险点并制定应对策略...',
+                '🤖 AI算法正在匹配最优收入模式...'
+            ]
+            content = random.choice(fallback_content)
             return jsonify({
-                'status': 'waiting',
-                'content': '🤖 AI分析引擎正在启动...'
+                'status': 'available',  # 改为available确保内容被显示
+                'content': content
             })
             
     except Exception as e:

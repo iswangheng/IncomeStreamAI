@@ -205,3 +205,24 @@ class ModelConfig(db.Model):
             'timeout': 45
         }
 
+
+class FormSubmission(db.Model):
+    """表单提交记录模型 - 用于临时存储用户提交的表单数据"""
+    __tablename__ = 'form_submissions'
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    project_name = db.Column(db.String(200), nullable=False, index=True)
+    project_description = db.Column(db.Text)
+    key_persons_data = db.Column(db.Text, nullable=False)  # JSON格式的关键人物数据
+    form_data_complete = db.Column(db.Text, nullable=False)  # 完整表单数据JSON
+    status = db.Column(db.String(50), default='submitted')  # submitted, processing, completed, error
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 关联用户
+    user = db.relationship('User', backref='form_submissions')
+
+    def __repr__(self):
+        return f'<FormSubmission {self.id}: {self.project_name}>'
+

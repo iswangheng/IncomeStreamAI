@@ -342,8 +342,13 @@ def start_analysis():
         if any(keyword in error_str for keyword in ['ssl', 'timeout', 'connection', 'network', 'recv', 'read', 'socket', 'systemexit']):
             app.logger.info(f"Network error detected in start_analysis: {str(e)}, generating immediate fallback")
             try:
+                # 获取表单数据用于备用方案
+                local_form_data = get_form_data_from_db(session)
+                if not local_form_data:
+                    local_form_data = form_data  # 使用已有的form_data
+                
                 # 直接生成备用方案并设置为completed状态
-                fallback_result = generate_fallback_suggestions(form_data)
+                fallback_result = generate_fallback_suggestions(local_form_data)
                 
                 # 保存到数据库
                 import uuid
@@ -353,11 +358,11 @@ def start_analysis():
                 analysis_result = AnalysisResult()
                 analysis_result.id = fallback_id
                 analysis_result.user_id = current_user.id
-                analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                analysis_result.form_data = json.dumps(local_form_data, ensure_ascii=False)
                 analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
-                analysis_result.project_name = form_data.get('projectName', '')
-                analysis_result.project_description = form_data.get('projectDescription', '')
-                analysis_result.team_size = len(form_data.get('keyPersons', []))
+                analysis_result.project_name = local_form_data.get('projectName', '')
+                analysis_result.project_description = local_form_data.get('projectDescription', '')
+                analysis_result.team_size = len(local_form_data.get('keyPersons', []))
                 analysis_result.analysis_type = 'fallback_network'
                 db.session.add(analysis_result)
                 db.session.commit()
@@ -1195,35 +1200,55 @@ def generate():
         app.logger.info(f"Generate route accessed - Request method: {request.method}")
         app.logger.info(f"Generate route - Form data keys: {list(request.form.keys())}")
         app.logger.info(f"Generate route - Content type: {request.content_type}")
-        # Get form data
-        project_name = request.form.get('project_name', '').strip()
-        project_description = request.form.get('project_description', '').strip()
+        # Get form data - 修复字段名匹配问题
+        project_name = request.form.get('projectName', '').strip()
+        project_description = request.form.get('projectDescription', '').strip()
+        
+        # 如果没有找到新字段名，尝试旧字段名（向后兼容）
+        if not project_name:
+            project_name = request.form.get('project_name', '').strip()
+        if not project_description:
+            project_description = request.form.get('project_description', '').strip()
 
         # Validate required fields
         if not project_name or not project_description:
             flash('项目名称和背景描述不能为空', 'error')
             return redirect(url_for('index'))
 
-        # Process key persons data
+        # Process key persons data - 支持JSON格式输入
         key_persons = []
-        person_names = request.form.getlist('person_name[]')
-        person_roles = request.form.getlist('person_role[]')
-        person_resources = request.form.getlist('person_resources[]')
-        person_needs = request.form.getlist('person_needs[]')
+        
+        # 尝试从JSON字段获取（前端提交的格式）
+        key_persons_json = request.form.get('keyPersons', '')
+        if key_persons_json:
+            try:
+                import json
+                key_persons = json.loads(key_persons_json)
+                app.logger.info(f"Parsed key persons from JSON: {len(key_persons)} persons")
+            except json.JSONDecodeError as e:
+                app.logger.error(f"Failed to parse keyPersons JSON: {e}")
+                key_persons = []
+        
+        # 如果JSON解析失败，尝试传统表单字段
+        if not key_persons:
+            person_names = request.form.getlist('person_name[]')
+            person_roles = request.form.getlist('person_role[]')
+            person_resources = request.form.getlist('person_resources[]')
+            person_needs = request.form.getlist('person_needs[]')
 
-        for i in range(len(person_names)):
-            if person_names[i].strip():  # Only add if name is not empty
-                # 处理make_happy字段，将逗号分隔的字符串分割成数组
-                make_happy_list = []
-                if i < len(person_needs) and person_needs[i].strip():
-                    make_happy_list = [need.strip() for need in person_needs[i].split(',') if need.strip()]
+            for i in range(len(person_names)):
+                if person_names[i].strip():  # Only add if name is not empty
+                    # 处理make_happy字段，将逗号分隔的字符串分割成数组
+                    make_happy_list = []
+                    if i < len(person_needs) and person_needs[i].strip():
+                        make_happy_list = [need.strip() for need in person_needs[i].split(',') if need.strip()]
 
-                key_persons.append({
-                    "name": person_names[i].strip(),
-                    "role": person_roles[i].strip() if i < len(person_roles) else "",
-                    "resources": [r.strip() for r in person_resources[i].split(',') if r.strip()] if i < len(person_resources) else [],
-                    "make_happy": make_happy_list
-                })
+                    key_persons.append({
+                        "name": person_names[i].strip(),
+                        "role": person_roles[i].strip() if i < len(person_roles) else "",
+                        "resources": [r.strip() for r in person_resources[i].split(',') if r.strip()] if i < len(person_resources) else [],
+                        "make_happy": make_happy_list
+                    })
 
         # Create JSON structure as per PRD
         form_data = {

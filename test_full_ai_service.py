@@ -1,58 +1,61 @@
-import os
+#!/usr/bin/env python3
+"""测试完整的AI分析服务"""
+
 import sys
-import json
-import time
+import os
+sys.path.append('.')
 
-# 添加项目路径
-sys.path.insert(0, '/home/runner/workspace')
-
-from openai_service import AngelaAI
-from app import db
-
-print("Testing full AI service with actual project data...")
-
-# 测试数据 - 商铺租赁案例
-test_data = {
-    "projectName": "Angela临街商铺二房东管道",
-    "projectDescription": "我打了20多个电话调研发现一个房东有临街双层商铺，挂了两三个月都租不出去",
-    "keyPersons": [
-        {
-            "name": "社恐房东",
-            "role": "investor",
-            "resources": ["临街双层商铺", "5年长期租约意愿"],
-            "make_happy": "recurring_income,no_money_no_liability"
+def test_ai_analysis():
+    """测试AI分析服务"""
+    try:
+        from openai_service import AngelaAI
+        
+        # 模拟表单数据
+        form_data = {
+            "projectName": "测试项目", 
+            "projectDescription": "这是一个测试项目描述",
+            "keyPersons": [
+                {
+                    "name": "测试人员A",
+                    "role": "service_provider", 
+                    "resources": ["测试资源1", "测试资源2"],
+                    "make_happy": ["获得持续收入", "获得认可/名声"]
+                }
+            ]
         }
-    ],
-    "externalResources": ["暂无明确外部资源"]
-}
+        
+        print("🧪 测试AngelaAI分析服务...")
+        angela_ai = AngelaAI()
+        
+        # 尝试生成建议
+        print("🔄 正在调用AI分析...")
+        result = angela_ai.generate_income_paths(
+            form_data, 
+            db_session=None
+        )
+        
+        if result and isinstance(result, dict):
+            print("✅ AI分析成功！")
+            print(f"结果包含 {len(result.get('paths', []))} 个收入路径")
+            return True
+        else:
+            print("❌ AI分析失败：结果无效")
+            return False
+            
+    except Exception as e:
+        print(f"❌ AI分析出错: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
 
-try:
-    angela_ai = AngelaAI()
-    print(f"Using model: {angela_ai.model}")
-    print(f"Max tokens: {angela_ai.max_tokens}")
+if __name__ == "__main__":
+    print("=" * 50)
+    print("完整AI分析服务测试")
+    print("=" * 50)
     
-    start_time = time.time()
-    print("\nGenerating income paths...")
+    success = test_ai_analysis()
     
-    # 使用实际的数据库session
-    with db.app.app_context():
-        result = angela_ai.generate_income_paths(test_data, db.session)
-    
-    elapsed = time.time() - start_time
-    
-    if result:
-        print(f"\n✓ Success! Generated in {elapsed:.2f} seconds")
-        print(f"Result keys: {list(result.keys())}")
-        
-        if 'overview' in result:
-            print(f"Income type: {result['overview'].get('income_type', 'N/A')}")
-        if 'income_paths' in result and len(result['income_paths']) > 0:
-            print(f"Generated {len(result['income_paths'])} paths")
-            print(f"First path title: {result['income_paths'][0].get('title', 'N/A')}")
+    if success:
+        print("\n✅ AI分析服务工作正常！")
     else:
-        print(f"\n✗ Failed: AI returned None after {elapsed:.2f} seconds")
-        
-except Exception as e:
-    print(f"\n✗ Error: {type(e).__name__}: {str(e)}")
-    import traceback
-    traceback.print_exc()
+        print("\n❌ AI分析服务有问题！")

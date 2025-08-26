@@ -1271,7 +1271,7 @@ def generate_ai_suggestions(form_data, session=None):
         start_time = time.time()
         # 调用AI生成服务，添加SSL错误处理
         try:
-            ai_result = angela_ai.generate_income_paths(converted_data, db)
+            ai_result = angela_ai.generate_income_paths(converted_data, db.session)
         except Exception as network_error:
             # 检查是否是SSL/网络相关错误
             error_str = str(network_error).lower()

@@ -10,10 +10,14 @@ from typing import Dict, List, Any, Optional
 import httpx
 import time
 
-# 创建带重试机制的客户端
+# 创建带优化连接配置的客户端
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
-    timeout=httpx.Timeout(60.0, connect=30.0)  # 增加超时时间：连接30秒，读取60秒
+    timeout=httpx.Timeout(40.0, connect=15.0),  # 优化超时：连接15秒，读取40秒
+    http_client=httpx.Client(
+        limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
+        timeout=httpx.Timeout(40.0, connect=15.0)
+    )
 )
 
 logger = logging.getLogger(__name__)
@@ -29,7 +33,10 @@ class AngelaAI:
     def get_model_config(self, config_type='main_analysis'):
         """从数据库获取模型配置"""
         try:
-            from models import ModelConfig
+            # 延迟导入避免循环导入问题
+            import importlib
+            models_module = importlib.import_module('models')
+            ModelConfig = getattr(models_module, 'ModelConfig')
             config = ModelConfig.get_config(config_type, self.default_model)
             return config
         except Exception as e:
@@ -42,31 +49,50 @@ class AngelaAI:
             }
 
     def _call_openai_with_retry(self, **kwargs):
-        """调用OpenAI API，带简单重试机制"""
-        max_retries = 3
+        """调用OpenAI API，带强化重试机制"""
+        max_retries = 2  # 减少重试次数，避免长时间阻塞
         for attempt in range(max_retries):
             try:
-                logger.info(
-                    f"正在调用OpenAI API (尝试 {attempt + 1}/{max_retries})...")
-                return client.chat.completions.create(**kwargs)
-            except (httpx.TimeoutException, httpx.ConnectError,
-                    ConnectionError, httpx.ReadTimeout,
-                    httpx.ConnectTimeout, TimeoutError) as e:
-                if attempt < max_retries - 1:
-                    wait_time = 3 * (attempt + 1)  # 线性退避: 3s, 6s, 9s
-                    logger.warning(
-                        f"OpenAI API网络超时 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试..."
+                logger.info(f"正在调用OpenAI API (尝试 {attempt + 1}/{max_retries})...")
+                
+                # 为每次重试创建新的客户端连接，避免连接复用问题
+                if attempt > 0:
+                    fresh_client = OpenAI(
+                        api_key=os.environ.get("OPENAI_API_KEY"),
+                        timeout=httpx.Timeout(45.0, connect=15.0)  # 缩短超时时间
                     )
+                    return fresh_client.chat.completions.create(**kwargs)
+                else:
+                    return client.chat.completions.create(**kwargs)
+                    
+            except (httpx.TimeoutException, httpx.ConnectError, ConnectionError, 
+                    httpx.ReadTimeout, httpx.ConnectTimeout, TimeoutError,
+                    OSError, ConnectionResetError, BrokenPipeError) as e:
+                if attempt < max_retries - 1:
+                    wait_time = 2 * (attempt + 1)  # 缩短等待时间: 2s, 4s
+                    logger.warning(f"OpenAI API网络超时 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试...")
                     time.sleep(wait_time)
                     continue
                 else:
                     logger.error(f"OpenAI API网络连接失败，已重试{max_retries}次: {str(e)}")
                     # 抛出一个明确的网络错误，让调用方知道是网络问题
-                    raise ConnectionError(f"网络连接超时，无法访问OpenAI服务: {str(e)}")
+                    raise ConnectionError(f"网络连接问题，无法访问OpenAI服务")
+            except SystemExit as e:
+                # 特殊处理Gunicorn worker退出信号
+                logger.error(f"Worker进程退出信号: {str(e)}")
+                raise ConnectionError("服务重启中，请稍后重试")
             except Exception as e:
-                logger.error(f"OpenAI API调用遇到其他错误: {str(e)}")
-                # 对于其他错误，抛出原始异常
-                raise e
+                error_str = str(e).lower()
+                if any(keyword in error_str for keyword in ['ssl', 'recv', 'connection', 'broken pipe', 'reset']):
+                    logger.error(f"网络连接问题: {str(e)}")
+                    if attempt < max_retries - 1:
+                        time.sleep(2)
+                        continue
+                    else:
+                        raise ConnectionError("网络连接不稳定")
+                else:
+                    logger.error(f"OpenAI API调用遇到其他错误: {str(e)}")
+                    raise e
 
     def format_role_to_chinese(self, role_identifier: str) -> str:
         """将英文角色标识符转换为中文显示"""

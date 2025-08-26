@@ -693,7 +693,28 @@ def _handle_analysis_execution(form_data, session):
         session['analysis_progress'] = 30
         session['analysis_stage'] = '正在分析项目数据...'
         save_session_in_ajax()  # 使用辅助函数确保session被保存
-        suggestions = generate_ai_suggestions(form_data, session)
+        
+        # 使用强化的多层错误处理机制调用AI分析
+        suggestions = None
+        max_ai_retries = 2
+        for retry_count in range(max_ai_retries):
+            try:
+                app.logger.info(f"AI分析尝试 {retry_count + 1}/{max_ai_retries}")
+                suggestions = generate_ai_suggestions(form_data, session)
+                if suggestions:
+                    break  # 成功获得结果，跳出重试循环
+            except Exception as ai_error:
+                app.logger.error(f"AI分析失败 (尝试 {retry_count + 1}): {str(ai_error)}")
+                if retry_count == max_ai_retries - 1:
+                    # 最后一次尝试失败，生成备用方案
+                    app.logger.info("生成备用方案")
+                    suggestions = generate_fallback_result(form_data, "分析过程遇到技术问题，为您提供基础建议")
+                    session['analysis_fallback'] = True
+                    save_session_in_ajax()
+                else:
+                    # 等待后重试
+                    time.sleep(3)
+                    continue
 
         if suggestions and isinstance(suggestions, dict):
             # 分析成功 - 将结果存储到数据库而不是session，避免session过大
@@ -1320,7 +1341,7 @@ def generate():
         return redirect(url_for('index'))
 
 def generate_ai_suggestions(form_data, session=None):
-    """Generate AI suggestions using OpenAI API with timeout and error handling"""
+    """Generate AI suggestions using OpenAI API with enhanced error handling"""
     import signal
     import time
 
@@ -1328,9 +1349,9 @@ def generate_ai_suggestions(form_data, session=None):
         raise TimeoutError("AI分析超时")
 
     try:
-        # 设置60秒超时，避免过长等待
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(60)
+        # 设置45秒超时，与OpenAI客户端超时保持一致
+        signal.signal(signal.SIGALRM, timeout_handler) 
+        signal.alarm(45)
 
         from openai_service import AngelaAI
 

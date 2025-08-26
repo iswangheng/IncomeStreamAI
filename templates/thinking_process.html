@@ -492,7 +492,11 @@
                 { type: 'analysis', text: '# 构建最小闭环（MVP）验证方案...', duration: 800 },
                 { type: 'analysis', text: '# 识别关键风险点和应对策略...', duration: 700 },
                 { type: 'analysis', text: '# 评估劳动投入与收益比例...', duration: 600 },
-                { type: 'analysis', text: '# 生成框架级收入管道设计方案...', duration: 1000 }
+                { type: 'analysis', text: '# 优化三方利益分配机制...', duration: 800 },
+                { type: 'analysis', text: '# 设计防绕行和锁定机制...', duration: 700 },
+                { type: 'process', text: 'def optimize_business_structure():', duration: 300 },
+                { type: 'analysis', text: '# 调用深度学习模型进行方案优化...', duration: 1200 },
+                { type: 'analysis', text: '# 交叉验证收入管道可行性...', duration: 1000 }
             ];
         }
         
@@ -568,7 +572,13 @@
             if (currentStep < genericThinkingSteps.length && !realAnalysisCompleted) {
                 const step = genericThinkingSteps[currentStep];
                 
-                addThinkingLine(step.text, step.type);
+                // 计算当前模拟进度，限制在85%以内
+                const simulationProgress = Math.min((currentStep / genericThinkingSteps.length) * 85, 85);
+                
+                // 只有在模拟进度还没到达85%时才显示步骤
+                if (simulationProgress < 85) {
+                    addThinkingLine(step.text, step.type);
+                }
                 
                 // 如果有真实进度，使用真实进度；否则使用模拟进度
                 if (!window.realProgressStarted) {
@@ -576,24 +586,33 @@
                 }
                 currentStep++;
                 
-                // 继续显示思考步骤，但当有真实进度时调整速度
-                const delay = window.realProgressStarted ? Math.min(step.duration, 1000) : step.duration;
-                setTimeout(showGenericThinking, delay);
-            } else if (!realAnalysisCompleted) {
-                // 模拟步骤完成，检查是否需要强制完成
-                const currentProgress = Math.min((currentStep / genericThinkingSteps.length) * 100, 100);
-                if (currentProgress >= 100 && !window.forceCompletionTriggered) {
-                    window.forceCompletionTriggered = true;
-                    addThinkingLine('>>> ✅ 分析完成！正在跳转...', 'conclusion');
-                    updateStatusDisplay(100, '分析完成！');
-                    setTimeout(() => {
-                        window.location.href = '/results';
-                    }, 2000);
+                // 如果模拟进度已达到85%，显示等待状态
+                if (simulationProgress >= 85) {
+                    if (!window.waitingStateShown) {
+                        addThinkingLine('>>> ⏳ 等待AI引擎响应...', 'system');
+                        addThinkingLine('# 正在进行深度分析，请稍候...', 'analysis');
+                        window.waitingStateShown = true;
+                    }
+                    // 进入等待循环，减少频率
+                    setTimeout(showGenericThinking, 3000);
                 } else {
-                    // 继续显示等待信息
-                    addThinkingLine('# 深度分析中，请稍候...', 'analysis');
-                    setTimeout(showGenericThinking, 2000);
+                    // 正常显示步骤，适当延长时间使过程更真实
+                    const delay = window.realProgressStarted ? Math.min(step.duration * 1.5, 2000) : step.duration * 1.8;
+                    setTimeout(showGenericThinking, delay);
                 }
+            } else if (!realAnalysisCompleted) {
+                // 所有模拟步骤完成，但真实分析还未完成，继续等待
+                if (!window.waitingStateShown) {
+                    addThinkingLine('>>> ⏳ 等待AI引擎响应...', 'system');
+                    window.waitingStateShown = true;
+                }
+                // 定期显示等待提示
+                setTimeout(() => {
+                    if (!realAnalysisCompleted) {
+                        addThinkingLine('# 深度分析中，请稍候...', 'analysis');
+                        setTimeout(showGenericThinking, 4000);
+                    }
+                }, 3000);
             }
         }
         

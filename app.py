@@ -385,19 +385,28 @@ def _internal_check_analysis_status():
                 'error_code': 'FALLBACK_FAILED'
             })
 
-    # 处理需要开始或重试的分析
-    if status == 'not_started' or (status == 'processing' and result is None and not result_id):
+    # 处理需要开始的分析
+    if status == 'not_started':
         return _handle_analysis_execution(form_data, session)
 
-    # 默认处理中状态 - 返回真实进度
-    progress = session.get('analysis_progress', 50)
-    stage = session.get('analysis_stage', '分析正在进行中...')
-    app.logger.info(f"Analysis in progress - Progress: {progress}%, Stage: {stage}")
+    # 处理正在进行中的分析 - 直接返回进度，不要重新开始
+    if status == 'processing':
+        progress = session.get('analysis_progress', 50)
+        stage = session.get('analysis_stage', '分析正在进行中...')
+        app.logger.info(f"Analysis in progress - Progress: {progress}%, Stage: {stage}")
+        return jsonify({
+            'status': 'processing', 
+            'progress': progress,
+            'stage': stage,
+            'message': stage
+        })
+
+    # 如果到这里说明状态异常，记录并返回错误
+    app.logger.warning(f"Unexpected analysis status: {status}")
     return jsonify({
-        'status': 'processing', 
-        'progress': progress,
-        'stage': stage,
-        'message': stage
+        'status': 'error', 
+        'message': '分析状态异常，请重新提交表单',
+        'error_code': 'UNEXPECTED_STATUS'
     })
 
 def _handle_analysis_execution(form_data, session):
@@ -995,6 +1004,7 @@ def generate_ai_suggestions(form_data, session=None):
         if session:
             session['analysis_progress'] = 50
             session['analysis_stage'] = '正在调用AI分析引擎...'
+            save_session_in_ajax()  # 保存session确保前端能看到进度更新
 
         start_time = time.time()
         # 调用AI生成服务，添加SSL错误处理
@@ -1012,6 +1022,7 @@ def generate_ai_suggestions(form_data, session=None):
         if session:
             session['analysis_progress'] = 90
             session['analysis_stage'] = '正在生成分析报告...'
+            save_session_in_ajax()  # 保存session确保前端能看到进度更新
         elapsed_time = time.time() - start_time
 
         # 取消超时

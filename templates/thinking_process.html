@@ -209,13 +209,19 @@
             word-wrap: break-word; /* 长单词自动换行 */
         }
         
-        /* 确保空行和无内容行被完全隐藏 */
-        .thinking-line:empty,
-        .thinking-line[data-empty="true"] {
+        /* 确保空行和无内容行被完全隐藏 - 但保护AI思考流 */
+        .thinking-line:empty:not(.ai-stream),
+        .thinking-line[data-empty="true"]:not(.ai-stream) {
             display: none !important;
             height: 0;
             margin: 0;
             padding: 0;
+        }
+        
+        /* 额外保护：确保有空白内容的非AI思考流元素被隐藏 */
+        .thinking-line:not(.ai-stream):has(:empty),
+        .thinking-line:not(.ai-stream)[data-content=""]:not([data-content="true"]) {
+            display: none !important;
         }
         
         .thinking-line.system {
@@ -238,18 +244,22 @@
             margin-left: 20px;
         }
         
-        /* AI思考流特殊样式 - 更炫酷和优雅 */
+        /* AI思考流特殊样式 - 确保可见性和突出显示 */
         .thinking-line.ai-stream {
-            color: #00d4ff;  /* 蓝色调，区别于其他类型 */
+            color: #00d4ff !important;  /* 强制蓝色调，区别于其他类型 */
             margin-left: 20px;
-            font-weight: 400;
-            border-left: 2px solid #00d4ff;
+            margin-bottom: 3px !important; /* 确保有足够间距 */
+            font-weight: 500 !important;
+            border-left: 3px solid #00d4ff;
             padding-left: 15px;
-            background: linear-gradient(90deg, rgba(0, 212, 255, 0.1) 0%, transparent 100%);
+            background: linear-gradient(90deg, rgba(0, 212, 255, 0.15) 0%, transparent 100%) !important;
             border-radius: 0 8px 8px 0;
             position: relative;
-            overflow: hidden;
-            animation: ai-stream-glow 2s ease-in-out infinite alternate;
+            display: block !important; /* 强制显示 */
+            visibility: visible !important; /* 强制可见 */
+            opacity: 1 !important; /* 强制不透明 */
+            min-height: 20px !important; /* 确保最小高度 */
+            line-height: 1.4 !important;
         }
         
         .thinking-line.ai-stream::before {
@@ -642,17 +652,48 @@
                 }
             }
             
-            console.log('✅ 成功添加思考行:', cleanedText);
+            console.log('✅ 成功添加思考行:', cleanedText, '类型:', type);
             
-            // 最终验证DOM中的元素是否真正有内容
+            // 如果是AI思考流，立即验证其可见性
+            if (type === 'ai-stream') {
+                setTimeout(() => {
+                    const computedStyle = window.getComputedStyle(line);
+                    console.log('🔍 AI思考流元素样式检查:', {
+                        display: computedStyle.display,
+                        visibility: computedStyle.visibility,
+                        opacity: computedStyle.opacity,
+                        height: computedStyle.height,
+                        color: computedStyle.color,
+                        className: line.className,
+                        textContent: line.textContent
+                    });
+                }, 20);
+            }
+            
+            // 验证DOM中的元素 - 但不移除AI思考流内容
             setTimeout(() => {
                 const allLines = content.querySelectorAll('.thinking-line');
                 const lastLine = allLines[allLines.length - 1];
+                
+                // 统计各类型元素
+                const aiStreamLines = content.querySelectorAll('.thinking-line.ai-stream');
+                console.log('📊 DOM元素统计:', {
+                    总行数: allLines.length,
+                    AI思考流行数: aiStreamLines.length,
+                    最后一行类型: lastLine ? lastLine.className : 'null',
+                    最后一行内容: lastLine ? lastLine.textContent : 'null'
+                });
+                
                 if (!lastLine || !lastLine.textContent || lastLine.textContent.trim() === '') {
-                    console.log('🚨 检测到DOM中的空行元素，即将移除');
-                    if (lastLine) lastLine.remove();
+                    // 只有非AI思考流的空元素才移除
+                    if (lastLine && !lastLine.classList.contains('ai-stream')) {
+                        console.log('🚨 检测到DOM中的空行元素，即将移除');
+                        lastLine.remove();
+                    }
+                } else if (lastLine && lastLine.classList.contains('ai-stream')) {
+                    console.log('✨ AI思考流内容已成功添加到DOM:', lastLine.textContent);
                 }
-            }, 10);
+            }, 50);
             
             return true; // 返回true表示成功添加
         }

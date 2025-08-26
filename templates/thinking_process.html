@@ -654,13 +654,13 @@
             } else if (!realAnalysisCompleted) {
                 // 所有模拟步骤完成，但真实分析还未完成，继续等待
                 if (!window.waitingStateShown) {
-                    addThinkingLine('>>> ⏳ 等待AI引擎响应...', 'system');
+                    addThinkingLine('>>> ⏳ 连接AI引擎，开始深度分析...', 'system');
                     window.waitingStateShown = true;
-                    // 开始展示AI思考流
+                    // 立即开始展示AI思考流
                     startAIThinkingStream();
                 }
                 // 继续等待，不再显示重复的等待提示
-                setTimeout(showGenericThinking, 5000);
+                setTimeout(showGenericThinking, 8000);
             }
         }
 
@@ -784,6 +784,10 @@
                             if (progress >= 50 && !window.stage50Shown) {
                                 addThinkingLine('>>> 🧠 AI核心引擎已激活，开始深度分析...', 'system');
                                 window.stage50Shown = true;
+                                // 当AI引擎激活时，立即开始展示AI思考流
+                                if (!window.aiThinkingStreamActive) {
+                                    startAIThinkingStream();
+                                }
                             }
                             if (progress >= 90 && !window.stage90Shown) {
                                 addThinkingLine('>>> ⚡ AI分析引擎完成核心计算...', 'system');
@@ -856,6 +860,13 @@
                         console.log('Starting thinking process...');
                         showGenericThinking();
                     }, 100);
+                    
+                    // 提早启动AI思考流，在页面加载5秒后开始展示
+                    setTimeout(() => {
+                        console.log('Starting AI thinking stream early...');
+                        addThinkingLine('>>> 🚀 Angela AI分析引擎正在启动...', 'system');
+                        startAIThinkingStream();
+                    }, 5000);
                     
                     // Start real analysis polling with shorter delay
                     setTimeout(() => {

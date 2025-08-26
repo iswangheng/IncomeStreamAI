@@ -268,12 +268,15 @@ def get_ai_thinking_stream():
         status = session.get('analysis_status', 'not_started')
         form_data = session.get('analysis_form_data')
         
-        if not form_data or status != 'processing':
+        if not form_data:
             return jsonify({
                 'status': 'not_available',
                 'content': '等待AI引擎响应...',
                 'timestamp': time.time()
             })
+        
+        # 无论什么状态，只要有表单数据就展示AI思考内容
+        # 这样可以在OpenAI API调用期间持续展示思考过程
         
         # 基于真实项目数据生成AI思考内容
         project_name = form_data.get('projectName', '项目')

@@ -244,16 +244,16 @@
             margin-left: 20px;
         }
         
-        /* AI思考流特殊样式 - 确保可见性和突出显示 */
+        /* AI思考流特殊样式 - 与analysis样式保持一致 */
         .thinking-line.ai-stream {
-            color: #00d4ff !important;  /* 强制蓝色调，区别于其他类型 */
-            margin-left: 20px;
+            color: #80ff80 !important;  /* 使用与analysis相同的绿色 */
+            margin-left: 40px; /* 与analysis相同的缩进 */
             margin-bottom: 3px !important; /* 确保有足够间距 */
-            font-weight: 500 !important;
-            border-left: 3px solid #00d4ff;
-            padding-left: 15px;
-            background: linear-gradient(90deg, rgba(0, 212, 255, 0.15) 0%, transparent 100%) !important;
-            border-radius: 0 8px 8px 0;
+            font-weight: 400 !important;
+            padding-left: 0px; /* 移除额外padding */
+            background: none !important; /* 移除背景色 */
+            border: none; /* 移除边框 */
+            border-radius: 0;
             position: relative;
             display: block !important; /* 强制显示 */
             visibility: visible !important; /* 强制可见 */
@@ -262,42 +262,7 @@
             line-height: 1.4 !important;
         }
         
-        .thinking-line.ai-stream::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(45deg, #00d4ff, #0066ff, #00d4ff);
-            animation: stream-flow 1.5s linear infinite;
-        }
-        
-        @keyframes ai-stream-glow {
-            0% {
-                text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-                box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
-            }
-            100% {
-                text-shadow: 0 0 20px rgba(0, 212, 255, 0.8), 0 0 30px rgba(0, 212, 255, 0.4);
-                box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-            }
-        }
-        
-        @keyframes stream-flow {
-            0% {
-                background: linear-gradient(45deg, transparent, #00d4ff, transparent);
-                transform: translateY(-100%);
-            }
-            50% {
-                background: linear-gradient(45deg, #00d4ff, #0066ff, #00d4ff);
-                transform: translateY(0%);
-            }
-            100% {
-                background: linear-gradient(45deg, transparent, #00d4ff, transparent);
-                transform: translateY(100%);
-            }
-        }
+        /* 移除AI思考流的特殊动画效果，保持简洁 */
         
         .cursor {
             animation: blink 1s infinite;
@@ -770,15 +735,18 @@
                     setTimeout(showGenericThinking, delay);
                 }
             } else if (!realAnalysisCompleted) {
-                // 所有模拟步骤完成，但真实分析还未完成，继续等待
+                // 所有模拟步骤完成，但真实分析还未完成，显示等待状态并启动AI思考流
                 if (!window.waitingStateShown) {
                     addThinkingLine('>>> ⚡ AI引擎深度分析中，正在生成专业方案...', 'system');
+                    addThinkingLine('# AI正在进行更深入的逻辑分析...', 'analysis');
                     window.waitingStateShown = true;
-                    // 确保AI思考流正在运行
-                    if (!window.aiThinkingStreamActive) {
-                        console.log('模拟完成，启动AI思考流');
-                        startAIThinkingStream();
-                    }
+                    // 延迟启动AI思考流，确保模拟步骤完全结束
+                    setTimeout(() => {
+                        if (!window.aiThinkingStreamActive) {
+                            console.log('模拟完成，启动AI思考流');
+                            startAIThinkingStream();
+                        }
+                    }, 2000); // 2秒后才开始AI思考流
                 }
                 // 不再调用showGenericThinking，完全依赖AI思考流
             }
@@ -788,7 +756,10 @@
         function startAIThinkingStream() {
             if (window.aiThinkingStreamActive) return; // 防止重复启动
             window.aiThinkingStreamActive = true;
-            console.log('AI思考流已启动');
+            console.log('AI思考流已启动 - 模拟步骤已完成');
+            
+            // 在AI思考流开始前添加分隔符
+            addThinkingLine('# ──── AI深度分析开始 ────', 'analysis');
             
             function fetchAIThinking() {
                 console.log('正在获取AI思考内容...');
@@ -808,9 +779,9 @@
                         console.log('AI思考流数据:', data);
                         
                         if (data.status === 'available' && data.content && data.content.trim()) {
-                            // 展示AI的真实思考内容，使用独特的样式
-                            console.log('🔥 尝试添加AI思考内容:', data.content, '类型: ai-stream');
-                            const success = addThinkingLine(data.content, 'ai-stream');
+                            // 展示AI的真实思考内容，使用analysis样式保持一致
+                            console.log('🔥 尝试添加AI思考内容:', data.content, '类型: analysis');
+                            const success = addThinkingLine(`# ${data.content}`, 'analysis'); // 添加#前缀保持格式一致
                             if (success) {
                                 console.log('✅ 成功显示AI思考内容:', data.content);
                             } else {
@@ -819,7 +790,7 @@
                             
                             // 继续获取下一条思考内容，更频繁的更新
                             if (!realAnalysisCompleted) {
-                                setTimeout(fetchAIThinking, 2800); // 每2.8秒获取新的思考内容
+                                setTimeout(fetchAIThinking, 4500); // 增加间隔，避免过于频繁
                             }
                         } else {
                             console.log('AI思考流暂无内容，继续等待');
@@ -1051,13 +1022,8 @@
                         showGenericThinking();
                     }, 100);
                     
-                    // 提早启动AI思考流，但减少初始消息
-                    setTimeout(() => {
-                        console.log('Starting AI thinking stream early...');
-                        if (!window.aiThinkingStreamActive) {
-                            startAIThinkingStream();
-                        }
-                    }, 3000);
+                    // 不再提前启动AI思考流，等待模拟步骤完成后再启动
+                    console.log('等待模拟步骤完成后再启动AI思考流');
                     
                     // Start real analysis polling with shorter delay
                     setTimeout(() => {

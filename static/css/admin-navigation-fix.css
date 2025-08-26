@@ -3,92 +3,89 @@
    确保与其他页面保持一致
    ================================ */
 
-/* 管理中心特定修复 - PC端 */
+/* 最高优先级修复 - 管理中心页面的用户信息必须单行显示 */
 @media (min-width: 769px) {
-    /* 修复用户触发器宽度问题 */
-    .admin-container ~ * .user-trigger,
-    body:has(.admin-container) .user-trigger {
-        min-width: auto !important;
-        max-width: 160px !important;
-        width: auto !important;
-        display: inline-flex !important;
-        flex-wrap: nowrap !important;
-    }
-    
-    /* 确保用户信息在一行 */
-    body:has(.admin-container) .user-info {
-        display: inline-flex !important;
-        flex-wrap: nowrap !important;
-        flex: 0 1 auto !important;
-        min-width: 0 !important;
-    }
-    
-    /* 用户名不换行 */
-    body:has(.admin-container) .user-name {
-        display: inline-block !important;
-        max-width: 70px !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }
-    
-    /* 确保箭头不换行 */
-    body:has(.admin-container) .dropdown-arrow {
-        display: inline-block !important;
-        flex-shrink: 0 !important;
-        margin-left: 4px !important;
-    }
-}
-
-/* 覆盖可能的冲突样式 */
-.admin-container + .navigation-bar .user-trigger,
-.navigation-bar:has(~ .admin-container) .user-trigger {
-    height: auto !important;
-    line-height: normal !important;
-}
-
-/* 强制单行显示 */
-@media (min-width: 769px) {
+    /* 强制覆盖所有其他样式 */
     .navigation-bar .user-trigger {
-        display: inline-flex !important;
+        display: flex !important;
+        flex-direction: row !important;
         align-items: center !important;
         justify-content: space-between !important;
-        gap: 6px !important;
-        padding: 6px 10px !important;
-        min-width: 120px !important;
-        max-width: 180px !important;
-        height: 36px !important;
+        gap: 8px !important;
+        padding: 8px 12px !important;
+        min-width: 140px !important;
+        max-width: 200px !important;
+        height: 40px !important;
         white-space: nowrap !important;
-        overflow: hidden !important;
+        background: rgba(245, 245, 247, 0.5) !important;
+        border: 1px solid rgba(229, 229, 234, 0.6) !important;
+        border-radius: 12px !important;
     }
     
+    /* 用户信息容器 - 强制横向布局 */
     .navigation-bar .user-info {
-        display: inline-flex !important;
+        display: flex !important;
+        flex-direction: row !important;
         align-items: center !important;
-        gap: 6px !important;
-        flex: 1 1 auto !important;
+        gap: 8px !important;
+        flex: 1 !important;
         min-width: 0 !important;
-        overflow: hidden !important;
+        white-space: nowrap !important;
     }
     
+    /* 用户图标 - 固定大小不换行 */
     .navigation-bar .user-info i {
+        display: inline-block !important;
         flex-shrink: 0 !important;
-        font-size: 16px !important;
+        font-size: 18px !important;
+        color: #007AFF !important;
+        line-height: 1 !important;
+        width: 18px !important;
+        height: 18px !important;
     }
     
-    .navigation-bar .user-name {
+    /* 用户名 - 单行显示 */
+    .navigation-bar .user-info .user-name {
+        display: inline-block !important;
         flex: 0 1 auto !important;
-        min-width: 0 !important;
         max-width: 100px !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
-        font-size: 13px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #6D6D70 !important;
+        line-height: 1.2 !important;
     }
     
+    /* 下拉箭头 - 固定在右侧 */
     .navigation-bar .dropdown-arrow {
+        display: inline-block !important;
         flex-shrink: 0 !important;
-        font-size: 10px !important;
-        margin-left: 4px !important;
+        font-size: 12px !important;
+        color: #8e8e93 !important;
+        margin-left: auto !important;
+        line-height: 1 !important;
+    }
+}
+
+/* 移除任何可能导致换行的样式 */
+@media (min-width: 769px) {
+    .navigation-bar .user-trigger * {
+        vertical-align: middle !important;
+    }
+    
+    /* 确保没有元素会换行 */
+    .navigation-bar .user-trigger,
+    .navigation-bar .user-info,
+    .navigation-bar .user-info > * {
+        flex-wrap: nowrap !important;
+    }
+    
+    /* 移除任何可能的块级显示 */
+    .navigation-bar .user-info i,
+    .navigation-bar .user-info .user-name,
+    .navigation-bar .dropdown-arrow {
+        display: inline-block !important;
     }
 }

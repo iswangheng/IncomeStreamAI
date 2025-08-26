@@ -654,13 +654,15 @@
             } else if (!realAnalysisCompleted) {
                 // 所有模拟步骤完成，但真实分析还未完成，继续等待
                 if (!window.waitingStateShown) {
-                    addThinkingLine('>>> ⏳ 连接AI引擎，开始深度分析...', 'system');
+                    addThinkingLine('>>> ⏳ 模拟分析完成，切换到AI实时思考流...', 'system');
                     window.waitingStateShown = true;
-                    // 立即开始展示AI思考流
-                    startAIThinkingStream();
+                    // 确保AI思考流正在运行
+                    if (!window.aiThinkingStreamActive) {
+                        console.log('模拟完成，启动AI思考流');
+                        startAIThinkingStream();
+                    }
                 }
-                // 继续等待，不再显示重复的等待提示
-                setTimeout(showGenericThinking, 8000);
+                // 不再调用showGenericThinking，完全依赖AI思考流
             }
         }
 
@@ -668,37 +670,49 @@
         function startAIThinkingStream() {
             if (window.aiThinkingStreamActive) return; // 防止重复启动
             window.aiThinkingStreamActive = true;
+            console.log('AI思考流已启动');
             
             function fetchAIThinking() {
+                console.log('正在获取AI思考内容...');
+                
                 if (realAnalysisCompleted) {
+                    console.log('分析已完成，停止AI思考流');
                     window.aiThinkingStreamActive = false;
                     return;
                 }
                 
                 fetch('/get_ai_thinking_stream')
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('AI思考流响应状态:', response.status);
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('AI思考流数据:', data);
+                        
                         if (data.status === 'available' && data.content) {
                             // 展示AI的真实思考内容，使用独特的样式
                             addThinkingLine(data.content, 'ai-stream');
+                            console.log('显示AI思考内容:', data.content);
                             
-                            // 继续获取下一条思考内容
+                            // 继续获取下一条思考内容，更频繁的更新
                             if (!realAnalysisCompleted) {
-                                setTimeout(fetchAIThinking, 3500); // 每3.5秒获取新的思考内容
+                                setTimeout(fetchAIThinking, 2800); // 每2.8秒获取新的思考内容
                             }
                         } else {
-                            // 如果没有可用内容，显示等待状态
+                            console.log('AI思考流暂无内容，继续等待');
+                            // 如果没有可用内容，显示等待状态并继续尝试
                             if (!realAnalysisCompleted) {
-                                setTimeout(fetchAIThinking, 4000);
+                                addThinkingLine('🤖 AI引擎深度运算中...', 'ai-stream');
+                                setTimeout(fetchAIThinking, 3500);
                             }
                         }
                     })
                     .catch(error => {
                         console.error('获取AI思考流失败:', error);
                         if (!realAnalysisCompleted) {
-                            // 错误时显示备用内容
-                            addThinkingLine('🤖 AI引擎正在深度运算中...', 'ai-stream');
-                            setTimeout(fetchAIThinking, 5000);
+                            // 错误时显示备用内容并继续尝试
+                            addThinkingLine('⚡ AI神经网络正在高速计算...', 'ai-stream');
+                            setTimeout(fetchAIThinking, 4000);
                         }
                     });
             }
@@ -861,12 +875,14 @@
                         showGenericThinking();
                     }, 100);
                     
-                    // 提早启动AI思考流，在页面加载5秒后开始展示
+                    // 提早启动AI思考流，在页面加载3秒后开始展示
                     setTimeout(() => {
                         console.log('Starting AI thinking stream early...');
                         addThinkingLine('>>> 🚀 Angela AI分析引擎正在启动...', 'system');
-                        startAIThinkingStream();
-                    }, 5000);
+                        if (!window.aiThinkingStreamActive) {
+                            startAIThinkingStream();
+                        }
+                    }, 3000);
                     
                     // Start real analysis polling with shorter delay
                     setTimeout(() => {

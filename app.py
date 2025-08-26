@@ -851,6 +851,7 @@ def results():
                     # 将备用方案也保存到数据库
                     try:
                         import uuid
+                        import json
                         fallback_id = str(uuid.uuid4())
 
                         analysis_result = AnalysisResult()
@@ -2103,6 +2104,7 @@ def get_model_config():
             }
         })
     except Exception as e:
+        import traceback
         app.logger.error(f"获取模型配置失败: {str(e)}")
         app.logger.error(f"错误追踪: {traceback.format_exc()}")
         return jsonify({'success': False, 'message': f'获取配置失败: {str(e)}'}), 500

@@ -603,6 +603,7 @@ def _handle_analysis_execution(form_data, session):
     """处理AI分析执行"""
     import traceback
     import json
+    import uuid
 
     try:
         # 检查是否已经在执行中，防止重复调用
@@ -704,9 +705,11 @@ def _handle_analysis_execution(form_data, session):
         app.logger.error(f"Analysis traceback: {traceback.format_exc()}")
 
         # 如果是网络超时错误，立即生成备用方案
-        if 'timeout' in error_msg.lower() or 'connection' in error_msg.lower() or 'ssl' in error_msg.lower():
+        if ('timeout' in error_msg.lower() or 'connection' in error_msg.lower() or 
+            'ssl' in error_msg.lower() or 'network' in error_msg.lower() or
+            'read timeout' in error_msg.lower() or 'connect timeout' in error_msg.lower()):
             session['analysis_status'] = 'timeout'
-            app.logger.info("Network timeout detected, immediately generating fallback")
+            app.logger.info(f"Network/timeout error detected: {error_msg}, immediately generating fallback")
 
             try:
                 fallback_result = generate_fallback_suggestions(form_data)
@@ -1219,6 +1222,7 @@ def generate():
         app.logger.info(f"Generate route - Session permanent: {session.permanent}, Modified: {session.modified}")
 
         # Log the received data
+        import json
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully")
 
@@ -1239,9 +1243,9 @@ def generate_ai_suggestions(form_data, session=None):
         raise TimeoutError("AI分析超时")
 
     try:
-        # 设置90秒超时，给重试机制和网络延迟留足够时间
+        # 设置60秒超时，避免过长等待
         signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(90)
+        signal.alarm(60)
 
         from openai_service import AngelaAI
 

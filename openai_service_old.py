@@ -76,16 +76,25 @@ class AngelaAI:
                     time.sleep(wait_time)
                     continue
                 else:
-                    logger.error(f"OpenAI API网络超时，最终失败: {str(e)}")
-                    # 对于网络问题，抛出连接错误而不是返回None
-                    if "read timed out" in str(e).lower() or "timeout" in str(e).lower():
+                    logger.error(f"OpenAI API网络连接失败，已重试{max_retries}次: {str(e)}")
+                    # 抛出一个明确的网络错误，让调用方知道是网络问题
+                    raise ConnectionError(f"网络连接问题，无法访问OpenAI服务")
+            except SystemExit as e:
+                # 特殊处理Gunicorn worker退出信号
+                logger.error(f"Worker进程退出信号: {str(e)}")
+                raise ConnectionError("服务重启中，请稍后重试")
+            except Exception as e:
+                error_str = str(e).lower()
+                if any(keyword in error_str for keyword in ['ssl', 'recv', 'connection', 'broken pipe', 'reset']):
+                    logger.error(f"网络连接问题: {str(e)}")
+                    if attempt < max_retries - 1:
                         time.sleep(2)
                         continue
                     else:
                         raise ConnectionError("网络连接不稳定")
-            except Exception as e:
-                logger.error(f"OpenAI API调用遇到其他错误: {str(e)}")
-                raise e
+                else:
+                    logger.error(f"OpenAI API调用遇到其他错误: {str(e)}")
+                    raise e
 
     def format_role_to_chinese(self, role_identifier: str) -> str:
         """将英文角色标识符转换为中文显示"""
@@ -158,7 +167,7 @@ class AngelaAI:
         # 按资源类型分组
         categories = {'资金支持': [], '市场渠道': [], '执行能力': [], '战略合作': []}
 
-        # 根据资源内容分类（简化版）
+        # 根据资源内容分类（简化版，可以扩展）
         for resource in resources_data:
             if any(keyword in resource
                    for keyword in ['资金', '投资', '预算', '赞助']):
@@ -195,6 +204,10 @@ class AngelaAI:
 
             if not knowledge_items:
                 return self.get_core_knowledge_fallback()
+
+            # 构建项目关键词，用于匹配知识库案例
+            project_keywords = self._extract_project_keywords(
+                project_description, key_persons)
 
             # 优先查找非劳务收入相关的知识库内容
             non_labor_income_items = [
@@ -239,6 +252,21 @@ class AngelaAI:
         except Exception as e:
             logger.error(f"Knowledge base retrieval error: {e}")
             return self.get_core_knowledge_fallback()
+
+    def _extract_project_keywords(self, project_description: str,
+                                  key_persons: List[Dict]) -> List[str]:
+        """提取项目关键词用于知识库匹配"""
+        keywords = []
+
+        # 从项目描述中提取关键词
+        if '英语' in project_description or '培训' in project_description:
+            keywords.extend(['英语培训', 'Bonnie', '升学规划'])
+        if '商铺' in project_description or '房东' in project_description or '租' in project_description:
+            keywords.extend(['商铺', '租金', 'Angela', '二房东'])
+        if '知了猴' in project_description or '养殖' in project_description:
+            keywords.extend(['知了猴', '楚楚', '养殖'])
+
+        return keywords
 
     def get_core_knowledge_fallback(self) -> str:
         """当知识库检索失败时的核心知识要点"""
@@ -289,12 +317,175 @@ class AngelaAI:
 - 避免通用模板，体现项目独特性  
 - 说明具体的收益机制和第一步行动
 
-## 分析要点
-针对这个具体项目，请分析：
-1. 项目的独特机会点在哪里？
-2. 现有资源如何形成收益闭环？  
-3. 设计者可以通过什么方式获得非劳务收入？
-4. 第一步应该如何行动？"""
+---
+
+## 🔑 核心设计原则
+
+### 1. 非劳务收入本质公式
+```
+【意识 + 能量 + 能力 = 结果】
+```
+
+- **意识**: 设计者负责提出闭环方案与规则，确保所有关键人物都高兴
+- **能量**: 关键环节的关键人物必须"高兴"，即获得他们想要的（动机满足）  
+- **能力**: 让结果发生所需的所有环节能力（人、钱、时间、资源），都借用别人的
+- **结果**: 设计者本人不依赖持续劳动，通过七大类型获得稳定回报
+
+> **输出要求**：必须说明这一条管道中的【设计者的意识/位置】、能量来自谁、能力是谁的。
+
+### 2. 七大非劳务收入类型框架
+
+| 类型 | 核心逻辑 | 典型形式 |
+|------|----------|----------|
+| **租金** | 万物皆可租 | 场地租赁、设备租赁、渠道租赁、品牌位租赁 |
+| **利息** | 金钱的时间价值 | 资金占用费、信用额度收益、资金拆借 |
+| **股份** | 资源换股权 | 以资源/渠道/IP入股，收取股息或未来收益 |
+| **版权专利** | 知识产权授权费 | 内容、方法论、商标、专利许可 |
+| **居间** | 中介费/撮合费 | 供需对接、撮合成交、推荐返佣 |
+| **企业连锁** | 体系复制收益 | 加盟费、平台会员费、生态合作费 |
+| **团队收益** | 借人赚钱 | 团队业绩提成、代理分佣、运营管理费 |
+
+#### 强制要求：
+- [x] 每条管道必须标注：**【类型】+【收益触发点】+【结算方式】**
+- [x] 必须明确设计者本人通过哪一类或哪几类获得非劳务收入
+- [x] 收益来源若不属于七类之一，**必须重写**
+
+---
+
+## 管道设计7步流程
+
+### Step 1: 判断闭环完整性
+- **现有资源足够？** 直接设计闭环，标注"现有资源足够闭环"
+- **资源不足？** 指出缺口，补齐后再设计管道
+
+### Step 2: 匹配动机
+为关键人物设计"让他们高兴"的激励（满足需求标签）
+
+### Step 3: 串联资源  
+借用别人的资源形成闭环（设计者自己不出力）
+
+### Step 4: 设计最小闭环（MVP）
+用 **1-3句话** 清晰说明方案如何自洽
+
+### Step 5: 收益来源
+明确钱从哪里来，属于哪一类，标出设计者的收入来源
+
+### Step 6: 风险与Plan B
+写清风险点，每个风险都有对应应对方案
+
+### Step 7: 弱环节识别
+指出闭环中最脆弱的一环，并说明原因
+
+---
+
+## 输出标准与要求
+
+### 框架化输出要求
+- **战略层次**：输出框架性方案草案，非执行计划
+- **禁止颗粒度**：不写具体平台、发帖频次等执行细节
+- **保持层次**：战略设计/管道架构层次
+
+### 每条管道必须包含：
+- [x] 涉及哪些关键人物
+- [x] 各方能提供的资源  
+- [x] 每方的核心动机
+- [x] 设计者在方案中的位置与统筹作用
+- [x] 资源如何串联成闭环
+- [x] 收益如何触发，明确设计者的收益
+
+---
+
+## 缺口识别与补齐机制
+
+### 关键判断标准：
+- **人物数量**：< 2个 → 必须识别为"明显不足"
+- **角色完整性**：需求方、交付方、资金方至少各有1个
+
+### 不足时的处理：
+1. **具体化缺口**：明确角色名称、职能、寻找路径（禁止说"需要合作伙伴"）
+2. **提供寻找方案**：【去哪找 + 如何说服】
+3. **中国化话术**：接地气，符合中国商业环境，避免大路货
+4. **交换逻辑**：明确你给什么/他得到什么
+
+---
+
+## 质量检验标准
+
+### 合格标准：
+- [x] 设计者一眼看懂闭环，知道第一步怎么做
+- [x] 输出明确【first_step】：启动动作、在哪做、为什么可行  
+- [x] 设计者必须在闭环里，且获得非劳务收入
+- [x] 方案具有可落地性
+
+### 失败标准：
+- [ ] 不能落地的方案 = 失败
+- [ ] 设计者需要持续劳动投入
+- [ ] 收益来源不属于七大类型
+
+### 劳动占比自检：
+- **<5小时/周** = 轻度 ✅
+- **5-10小时/周** = 中度 ⚠️  
+- **>10小时/周** = 过高 ❌
+
+> 必须提供降低劳动的替代执行方案
+
+---
+
+## 📚 经典案例库
+
+### 案例1: 租金型 - 临街商铺二房东
+- **类型**: 租金
+- **场景**: 房东坚持整租，市场租客只要部分面积
+- **关键人物**: 房东（整租）+ 租客（小面积）
+- **闭环**: 设计者整租→分租，各方获益
+- **收益触发**: 房租差价
+- **Plan B**: 空置风险 → 提前锁定租客
+
+### 案例2: 居间型 - 英语培训撮合  
+- **类型**: 居间
+- **场景**: 升学需求学生 vs 合适老师
+- **关键人物**: 升学规划师（生源）+ 老师（教学）
+- **闭环**: 设计者撮合供需，收居间费
+- **收益触发**: 按学员收费抽成
+- **Plan B**: 绕过风险 → 签分佣协议
+
+### 案例3: 版权型 - SOP授权
+- **类型**: 版权  
+- **场景**: 设计者有方法论，培训机构缺内容
+- **闭环**: 授权使用，收版权费
+- **收益触发**: 按次/年收版权费
+- **Plan B**: 侵权风险 → 协议+水印
+
+### 案例4: 股份型 - 卤味店扩张
+- **类型**: 股份
+- **场景**: 小店老板技术好但缺扩店资源  
+- **关键人物**: 老板（技术+口碑）+ 设计者（商铺+渠道）
+- **闭环**: 资源换股权，收分红
+- **收益触发**: 股权分红+扩张增值
+- **Plan B**: 股东纠纷 → 先签增量分红协议
+
+### 案例5: 团队收益型 - 短视频代运营
+- **类型**: 团队收益
+- **场景**: 品牌缺执行，代运营团队有产能
+- **闭环**: 设计者撮合双方，合同走自己
+- **收益触发**: 按业绩提成  
+- **Plan B**: 绕过风险 → 所有合同通过设计者
+
+### 案例6: 企业连锁型 - 小镇托管加盟
+- **类型**: 企业连锁
+- **场景**: 县城托管班各自为战，缺品牌统一
+- **闭环**: 设计者搭建统一品牌，收费
+- **收益触发**: 加盟费+分成
+- **Plan B**: 统一管理困难 → 分区域代理
+
+---
+
+## 最终输出要求
+
+- **数量控制**: 1-3条方案，少而精
+- **结构统一**: 严格结构化，字段固定，顺序统一  
+- **避免空话**: 必须落在资源、动机和收益上
+- **非劳务本质**: 收益必须为"非劳务"性质，不依赖用户劳动"""
 
             # 构造用户提示
             user_content = f"""【项目名称】{project_name}
@@ -334,28 +525,38 @@ class AngelaAI:
                 for i, person in enumerate(key_persons)
             ])
 
-            # 简化assistant prompt - 专注于个性化生成
-            assistant_prompt = f"""请根据这个具体项目，生成个性化的非劳务收入管道建议。
+            assistant_prompt = f"""请严格按照非劳务收入管道设计原理与系统提示词生成答案，并输出下述唯一 JSON 结构。注意：用户输入的关键人物数据已在 User Content 中提供（例如表单中"关键人物列表"字段）。你必须从 User Content 中读取这些人物并在输出中完整保留。
 
-要求：
-1. 必须体现项目的独特特点
-2. 管道名称要反映项目特色，避免通用模板
-3. 针对项目的具体痛点和机会
-4. 说明如何利用现有资源
+【关键要求 - 必须严格执行】
+1. parties_structure 中必须**完整包含**用户在 User Content 中提供的**所有**关键人物，名称需与输入**完全一致**（不得改写、不得遗漏、不得合并）。
+2. 每个参与方都必须有 role_type 字段，且值必须是以下四选一："需求方"、"交付方"、"资金方"、"统筹方"。
+3. 设计者（你）必须出现在 parties_structure 中，且 role_type 固定为 "统筹方"。
+4. 其他人物根据其在闭环中的实际作用确定 role_type；如判断与常识不符，仍须保留其原名，并在 role_value 中解释定位依据。
+5. **关键**：如果当前关键人物少于2个，或者缺少需求方/交付方/资金方中的任何一方，**必须**在 parties_structure 中加入"待补齐角色"，并在 overview.suggested_roles_to_hunt 中详细说明。待补齐角色的 party 字段请用 "【待补齐】XXX" 格式命名。
+6. 输出为**框架性草案**（战略/架构层次），不写执行颗粒度（具体平台、频次、字数等）。MVP 仅用 1–3 句话说明闭环逻辑。
 
-请返回JSON格式：
+【JSON结构（仅返回此对象，不要多余文字）】
 {{
   "overview": {{
-    "situation": "项目分析（针对具体项目情况）",
-    "income_type": "适用的非劳务收入类型",
-    "core_insight": "核心洞察（项目的独特机会）",
-    "gaps": ["缺少的关键角色"],
-    "suggested_roles_to_hunt": []
+    "situation": "运用【意识+能量+能力=结果】分析当前局势（<=150字），必须包含设计者的位置与作用",
+    "income_type": "主要适用的非劳务收入类型（租金/利息/股份/版权/居间/企业连锁/团队收益）",
+    "core_insight": "核心洞察：为什么能形成非劳务收入管道；以及设计者如何在其中获利（框架层面）",
+    "gaps": ["缺少的关键角色或环节1","..."（若现有人物已能闭环，此数组必须为空 []）],
+    "suggested_roles_to_hunt": [
+      {{
+        "role": "建议补齐的角色名称（若需要）",
+        "role_type": "需求方/交付方/资金方",
+        "why": "为什么需要该角色（框架层面）",
+        "where_to_find": "去哪找（行业协会/商会/园区/同类活动主办方/朋友圈等）",
+        "outreach_script": "切实可行的开场话术（包含交换逻辑：你给什么/对方得什么）"
+      }}
+      // 仅在确实缺口时填写；否则返回 []
+    ]
   }},
   "pipelines": [
     {{
-      "id": "pipeline_1", 
-      "name": "针对项目的具体管道名称",
+      "id": "pipeline_1",
+      "name": "管道名称（<=20字）",
       "income_mechanism": {{
         "type": "所属的非劳务收入类型（七大类之一或组合）",
         "trigger": "收益触发点（钱从哪来）",
@@ -475,17 +676,10 @@ class AngelaAI:
             return result
 
         except json.JSONDecodeError as e:
-            import traceback
-            logger.error(f"💥 JSON parsing error: {e}")
-            logger.error(f"💥 Full traceback: {traceback.format_exc()}")
-            logger.error(f"💥 AI response text that failed to parse: {result_text[:1000] if 'result_text' in locals() else 'No response text available'}")
+            logger.error(f"JSON parsing error: {e}")
             return self._get_fallback_result(form_data)
         except Exception as e:
-            import traceback
-            logger.error(f"💥 AI generation error: {e}")
-            logger.error(f"💥 Error type: {type(e).__name__}")
-            logger.error(f"💥 Full traceback: {traceback.format_exc()}")
-            logger.error(f"💥 This error caused fallback result to be used instead of real OpenAI analysis")
+            logger.error(f"AI generation error: {e}")
             return self._get_fallback_result(form_data)
 
     def refine_path(self, pipeline_data: Dict[str, Any],
@@ -777,51 +971,51 @@ class AngelaAI:
                     "where_to_find":
                     "行业协会、商会、同城企业家群、相关业务的朋友圈",
                     "outreach_script":
-                    "我们有优质的服务团队和成熟的管理经验，正在寻求优质合作伙伴扩大业务覆盖，期待与您探讨双赢合作机会"
+                    "我们有优质的服务团队和成熟的管理经验，正在寻求优质合作伙伴。可以先小规模合作试点，看看是否互利共赢，您觉得如何？"
                 }]
             },
             "pipelines": [{
                 "id":
-                "pipeline_1",
+                "管道一",
                 "name":
-                f"{project_name}撮合服务管道",
+                "资源整合撮合管道",
                 "income_mechanism": {
                     "type": "居间（撮合费）",
-                    "trigger": "每次成功匹配并完成交易时",
-                    "settlement": "按交易金额的百分比收取或固定撮合费"
+                    "trigger": "成功撮合交易后的佣金分成",
+                    "settlement": "按单结算，交易完成确认后收取撮合费"
                 },
                 "parties_structure":
                 parties_structure,
                 "framework_logic": {
                     "resource_chain":
-                    "通过整合各方资源形成供需匹配闭环：需求方提供客户和需求信息，交付方提供专业服务能力，设计者制定匹配规则和质量标准，确保交易顺利完成",
-                    "motivation_match":
-                    "需求方获得优质服务解决方案，交付方获得稳定客户来源，设计者通过撮合获得持续收益，形成三方共赢格局",
-                    "designer_position":
-                    "控制客户筛选标准、服务提供商认证体系、交易流程规范和结算环节，确保所有交易必须通过统筹方完成",
-                    "designer_income":
-                    "居间收益 - 通过制定规则和控制关键环节获得每笔交易的撮合费用"
+                    "设计者统筹规则制定和质量监督，关键人物提供专业服务和客户基础，形成供需匹配的撮合闭环",
+                    "motivation_match": "设计者获得撮合费，关键人物获得业务机会和客户扩展，最终客户获得专业服务",
+                    "designer_position": "控制合作标准制定和结算管理，通过共管账户和合同条款确保不被绕过",
+                    "designer_income": "居间类非劳务收入，通过撮合成功收取佣金，无需持续劳动投入"
                 },
                 "mvp":
-                "建立简单的供需信息收集和匹配机制，先从现有人脉开始小规模撮合，验证商业模式可行性后逐步扩大规模。",
+                "连接现有关键人物资源，为1-2个客户提供撮合服务，验证收费模式和防绕过机制的可行性。",
                 "weak_link":
-                "初期可能面临供需双方信任建立的挑战，需要通过成功案例和口碑积累来强化平台可信度。",
+                "关键人物的配合度和服务标准统一性，可能影响客户满意度和复购率",
                 "revenue_trigger":
-                "居间收益：每次成功撮合交易时按比例或固定费用收取撮合费",
+                "撮合费（按交易额3-8%收取），属于居间类非劳务收入",
                 "risks_and_planB": [{
-                    "risk": "供需双方绕过平台直接合作",
-                    "mitigation": "建立独家合作协议，控制关键客户信息，设计阶梯式奖励机制"
+                    "risk": "关键人物绕过设计者直接合作",
+                    "mitigation": "签署分佣协议，控制客户资源入口，建立共管结算机制"
                 }, {
-                    "risk": "竞争对手进入市场",
-                    "mitigation": "建立差异化服务标准，深耕细分领域，提高转换成本"
+                    "risk": "服务质量不稳定影响口碑",
+                    "mitigation": "制定服务标准和评价体系，建立客户反馈和改进机制"
                 }],
                 "first_step":
-                "从现有人脉中识别2-3个潜在的需求方和交付方，设计初步的合作规则和费用标准，安排试点撮合项目验证模式",
+                "与现有关键人物深度沟通，确定合作模式和收益分配，签署初步合作协议，选择1-2个试点客户开始验证",
                 "labor_load_estimate": {
-                    "hours_per_week": "5-8小时",
-                    "level": "中度",
-                    "alternative":
-                    "建立标准化的筛选和匹配流程，培训助手处理日常对接工作，设计自动化的信息收集和初步筛选系统"
+                    "hours_per_week": "4-6小时",
+                    "level": "轻度(<5小时)",
+                    "alternative": "建立标准化SOP和自助服务平台，将日常协调工作外包给助理或兼职人员"
                 }
             }]
         }
+
+
+# 创建全局实例
+angela_ai = AngelaAI()

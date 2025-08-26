@@ -829,7 +829,7 @@
                             }
                             
                             if (pollCount < maxPolls) {
-                                setTimeout(poll, 2000); // 减少轮询频率，避免重复API调用
+                                setTimeout(poll, 1000); // 减少轮询间隔为1秒，加快检测速度
                             } else {
                                 addThinkingLine('>>> ⏰ 分析超时，正在跳转...', 'system');
                                 setTimeout(() => {
@@ -841,7 +841,7 @@
                             // Status is 'not_started' or other - trigger analysis start
                             console.log(`Unexpected status: ${data.status}, continuing poll...`);
                             if (pollCount < maxPolls && !realAnalysisCompleted) {
-                                setTimeout(poll, 2000); // 增加间隔避免重复调用
+                                setTimeout(poll, 1000); // 减少间隔加快检测
                             } else {
                                 addThinkingLine('>>> ⏰ 连接超时，正在重试...', 'system');
                                 // 超时后，强制显示完成状态并跳转
@@ -885,20 +885,19 @@
                         addThinkingLine('>>> ✅ 检测到已完成的分析结果', 'system');
                         realAnalysisCompleted = true;
                         updateStatusDisplay(100, '分析完成！');
-                        setTimeout(() => {
-                            window.location.href = '/results';
-                        }, 1000);
+                        // 立即跳转，无延迟
+                        window.location.href = '/results';
                     } else {
                         addThinkingLine(`>>> ❌ 启动分析失败: ${data.message}`, 'system');
                         // 即使启动失败也开始轮询，可能session中有数据
-                        setTimeout(poll, 2000);
+                        setTimeout(poll, 500); // 更快开始轮询检测
                     }
                 })
                 .catch(error => {
                     console.error('Failed to start analysis:', error);
                     addThinkingLine('>>> ⚠️ 启动分析遇到问题，尝试轮询检查...', 'system');
                     // 启动失败时也开始轮询
-                    setTimeout(poll, 2000);
+                    setTimeout(poll, 500); // 更快开始轮询检测
                 });
         }
         

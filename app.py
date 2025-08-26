@@ -200,29 +200,57 @@ def logout():
 def get_form_data_from_db(session):
     """从数据库获取表单数据，避免session过大"""
     try:
+        app.logger.info(f"📍 get_form_data_from_db调用 - Session内容: {dict(session)}")
+        
         # 优先从session获取form_id
         form_id = session.get('analysis_form_id')
+        app.logger.info(f"📍 Session中的form_id: {form_id}")
+        
         if form_id:
             from models import AnalysisResult
             import json
             temp_result = AnalysisResult.query.get(form_id)
+            app.logger.info(f"📍 数据库查询结果: {temp_result is not None}")
+            
             if temp_result and temp_result.form_data:
-                return json.loads(temp_result.form_data)
+                form_data = json.loads(temp_result.form_data)
+                app.logger.info(f"✅ 通过form_id找到表单数据: {form_data.get('projectName', 'Unknown')}")
+                return form_data
+            else:
+                app.logger.warning(f"⚠️ form_id {form_id} 对应的记录不存在或无表单数据")
         
-        # 如果没有form_id，尝试从project_name查找
-        project_name = session.get('analysis_project_name')
-        if project_name:
+        # 如果没有form_id，尝试从project_name查找当前用户最新的pending记录
+        if current_user and current_user.is_authenticated:
             from models import AnalysisResult
             import json
-            recent_result = AnalysisResult.query.filter_by(
+            
+            # 查找当前用户最新的pending类型记录
+            recent_pending = AnalysisResult.query.filter_by(
                 user_id=current_user.id,
-                project_name=project_name
+                analysis_type='pending'
             ).order_by(AnalysisResult.created_at.desc()).first()
-            if recent_result and recent_result.form_data:
-                return json.loads(recent_result.form_data)
+            
+            app.logger.info(f"📍 查找用户{current_user.id}的最新pending记录: {recent_pending is not None}")
+            
+            if recent_pending and recent_pending.form_data:
+                form_data = json.loads(recent_pending.form_data)
+                app.logger.info(f"✅ 通过pending记录找到表单数据: {form_data.get('projectName', 'Unknown')}")
+                # 更新session中的form_id，建立关联
+                session['analysis_form_id'] = recent_pending.id
+                session['analysis_project_name'] = form_data.get('projectName', '')
+                session.modified = True
+                return form_data
+            else:
+                app.logger.warning("⚠️ 没有找到pending类型的表单记录")
         
         # 最后尝试从session获取（向后兼容）
-        return session.get('analysis_form_data')
+        legacy_data = session.get('analysis_form_data')
+        if legacy_data:
+            app.logger.info("✅ 从session的legacy字段找到表单数据")
+            return legacy_data
+        
+        app.logger.error("❌ 所有方法都未能获取到表单数据")
+        return None
         
     except Exception as e:
         app.logger.error(f"Failed to get form data from DB: {str(e)}")
@@ -699,20 +727,28 @@ def _handle_analysis_execution(form_data, session):
         max_ai_retries = 2
         for retry_count in range(max_ai_retries):
             try:
-                app.logger.info(f"AI分析尝试 {retry_count + 1}/{max_ai_retries}")
+                app.logger.info(f"🚀 AI分析尝试 {retry_count + 1}/{max_ai_retries} - 即将调用generate_ai_suggestions")
                 suggestions = generate_ai_suggestions(form_data, session)
+                app.logger.info(f"✅ generate_ai_suggestions成功返回，数据类型: {type(suggestions)}")
                 if suggestions:
+                    app.logger.info("🎯 获得有效suggestions，跳出重试循环")
                     break  # 成功获得结果，跳出重试循环
+                else:
+                    app.logger.warning("⚠️ generate_ai_suggestions返回了空结果")
             except Exception as ai_error:
-                app.logger.error(f"AI分析失败 (尝试 {retry_count + 1}): {str(ai_error)}")
+                app.logger.error(f"💥 AI分析失败 (尝试 {retry_count + 1}): {str(ai_error)}")
+                app.logger.error(f"💥 异常类型: {type(ai_error).__name__}")
+                import traceback
+                app.logger.error(f"💥 完整错误堆栈: {traceback.format_exc()}")
                 if retry_count == max_ai_retries - 1:
                     # 最后一次尝试失败，生成备用方案
-                    app.logger.info("生成备用方案")
+                    app.logger.info("🛡️ 最后尝试失败，生成备用方案")
                     suggestions = generate_fallback_result(form_data, "分析过程遇到技术问题，为您提供基础建议")
                     session['analysis_fallback'] = True
                     save_session_in_ajax()
                 else:
                     # 等待后重试
+                    app.logger.warning(f"⏳ 等待3秒后进行第{retry_count + 2}次重试...")
                     time.sleep(3)
                     continue
 
@@ -1221,34 +1257,63 @@ def generate():
         app.logger.info(f"Generate route accessed - Request method: {request.method}")
         app.logger.info(f"Generate route - Form data keys: {list(request.form.keys())}")
         app.logger.info(f"Generate route - Content type: {request.content_type}")
-        # Get form data - 修复字段名匹配问题
-        project_name = request.form.get('projectName', '').strip()
-        project_description = request.form.get('projectDescription', '').strip()
         
-        # 如果没有找到新字段名，尝试旧字段名（向后兼容）
-        if not project_name:
-            project_name = request.form.get('project_name', '').strip()
-        if not project_description:
-            project_description = request.form.get('project_description', '').strip()
+        # 初始化变量
+        project_name = ''
+        project_description = ''
+        key_persons = []
+        
+        # 检查是否是JSON格式的form_data提交
+        form_data_json = request.form.get('form_data', '')
+        if form_data_json:
+            try:
+                import json
+                parsed_form_data = json.loads(form_data_json)
+                app.logger.info(f"🎯 解析JSON格式的form_data成功: {parsed_form_data.get('projectName', '未知项目')}")
+                
+                # 从解析的JSON中提取数据
+                project_name = parsed_form_data.get('projectName', '').strip()
+                project_description = parsed_form_data.get('projectDescription', '').strip()
+                key_persons = parsed_form_data.get('keyPersons', [])
+                
+                app.logger.info(f"📋 提取的数据 - 项目名: {project_name}, 人员数: {len(key_persons)}")
+            except json.JSONDecodeError as e:
+                app.logger.error(f"❌ JSON form_data解析失败: {e}")
+                # 继续使用普通表单解析
+        
+        # 如果JSON解析失败或没有JSON数据，使用传统表单解析
+        if not project_name or not project_description:
+            # Get form data - 修复字段名匹配问题
+            if not project_name:
+                project_name = request.form.get('projectName', '').strip()
+                if not project_name:
+                    project_name = request.form.get('project_name', '').strip()
+            
+            if not project_description:
+                project_description = request.form.get('projectDescription', '').strip()
+                if not project_description:
+                    project_description = request.form.get('project_description', '').strip()
 
         # Validate required fields
         if not project_name or not project_description:
+            app.logger.error(f"❌ 验证失败 - 项目名: '{project_name}', 描述: '{project_description[:50]}...'")
             flash('项目名称和背景描述不能为空', 'error')
             return redirect(url_for('index'))
-
-        # Process key persons data - 支持JSON格式输入
-        key_persons = []
         
-        # 尝试从JSON字段获取（前端提交的格式）
-        key_persons_json = request.form.get('keyPersons', '')
-        if key_persons_json:
-            try:
-                import json
-                key_persons = json.loads(key_persons_json)
-                app.logger.info(f"Parsed key persons from JSON: {len(key_persons)} persons")
-            except json.JSONDecodeError as e:
-                app.logger.error(f"Failed to parse keyPersons JSON: {e}")
-                key_persons = []
+        # Process key persons data - 支持JSON格式输入
+        if 'key_persons' not in locals():
+            key_persons = []
+            
+            # 尝试从JSON字段获取（前端提交的格式）
+            key_persons_json = request.form.get('keyPersons', '')
+            if key_persons_json:
+                try:
+                    import json
+                    key_persons = json.loads(key_persons_json)
+                    app.logger.info(f"Parsed key persons from JSON: {len(key_persons)} persons")
+                except json.JSONDecodeError as e:
+                    app.logger.error(f"Failed to parse keyPersons JSON: {e}")
+                    key_persons = []
         
         # 如果JSON解析失败，尝试传统表单字段
         if not key_persons:
@@ -1330,7 +1395,14 @@ def generate():
         # Log the received data
         import json
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
-        app.logger.info(f"Session data stored successfully")
+        app.logger.info(f"Session data stored successfully - Temp ID: {session.get('analysis_form_id')}, Project: {session.get('analysis_project_name')}")
+        
+        # 验证session存储是否成功
+        verification_data = get_form_data_from_db(session)
+        if verification_data:
+            app.logger.info("✅ Session数据存储验证成功")
+        else:
+            app.logger.error("❌ Session数据存储验证失败，数据未能正确保存")
 
         # 跳转到新的Matrix风格思考页面，同时启动分析
         return redirect(url_for('thinking_process'))

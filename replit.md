@@ -88,19 +88,25 @@ Angela is a Flask-based web application designed to help users generate non-labo
 
 ## Recent Critical Fixes
 
-### SSL/Network Error Resolution (August 26, 2025) - FINAL SOLUTION
-- **Problem Solved**: 彻底解决了"启动分析遇到网络问题"的SSL连接不稳定问题
-- **Root Cause**: Gunicorn worker进程在长时间OpenAI API调用中SSL连接中断，导致worker重启
+### Form Data Processing & OpenAI API Integration (August 26, 2025) - COMPLETE RESOLUTION
+- **Problem Solved**: 彻底解决了表单数据解析失败和OpenAI API调用问题
+- **Root Cause Analysis**: 
+  - **主要问题**: JSON格式的form_data无法被正确解析，导致"项目名称和背景描述不能为空"错误
+  - **数据流断裂**: 表单提交成功但数据未存储到数据库，Session-数据库关联失效
+  - **验证时序错误**: 在JSON解析之前就进行了表单验证，导致有效数据被拒绝
 - **Final Solution Implemented**:
-  - **连接优化**: 优化OpenAI客户端连接池配置(max_connections=10, keepalive=5)
-  - **超时管理**: 统一设置40秒读取超时，15秒连接超时，避免长时间阻塞
-  - **重试机制**: 实现智能重试(2次)，每次重试使用全新客户端连接
-  - **错误分类**: 精准识别SSL/SystemExit/网络错误，针对性处理
-  - **备用保障**: 任何情况下都生成高质量备用方案，确保用户获得结果
-  - **循环导入修复**: 使用importlib延迟导入解决models模块循环导入问题
+  - **JSON解析修复**: 在`/generate`路由中增加form_data字段的JSON解析逻辑
+  - **数据提取优化**: 正确提取projectName、projectDescription、keyPersons字段
+  - **验证时序调整**: 调整表单验证逻辑，在JSON解析完成后再进行数据验证
+  - **Session-DB关联**: 修复get_form_data_from_db函数，支持通过pending记录恢复Session关联
+  - **详细日志**: 增加全面的调试日志，监控数据流的每个环节
 - **测试验证**: 
-  - 通过comprehensive测试验证：系统确实调用真实OpenAI API，不是备用方案
-  - 发现并修复了循环导入问题（models模块导入使用importlib延迟导入）
-  - 详细的API调用日志确认：POST https://api.openai.com/v1/chat/completions成功
-  - OpenAI服务器响应时间：16-27秒，完整JSON结构化回复
-- **用户体验**: 无论遇到什么网络问题，用户都能获得完整的分析结果，系统具备世界级容错能力，确认真实调用OpenAI API
+  - **真实API调用确认**: OpenAI API成功调用，返回结构化的非劳务收入分析方案
+  - **数据完整性验证**: 测试标识"JSON解析修复验证-1756218051"在结果中完整保留
+  - **性能表现**: API调用快速响应，无网络连接问题
+  - **用户体验**: 从表单提交到结果生成的完整流程顺畅运行
+- **系统状态**: 
+  - **表单处理**: ✅ JSON和传统表单格式均支持
+  - **数据存储**: ✅ PostgreSQL正常存储用户表单和AI结果
+  - **API集成**: ✅ OpenAI API稳定工作，生成高质量分析结果
+  - **错误处理**: ✅ 保持完整的备用机制和容错能力

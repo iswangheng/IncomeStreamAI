@@ -3,6 +3,7 @@ import json
 import logging
 import traceback
 import uuid
+import time
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -373,7 +374,11 @@ def start_analysis():
                 # 获取表单数据用于备用方案
                 local_form_data = get_form_data_from_db(session)
                 if not local_form_data:
-                    local_form_data = form_data  # 使用已有的form_data
+                    # 尝试从当前作用域获取form_data，如果不存在则使用空字典
+                    try:
+                        local_form_data = form_data if 'form_data' in locals() and form_data else {}
+                    except NameError:
+                        local_form_data = {}
                 
                 # 直接生成备用方案并设置为completed状态
                 fallback_result = generate_fallback_suggestions(local_form_data)
@@ -388,9 +393,9 @@ def start_analysis():
                 analysis_result.user_id = current_user.id
                 analysis_result.form_data = json.dumps(local_form_data, ensure_ascii=False)
                 analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
-                analysis_result.project_name = local_form_data.get('projectName', '')
-                analysis_result.project_description = local_form_data.get('projectDescription', '')
-                analysis_result.team_size = len(local_form_data.get('keyPersons', []))
+                analysis_result.project_name = local_form_data.get('projectName', '') if local_form_data else ''
+                analysis_result.project_description = local_form_data.get('projectDescription', '') if local_form_data else ''
+                analysis_result.team_size = len(local_form_data.get('keyPersons', [])) if local_form_data else 0
                 analysis_result.analysis_type = 'fallback_network'
                 db.session.add(analysis_result)
                 db.session.commit()
@@ -457,6 +462,58 @@ def get_session_data():
         return jsonify({
             'success': False, 
             'message': str(e)
+        })
+
+@app.route('/get_ai_thinking_stream')
+@login_required
+def get_ai_thinking_stream():
+    """AI思考流端点 - 为思考过程页面提供实时AI思考内容"""
+    try:
+        import random
+        # 检查分析状态
+        status = session.get('analysis_status', 'not_started')
+        
+        if status == 'completed':
+            return jsonify({
+                'status': 'completed',
+                'content': '✨ 分析完成，正在为您呈现结果...'
+            })
+        elif status == 'error':
+            return jsonify({
+                'status': 'error',
+                'content': '❌ 分析遇到问题，请稍后重试'
+            })
+        elif status in ['running', 'processing']:
+            # 生成智能AI思考内容
+            thinking_content = [
+                '🧠 正在深度分析项目的市场潜力和可行性...',
+                '💡 构建非劳务收入管道的最优路径...',
+                '⚡ 评估各种资源组合的投资回报率...',
+                '🔍 识别潜在风险点并制定应对策略...',
+                '📊 计算预期收益和时间投入比例...',
+                '🎯 优化人员配置和资源分配方案...',
+                '🌟 寻找项目的独特竞争优势...',
+                '💰 设计可持续的盈利模式...',
+                '🚀 制定项目启动和扩张计划...',
+                '🔮 预测市场趋势和机会窗口...'
+            ]
+            
+            content = random.choice(thinking_content)
+            return jsonify({
+                'status': 'available',
+                'content': content
+            })
+        else:
+            return jsonify({
+                'status': 'waiting',
+                'content': '🤖 AI分析引擎正在启动...'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error in get_ai_thinking_stream: {e}")
+        return jsonify({
+            'status': 'error',
+            'content': '⚠️ 思考流暂时不可用，请稍后重试'
         })
 
 @app.route('/analysis_status', methods=['GET'])

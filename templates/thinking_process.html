@@ -768,9 +768,12 @@
                         
                         if (data.status === 'available' && data.content && data.content.trim()) {
                             // 展示AI的真实思考内容，使用独特的样式
+                            console.log('🔥 尝试添加AI思考内容:', data.content, '类型: ai-stream');
                             const success = addThinkingLine(data.content, 'ai-stream');
                             if (success) {
-                                console.log('✅ 显示AI思考内容:', data.content);
+                                console.log('✅ 成功显示AI思考内容:', data.content);
+                            } else {
+                                console.log('❌ AI思考内容添加失败:', data.content);
                             }
                             
                             // 继续获取下一条思考内容，更频繁的更新

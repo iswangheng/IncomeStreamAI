@@ -291,14 +291,14 @@ def start_analysis():
                 'error_code': 'NO_FORM_DATA'
             })
         
-        # 检查是否已经有分析结果
-        current_status = session.get('analysis_status', 'not_started')
-        if current_status == 'completed':
-            return jsonify({
-                'status': 'completed',
-                'message': '分析已完成',
-                'progress': 100
-            })
+        # 重要：每次启动分析都强制重置状态，确保真正执行OpenAI API调用
+        app.logger.info(f"Force reset analysis status - Current: {session.get('analysis_status')}")
+        session['analysis_status'] = 'not_started'
+        session['analysis_started'] = False
+        session['analysis_progress'] = 0
+        if 'analysis_result_id' in session:
+            del session['analysis_result_id']
+        save_session_in_ajax()
         
         app.logger.info(f"Starting AI analysis for project: {form_data.get('projectName')}")
         

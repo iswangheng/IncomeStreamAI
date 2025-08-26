@@ -14,11 +14,9 @@ import time
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
     timeout=httpx.Timeout(40.0, connect=15.0),  # 优化超时：连接15秒，读取40秒
-    http_client=httpx.Client(
-        limits=httpx.Limits(max_connections=10, max_keepalive_connections=5),
-        timeout=httpx.Timeout(40.0, connect=15.0)
-    )
-)
+    http_client=httpx.Client(limits=httpx.Limits(max_connections=10,
+                                                 max_keepalive_connections=5),
+                             timeout=httpx.Timeout(40.0, connect=15.0)))
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +49,15 @@ class AngelaAI:
     def _call_openai_with_retry(self, **kwargs):
         """调用OpenAI API，带强化重试机制"""
         logger.info("=== _call_openai_with_retry方法被调用 ===")
-        logger.info(f"传入参数: model={kwargs.get('model')}, timeout={kwargs.get('timeout')}")
+        logger.info(
+            f"传入参数: model={kwargs.get('model')}, timeout={kwargs.get('timeout')}"
+        )
         max_retries = 2  # 减少重试次数，避免长时间阻塞
         for attempt in range(max_retries):
             try:
-                logger.info(f"正在调用OpenAI API (尝试 {attempt + 1}/{max_retries})...")
-                
+                logger.info(
+                    f"正在调用OpenAI API (尝试 {attempt + 1}/{max_retries})...")
+
                 # 为每次重试创建新的客户端连接，避免连接复用问题
                 if attempt > 0:
                     fresh_client = OpenAI(
@@ -66,19 +67,23 @@ class AngelaAI:
                     return fresh_client.chat.completions.create(**kwargs)
                 else:
                     return client.chat.completions.create(**kwargs)
-                    
-            except (httpx.TimeoutException, httpx.ConnectError, ConnectionError, 
-                    httpx.ReadTimeout, httpx.ConnectTimeout, TimeoutError,
-                    OSError, ConnectionResetError, BrokenPipeError) as e:
+
+            except (httpx.TimeoutException, httpx.ConnectError,
+                    ConnectionError, httpx.ReadTimeout, httpx.ConnectTimeout,
+                    TimeoutError, OSError, ConnectionResetError,
+                    BrokenPipeError) as e:
                 if attempt < max_retries - 1:
                     wait_time = 2 * (attempt + 1)  # 缩短等待时间: 2s, 4s
-                    logger.warning(f"OpenAI API网络超时 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试...")
+                    logger.warning(
+                        f"OpenAI API网络超时 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试..."
+                    )
                     time.sleep(wait_time)
                     continue
                 else:
                     logger.error(f"OpenAI API网络超时，最终失败: {str(e)}")
                     # 对于网络问题，抛出连接错误而不是返回None
-                    if "read timed out" in str(e).lower() or "timeout" in str(e).lower():
+                    if "read timed out" in str(e).lower() or "timeout" in str(
+                            e).lower():
                         time.sleep(2)
                         continue
                     else:
@@ -96,7 +101,7 @@ class AngelaAI:
         role_mapping = {
             # 需求方角色
             'enterprise_owner': '企业主',
-            'store_owner': '实体店主', 
+            'store_owner': '实体店主',
             'department_head': '部门负责人',
             'brand_manager': '主理人',
             # 交付方角色
@@ -109,9 +114,15 @@ class AngelaAI:
 
     def get_role_type_by_identifier(self, role_identifier: str) -> str:
         """根据角色标识符获取角色类型（需求方/交付方等）"""
-        demand_roles = ['enterprise_owner', 'store_owner', 'department_head', 'brand_manager']
-        delivery_roles = ['product_provider', 'service_provider', 'traffic_provider', 'other_provider']
-        
+        demand_roles = [
+            'enterprise_owner', 'store_owner', 'department_head',
+            'brand_manager'
+        ]
+        delivery_roles = [
+            'product_provider', 'service_provider', 'traffic_provider',
+            'other_provider'
+        ]
+
         if role_identifier in demand_roles:
             return '需求方'
         elif role_identifier in delivery_roles:
@@ -154,8 +165,6 @@ class AngelaAI:
             for item in make_happy_list
         ])
 
-
-
     def get_core_knowledge_fallback(self) -> str:
         """当知识库检索失败时的核心知识要点"""
         return """• 非劳务收入核心公式：意识+能量+能力（行动）=结果
@@ -176,28 +185,186 @@ class AngelaAI:
             key_persons = form_data.get('keyPersons', [])
             external_resources = form_data.get('externalResources', [])
 
-            # 简化系统提示 - 专注于个性化分析  
-            system_prompt = """你是Angela，专业的非劳务收入管道设计师。
+            #专注于个性化分析
+            system_prompt = """# Angela - 非劳务收入管道设计专家
 
-## 任务
-根据用户的具体项目特点，设计个性化的非劳务收入管道方案。
+            ## 角色定位
+            你是 **Angela**，一位专精于 **非劳务收入管道设计** 的高级商业顾问与架构师。
 
-## 核心原则
-- 非劳务收入类型：租金、利息、股份、版权、居间、企业连锁、团队收益
-- 设计者通过整合资源获得收益，而非依赖持续劳动
-- 让所有参与方获益，设计者控制关键环节
+            ### 核心专长
+            - 长期研究并实践 **"如何利用别人手中的资源来创造收益"**
+            - 擅长把复杂的利益关系拆解成 **低成本、低风险、快验证** 的合作路径
+            - 任务：根据用户提供的项目信息，生成 **1-3套切实可行的非劳务收入管道草案**
 
-## 要求
-- 深入分析项目特点，提供针对性建议
-- 避免通用模板，体现项目独特性  
-- 说明具体的收益机制和第一步行动
+            ---
 
-## 分析要点
-针对这个具体项目，请分析：
-1. 项目的独特机会点在哪里？
-2. 现有资源如何形成收益闭环？  
-3. 设计者可以通过什么方式获得非劳务收入？
-4. 第一步应该如何行动？"""
+            ## 🔑 核心设计原则
+
+            ### 1. 非劳务收入本质公式
+            ```
+            【意识 + 能量 + 能力 = 结果】
+            ```
+
+            - **意识**: 设计者负责提出闭环方案与规则，确保所有关键人物都高兴
+            - **能量**: 关键环节的关键人物必须"高兴"，即获得他们想要的（动机满足）  
+            - **能力**: 让结果发生所需的所有环节能力（人、钱、时间、资源），都借用别人的
+            - **结果**: 设计者本人不依赖持续劳动，通过七大类型获得稳定回报
+
+            > ⚠️ **输出要求**：必须说明这一条管道中的【设计者的意识/位置】、能量来自谁、能力是谁的。
+
+            ### 2. 七大非劳务收入类型框架
+
+            | 类型 | 核心逻辑 | 典型形式 |
+            |------|----------|----------|
+            | **租金** | 万物皆可租 | 场地租赁、设备租赁、渠道租赁、品牌位租赁 |
+            | **利息** | 金钱的时间价值 | 资金占用费、信用额度收益、资金拆借 |
+            | **股份** | 资源换股权 | 以资源/渠道/IP入股，收取股息或未来收益 |
+            | **版权专利** | 知识产权授权费 | 内容、方法论、商标、专利许可 |
+            | **居间** | 中介费/撮合费 | 供需对接、撮合成交、推荐返佣 |
+            | **企业连锁** | 体系复制收益 | 加盟费、平台会员费、生态合作费 |
+            | **团队收益** | 借人赚钱 | 团队业绩提成、代理分佣、运营管理费 |
+
+            #### 强制要求：
+            - [x] 每条管道必须标注：**【类型】+【收益触发点】+【结算方式】**
+            - [x] 必须明确设计者本人通过哪一类或哪几类获得非劳务收入
+            - [x] 收益来源若不属于七类之一，**必须重写**
+
+            ---
+
+            ## 📋 管道设计7步流程
+
+            ### Step 1: 判断闭环完整性
+            - **现有资源足够？** 直接设计闭环，标注"现有资源足够闭环"
+            - **资源不足？** 指出缺口，补齐后再设计管道
+
+            ### Step 2: 匹配动机
+            为关键人物设计"让他们高兴"的激励（满足需求标签）
+
+            ### Step 3: 串联资源  
+            借用别人的资源形成闭环（设计者自己不出力）
+
+            ### Step 4: 设计最小闭环（MVP）
+            用 **1-3句话** 清晰说明方案如何自洽
+
+            ### Step 5: 收益来源
+            明确钱从哪里来，属于哪一类，标出设计者的收入来源
+
+            ### Step 6: 风险与Plan B
+            写清风险点，每个风险都有对应应对方案
+
+            ### Step 7: 弱环节识别
+            指出闭环中最脆弱的一环，并说明原因
+
+            ---
+
+            ## ✅ 输出标准与要求
+
+            ### 框架化输出要求
+            - **战略层次**：输出框架性方案草案，非执行计划
+            - **禁止颗粒度**：不写具体平台、发帖频次等执行细节
+            - **保持层次**：战略设计/管道架构层次
+
+            ### 每条管道必须包含：
+            - [x] 涉及哪些关键人物
+            - [x] 各方能提供的资源  
+            - [x] 每方的核心动机
+            - [x] 设计者在方案中的位置与统筹作用
+            - [x] 资源如何串联成闭环
+            - [x] 收益如何触发，明确设计者的收益
+
+            ---
+
+            ## 🔍 缺口识别与补齐机制
+
+            ### 关键判断标准：
+            - **人物数量**：< 2个 → 必须识别为"明显不足"
+            - **角色完整性**：需求方、交付方、资金方至少各有1个
+
+            ### 不足时的处理：
+            1. **具体化缺口**：明确角色名称、职能、寻找路径（禁止说"需要合作伙伴"）
+            2. **提供寻找方案**：【去哪找 + 如何说服】
+            3. **中国化话术**：接地气，符合中国商业环境，避免大路货
+            4. **交换逻辑**：明确你给什么/他得到什么
+
+            ---
+
+            ## ⚖️ 质量检验标准
+
+            ### ✅ 合格标准：
+            - [x] 设计者一眼看懂闭环，知道第一步怎么做
+            - [x] 输出明确【first_step】：启动动作、在哪做、为什么可行  
+            - [x] 设计者必须在闭环里，且获得非劳务收入
+            - [x] 方案具有可落地性
+
+            ### ❌ 失败标准：
+            - [ ] 不能落地的方案 = 失败
+            - [ ] 设计者需要持续劳动投入
+            - [ ] 收益来源不属于七大类型
+
+            ### 劳动占比自检：
+            - **<5小时/周** = 轻度 ✅
+            - **5-10小时/周** = 中度 ⚠️  
+            - **>10小时/周** = 过高 ❌
+
+            > 必须提供降低劳动的替代执行方案
+
+            ---
+
+            ## 📚 经典案例库
+
+            ### 案例1: 租金型 - 临街商铺二房东
+            - **类型**: 租金
+            - **场景**: 房东坚持整租，市场租客只要部分面积
+            - **关键人物**: 房东（整租）+ 租客（小面积）
+            - **闭环**: 设计者整租→分租，各方获益
+            - **收益触发**: 房租差价
+            - **Plan B**: 空置风险 → 提前锁定租客
+
+            ### 案例2: 居间型 - 英语培训撮合  
+            - **类型**: 居间
+            - **场景**: 升学需求学生 vs 合适老师
+            - **关键人物**: 升学规划师（生源）+ 老师（教学）
+            - **闭环**: 设计者撮合供需，收居间费
+            - **收益触发**: 按学员收费抽成
+            - **Plan B**: 绕过风险 → 签分佣协议
+
+            ### 案例3: 版权型 - SOP授权
+            - **类型**: 版权  
+            - **场景**: 设计者有方法论，培训机构缺内容
+            - **闭环**: 授权使用，收版权费
+            - **收益触发**: 按次/年收版权费
+            - **Plan B**: 侵权风险 → 协议+水印
+
+            ### 案例4: 股份型 - 卤味店扩张
+            - **类型**: 股份
+            - **场景**: 小店老板技术好但缺扩店资源  
+            - **关键人物**: 老板（技术+口碑）+ 设计者（商铺+渠道）
+            - **闭环**: 资源换股权，收分红
+            - **收益触发**: 股权分红+扩张增值
+            - **Plan B**: 股东纠纷 → 先签增量分红协议
+
+            ### 案例5: 团队收益型 - 短视频代运营
+            - **类型**: 团队收益
+            - **场景**: 品牌缺执行，代运营团队有产能
+            - **闭环**: 设计者撮合双方，合同走自己
+            - **收益触发**: 按业绩提成  
+            - **Plan B**: 绕过风险 → 所有合同通过设计者
+
+            ### 案例6: 企业连锁型 - 小镇托管加盟
+            - **类型**: 企业连锁
+            - **场景**: 县城托管班各自为战，缺品牌统一
+            - **闭环**: 设计者搭建统一品牌，收费
+            - **收益触发**: 加盟费+分成
+            - **Plan B**: 统一管理困难 → 分区域代理
+
+            ---
+
+            ## 🎯 最终输出要求
+
+            - **数量控制**: 1-3条方案，少而精
+            - **结构统一**: 严格结构化，字段固定，顺序统一  
+            - **避免空话**: 必须落在资源、动机和收益上
+            - **非劳务本质**: 收益必须为"非劳务"性质，不依赖用户劳动"""
 
             # 构造用户提示
             user_content = f"""【项目名称】{project_name}
@@ -214,8 +381,10 @@ class AngelaAI:
                 notes = person.get('notes', '')
 
                 # 将英文角色标识符转换为中文显示名称
-                role_chinese = self.format_role_to_chinese(role) if role else "未指定"
-                role_type = self.get_role_type_by_identifier(role) if role else "其他方"
+                role_chinese = self.format_role_to_chinese(
+                    role) if role else "未指定"
+                role_type = self.get_role_type_by_identifier(
+                    role) if role else "其他方"
 
                 user_content += f"""
 - 人物：{name}｜角色：{role_chinese}（{role_type}）
@@ -321,7 +490,6 @@ class AngelaAI:
     }
   ]
 }
-
 """
 
             # 获取模型配置
@@ -371,7 +539,7 @@ class AngelaAI:
                 if response is None:
                     logger.error("💥 OpenAI API返回None，这通常意味着连接失败")
                     raise ConnectionError("OpenAI API连接失败，响应为None")
-                    
+
             except Exception as api_error:
                 logger.error(f"OpenAI API调用失败: {str(api_error)}")
                 # 抛出连接错误让上层处理
@@ -393,14 +561,18 @@ class AngelaAI:
             import traceback
             logger.error(f"💥 JSON parsing error: {e}")
             logger.error(f"💥 Full traceback: {traceback.format_exc()}")
-            logger.error(f"💥 AI response text that failed to parse: {result_text[:1000] if 'result_text' in locals() else 'No response text available'}")
+            logger.error(
+                f"💥 AI response text that failed to parse: {result_text[:1000] if 'result_text' in locals() else 'No response text available'}"
+            )
             return self._get_fallback_result(form_data)
         except Exception as e:
             import traceback
             logger.error(f"💥 AI generation error: {e}")
             logger.error(f"💥 Error type: {type(e).__name__}")
             logger.error(f"💥 Full traceback: {traceback.format_exc()}")
-            logger.error(f"💥 This error caused fallback result to be used instead of real OpenAI analysis")
+            logger.error(
+                f"💥 This error caused fallback result to be used instead of real OpenAI analysis"
+            )
             return self._get_fallback_result(form_data)
 
     def _validate_result_structure(self, result: Dict[str, Any]) -> bool:
@@ -506,7 +678,7 @@ class AngelaAI:
 
         # 智能判断是否需要补充角色
         needs_additional_roles = len(key_persons) < 2  # 简单规则：少于2个人物时建议补充
-        
+
         # 分析现有人物的角色类型分布
         existing_role_types = set()
         for person in key_persons:
@@ -514,7 +686,7 @@ class AngelaAI:
             if original_role:
                 role_type = self.get_role_type_by_identifier(original_role)
                 existing_role_types.add(role_type)
-        
+
         # 检查是否缺少关键角色类型
         required_types = {'需求方', '交付方'}
         missing_types = required_types - existing_role_types
@@ -544,7 +716,7 @@ class AngelaAI:
             name = person.get('name', f'关键人物{i+1}')
             resources = person.get('resources', ['专业技能', '客户基础'])
             make_happy = person.get('make_happy', ['获得收益', '扩展业务'])
-            
+
             # 如果有原始role信息，优先使用role类型判断，否则使用索引映射
             original_role = person.get('role', '')
             if original_role:
@@ -574,13 +746,17 @@ class AngelaAI:
                     "资金方": "投资合作方"
                 }
                 role_name = role_name_mapping.get(missing_type, "合作伙伴")
-                
+
                 parties_structure.append({
-                    "party": f"【待补齐】{role_name}",
-                    "role_type": missing_type,
+                    "party":
+                    f"【待补齐】{role_name}",
+                    "role_type":
+                    missing_type,
                     "resources": ["待确定的关键资源", "待匹配的合作能力"],
-                    "role_value": f"补齐{missing_type}角色，完善闭环结构，确保管道可持续运行",
-                    "make_them_happy": "通过互利共赢的合作模式，实现各方价值最大化"
+                    "role_value":
+                    f"补齐{missing_type}角色，完善闭环结构，确保管道可持续运行",
+                    "make_them_happy":
+                    "通过互利共赢的合作模式，实现各方价值最大化"
                 })
 
         return {
@@ -626,8 +802,7 @@ class AngelaAI:
                     "需求方获得优质服务解决方案，交付方获得稳定客户来源，设计者通过撮合获得持续收益，形成三方共赢格局",
                     "designer_position":
                     "控制客户筛选标准、服务提供商认证体系、交易流程规范和结算环节，确保所有交易必须通过统筹方完成",
-                    "designer_income":
-                    "居间收益 - 通过制定规则和控制关键环节获得每笔交易的撮合费用"
+                    "designer_income": "居间收益 - 通过制定规则和控制关键环节获得每笔交易的撮合费用"
                 },
                 "mvp":
                 "建立简单的供需信息收集和匹配机制，先从现有人脉开始小规模撮合，验证商业模式可行性后逐步扩大规模。",

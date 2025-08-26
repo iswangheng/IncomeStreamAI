@@ -532,19 +532,13 @@
             let displayProgress, displayStage;
             
             if (realProgress !== null && window.realProgressStarted) {
-                // 使用真实进度
+                // 严格使用真实进度，不混合模拟进度
                 displayProgress = realProgress;
                 displayStage = realStage || '分析正在进行中...';
             } else {
-                // 使用模拟进度，允许达到100%
-                const simulationProgress = Math.min((currentStep / genericThinkingSteps.length) * 100, 100);
-                
-                if (window.realProgressStarted && realProgress !== null) {
-                    // 混合模式：使用真实进度，但保持模拟的阶段描述流畅性
-                    displayProgress = Math.max(simulationProgress, realProgress);
-                } else {
-                    displayProgress = simulationProgress;
-                }
+                // 使用模拟进度，但限制最大值防止超过真实进度
+                const simulationProgress = Math.min((currentStep / genericThinkingSteps.length) * 85, 85); // 模拟进度最多85%
+                displayProgress = simulationProgress;
                 
                 // 使用模拟阶段信息（更丰富的描述）
                 if (displayProgress < 15) {
@@ -561,17 +555,8 @@
                     displayStage = '设计收入管道...';
                 } else if (displayProgress < 75) {
                     displayStage = '优化三方结构...';
-                } else if (displayProgress < 85) {
-                    displayStage = '生成执行方案...';
-                } else if (displayProgress < 95) {
-                    displayStage = '生成分析报告...';
                 } else {
-                    displayStage = '分析完成！';
-                }
-                
-                // 如果有真实阶段信息且真实进度已开始，优先使用真实阶段
-                if (realStage && window.realProgressStarted) {
-                    displayStage = realStage;
+                    displayStage = '等待AI引擎响应...';
                 }
             }
             
@@ -632,15 +617,13 @@
                             console.log('分析完成，准备跳转到:', data.redirect_url);
                             
                             addThinkingLine('>>> ✅ 分析完成！检测到专业收入管道方案', 'conclusion');
-                            updateStatusDisplay(100);
+                            updateStatusDisplay(100, '分析完成！');
                             
                             addThinkingLine('>>> 🚀 正在跳转到结果页面...', 'system');
                             console.log('执行跳转...');
                             
-                            // 直接跳转，减少延迟
-                            setTimeout(() => {
-                                window.location.href = data.redirect_url;
-                            }, 1000);
+                            // 立即跳转，无延迟
+                            window.location.href = data.redirect_url;
                             
                         } else if (data.status === 'error' || data.status === 'timeout') {
                             realAnalysisCompleted = true;
@@ -679,10 +662,13 @@
                             // 标记真实进度已开始
                             window.realProgressStarted = true;
                             
-                            // 使用后端真实进度信息
-                            const progress = data.progress || Math.min(80 + (pollCount / maxPolls * 15), 95);
+                            // 严格使用后端真实进度，不要自己计算进度
+                            const progress = data.progress || 10; // 如果没有进度数据，使用保守的默认值
                             const stage = data.stage || data.message || '分析正在进行中...';
-                            updateStatusDisplay(progress, stage); // 同时更新进度和阶段信息
+                            
+                            // 确保进度不会跳到100%除非后端明确返回100%
+                            const safeProgress = Math.min(progress, 95); // 处理中状态最多显示95%
+                            updateStatusDisplay(safeProgress, stage);
                             
                             // 根据真实进度添加关键节点的思考行（不干扰常规模拟步骤）
                             if (progress >= 50 && !window.stage50Shown) {

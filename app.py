@@ -451,7 +451,7 @@ def _handle_analysis_execution(form_data, session):
             session['analysis_form_data'] = form_data  # 关键！必须保存form_data
             session['analysis_result_id'] = result_id
             session['analysis_status'] = 'completed'
-            session['analysis_progress'] = 100
+            session['analysis_progress'] = 100  # 只有真正完成时才设置为100%
             session['analysis_stage'] = '分析完成！'
             # 保留一份备份在session中以防数据库读取失败
             session['analysis_result'] = suggestions

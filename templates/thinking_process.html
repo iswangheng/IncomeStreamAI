@@ -866,8 +866,40 @@
                     });
             }
             
-            // Start polling immediately
-            poll();
+            // 首先启动分析，然后开始轮询
+            startAnalysisFirst();
+        }
+        
+        // 首先启动分析的函数
+        function startAnalysisFirst() {
+            console.log('Starting analysis first before polling...');
+            fetch('/start_analysis', {method: 'POST'})
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Analysis start response:', data);
+                    if (data.status === 'processing') {
+                        addThinkingLine('>>> 🚀 AI分析引擎已启动...', 'system');
+                        // 开始轮询检查状态
+                        poll();
+                    } else if (data.status === 'completed') {
+                        addThinkingLine('>>> ✅ 检测到已完成的分析结果', 'system');
+                        realAnalysisCompleted = true;
+                        updateStatusDisplay(100, '分析完成！');
+                        setTimeout(() => {
+                            window.location.href = '/results';
+                        }, 1000);
+                    } else {
+                        addThinkingLine(`>>> ❌ 启动分析失败: ${data.message}`, 'system');
+                        // 即使启动失败也开始轮询，可能session中有数据
+                        setTimeout(poll, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to start analysis:', error);
+                    addThinkingLine('>>> ⚠️ 启动分析遇到问题，尝试轮询检查...', 'system');
+                    // 启动失败时也开始轮询
+                    setTimeout(poll, 2000);
+                });
         }
         
         // Initialize everything with synchronized analysis

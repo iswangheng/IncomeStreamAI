@@ -230,6 +230,41 @@ def thinking_process():
     app.logger.info(f"Thinking page loaded with status: {session.get('analysis_status')}")
     return render_template('thinking_process.html')
 
+@app.route('/start_analysis', methods=['POST'])
+@login_required
+def start_analysis():
+    """专门用于启动AI分析的接口 - 只在thinking页面首次加载时调用一次"""
+    try:
+        form_data = session.get('analysis_form_data')
+        if not form_data:
+            return jsonify({
+                'status': 'error',
+                'message': '没有找到表单数据',
+                'error_code': 'NO_FORM_DATA'
+            })
+        
+        # 检查是否已经有分析结果
+        current_status = session.get('analysis_status', 'not_started')
+        if current_status == 'completed':
+            return jsonify({
+                'status': 'completed',
+                'message': '分析已完成',
+                'progress': 100
+            })
+        
+        app.logger.info(f"Starting AI analysis for project: {form_data.get('projectName')}")
+        
+        # 启动分析
+        return _handle_analysis_execution(form_data, session)
+        
+    except Exception as e:
+        app.logger.error(f"Error starting analysis: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': f'启动分析失败: {str(e)}',
+            'error_code': 'START_FAILED'
+        })
+
 @app.route('/get_session_data')
 @login_required
 def get_session_data():
@@ -450,16 +485,15 @@ def _internal_check_analysis_status():
                 'error_code': 'FALLBACK_FAILED'
             })
 
-    # 处理需要开始的分析
+    # 处理未开始的分析状态 - 轮询时只返回状态，不触发分析
     if status == 'not_started':
-        app.logger.info("Analysis not started, initiating analysis...")
-        # 立即设置状态为processing，防止重复调用
-        session['analysis_status'] = 'processing' 
-        session['analysis_stage'] = '正在启动AI分析引擎...'
-        session['analysis_progress'] = 10
-        save_session_in_ajax()
-        
-        return _handle_analysis_execution(form_data, session)
+        app.logger.info("Analysis not started - polling detected, returning status only")
+        return jsonify({
+            'status': 'not_started',
+            'progress': 0,
+            'stage': '等待分析开始...',
+            'message': '等待分析开始...'
+        })
 
     # 处理正在进行中的分析 - 直接返回进度，不要重新开始
     if status == 'processing':
@@ -1052,7 +1086,7 @@ def generate():
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully")
 
-        # 跳转到新的Matrix风格思考页面
+        # 跳转到新的Matrix风格思考页面，同时启动分析
         return redirect(url_for('thinking_process'))
 
     except Exception as e:

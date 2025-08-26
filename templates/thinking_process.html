@@ -746,6 +746,7 @@
                 pollCount++;
                 console.log(`Polling real analysis status, attempt: ${pollCount}`);
                 
+                // 防止过于频繁轮询，增加延迟
                 fetch('/check_analysis_status')
                     .then(response => response.json())
                     .then(data => {
@@ -803,6 +804,7 @@
                         } else if (data.status === 'processing') {
                             // 标记真实进度已开始
                             window.realProgressStarted = true;
+                            console.log('Status is processing, continuing polling...');
                             
                             // 严格使用后端真实进度，不要自己计算进度
                             const progress = data.progress || 10; // 如果没有进度数据，使用保守的默认值
@@ -827,7 +829,7 @@
                             }
                             
                             if (pollCount < maxPolls) {
-                                setTimeout(poll, 500); // 更频繁的轮询，减少延迟
+                                setTimeout(poll, 2000); // 减少轮询频率，避免重复API调用
                             } else {
                                 addThinkingLine('>>> ⏰ 分析超时，正在跳转...', 'system');
                                 setTimeout(() => {
@@ -837,8 +839,9 @@
                             
                         } else {
                             // Status is 'not_started' or other - trigger analysis start
-                            if (pollCount < maxPolls) {
-                                setTimeout(poll, 1000);
+                            console.log(`Unexpected status: ${data.status}, continuing poll...`);
+                            if (pollCount < maxPolls && !realAnalysisCompleted) {
+                                setTimeout(poll, 2000); // 增加间隔避免重复调用
                             } else {
                                 addThinkingLine('>>> ⏰ 连接超时，正在重试...', 'system');
                                 // 超时后，强制显示完成状态并跳转
@@ -852,7 +855,7 @@
                     })
                     .catch(error => {
                         console.error('Polling error:', error);
-                        if (pollCount < maxPolls) {
+                        if (pollCount < maxPolls && !realAnalysisCompleted) {
                             setTimeout(poll, 3000); // Longer delay on error
                         } else {
                             addThinkingLine('>>> ⚠️ 网络连接问题，正在跳转...', 'system');

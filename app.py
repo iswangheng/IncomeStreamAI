@@ -452,6 +452,13 @@ def _internal_check_analysis_status():
 
     # 处理需要开始的分析
     if status == 'not_started':
+        app.logger.info("Analysis not started, initiating analysis...")
+        # 立即设置状态为processing，防止重复调用
+        session['analysis_status'] = 'processing' 
+        session['analysis_stage'] = '正在启动AI分析引擎...'
+        session['analysis_progress'] = 10
+        save_session_in_ajax()
+        
         return _handle_analysis_execution(form_data, session)
 
     # 处理正在进行中的分析 - 直接返回进度，不要重新开始
@@ -480,12 +487,23 @@ def _handle_analysis_execution(form_data, session):
     import json
 
     try:
-        # 设置状态为处理中
+        # 检查是否已经在执行中，防止重复调用
+        if session.get('analysis_started', False):
+            app.logger.warning("Analysis already started, returning current status")
+            return jsonify({
+                'status': 'processing',
+                'progress': session.get('analysis_progress', 50),
+                'stage': session.get('analysis_stage', '分析正在进行中...'),
+                'message': '分析正在进行中，请稍候...'
+            })
+
+        # 标记分析已开始，防止重复执行
+        session['analysis_started'] = True
         session['analysis_status'] = 'processing'
         session['analysis_progress'] = 10
         session['analysis_stage'] = '开始AI分析...'
         save_session_in_ajax()  # 使用辅助函数确保session被保存
-        app.logger.info("Starting AI analysis in request context")
+        app.logger.info("Starting AI analysis in request context - FIRST TIME")
         app.logger.info(f"Form data for analysis: {json.dumps(form_data, ensure_ascii=False)[:200]}")
 
         # 执行AI分析，设置进度追踪
@@ -516,6 +534,7 @@ def _handle_analysis_execution(form_data, session):
             session['analysis_form_data'] = form_data  # 关键！必须保存form_data
             session['analysis_result_id'] = result_id
             session['analysis_status'] = 'completed'
+            session['analysis_started'] = False  # 重置开始标志
             session['analysis_progress'] = 100  # 只有真正完成时才设置为100%
             session['analysis_stage'] = '分析完成！'
             # 保留一份备份在session中以防数据库读取失败
@@ -607,6 +626,7 @@ def _handle_analysis_execution(form_data, session):
             except Exception as fallback_error:
                 app.logger.error(f"Fallback generation failed: {str(fallback_error)}")
                 session['analysis_status'] = 'error'
+                session['analysis_started'] = False  # 重置开始标志，允许重试
                 session['analysis_error'] = '网络超时且备用方案生成失败，请重试'
                 return jsonify({
                     'status': 'error', 
@@ -615,6 +635,7 @@ def _handle_analysis_execution(form_data, session):
                 })
         else:
             session['analysis_status'] = 'error'
+            session['analysis_started'] = False  # 重置开始标志，允许重试
             session['analysis_error'] = error_msg
             return jsonify({
                 'status': 'error', 
@@ -1013,6 +1034,7 @@ def generate():
 
         # 清理所有旧的分析相关数据，确保新项目不会使用旧的result_id
         session['analysis_status'] = 'not_started'
+        session['analysis_started'] = False  # 重置开始标志
         session['analysis_result'] = None
         session['analysis_result_id'] = None  # 关键修复：清理旧的result_id
         session['analysis_progress'] = 0

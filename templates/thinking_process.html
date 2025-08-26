@@ -675,8 +675,8 @@
             function fetchAIThinking() {
                 console.log('正在获取AI思考内容...');
                 
-                if (realAnalysisCompleted) {
-                    console.log('分析已完成，停止AI思考流');
+                if (realAnalysisCompleted || !window.aiThinkingStreamActive) {
+                    console.log('分析已完成或思考流已停止，退出AI思考流');
                     window.aiThinkingStreamActive = false;
                     return;
                 }
@@ -755,6 +755,7 @@
                         if (data.status === 'completed') {
                             // 后端分析完成，立即处理跳转
                             realAnalysisCompleted = true;
+                            window.aiThinkingStreamActive = false; // 立即停止AI思考流
                             console.log('分析完成，准备跳转');
                             
                             addThinkingLine('>>> ✅ 分析完成！生成专业收入管道方案', 'conclusion');
@@ -763,10 +764,8 @@
                             addThinkingLine('>>> 🚀 正在跳转到结果页面...', 'system');
                             console.log('执行跳转...');
                             
-                            // 立即跳转到结果页面，不依赖redirect_url
-                            setTimeout(() => {
-                                window.location.href = '/results';
-                            }, 500); // 极短延迟，确保用户看到完成消息
+                            // 立即跳转到结果页面，无延迟
+                            window.location.href = '/results';
                             
                         } else if (data.status === 'error' || data.status === 'timeout') {
                             realAnalysisCompleted = true;
@@ -884,8 +883,10 @@
                     } else if (data.status === 'completed') {
                         addThinkingLine('>>> ✅ 检测到已完成的分析结果', 'system');
                         realAnalysisCompleted = true;
+                        window.aiThinkingStreamActive = false; // 立即停止AI思考流
                         updateStatusDisplay(100, '分析完成！');
                         // 立即跳转，无延迟
+                        console.log('立即执行跳转...');
                         window.location.href = '/results';
                     } else {
                         addThinkingLine(`>>> ❌ 启动分析失败: ${data.message}`, 'system');

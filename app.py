@@ -616,11 +616,21 @@ def _handle_analysis_execution(form_data, session):
 
             # 立即返回成功响应，不需要额外处理
             app.logger.info("About to return success response to frontend")
-            return jsonify({
-                'status': 'completed', 
-                'message': '分析完成，正在跳转到结果页面...',
-                'progress': 100
-            })
+            
+            try:
+                response = jsonify({
+                    'status': 'completed', 
+                    'message': '分析完成，正在跳转到结果页面...',
+                    'progress': 100
+                })
+                app.logger.info("Successfully created JSON response")
+                return response
+            except Exception as response_error:
+                app.logger.error(f"Error creating JSON response: {str(response_error)}")
+                # 即使JSON创建失败，也要确保前端知道分析完成了
+                session['analysis_status'] = 'completed'
+                save_session_in_ajax()
+                raise response_error
         else:
             # 分析结果无效
             app.logger.error("AI analysis returned invalid result")
@@ -1168,11 +1178,13 @@ def generate_ai_suggestions(form_data, session=None):
         except Exception as network_error:
             # 检查是否是SSL/网络相关错误
             error_str = str(network_error).lower()
+            app.logger.error(f"AI调用异常: {str(network_error)}")
+            # 取消超时
+            signal.alarm(0)
+            
             if any(keyword in error_str for keyword in ['ssl', 'timeout', 'connection', 'network', 'recv', 'read', 'httpx', 'httpcore']):
                 # 网络/SSL/超时错误
                 app.logger.error(f"Network/SSL/Timeout error during AI call: {str(network_error)}")
-                # 取消超时
-                signal.alarm(0)
                 # 更新session状态为timeout
                 if session:
                     session['analysis_status'] = 'timeout'
@@ -1181,20 +1193,15 @@ def generate_ai_suggestions(form_data, session=None):
                 # 返回网络错误的备用方案
                 return generate_fallback_result(form_data, "网络连接问题，为您提供基础建议")
             else:
-                # 重新抛出其他类型的异常
-                raise network_error
-        except Exception as general_error:
-            # 其他所有错误
-            app.logger.error(f"General error during AI call: {str(general_error)}")
-            # 取消超时
-            signal.alarm(0)
-            # 更新session状态为error
-            if session:
-                session['analysis_status'] = 'error'
-                session['analysis_error'] = f'分析过程遇到问题: {str(general_error)}'
-                save_session_in_ajax()
-            # 返回一般错误的备用方案
-            return generate_fallback_result(form_data, "分析过程遇到问题，为您提供基础建议")
+                # 其他类型的错误
+                app.logger.error(f"General error during AI call: {str(network_error)}")
+                # 更新session状态为error
+                if session:
+                    session['analysis_status'] = 'error'
+                    session['analysis_error'] = f'分析过程遇到问题: {str(network_error)[:100]}'
+                    save_session_in_ajax()
+                # 返回一般错误的备用方案
+                return generate_fallback_result(form_data, "分析过程遇到问题，为您提供基础建议")
 
         # 更新进度：AI分析完成
         if session:

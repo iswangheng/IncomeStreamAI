@@ -1,0 +1,185 @@
+/* 导航栏用户菜单修复 - 确保与首页保持一致 */
+
+/* 强制覆盖所有可能的冲突样式 */
+
+/* PC端用户菜单样式修复 */
+@media (min-width: 769px) {
+    /* 用户触发器容器 - 单行显示 */
+    .navigation-bar .user-trigger {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 8px 12px !important;
+        background: rgba(245, 245, 247, 0.5) !important;
+        border: 1px solid rgba(229, 229, 234, 0.6) !important;
+        border-radius: 12px !important;
+        cursor: pointer !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        min-width: 140px !important;
+        justify-content: space-between !important;
+        height: auto !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+    }
+
+    /* 用户信息容器 - 确保图标和名字在同一行 */
+    .navigation-bar .user-info {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #6D6D70 !important;
+        flex: 1 !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        white-space: nowrap !important;
+    }
+
+    /* 用户图标 */
+    .navigation-bar .user-info i {
+        font-size: 18px !important;
+        color: #007AFF !important;
+        display: inline-block !important;
+        flex-shrink: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 用户名 */
+    .navigation-bar .user-name {
+        max-width: 80px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        display: inline-block !important;
+        line-height: 1.2 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #6D6D70 !important;
+    }
+
+    /* 下拉箭头 */
+    .navigation-bar .dropdown-arrow {
+        font-size: 12px !important;
+        color: #8e8e93 !important;
+        transition: transform 0.2s ease !important;
+        display: inline-block !important;
+        flex-shrink: 0 !important;
+        margin-left: 4px !important;
+        line-height: 1 !important;
+    }
+
+    /* hover状态 */
+    .navigation-bar .user-trigger:hover {
+        background: rgba(245, 245, 247, 0.8) !important;
+        border-color: #C7C7CC !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .navigation-bar .user-trigger:hover .dropdown-arrow {
+        transform: rotate(180deg) !important;
+    }
+
+    /* 下拉菜单头部修复 */
+    .navigation-bar .dropdown-header {
+        padding: 16px !important;
+        border-bottom: 1px solid rgba(209, 209, 214, 0.8) !important;
+        background: linear-gradient(135deg, rgba(245, 245, 247, 0.8), rgba(250, 250, 250, 0.6)) !important;
+    }
+
+    .navigation-bar .user-profile {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        flex-direction: row !important;
+    }
+
+    .navigation-bar .user-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #007AFF, #0056CC) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        flex-shrink: 0 !important;
+    }
+
+    .navigation-bar .user-details {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+        flex: 1 !important;
+    }
+
+    .navigation-bar .user-details h4 {
+        margin: 0 !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        color: #1d1d1f !important;
+        line-height: 1.2 !important;
+    }
+
+    .navigation-bar .user-details p {
+        margin: 0 !important;
+        font-size: 12px !important;
+        color: #8e8e93 !important;
+        line-height: 1.2 !important;
+    }
+
+    /* 确保用户菜单容器正确显示 */
+    .navigation-bar .user-menu {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        padding-left: 12px !important;
+        border-left: 1px solid rgba(209, 209, 214, 0.4) !important;
+        margin-left: 8px !important;
+        flex-shrink: 0 !important;
+        height: auto !important;
+    }
+}
+
+/* 移动端样式保持不变 */
+@media (max-width: 768px) {
+    /* 移动端隐藏用户菜单 */
+    .navigation-bar .user-menu {
+        display: none !important;
+    }
+
+    /* 显示汉堡菜单 */
+    .navigation-bar .mobile-menu-toggle {
+        display: flex !important;
+    }
+}
+
+/* 管理中心特定修复 */
+.admin-container .navigation-bar .user-trigger {
+    min-width: 160px !important;
+}
+
+/* 清除可能的错误样式 */
+.admin-container .user-trigger .user-info,
+.admin-container .user-trigger .user-name,
+.admin-container .user-trigger i {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    vertical-align: middle !important;
+}

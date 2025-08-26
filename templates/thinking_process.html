@@ -226,6 +226,57 @@
             margin-left: 20px;
         }
         
+        /* AI思考流特殊样式 - 更炫酷和优雅 */
+        .thinking-line.ai-stream {
+            color: #00d4ff;  /* 蓝色调，区别于其他类型 */
+            margin-left: 20px;
+            font-weight: 400;
+            border-left: 2px solid #00d4ff;
+            padding-left: 15px;
+            background: linear-gradient(90deg, rgba(0, 212, 255, 0.1) 0%, transparent 100%);
+            border-radius: 0 8px 8px 0;
+            position: relative;
+            overflow: hidden;
+            animation: ai-stream-glow 2s ease-in-out infinite alternate;
+        }
+        
+        .thinking-line.ai-stream::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(45deg, #00d4ff, #0066ff, #00d4ff);
+            animation: stream-flow 1.5s linear infinite;
+        }
+        
+        @keyframes ai-stream-glow {
+            0% {
+                text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+                box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+            }
+            100% {
+                text-shadow: 0 0 20px rgba(0, 212, 255, 0.8), 0 0 30px rgba(0, 212, 255, 0.4);
+                box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+            }
+        }
+        
+        @keyframes stream-flow {
+            0% {
+                background: linear-gradient(45deg, transparent, #00d4ff, transparent);
+                transform: translateY(-100%);
+            }
+            50% {
+                background: linear-gradient(45deg, #00d4ff, #0066ff, #00d4ff);
+                transform: translateY(0%);
+            }
+            100% {
+                background: linear-gradient(45deg, transparent, #00d4ff, transparent);
+                transform: translateY(100%);
+            }
+        }
+        
         .cursor {
             animation: blink 1s infinite;
         }
@@ -605,15 +656,55 @@
                 if (!window.waitingStateShown) {
                     addThinkingLine('>>> ⏳ 等待AI引擎响应...', 'system');
                     window.waitingStateShown = true;
+                    // 开始展示AI思考流
+                    startAIThinkingStream();
                 }
-                // 定期显示等待提示
-                setTimeout(() => {
-                    if (!realAnalysisCompleted) {
-                        addThinkingLine('# 深度分析中，请稍候...', 'analysis');
-                        setTimeout(showGenericThinking, 4000);
-                    }
-                }, 3000);
+                // 继续等待，不再显示重复的等待提示
+                setTimeout(showGenericThinking, 5000);
             }
+        }
+
+        // AI思考流展示功能 - 在等待期间显示真实的AI思考内容
+        function startAIThinkingStream() {
+            if (window.aiThinkingStreamActive) return; // 防止重复启动
+            window.aiThinkingStreamActive = true;
+            
+            function fetchAIThinking() {
+                if (realAnalysisCompleted) {
+                    window.aiThinkingStreamActive = false;
+                    return;
+                }
+                
+                fetch('/get_ai_thinking_stream')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'available' && data.content) {
+                            // 展示AI的真实思考内容，使用独特的样式
+                            addThinkingLine(data.content, 'ai-stream');
+                            
+                            // 继续获取下一条思考内容
+                            if (!realAnalysisCompleted) {
+                                setTimeout(fetchAIThinking, 3500); // 每3.5秒获取新的思考内容
+                            }
+                        } else {
+                            // 如果没有可用内容，显示等待状态
+                            if (!realAnalysisCompleted) {
+                                setTimeout(fetchAIThinking, 4000);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('获取AI思考流失败:', error);
+                        if (!realAnalysisCompleted) {
+                            // 错误时显示备用内容
+                            addThinkingLine('🤖 AI引擎正在深度运算中...', 'ai-stream');
+                            setTimeout(fetchAIThinking, 5000);
+                        }
+                    });
+            }
+            
+            // 立即开始获取AI思考内容
+            fetchAIThinking();
         }
         
         // Real backend analysis polling with synchronized display

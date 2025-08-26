@@ -1,0 +1,94 @@
+/* ================================
+   管理中心导航栏专用修复
+   确保与其他页面保持一致
+   ================================ */
+
+/* 管理中心特定修复 - PC端 */
+@media (min-width: 769px) {
+    /* 修复用户触发器宽度问题 */
+    .admin-container ~ * .user-trigger,
+    body:has(.admin-container) .user-trigger {
+        min-width: auto !important;
+        max-width: 160px !important;
+        width: auto !important;
+        display: inline-flex !important;
+        flex-wrap: nowrap !important;
+    }
+    
+    /* 确保用户信息在一行 */
+    body:has(.admin-container) .user-info {
+        display: inline-flex !important;
+        flex-wrap: nowrap !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+    }
+    
+    /* 用户名不换行 */
+    body:has(.admin-container) .user-name {
+        display: inline-block !important;
+        max-width: 70px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+    
+    /* 确保箭头不换行 */
+    body:has(.admin-container) .dropdown-arrow {
+        display: inline-block !important;
+        flex-shrink: 0 !important;
+        margin-left: 4px !important;
+    }
+}
+
+/* 覆盖可能的冲突样式 */
+.admin-container + .navigation-bar .user-trigger,
+.navigation-bar:has(~ .admin-container) .user-trigger {
+    height: auto !important;
+    line-height: normal !important;
+}
+
+/* 强制单行显示 */
+@media (min-width: 769px) {
+    .navigation-bar .user-trigger {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        padding: 6px 10px !important;
+        min-width: 120px !important;
+        max-width: 180px !important;
+        height: 36px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+    }
+    
+    .navigation-bar .user-info {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+    
+    .navigation-bar .user-info i {
+        flex-shrink: 0 !important;
+        font-size: 16px !important;
+    }
+    
+    .navigation-bar .user-name {
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 100px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        font-size: 13px !important;
+    }
+    
+    .navigation-bar .dropdown-arrow {
+        flex-shrink: 0 !important;
+        font-size: 10px !important;
+        margin-left: 4px !important;
+    }
+}

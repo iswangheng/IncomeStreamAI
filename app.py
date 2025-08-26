@@ -306,6 +306,17 @@ def thinking_process():
     app.logger.info(f"Thinking page loaded with status: {session.get('analysis_status')}")
     return render_template('thinking_process.html')
 
+@app.route('/thinking-demo')
+def thinking_demo():
+    """独立的thinking页面演示 - 无需登录和表单数据"""
+    # 模拟session数据用于演示
+    session['analysis_status'] = 'processing'
+    session['analysis_progress'] = 50
+    session['analysis_stage'] = '演示模式 - AI分析进行中...'
+    
+    app.logger.info("Thinking demo page loaded - standalone demo mode")
+    return render_template('thinking_process.html')
+
 @app.route('/start_analysis', methods=['POST'])
 @login_required
 def start_analysis():

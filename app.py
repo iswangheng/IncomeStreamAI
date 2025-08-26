@@ -1140,9 +1140,10 @@ def generate_ai_suggestions(form_data, session=None):
         # 调用AI生成服务，添加SSL错误处理
         try:
             ai_result = angela_ai.generate_income_paths(converted_data, db)
-        except (ConnectionError, OSError, TimeoutError, Exception) as network_error:
+        except Exception as network_error:
             # 检查是否是SSL/网络相关错误
-            if any(keyword in str(network_error).lower() for keyword in ['ssl', 'timeout', 'connection', 'network', 'recv', 'read']):
+            error_str = str(network_error).lower()
+            if any(keyword in error_str for keyword in ['ssl', 'timeout', 'connection', 'network', 'recv', 'read', 'httpx', 'httpcore']):
                 # 网络/SSL/超时错误
                 app.logger.error(f"Network/SSL/Timeout error during AI call: {str(network_error)}")
                 # 取消超时
@@ -1150,7 +1151,7 @@ def generate_ai_suggestions(form_data, session=None):
                 # 更新session状态为timeout
                 if session:
                     session['analysis_status'] = 'timeout'
-                    session['analysis_error'] = f'网络连接问题: {str(network_error)}'
+                    session['analysis_error'] = f'网络连接问题: {str(network_error)[:100]}'  # 限制错误信息长度
                     save_session_in_ajax()
                 # 返回网络错误的备用方案
                 return generate_fallback_result(form_data, "网络连接问题，为您提供基础建议")

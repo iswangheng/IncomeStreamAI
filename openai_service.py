@@ -595,28 +595,34 @@ class AngelaAI:
                 assistant_prompt) > 500 else f"Assistant: {assistant_prompt}")
             logger.info(f"================================")
 
-            # 调用OpenAI API，带重试机制
-            response = self._call_openai_with_retry(
-                model=model_config['model'],
-                messages=[{
-                    "role": "system",
-                    "content": system_prompt
-                }, {
-                    "role": "user",
-                    "content": user_content
-                }, {
-                    "role": "assistant",
-                    "content": assistant_prompt
-                }],
-                response_format={"type": "json_object"},
-                temperature=model_config['temperature'],
-                max_tokens=model_config['max_tokens'],
-                timeout=model_config['timeout'])
+            # 调用OpenAI API，带重试机制和错误处理
+            try:
+                response = self._call_openai_with_retry(
+                    model=model_config['model'],
+                    messages=[{
+                        "role": "system",
+                        "content": system_prompt
+                    }, {
+                        "role": "user",
+                        "content": user_content
+                    }, {
+                        "role": "assistant",
+                        "content": assistant_prompt
+                    }],
+                    response_format={"type": "json_object"},
+                    temperature=model_config['temperature'],
+                    max_tokens=model_config['max_tokens'],
+                    timeout=model_config['timeout'])
 
-            # 如果响应为None（网络错误），返回备用方案
-            if response is None:
-                logger.warning("OpenAI API返回None，使用备用方案")
-                return self._get_fallback_result(form_data)
+                # 如果响应为None（网络错误），返回备用方案
+                if response is None:
+                    logger.warning("OpenAI API返回None，使用备用方案")
+                    return self._get_fallback_result(form_data)
+                    
+            except Exception as api_error:
+                logger.error(f"OpenAI API调用失败: {str(api_error)}")
+                # 抛出连接错误让上层处理
+                raise ConnectionError(f"OpenAI API连接失败: {str(api_error)}")
 
             # 解析响应
             result_text = response.choices[0].message.content

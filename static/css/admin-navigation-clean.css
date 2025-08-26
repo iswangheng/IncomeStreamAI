@@ -1,0 +1,142 @@
+/* 管理中心导航栏清洁样式 - 最小化覆盖，与首页保持一致 */
+
+/* 确保管理中心使用相同的导航栏样式 */
+/* 这个文件只包含必要的调整，避免与主导航样式冲突 */
+
+/* 管理中心专用容器样式 */
+.admin-container {
+    position: relative;
+    z-index: 1;
+}
+
+/* 确保主内容在导航栏下方 */
+body {
+    padding-top: 64px;
+}
+
+.main-content {
+    margin-top: 0;
+    padding-top: 20px;
+}
+
+/* 页面标题样式 */
+.page-header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding: 0 20px;
+}
+
+.page-title {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #1d1d1f;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #6e6e73;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* 确保Tab导航不受影响 */
+.admin-tabs {
+    max-width: 1200px;
+    margin: 0 auto 32px;
+    padding: 0 24px;
+}
+
+.admin-tab-nav {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background: rgba(245, 245, 247, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 0.5px solid rgba(209, 209, 214, 0.3);
+}
+
+.admin-tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: transparent;
+    color: #6e6e73;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+}
+
+.admin-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.6);
+    color: #1d1d1f;
+}
+
+.admin-tab-btn.active {
+    background: white;
+    color: #007AFF;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.admin-tab-btn i {
+    font-size: 16px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    body {
+        padding-top: 64px;
+    }
+
+    .page-header {
+        margin-bottom: 32px;
+        padding: 0 16px;
+    }
+
+    .page-title {
+        font-size: 32px;
+    }
+
+    .page-subtitle {
+        font-size: 17px;
+    }
+
+    .admin-tabs {
+        padding: 0 16px;
+        margin-bottom: 24px;
+    }
+
+    .admin-tab-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 6px;
+    }
+
+    .admin-tab-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+        flex: 0 0 auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 28px;
+    }
+
+    .page-subtitle {
+        font-size: 16px;
+    }
+}

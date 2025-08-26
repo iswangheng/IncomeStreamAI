@@ -1378,18 +1378,34 @@ def generate_ai_suggestions(form_data, session=None):
         app.logger.info("=== 开始调用OpenAI API ===")
         # 调用AI生成服务，添加SSL错误处理
         try:
+            app.logger.info("调用 angela_ai.generate_income_paths() 开始...")
             ai_result = angela_ai.generate_income_paths(converted_data, db.session)
-            app.logger.info("=== OpenAI API调用成功 ===")
+            app.logger.info(f"=== OpenAI API调用成功，返回数据类型: {type(ai_result)}, 数据长度: {len(str(ai_result)) if ai_result else 0} ===")
+            
+            # 验证返回结果的有效性
+            if not ai_result or not isinstance(ai_result, dict):
+                app.logger.error(f"OpenAI API返回了无效数据: {ai_result}")
+                raise ValueError(f"OpenAI API返回无效数据: {type(ai_result)}")
+            
+            # 检查是否是真正的AI生成结果还是内部备用方案
+            if ai_result.get('overview', {}).get('situation', '').startswith('设计者作为统筹方'):
+                app.logger.warning("⚠️ 检测到可能是内部备用方案，而非真实OpenAI生成内容")
+            else:
+                app.logger.info("✅ 确认是真实OpenAI生成的内容")
+            
         except Exception as network_error:
             # 检查是否是SSL/网络相关错误
             error_str = str(network_error).lower()
-            app.logger.error(f"AI调用异常: {str(network_error)}")
+            app.logger.error(f"💥 AI调用异常详细信息: {str(network_error)}")
+            app.logger.error(f"💥 异常类型: {type(network_error).__name__}")
+            import traceback
+            app.logger.error(f"💥 完整调用堆栈: {traceback.format_exc()}")
             # 取消超时
             signal.alarm(0)
             
             if any(keyword in error_str for keyword in ['ssl', 'timeout', 'connection', 'network', 'recv', 'read', 'httpx', 'httpcore', 'systemexit', 'socket']):
                 # 网络/SSL/超时错误
-                app.logger.error(f"Network/SSL/Timeout error during AI call: {str(network_error)}")
+                app.logger.error(f"🌐 网络相关错误，使用备用方案: {str(network_error)}")
                 # 更新session状态为timeout
                 if session:
                     session['analysis_status'] = 'timeout'
@@ -1399,7 +1415,7 @@ def generate_ai_suggestions(form_data, session=None):
                 return generate_fallback_result(form_data, "网络连接问题，为您提供基础建议")
             else:
                 # 其他类型的错误
-                app.logger.error(f"General error during AI call: {str(network_error)}")
+                app.logger.error(f"❌ 非网络错误，使用备用方案: {str(network_error)}")
                 # 更新session状态为error
                 if session:
                     session['analysis_status'] = 'error'

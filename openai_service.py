@@ -648,10 +648,10 @@ class AngelaAI:
                     max_tokens=model_config['max_tokens'],
                     timeout=model_config['timeout'])
 
-                # 如果响应为None（网络错误），返回备用方案
+                # 如果响应为None（网络错误），抛出异常而不是返回备用方案
                 if response is None:
-                    logger.warning("OpenAI API返回None，使用备用方案")
-                    return self._get_fallback_result(form_data)
+                    logger.error("💥 OpenAI API返回None，这通常意味着连接失败")
+                    raise ConnectionError("OpenAI API连接失败，响应为None")
                     
             except Exception as api_error:
                 logger.error(f"OpenAI API调用失败: {str(api_error)}")

@@ -654,7 +654,7 @@
             } else if (!realAnalysisCompleted) {
                 // 所有模拟步骤完成，但真实分析还未完成，继续等待
                 if (!window.waitingStateShown) {
-                    addThinkingLine('>>> ⏳ 模拟分析完成，切换到AI实时思考流...', 'system');
+                    addThinkingLine('>>> ⚡ AI引擎深度分析中，正在生成专业方案...', 'system');
                     window.waitingStateShown = true;
                     // 确保AI思考流正在运行
                     if (!window.aiThinkingStreamActive) {
@@ -700,9 +700,18 @@
                             }
                         } else {
                             console.log('AI思考流暂无内容，继续等待');
-                            // 如果没有可用内容，显示等待状态并继续尝试
+                            // 如果没有可用内容，显示智能等待内容并继续尝试
                             if (!realAnalysisCompleted) {
-                                addThinkingLine('🤖 AI引擎深度运算中...', 'ai-stream');
+                                const waitingMessages = [
+                                    '🧠 AI正在深度思考项目可行性...',
+                                    '⚡ 分析市场机会与风险评估...',
+                                    '💡 构建创新收入管道模型...',
+                                    '🔍 挖掘隐藏的盈利机会...',
+                                    '📊 计算投资回报率预期...',
+                                    '🎯 优化资源配置策略...'
+                                ];
+                                const randomMessage = waitingMessages[Math.floor(Math.random() * waitingMessages.length)];
+                                addThinkingLine(randomMessage, 'ai-stream');
                                 setTimeout(fetchAIThinking, 3500);
                             }
                         }
@@ -710,8 +719,15 @@
                     .catch(error => {
                         console.error('获取AI思考流失败:', error);
                         if (!realAnalysisCompleted) {
-                            // 错误时显示备用内容并继续尝试
-                            addThinkingLine('⚡ AI神经网络正在高速计算...', 'ai-stream');
+                            // 错误时显示智能备用内容并继续尝试
+                            const errorMessages = [
+                                '🌟 AI正在探索最佳解决方案...',
+                                '🚀 深度学习算法运行中...',
+                                '💎 挖掘独特商业机会...',
+                                '🔮 预测未来收入趋势...'
+                            ];
+                            const randomErrorMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                            addThinkingLine(randomErrorMessage, 'ai-stream');
                             setTimeout(fetchAIThinking, 4000);
                         }
                     });
@@ -735,19 +751,21 @@
                     .then(data => {
                         console.log('Real analysis status:', data);
                         
-                        if (data.status === 'completed' && data.redirect_url) {
+                        if (data.status === 'completed') {
                             // 后端分析完成，立即处理跳转
                             realAnalysisCompleted = true;
-                            console.log('分析完成，准备跳转到:', data.redirect_url);
+                            console.log('分析完成，准备跳转');
                             
-                            addThinkingLine('>>> ✅ 分析完成！检测到专业收入管道方案', 'conclusion');
+                            addThinkingLine('>>> ✅ 分析完成！生成专业收入管道方案', 'conclusion');
                             updateStatusDisplay(100, '分析完成！');
                             
                             addThinkingLine('>>> 🚀 正在跳转到结果页面...', 'system');
                             console.log('执行跳转...');
                             
-                            // 立即跳转，无延迟
-                            window.location.href = data.redirect_url;
+                            // 立即跳转到结果页面，不依赖redirect_url
+                            setTimeout(() => {
+                                window.location.href = '/results';
+                            }, 500); // 极短延迟，确保用户看到完成消息
                             
                         } else if (data.status === 'error' || data.status === 'timeout') {
                             realAnalysisCompleted = true;

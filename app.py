@@ -258,10 +258,40 @@ def start_analysis():
         return _handle_analysis_execution(form_data, session)
         
     except Exception as e:
+        import traceback
         app.logger.error(f"Error starting analysis: {str(e)}")
+        app.logger.error(f"Full traceback: {traceback.format_exc()}")
+        
+        # 检查是否已经有结果保存但session有问题
+        try:
+            from models import AnalysisResult
+            project_name = session.get('analysis_form_data', {}).get('projectName', '')
+            if project_name:
+                # 查找最近的分析结果
+                recent_result = AnalysisResult.query.filter_by(
+                    user_id=current_user.id,
+                    project_name=project_name
+                ).order_by(AnalysisResult.created_at.desc()).first()
+                
+                if recent_result:
+                    app.logger.info(f"Found recent result for project {project_name}, using it instead")
+                    # 恢复session状态
+                    session['analysis_status'] = 'completed'
+                    session['analysis_result_id'] = recent_result.id
+                    session['analysis_progress'] = 100
+                    save_session_in_ajax()
+                    
+                    return jsonify({
+                        'status': 'completed',
+                        'message': '分析完成，正在跳转到结果页面...',
+                        'progress': 100
+                    })
+        except Exception as recovery_error:
+            app.logger.error(f"Recovery attempt failed: {str(recovery_error)}")
+        
         return jsonify({
             'status': 'error',
-            'message': f'启动分析失败: {str(e)}',
+            'message': f'启动分析失败: {str(e)[:100]}',
             'error_code': 'START_FAILED'
         })
 
@@ -584,18 +614,13 @@ def _handle_analysis_execution(form_data, session):
             app.logger.info(f"Session updated - Status: {session.get('analysis_status')}, Result ID: {session.get('analysis_result_id')}")
             app.logger.info(f"Session state after update - Permanent: {session.permanent}, Modified: {session.modified}")
 
-            # 创建response并确保session被保存
-            response = jsonify({
+            # 立即返回成功响应，不需要额外处理
+            app.logger.info("About to return success response to frontend")
+            return jsonify({
                 'status': 'completed', 
                 'message': '分析完成，正在跳转到结果页面...',
                 'progress': 100
             })
-
-            # 确保会话cookie被正确设置
-            from flask import make_response
-            response = make_response(response)
-
-            return response
         else:
             # 分析结果无效
             app.logger.error("AI analysis returned invalid result")

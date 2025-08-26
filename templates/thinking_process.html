@@ -896,9 +896,9 @@
                 })
                 .catch(error => {
                     console.error('Failed to start analysis:', error);
-                    addThinkingLine('>>> ⚠️ 启动分析遇到问题，尝试轮询检查...', 'system');
-                    // 启动失败时也开始轮询
-                    setTimeout(poll, 500); // 更快开始轮询检测
+                    addThinkingLine('>>> ⚠️ 启动分析遇到网络问题，立即开始轮询检查结果...', 'system');
+                    // 网络错误时立即开始轮询，可能备用方案已经生成
+                    poll();
                 });
         }
         

@@ -280,7 +280,8 @@ def thinking_process():
 @app.route('/start_analysis', methods=['POST'])
 @login_required
 def start_analysis():
-    """专门用于启动AI分析的接口 - 只在thinking页面首次加载时调用一次"""
+    """专门用于启动AI分析的接口 - 增强错误处理，确保始终返回JSON"""
+    # 最外层错误捕获 - 防止任何错误导致前端收到空响应
     try:
         form_data = get_form_data_from_db(session)
         if not form_data:
@@ -336,11 +337,69 @@ def start_analysis():
         except Exception as recovery_error:
             app.logger.error(f"Recovery attempt failed: {str(recovery_error)}")
         
+        # 网络错误时，立即尝试生成备用方案
+        error_str = str(e).lower()
+        if any(keyword in error_str for keyword in ['ssl', 'timeout', 'connection', 'network', 'recv', 'read', 'socket', 'systemexit']):
+            app.logger.info(f"Network error detected in start_analysis: {str(e)}, generating immediate fallback")
+            try:
+                # 直接生成备用方案并设置为completed状态
+                fallback_result = generate_fallback_suggestions(form_data)
+                
+                # 保存到数据库
+                import uuid
+                import json
+                from models import AnalysisResult
+                fallback_id = str(uuid.uuid4())
+                analysis_result = AnalysisResult()
+                analysis_result.id = fallback_id
+                analysis_result.user_id = current_user.id
+                analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
+                analysis_result.project_name = form_data.get('projectName', '')
+                analysis_result.project_description = form_data.get('projectDescription', '')
+                analysis_result.team_size = len(form_data.get('keyPersons', []))
+                analysis_result.analysis_type = 'fallback_network'
+                db.session.add(analysis_result)
+                db.session.commit()
+                
+                # 设置session为completed状态
+                session['analysis_status'] = 'completed'
+                session['analysis_result_id'] = fallback_id
+                session['analysis_progress'] = 100
+                save_session_in_ajax()
+                
+                app.logger.info(f"Network error fallback generated successfully, ID: {fallback_id}")
+                
+                return jsonify({
+                    'status': 'completed',
+                    'message': '网络不稳定，已生成备用方案...',
+                    'progress': 100
+                })
+                
+            except Exception as fallback_error:
+                app.logger.error(f"Fallback generation in start_analysis failed: {str(fallback_error)}")
+        
         return jsonify({
             'status': 'error',
             'message': f'启动分析失败: {str(e)[:100]}',
             'error_code': 'START_FAILED'
         })
+    except Exception as fatal_error:
+        # 终极错误捕获 - 确保永远返回JSON
+        app.logger.error(f"FATAL error in start_analysis: {str(fatal_error)}")
+        try:
+            return jsonify({
+                'status': 'error',
+                'message': '系统遇到严重错误，请刷新重试',
+                'error_code': 'FATAL_START_ERROR'
+            })
+        except:
+            # 如果连jsonify都失败了
+            from flask import Response
+            return Response(
+                '{"status": "error", "message": "系统严重错误", "error_code": "JSON_FAILED"}',
+                mimetype='application/json'
+            )
 
 @app.route('/get_session_data')
 @login_required
@@ -707,7 +766,8 @@ def _handle_analysis_execution(form_data, session):
         # 如果是网络超时错误，立即生成备用方案
         if ('timeout' in error_msg.lower() or 'connection' in error_msg.lower() or 
             'ssl' in error_msg.lower() or 'network' in error_msg.lower() or
-            'read timeout' in error_msg.lower() or 'connect timeout' in error_msg.lower()):
+            'read timeout' in error_msg.lower() or 'connect timeout' in error_msg.lower() or
+            'recv' in error_msg.lower() or 'systemexit' in error_msg.lower() or 'socket' in error_msg.lower()):
             session['analysis_status'] = 'timeout'
             app.logger.info(f"Network/timeout error detected: {error_msg}, immediately generating fallback")
 
@@ -1279,7 +1339,7 @@ def generate_ai_suggestions(form_data, session=None):
             # 取消超时
             signal.alarm(0)
             
-            if any(keyword in error_str for keyword in ['ssl', 'timeout', 'connection', 'network', 'recv', 'read', 'httpx', 'httpcore']):
+            if any(keyword in error_str for keyword in ['ssl', 'timeout', 'connection', 'network', 'recv', 'read', 'httpx', 'httpcore', 'systemexit', 'socket']):
                 # 网络/SSL/超时错误
                 app.logger.error(f"Network/SSL/Timeout error during AI call: {str(network_error)}")
                 # 更新session状态为timeout

@@ -231,7 +231,7 @@ class AngelaAI:
 
             # assistant prompt - 专注于个性化生成
             assistant_prompt = """
-请严格按照非劳务收入管道设计原理与系统提示词生成答案，并输出下述唯一 JSON 结构。注意：用户输入的关键人物数据已在 User Content 中提供（例如表单中“关键人物列表”字段）。你必须从 User Content 中读取这些人物并在输出中完整保留。
+请严格按照非劳务收入管道设计原理与系统提示词生成答案，并输出下述唯一 JSON 结构。注意：用户输入的关键人物数据已在 User Content 中提供。你必须从 User Content 中读取这些人物并在输出中完整保留。
 
 【关键要求 - 必须严格执行】
 1. parties_structure 中必须**完整包含**用户在 User Content 中提供的**所有**关键人物，名称需与输入**完全一致**（不得改写、不得遗漏、不得合并）。

@@ -139,25 +139,9 @@
     flex-shrink: 0;
 }
 
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--color-text-secondary);
-    font-size: 14px;
-    font-weight: 500;
-    padding: 8px 12px;
-    background: rgba(245, 245, 247, 0.5);
-    border-radius: 12px;
-    border: 1px solid rgba(229, 229, 234, 0.6);
-    flex-shrink: 0;
-    box-sizing: border-box;
-}
+/* 移除冲突的 user-info 样式，由 user-menu-dropdown.css 统一处理 */
 
-.user-info i {
-    font-size: 16px;
-    color: var(--color-primary);
-}
+/* 图标样式已移至 user-menu-dropdown.css */
 
 /* Button Icon Spacing */
 .nav-actions .btn i {

@@ -12,16 +12,17 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- 导航系统 - 与首页保持完全一致 -->
-    <link href="{{ url_for('static', filename='css/navigation-redesign.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/user-menu-dropdown.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/navigation-spacing-fix.css') }}" rel="stylesheet">
-    <!-- 移动端导航样式 - 确保移动端正常显示 -->
-    <link href="{{ url_for('static', filename='css/mobile-navigation-isolated.css') }}" rel="stylesheet">
-    <!-- 优雅设计系统 - 参考首页风格 -->
+    <!-- 基础设计系统 - 最先加载 -->
     <link href="{{ url_for('static', filename='css/elegant-light.css') }}" rel="stylesheet">
-    <!-- 管理中心专用优雅设计 -->
+    <!-- 管理中心专用设计 -->
     <link href="{{ url_for('static', filename='css/admin-elegant.css') }}" rel="stylesheet">
+    <!-- 导航系统 - 确保用户菜单样式正确 -->
+    <link href="{{ url_for('static', filename='css/navigation-redesign.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/navigation-spacing-fix.css') }}" rel="stylesheet">
+    <!-- 移动端导航样式 -->
+    <link href="{{ url_for('static', filename='css/mobile-navigation-isolated.css') }}" rel="stylesheet">
+    <!-- 用户菜单样式 - 最后加载确保优先级 -->
+    <link href="{{ url_for('static', filename='css/user-menu-dropdown.css') }}" rel="stylesheet">
     <!-- 响应式用户列表布局优化 - 解决PC端和移动端显示问题 -->
     <link href="{{ url_for('static', filename='css/responsive-users-layout.css') }}" rel="stylesheet">
 

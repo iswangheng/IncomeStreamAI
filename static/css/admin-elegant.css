@@ -558,17 +558,18 @@
 
 .empty-title {
     font-size: var(--elegant-text-xl);
-    font-weight: 600;
-    color: var(--elegant-text-primary);
+    font-weight: 700;
+    color: #1C1C1E;
     margin-bottom: var(--elegant-space-2);
 }
 
 .empty-description {
     font-size: var(--elegant-text-base);
-    color: var(--elegant-text-secondary);
+    color: #3A3A3C;
     max-width: 400px;
     margin: 0 auto;
     line-height: 1.6;
+    font-weight: 500;
 }
 
 /* 加载状态 */
@@ -593,8 +594,9 @@
 
 .loading-text {
     font-size: var(--elegant-text-base);
-    color: var(--elegant-text-secondary);
+    color: #3A3A3C;
     margin: 0;
+    font-weight: 500;
 }
 
 @keyframes spin {

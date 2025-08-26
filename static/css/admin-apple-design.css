@@ -6,13 +6,13 @@
     --admin-bg-sidebar: rgba(255, 255, 255, 0.8);
     --admin-bg-main: var(--color-bg-secondary);
     --admin-nav-active: var(--color-primary);
-    
+
     /* 状态色彩 */
     --status-active: #34C759;
     --status-paused: #AF52DE;
     --status-deleted: #FF3B30;
     --status-draft: #8E8E93;
-    
+
     /* 数据可视化色彩 */
     --chart-primary: var(--color-primary);
     --chart-secondary: var(--color-secondary);
@@ -36,48 +36,48 @@
         -webkit-text-size-adjust: 100%;
         -webkit-font-smoothing: antialiased;
     }
-    
+
     /* 模态框移动端优化 */
     .modal-overlay {
         padding: var(--space-4);
         align-items: flex-start;
         padding-top: var(--space-8);
     }
-    
+
     .modal-content {
         max-width: 100%;
         max-height: calc(100vh - var(--space-16));
         border-radius: var(--radius-xl);
         margin-top: 0;
     }
-    
+
     .modal-header {
         padding: var(--space-4);
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
     }
-    
+
     .modal-title {
         font-size: var(--text-lg);
     }
-    
+
     .modal-body {
         padding: var(--space-4);
     }
-    
+
     .modal-footer {
         padding: var(--space-4);
         flex-direction: column;
         gap: var(--space-3);
     }
-    
+
     .modal-footer .btn {
         width: 100%;
         justify-content: center;
         min-height: 44px;
     }
-    
+
     /* 表单元素通用优化 */
     .form-control,
     input[type="text"],
@@ -90,18 +90,18 @@
         font-size: var(--text-base);
         border-radius: var(--radius-md);
     }
-    
+
     /* 修复输入框icon遮挡问题 */
     .input-group .form-control,
     .input-wrapper .form-control {
         padding-left: 48px;
     }
-    
+
     .input-group,
     .input-wrapper {
         position: relative;
     }
-    
+
     .input-group .input-group-text,
     .input-wrapper .input-icon {
         position: absolute;
@@ -289,7 +289,7 @@
         touch-action: manipulation;
         width: 100%;
     }
-    
+
     .btn {
         min-height: 44px;
         padding: var(--space-3) var(--space-4);
@@ -300,28 +300,28 @@
         -webkit-user-select: none;
         -webkit-tap-highlight-color: transparent;
     }
-    
+
     /* 导航栏移动端优化 */
     .navigation-bar .nav-content {
         padding: 0 16px !important;
         overflow: hidden;
     }
-    
+
     /* 隐藏桌面端按钮 */
     .navigation-bar .nav-actions .btn {
         display: none !important;
     }
-    
+
     /* 显示移动端汉堡菜单 */
     .navigation-bar .mobile-menu-toggle {
         display: block !important;
     }
-    
+
     /* 用户菜单移动端隐藏 */
     .navigation-bar .user-menu {
         display: none !important;
     }
-    
+
     /* 管理后台内容区域 */
     .admin-main-full {
         width: 100%;
@@ -330,7 +330,7 @@
         box-sizing: border-box;
         padding: 0;
     }
-    
+
     /* 数据表格移动端优化 */
     .table-container {
         overflow-x: auto;
@@ -338,19 +338,19 @@
         margin: var(--space-4);
         border-radius: var(--radius-lg);
     }
-    
+
     .data-table {
         min-width: 600px; /* 设置最小宽度保证可读性 */
         white-space: nowrap;
         font-size: var(--text-xs);
     }
-    
+
     .data-table th,
     .data-table td {
         padding: var(--space-3) var(--space-4);
         min-width: 80px;
     }
-    
+
     .data-table th:first-child,
     .data-table td:first-child {
         position: sticky;
@@ -891,7 +891,7 @@
     .upload-zone:hover {
         transform: none;
     }
-    
+
     .upload-zone:active {
         transform: scale(0.98);
         background: rgba(0, 122, 255, 0.05);
@@ -1057,7 +1057,7 @@
     .admin-sidebar {
         width: 240px;
     }
-    
+
     .admin-main {
         margin-left: 240px;
     }
@@ -1068,25 +1068,25 @@
         transform: translateX(-100%);
         transition: transform 0.3s ease;
     }
-    
+
     .admin-sidebar.open {
         transform: translateX(0);
     }
-    
+
     .admin-main {
         margin-left: 0;
     }
-    
+
     .stats-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .table-container {
         margin: var(--space-4);
         max-width: none;
         border-radius: var(--radius-lg);
     }
-    
+
     .table-filters {
         padding: 0 var(--space-4);
         margin: 0 var(--space-4) var(--space-6);
@@ -1095,81 +1095,111 @@
         align-items: stretch;
         gap: var(--space-3);
     }
-    
+
     .table-filters form {
         display: flex;
         flex-direction: column;
         gap: var(--space-3);
         align-items: stretch;
     }
-    
+
     .filters-left,
     .filters-right {
         width: 100%;
         justify-content: stretch;
     }
-    
+
     /* 滚动编辑区域优化 */
     .card-body {
         padding: var(--space-4);
     }
-    
+
     .form-group {
         margin-bottom: var(--space-4);
     }
-    
+
     .form-label {
         font-size: var(--text-base);
         font-weight: var(--font-medium);
         margin-bottom: var(--space-2);
         display: block;
     }
-    
+
     /* 按钮组优化 */
     .btn-group {
         display: flex;
         flex-direction: column;
         gap: var(--space-2);
     }
-    
+
     .btn-group .btn {
         width: 100%;
         justify-content: center;
     }
-    
+
     .stats-grid {
         padding: 0 var(--space-4) var(--space-8);
         max-width: none;
     }
-    
+
     .admin-page-header {
         padding: var(--space-6) var(--space-4) var(--space-4);
         max-width: none;
     }
-    
+
     .upload-section {
         margin: 0 var(--space-4) var(--space-6);
         padding: 0;
         max-width: none;
     }
-    
+
     .upload-zone {
         padding: var(--space-8);
         min-height: 120px;
         border-radius: var(--radius-lg);
     }
-    
+
     .upload-title {
         font-size: var(--text-lg);
     }
-    
+
     .upload-description {
         font-size: var(--text-sm);
         line-height: 1.4;
     }
-    
+
     .upload-formats {
         font-size: var(--text-xs);
+    }
+
+    .upload-progress {
+        margin: var(--space-3);
+        border-radius: var(--radius-md);
+    }
+
+    .upload-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-3);
+        padding: var(--space-3);
+    }
+
+    .upload-item-info {
+        width: 100%;
+    }
+
+    .upload-item-progress {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .upload-progress-track {
+        width: 100%;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
     }
 }
 
@@ -1177,19 +1207,19 @@
     .admin-toolbar {
         padding: var(--space-3) var(--space-4);
     }
-    
+
     .admin-page-header {
         padding: var(--space-4) var(--space-4) var(--space-4);
         margin: var(--space-2) var(--space-4) var(--space-4);
         border-radius: var(--radius-xl);
     }
-    
+
     .admin-page-title {
         font-size: var(--text-2xl);
         line-height: 1.3;
         letter-spacing: -0.01em;
     }
-    
+
     .admin-page-subtitle {
         font-size: var(--text-base);
         margin-top: var(--space-2);
@@ -1197,40 +1227,40 @@
         word-wrap: break-word;
         overflow-wrap: break-word;
     }
-    
+
     .table-container {
         margin: var(--space-3);
         border-radius: var(--radius-md);
     }
-    
+
     .table-filters {
         margin: 0 var(--space-3) var(--space-4);
         padding: 0;
     }
-    
+
     .table-header {
         padding: var(--space-4);
         flex-direction: column;
         align-items: flex-start;
         gap: var(--space-3);
     }
-    
+
     .data-table {
         min-width: 500px;
         font-size: 11px;
     }
-    
+
     .data-table th,
     .data-table td {
         padding: var(--space-2) var(--space-3);
         min-width: 60px;
     }
-    
+
     .action-buttons {
         flex-direction: column;
         gap: var(--space-1);
     }
-    
+
     .action-btn {
         width: 28px;
         height: 28px;
@@ -1243,13 +1273,13 @@
     .stats-grid {
         padding: 0 var(--space-3) var(--space-5);
     }
-    
+
     .admin-page-header {
         padding: var(--space-3) var(--space-3) var(--space-3);
         margin: var(--space-2) var(--space-3) var(--space-3);
         border-radius: var(--radius-lg);
     }
-    
+
     .admin-page-title {
         font-size: var(--text-xl);
         line-height: 1.4;
@@ -1257,24 +1287,24 @@
         word-break: keep-all;
         overflow-wrap: anywhere;
     }
-    
+
     .admin-page-subtitle {
         font-size: var(--text-sm);
         margin-top: var(--space-1);
         line-height: 1.5;
     }
-    
+
     .stats-card {
         padding: var(--space-4);
         min-height: 100px;
     }
-    
+
     .stats-icon {
         width: 40px;
         height: 40px;
         font-size: var(--text-lg);
     }
-    
+
     .stats-value {
         font-size: var(--text-2xl);
     }
@@ -1522,22 +1552,22 @@
         gap: var(--space-3);
         align-items: flex-start;
     }
-    
+
     .admin-brand-inline {
         order: 1;
     }
-    
+
     .admin-brand-inline h1 {
         font-size: var(--text-lg);
     }
-    
+
     .btn.btn-outline {
         order: 2;
         align-self: flex-end;
         font-size: var(--text-sm);
         padding: var(--space-2) var(--space-3);
     }
-    
+
     .admin-page-header,
     .stats-grid,
     .upload-section,
@@ -1545,7 +1575,7 @@
         padding-left: var(--space-4);
         padding-right: var(--space-4);
     }
-    
+
     /* 操作按钮样式 */
     .action-buttons {
         display: flex;
@@ -1553,7 +1583,7 @@
         justify-content: center;
         align-items: center;
     }
-    
+
     .action-btn {
         width: 32px;
         height: 32px;
@@ -1567,83 +1597,83 @@
         transition: var(--transition-fast);
         position: relative;
     }
-    
+
     .action-btn.edit {
         background: var(--color-primary);
         color: white;
     }
-    
+
     .action-btn.edit:hover {
         background: var(--color-primary-dark);
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);
     }
-    
+
     .action-btn.delete {
         background: var(--color-error);
         color: white;
     }
-    
+
     .action-btn.delete:hover {
         background: var(--color-error-dark);
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
     }
-    
+
     .admin-page-header {
         padding-top: var(--space-6);
         padding-bottom: var(--space-6);
     }
-    
+
     .upload-section {
         margin: 0 var(--space-3) var(--space-5);
     }
-    
+
     .upload-zone {
         padding: var(--space-6);
         min-height: 100px;
         border-radius: var(--radius-md);
         border-width: 1px;
     }
-    
+
     .upload-title {
         font-size: var(--text-base);
     }
-    
+
     .upload-description {
         font-size: var(--text-xs);
         max-width: 280px;
     }
-    
+
     .upload-formats {
         font-size: 10px;
     }
-    
+
     .upload-progress {
         margin: var(--space-3);
         border-radius: var(--radius-md);
     }
-    
+
     .upload-item {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--space-3);
         padding: var(--space-3);
     }
-    
+
     .upload-item-info {
         width: 100%;
     }
-    
+
     .upload-item-progress {
         width: 100%;
         align-items: flex-start;
     }
-    
+
     .upload-progress-track {
         width: 100%;
     }
-    
+
     .stats-grid {
         grid-template-columns: 1fr;
         gap: var(--space-4);

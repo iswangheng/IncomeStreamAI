@@ -87,3 +87,38 @@
         </div>
     </div>
 </nav>
+
+<!-- 导航栏JavaScript -->
+<script>
+function toggleMobileMenu() {
+    const dropdown = document.getElementById('mobileDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+// 点击外部关闭移动端菜单
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('mobileDropdown');
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    
+    if (dropdown && menuToggle) {
+        if (!menuToggle.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    }
+});
+
+// PC端用户菜单键盘导航支持
+document.addEventListener('DOMContentLoaded', function() {
+    const userTrigger = document.querySelector('.user-trigger');
+    if (userTrigger) {
+        userTrigger.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    }
+});
+</script>

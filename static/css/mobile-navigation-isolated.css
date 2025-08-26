@@ -3,8 +3,19 @@
    确保与PC端零冲突
    ================================ */
 
+/* PC端确保用户菜单显示 */
+@media (min-width: 769px) {
+    .navigation-bar .user-menu {
+        display: flex !important;
+    }
+}
+
 /* 移动端专用样式 - 优先级最高 */
 @media (max-width: 768px) {
+    /* 移动端隐藏PC端用户菜单 */
+    .navigation-bar .user-menu {
+        display: none !important;
+    }
     /* 强制重置所有可能冲突的样式 */
     .navigation-bar .mobile-menu-toggle {
         display: flex !important;
@@ -49,14 +60,12 @@
         color: #007AFF !important;
     }
     
-    /* 隐藏PC端的按钮和用户菜单 */
+    /* 隐藏PC端的按钮（但保留用户菜单） */
     .navigation-bar .nav-actions .btn:not(.mobile-menu-toggle) {
         display: none !important;
     }
     
-    .navigation-bar .user-menu {
-        display: none !important;
-    }
+    /* PC端用户菜单在移动端隐藏，但PC端保持显示 */
     
     /* 移动端下拉菜单样式 */
     .navigation-bar .mobile-dropdown {

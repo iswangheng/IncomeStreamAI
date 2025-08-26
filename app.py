@@ -197,6 +197,37 @@ def logout():
     return redirect(url_for('login'))
 
 
+def get_form_data_from_db(session):
+    """从数据库获取表单数据，避免session过大"""
+    try:
+        # 优先从session获取form_id
+        form_id = session.get('analysis_form_id')
+        if form_id:
+            from models import AnalysisResult
+            import json
+            temp_result = AnalysisResult.query.get(form_id)
+            if temp_result and temp_result.form_data:
+                return json.loads(temp_result.form_data)
+        
+        # 如果没有form_id，尝试从project_name查找
+        project_name = session.get('analysis_project_name')
+        if project_name:
+            from models import AnalysisResult
+            import json
+            recent_result = AnalysisResult.query.filter_by(
+                user_id=current_user.id,
+                project_name=project_name
+            ).order_by(AnalysisResult.created_at.desc()).first()
+            if recent_result and recent_result.form_data:
+                return json.loads(recent_result.form_data)
+        
+        # 最后尝试从session获取（向后兼容）
+        return session.get('analysis_form_data')
+        
+    except Exception as e:
+        app.logger.error(f"Failed to get form data from DB: {str(e)}")
+        return session.get('analysis_form_data')
+
 def save_session_in_ajax():
     """辅助函数：确保AJAX请求中session被正确保存，监控session大小"""
     from flask import session
@@ -212,6 +243,9 @@ def save_session_in_ajax():
         if 'analysis_result' in session:
             del session['analysis_result']
             app.logger.info("Removed analysis_result from session to reduce size")
+        if 'analysis_form_data' in session:
+            del session['analysis_form_data']
+            app.logger.info("Removed analysis_form_data from session to reduce size")
     
     session.permanent = True
     session.modified = True
@@ -224,9 +258,9 @@ def thinking_process():
     """AI thinking process visualization page"""
     from flask import session, redirect, url_for, flash
 
-    # Get form data from session
-    form_data = session.get('analysis_form_data')
-    app.logger.info(f"Thinking page - session data exists: {form_data is not None}")
+    # Get form data from database instead of session
+    form_data = get_form_data_from_db(session)
+    app.logger.info(f"Thinking page - form data exists: {form_data is not None}")
 
     # 如果没有表单数据，重定向到首页
     if not form_data:
@@ -248,7 +282,7 @@ def thinking_process():
 def start_analysis():
     """专门用于启动AI分析的接口 - 只在thinking页面首次加载时调用一次"""
     try:
-        form_data = session.get('analysis_form_data')
+        form_data = get_form_data_from_db(session)
         if not form_data:
             return jsonify({
                 'status': 'error',
@@ -278,7 +312,7 @@ def start_analysis():
         # 检查是否已经有结果保存但session有问题
         try:
             from models import AnalysisResult
-            project_name = session.get('analysis_form_data', {}).get('projectName', '')
+            project_name = session.get('analysis_project_name', '')
             if project_name:
                 # 查找最近的分析结果
                 recent_result = AnalysisResult.query.filter_by(
@@ -313,7 +347,7 @@ def start_analysis():
 def get_session_data():
     """获取session中的表单数据，供thinking页面使用"""
     try:
-        form_data = session.get('analysis_form_data')
+        form_data = get_form_data_from_db(session)
         if form_data:
             logger.info(f"Session data found for thinking page: {form_data.get('projectName', 'unnamed')}")
             return jsonify({
@@ -344,7 +378,7 @@ def get_ai_thinking_stream():
     try:
         # 获取当前分析状态
         status = session.get('analysis_status', 'not_started')
-        form_data = session.get('analysis_form_data')
+        form_data = get_form_data_from_db(session)
         
         if not form_data:
             return jsonify({
@@ -439,7 +473,7 @@ def _internal_check_analysis_status():
 
     # 检查session数据
     try:
-        form_data = session.get('analysis_form_data')
+        form_data = get_form_data_from_db(session)
         status = session.get('analysis_status', 'not_started')
         result = session.get('analysis_result')
 
@@ -500,11 +534,15 @@ def _internal_check_analysis_status():
             db.session.add(analysis_result)
             db.session.commit()
 
-            # 更新session状态
-            session['analysis_form_data'] = form_data  # 保存form_data
+            # 更新session状态，只保存必要数据
+            session['analysis_project_name'] = form_data.get('projectName', '')
             session['analysis_status'] = 'completed'
             session['analysis_result_id'] = fallback_id
-            session['analysis_result'] = fallback_result
+            # 清理大数据对象
+            if 'analysis_result' in session:
+                del session['analysis_result']
+            if 'analysis_form_data' in session:
+                del session['analysis_form_data']
 
             # 使用辅助函数确保session在AJAX中被保存
             save_session_in_ajax()
@@ -610,16 +648,19 @@ def _handle_analysis_execution(form_data, session):
             db.session.add(analysis_result)
             db.session.commit()
 
-            # 在session中存储必要的数据，避免session过大
-            session['analysis_form_data'] = form_data  # 关键！必须保存form_data
+            # 在session中只存储最小必要数据，避免cookie过大
+            # 只保存项目名称用于显示，完整数据从数据库读取
+            session['analysis_project_name'] = form_data.get('projectName', '')
             session['analysis_result_id'] = result_id
             session['analysis_status'] = 'completed'
             session['analysis_started'] = False  # 重置开始标志
             session['analysis_progress'] = 100  # 只有真正完成时才设置为100%
             session['analysis_stage'] = '分析完成！'
-            # 不在session中保存完整result，只保存ID，从数据库读取
+            # 清理大数据对象
             if 'analysis_result' in session:
-                del session['analysis_result']  # 删除可能存在的大数据
+                del session['analysis_result']
+            if 'analysis_form_data' in session:
+                del session['analysis_form_data']  # 删除大的form_data
 
             # 使用辅助函数确保session在AJAX中被保存
             save_session_in_ajax()
@@ -686,11 +727,15 @@ def _handle_analysis_execution(form_data, session):
                 db.session.add(analysis_result)
                 db.session.commit()
 
-                # 更新session状态为完成
-                session['analysis_form_data'] = form_data  # 保存form_data
+                # 更新session状态为完成，只保存必要数据
+                session['analysis_project_name'] = form_data.get('projectName', '')
                 session['analysis_status'] = 'completed'
                 session['analysis_result_id'] = fallback_id
-                # 不保存完整result到session
+                # 清理大数据
+                if 'analysis_result' in session:
+                    del session['analysis_result']
+                if 'analysis_form_data' in session:
+                    del session['analysis_form_data']
 
                 # 使用辅助函数确保session在AJAX中被保存
                 save_session_in_ajax()
@@ -741,7 +786,7 @@ def results():
         app.logger.info(f"Results page - Session ID: {request.cookies.get('session', 'No session cookie')}")
 
         # Get form data and analysis status from session
-        form_data = session.get('analysis_form_data')
+        form_data = get_form_data_from_db(session)
         status = session.get('analysis_status', 'not_started')
         result_id = session.get('analysis_result_id')
         result_data = session.get('analysis_result')
@@ -759,14 +804,15 @@ def results():
                 if analysis_record:
                     if analysis_record.form_data and not form_data:
                         form_data = json.loads(analysis_record.form_data)
-                        session['analysis_form_data'] = form_data
+                        # 不要把大数据写回session，只更新项目名称
+                        session['analysis_project_name'] = form_data.get('projectName', '')
                         session.permanent = True
                         session.modified = True
                         app.logger.info(f"Recovered form data from database for result ID: {result_id}")
 
                     if analysis_record.result_data:
                         result_data = json.loads(analysis_record.result_data)
-                        session['analysis_result'] = result_data
+                        # 不要把结果数据写回session，会导致cookie过大
                         session['analysis_status'] = 'completed'
                         session.permanent = True
                         session.modified = True
@@ -1046,11 +1092,15 @@ def results():
                     db.session.add(analysis_result)
                     db.session.commit()
 
-                    # 更新session
-                    session['analysis_form_data'] = form_data  # 保存form_data
+                    # 更新session，只保存必要数据
+                    session['analysis_project_name'] = form_data.get('projectName', '')
                     session['analysis_status'] = 'completed'
                     session['analysis_result_id'] = emergency_id
-                    session['analysis_result'] = fallback_result
+                    # 清理大数据对象
+                    if 'analysis_result' in session:
+                        del session['analysis_result']
+                    if 'analysis_form_data' in session:
+                        del session['analysis_form_data']
 
                     app.logger.info(f"Emergency fallback generated with ID: {emergency_id}")
                 except Exception as db_error:
@@ -1119,9 +1169,38 @@ def generate():
             "keyPersons": key_persons
         }
 
-        # Store form data in session 
+        # Store form data in session - 保存到数据库而不是session
         from flask import session
-        session['analysis_form_data'] = form_data
+        
+        # 保存表单数据到数据库，避免session过大
+        try:
+            import uuid
+            import json
+            from models import AnalysisResult
+            
+            # 创建临时记录存储表单数据
+            temp_id = str(uuid.uuid4())
+            temp_result = AnalysisResult()
+            temp_result.id = temp_id
+            temp_result.user_id = current_user.id
+            temp_result.form_data = json.dumps(form_data, ensure_ascii=False)
+            temp_result.project_name = form_data.get('projectName', '')
+            temp_result.project_description = form_data.get('projectDescription', '')
+            temp_result.team_size = len(form_data.get('keyPersons', []))
+            temp_result.analysis_type = 'pending'  # 标记为待处理
+            temp_result.result_data = json.dumps({}, ensure_ascii=False)  # 空结果
+            db.session.add(temp_result)
+            db.session.commit()
+            
+            # Session中只保存ID和项目名称
+            session['analysis_form_id'] = temp_id
+            session['analysis_project_name'] = project_name
+            app.logger.info(f"Stored form data in database with temp ID: {temp_id}")
+            
+        except Exception as e:
+            app.logger.error(f"Failed to store form data in database: {str(e)}")
+            # 如果数据库失败，至少保存项目名称
+            session['analysis_project_name'] = project_name
 
         # 清理所有旧的分析相关数据，确保新项目不会使用旧的result_id
         session['analysis_status'] = 'not_started'

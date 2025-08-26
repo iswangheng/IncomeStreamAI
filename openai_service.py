@@ -28,6 +28,29 @@ class AngelaAI:
     def __init__(self):
         self.default_model = "gpt-4o"  # 默认模型
         self.default_max_tokens = 2500  # 默认token数量
+        
+    def load_prompt_from_file(self, prompt_type: str) -> str:
+        """从文件加载prompt"""
+        try:
+            if prompt_type == 'system':
+                file_path = 'prompts/system_prompt.txt'
+            elif prompt_type == 'assistant':
+                file_path = 'prompts/assistant_prompt.txt'
+            else:
+                raise ValueError(f"不支持的prompt类型: {prompt_type}")
+                
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+            
+            logger.info(f"成功加载{prompt_type} prompt，长度: {len(content)}字符")
+            return content
+        except Exception as e:
+            logger.error(f"加载{prompt_type} prompt失败: {e}")
+            # 返回备用prompt
+            if prompt_type == 'system':
+                return "你是Angela，专业的非劳务收入路径设计师。"
+            else:
+                return "现在我将为你分析这个项目的非劳务收入设计方案。"
 
     def get_model_config(self, config_type='main_analysis'):
         """从数据库获取模型配置"""

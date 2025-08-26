@@ -11,13 +11,13 @@ from typing import Dict, List, Any, Optional
 # do not change this unless explicitly requested by the user
 import httpx
 
-# 创建带优化连接配置的客户端
+# 创建带优化连接配置的客户端 - 增加超时时间应对慢响应
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
-    timeout=httpx.Timeout(40.0, connect=15.0),  # 优化超时：连接15秒，读取40秒
+    timeout=httpx.Timeout(120.0, connect=30.0),  # 增加超时：连接30秒，读取120秒
     http_client=httpx.Client(limits=httpx.Limits(max_connections=10,
                                                  max_keepalive_connections=5),
-                             timeout=httpx.Timeout(40.0, connect=15.0)))
+                             timeout=httpx.Timeout(120.0, connect=30.0)))
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class AngelaAI:
                     # 使用更保守的超时设置
                     fresh_client = OpenAI(
                         api_key=os.environ.get("OPENAI_API_KEY"),
-                        timeout=httpx.Timeout(60.0, connect=20.0, read=60.0)  # 增加超时时间，提升稳定性
+                        timeout=httpx.Timeout(150.0, connect=45.0, read=150.0)  # 进一步增加超时时间，提升稳定性
                     )
                     response = fresh_client.chat.completions.create(**kwargs)
                     logger.info("✅ OpenAI API调用成功")

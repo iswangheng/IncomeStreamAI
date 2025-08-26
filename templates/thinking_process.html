@@ -580,29 +580,39 @@
                 return false; // 明确返回false表示跳过
             }
             
+            // 清理文本内容 - 移除多余的换行符和空白字符
+            let cleanedText = text.trim()
+                .replace(/\n+/g, ' ')  // 替换多个换行符为单个空格
+                .replace(/\s+/g, ' ')  // 替换多个空白字符为单个空格
+                .trim();
+            
+            if (!cleanedText || cleanedText === '') {
+                console.log('🚫 清理后的文本为空:', text);
+                return false;
+            }
+            
             // 防止短时间内重复添加相同内容
-            const trimmedText = text.trim();
-            if (window.lastThinkingLine === trimmedText) {
-                console.log('🚫 跳过重复内容:', trimmedText);
+            if (window.lastThinkingLine === cleanedText) {
+                console.log('🚫 跳过重复内容:', cleanedText);
                 return false;
             }
             
-            // 防止过于频繁的添加（防抖机制）
+            // 防止过于频繁的添加（防抖机制）- 调整时间阈值
             const now = Date.now();
-            if (window.lastAddTime && (now - window.lastAddTime) < 100) {
-                console.log('🚫 防抖：跳过过于频繁的添加');
+            if (window.lastAddTime && (now - window.lastAddTime) < 50) { // 降低防抖阈值
+                console.log('🚫 防抖：跳过过于频繁的添加，时间间隔:', now - window.lastAddTime);
                 return false;
             }
             
-            window.lastThinkingLine = trimmedText;
+            window.lastThinkingLine = cleanedText;
             window.lastAddTime = now;
             
             const content = document.getElementById('thinkingContent');
             const line = document.createElement('div');
             line.className = `thinking-line ${type}`;
             
-            // 更严格的内容设置和验证
-            line.textContent = trimmedText;
+            // 更严格的内容设置和验证 - 使用清理后的文本
+            line.textContent = cleanedText;
             
             // 三重检查确保内容不为空
             if (!line.textContent || line.textContent.length === 0 || line.textContent.trim() === '') {
@@ -632,7 +642,18 @@
                 }
             }
             
-            console.log('✅ 成功添加思考行:', trimmedText);
+            console.log('✅ 成功添加思考行:', cleanedText);
+            
+            // 最终验证DOM中的元素是否真正有内容
+            setTimeout(() => {
+                const allLines = content.querySelectorAll('.thinking-line');
+                const lastLine = allLines[allLines.length - 1];
+                if (!lastLine || !lastLine.textContent || lastLine.textContent.trim() === '') {
+                    console.log('🚨 检测到DOM中的空行元素，即将移除');
+                    if (lastLine) lastLine.remove();
+                }
+            }, 10);
+            
             return true; // 返回true表示成功添加
         }
         

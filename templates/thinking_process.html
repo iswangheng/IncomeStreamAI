@@ -201,15 +201,21 @@
         }
         
         .thinking-line {
-            margin-bottom: 4px; /* 减少行间距，防止空行效果 */
+            margin-bottom: 1px; /* 最小行间距 */
             opacity: 0;
             animation: type-in 0.5s ease-out forwards;
-            min-height: 16px; /* 确保有内容的行有基础高度 */
+            line-height: 1.2; /* 紧凑行高 */
+            white-space: pre-line; /* 保持必要的换行但去除多余空白 */
+            word-wrap: break-word; /* 长单词自动换行 */
         }
         
-        /* 确保空行被隐藏 */
-        .thinking-line:empty {
-            display: none;
+        /* 确保空行和无内容行被完全隐藏 */
+        .thinking-line:empty,
+        .thinking-line[data-empty="true"] {
+            display: none !important;
+            height: 0;
+            margin: 0;
+            padding: 0;
         }
         
         .thinking-line.system {
@@ -594,14 +600,18 @@
             const content = document.getElementById('thinkingContent');
             const line = document.createElement('div');
             line.className = `thinking-line ${type}`;
-            line.textContent = trimmedText; // 确保使用已trim的内容
             
-            // 确保line有内容后再添加到DOM
-            if (line.textContent.length === 0) {
+            // 更严格的内容设置和验证
+            line.textContent = trimmedText;
+            
+            // 三重检查确保内容不为空
+            if (!line.textContent || line.textContent.length === 0 || line.textContent.trim() === '') {
                 console.log('🚫 创建的line内容为空，跳过添加');
                 return false;
             }
             
+            // 标记非空内容行
+            line.setAttribute('data-content', 'true');
             content.appendChild(line);
             
             // Auto scroll to bottom

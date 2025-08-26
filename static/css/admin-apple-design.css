@@ -492,51 +492,44 @@
 
 /* 页面标题区域 */
 .admin-page-header {
-    padding: var(--space-6) var(--space-6) var(--space-6); /* 优化间距 */
-    max-width: 1400px; /* 限制最大宽度 */
-    margin: 0 auto; /* 居中对齐 */
+    padding: var(--space-8) var(--space-6) var(--space-8);
+    max-width: 1400px;
+    margin: 0 auto;
     text-align: center;
-    background: linear-gradient(135deg, rgba(0, 122, 255, 0.03) 0%, rgba(255, 255, 255, 0.8) 100%);
+    background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
     border-radius: var(--radius-2xl);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 0.5px solid rgba(0, 122, 255, 0.1);
-    margin-bottom: var(--space-6);
-    margin-top: var(--space-4);
+    border: 1px solid #E9ECEF;
+    margin-bottom: var(--space-8);
+    margin-top: var(--space-6);
     overflow: hidden;
     word-wrap: break-word;
 }
 
 .admin-page-title {
-    font-size: var(--text-4xl);
-    font-weight: var(--font-bold);
-    color: #FFFFFF !important;
-    margin: 0 0 var(--space-2);
-    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.8);
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+    font-size: var(--text-5xl);
+    font-weight: 800;
+    color: #1C1C1E !important;
+    margin: 0 0 var(--space-4);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
-    position: relative;
-    z-index: 100;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* 移除渐变背景，改为纯白色 */
-    background: none;
-    -webkit-background-clip: unset;
-    -webkit-text-fill-color: unset;
-    background-clip: unset;
 }
 
 .admin-page-subtitle {
     font-size: var(--text-lg);
-    color: #FFFFFF !important;
-    font-weight: var(--font-normal);
-    opacity: 0.95;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.6);
-    position: relative;
-    z-index: 100;
+    color: #6B7280 !important;
+    font-weight: 500;
+    opacity: 1;
+    text-shadow: none;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }

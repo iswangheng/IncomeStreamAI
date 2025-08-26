@@ -111,3 +111,4 @@ Angela is a Flask-based web application designed to help users generate non-labo
   - **数据存储**: ✅ PostgreSQL正常存储，表间关系清晰
   - **API集成**: ✅ OpenAI API稳定工作，生成高质量个性化分析结果
   - **用户体验**: ✅ 完整功能正常，从提交到结果的整个流程顺畅
+  - **Prompt管理**: ✅ System prompt和Assistant prompt已提取到独立文件 (prompts/system_prompt.txt, prompts/assistant_prompt.txt)，便于修改和维护

@@ -17,6 +17,12 @@
     --chart-primary: var(--color-primary);
     --chart-secondary: var(--color-secondary);
     --chart-tertiary: var(--color-accent);
+
+    /* 文字颜色 */
+    --color-text-primary: #1C1C1E;
+    --color-text-secondary: #48484A;
+    --color-text-tertiary: #8E8E93;
+    --color-text-inverse: #FFFFFF;
 }
 
 /* 管理后台布局 */

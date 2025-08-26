@@ -198,8 +198,21 @@ def logout():
 
 
 def save_session_in_ajax():
-    """辅助函数：确保AJAX请求中session被正确保存"""
+    """辅助函数：确保AJAX请求中session被正确保存，监控session大小"""
     from flask import session
+    import json
+    
+    # 计算session大小
+    session_size = len(json.dumps(dict(session), ensure_ascii=False))
+    app.logger.debug(f"Session size: {session_size} bytes")
+    
+    # 如果session过大，清理不必要的数据
+    if session_size > 3500:  # 留一些余量
+        app.logger.warning(f"Session size too large ({session_size} bytes), cleaning up...")
+        if 'analysis_result' in session:
+            del session['analysis_result']
+            app.logger.info("Removed analysis_result from session to reduce size")
+    
     session.permanent = True
     session.modified = True
     # 这会强制Flask重新计算session并设置cookie
@@ -597,15 +610,16 @@ def _handle_analysis_execution(form_data, session):
             db.session.add(analysis_result)
             db.session.commit()
 
-            # 在session中存储必要的数据
+            # 在session中存储必要的数据，避免session过大
             session['analysis_form_data'] = form_data  # 关键！必须保存form_data
             session['analysis_result_id'] = result_id
             session['analysis_status'] = 'completed'
             session['analysis_started'] = False  # 重置开始标志
             session['analysis_progress'] = 100  # 只有真正完成时才设置为100%
             session['analysis_stage'] = '分析完成！'
-            # 保留一份备份在session中以防数据库读取失败
-            session['analysis_result'] = suggestions
+            # 不在session中保存完整result，只保存ID，从数据库读取
+            if 'analysis_result' in session:
+                del session['analysis_result']  # 删除可能存在的大数据
 
             # 使用辅助函数确保session在AJAX中被保存
             save_session_in_ajax()
@@ -676,7 +690,7 @@ def _handle_analysis_execution(form_data, session):
                 session['analysis_form_data'] = form_data  # 保存form_data
                 session['analysis_status'] = 'completed'
                 session['analysis_result_id'] = fallback_id
-                session['analysis_result'] = fallback_result
+                # 不保存完整result到session
 
                 # 使用辅助函数确保session在AJAX中被保存
                 save_session_in_ajax()

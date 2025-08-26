@@ -88,25 +88,26 @@ Angela is a Flask-based web application designed to help users generate non-labo
 
 ## Recent Critical Fixes
 
-### Form Data Processing & OpenAI API Integration (August 26, 2025) - COMPLETE RESOLUTION
-- **Problem Solved**: 彻底解决了表单数据解析失败和OpenAI API调用问题
+### Database Architecture & Form Processing Resolution (August 26, 2025) - COMPLETE RESOLUTION
+- **Problem Solved**: 彻底解决了数据存储架构混乱和表单数据处理问题
 - **Root Cause Analysis**: 
-  - **主要问题**: JSON格式的form_data无法被正确解析，导致"项目名称和背景描述不能为空"错误
-  - **数据流断裂**: 表单提交成功但数据未存储到数据库，Session-数据库关联失效
-  - **验证时序错误**: 在JSON解析之前就进行了表单验证，导致有效数据被拒绝
+  - **架构错误**: 错误使用AnalysisResult表存储临时表单数据（pending类型），而专门的FormSubmission表完全未被使用
+  - **数据职责混乱**: 单一表格承担多种职责，导致数据流混乱和查询逻辑复杂
+  - **JSON解析缺失**: JSON格式的form_data无法被正确解析，导致"项目名称和背景描述不能为空"错误
 - **Final Solution Implemented**:
-  - **JSON解析修复**: 在`/generate`路由中增加form_data字段的JSON解析逻辑
-  - **数据提取优化**: 正确提取projectName、projectDescription、keyPersons字段
-  - **验证时序调整**: 调整表单验证逻辑，在JSON解析完成后再进行数据验证
-  - **Session-DB关联**: 修复get_form_data_from_db函数，支持通过pending记录恢复Session关联
-  - **详细日志**: 增加全面的调试日志，监控数据流的每个环节
+  - **数据架构重构**: 正确使用FormSubmission表存储用户表单数据，AnalysisResult表专门存储AI分析结果
+  - **JSON解析修复**: 在`/generate`路由中增加完整的form_data字段解析逻辑
+  - **Session字段调整**: 从analysis_form_id改为form_submission_id，建立正确的数据关联
+  - **查询逻辑重写**: get_form_data_from_db函数重构为从FormSubmission表查询数据
+  - **职责分离**: FormSubmission表负责表单存储，AnalysisResult表负责结果存储，架构清晰
 - **测试验证**: 
-  - **真实API调用确认**: OpenAI API成功调用，返回结构化的非劳务收入分析方案
-  - **数据完整性验证**: 测试标识"JSON解析修复验证-1756218051"在结果中完整保留
-  - **性能表现**: API调用快速响应，无网络连接问题
-  - **用户体验**: 从表单提交到结果生成的完整流程顺畅运行
+  - **架构验证**: FormSubmission表正常工作，存储完整的用户表单数据
+  - **真实API调用**: OpenAI API成功调用，测试标识完整保留在分析结果中
+  - **端到端流程**: 登录→表单提交→AI分析→结果展示，全链路验证成功
+  - **数据完整性**: 表单数据和分析结果正确分离存储，数据流清晰可追踪
 - **系统状态**: 
-  - **表单处理**: ✅ JSON和传统表单格式均支持
-  - **数据存储**: ✅ PostgreSQL正常存储用户表单和AI结果
-  - **API集成**: ✅ OpenAI API稳定工作，生成高质量分析结果
-  - **错误处理**: ✅ 保持完整的备用机制和容错能力
+  - **数据架构**: ✅ FormSubmission和AnalysisResult表职责明确，架构合理
+  - **表单处理**: ✅ JSON和传统表单格式均支持，解析逻辑完善
+  - **数据存储**: ✅ PostgreSQL正常存储，表间关系清晰
+  - **API集成**: ✅ OpenAI API稳定工作，生成高质量个性化分析结果
+  - **用户体验**: ✅ 完整功能正常，从提交到结果的整个流程顺畅

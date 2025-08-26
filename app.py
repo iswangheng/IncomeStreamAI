@@ -198,50 +198,50 @@ def logout():
 
 
 def get_form_data_from_db(session):
-    """从数据库获取表单数据，避免session过大"""
+    """从FormSubmission表获取表单数据，避免session过大"""
     try:
         app.logger.info(f"📍 get_form_data_from_db调用 - Session内容: {dict(session)}")
         
-        # 优先从session获取form_id
-        form_id = session.get('analysis_form_id')
-        app.logger.info(f"📍 Session中的form_id: {form_id}")
+        # 优先从session获取form_submission_id
+        submission_id = session.get('form_submission_id')
+        app.logger.info(f"📍 Session中的submission_id: {submission_id}")
         
-        if form_id:
-            from models import AnalysisResult
+        if submission_id:
+            from models import FormSubmission
             import json
-            temp_result = AnalysisResult.query.get(form_id)
-            app.logger.info(f"📍 数据库查询结果: {temp_result is not None}")
+            form_submission = FormSubmission.query.get(submission_id)
+            app.logger.info(f"📍 FormSubmission查询结果: {form_submission is not None}")
             
-            if temp_result and temp_result.form_data:
-                form_data = json.loads(temp_result.form_data)
-                app.logger.info(f"✅ 通过form_id找到表单数据: {form_data.get('projectName', 'Unknown')}")
+            if form_submission and form_submission.form_data_complete:
+                form_data = json.loads(form_submission.form_data_complete)
+                app.logger.info(f"✅ 通过submission_id找到表单数据: {form_data.get('projectName', 'Unknown')}")
                 return form_data
             else:
-                app.logger.warning(f"⚠️ form_id {form_id} 对应的记录不存在或无表单数据")
+                app.logger.warning(f"⚠️ submission_id {submission_id} 对应的FormSubmission记录不存在或无数据")
         
-        # 如果没有form_id，尝试从project_name查找当前用户最新的pending记录
+        # 如果没有submission_id，尝试查找当前用户最新的表单提交记录
         if current_user and current_user.is_authenticated:
-            from models import AnalysisResult
+            from models import FormSubmission
             import json
             
-            # 查找当前用户最新的pending类型记录
-            recent_pending = AnalysisResult.query.filter_by(
+            # 查找当前用户最新的表单提交记录
+            recent_submission = FormSubmission.query.filter_by(
                 user_id=current_user.id,
-                analysis_type='pending'
-            ).order_by(AnalysisResult.created_at.desc()).first()
+                status='submitted'
+            ).order_by(FormSubmission.created_at.desc()).first()
             
-            app.logger.info(f"📍 查找用户{current_user.id}的最新pending记录: {recent_pending is not None}")
+            app.logger.info(f"📍 查找用户{current_user.id}的最新FormSubmission: {recent_submission is not None}")
             
-            if recent_pending and recent_pending.form_data:
-                form_data = json.loads(recent_pending.form_data)
-                app.logger.info(f"✅ 通过pending记录找到表单数据: {form_data.get('projectName', 'Unknown')}")
-                # 更新session中的form_id，建立关联
-                session['analysis_form_id'] = recent_pending.id
+            if recent_submission and recent_submission.form_data_complete:
+                form_data = json.loads(recent_submission.form_data_complete)
+                app.logger.info(f"✅ 通过最新FormSubmission找到表单数据: {form_data.get('projectName', 'Unknown')}")
+                # 更新session中的submission_id，建立关联
+                session['form_submission_id'] = recent_submission.id
                 session['analysis_project_name'] = form_data.get('projectName', '')
                 session.modified = True
                 return form_data
             else:
-                app.logger.warning("⚠️ 没有找到pending类型的表单记录")
+                app.logger.warning("⚠️ 没有找到有效的FormSubmission记录")
         
         # 最后尝试从session获取（向后兼容）
         legacy_data = session.get('analysis_form_data')
@@ -253,7 +253,7 @@ def get_form_data_from_db(session):
         return None
         
     except Exception as e:
-        app.logger.error(f"Failed to get form data from DB: {str(e)}")
+        app.logger.error(f"Failed to get form data from FormSubmission: {str(e)}")
         return session.get('analysis_form_data')
 
 def save_session_in_ajax():
@@ -1346,33 +1346,32 @@ def generate():
         # Store form data in session - 保存到数据库而不是session
         from flask import session
         
-        # 保存表单数据到数据库，避免session过大
+        # 保存表单数据到FormSubmission表，避免session过大
         try:
             import uuid
             import json
-            from models import AnalysisResult
+            from models import FormSubmission
             
-            # 创建临时记录存储表单数据
-            temp_id = str(uuid.uuid4())
-            temp_result = AnalysisResult()
-            temp_result.id = temp_id
-            temp_result.user_id = current_user.id
-            temp_result.form_data = json.dumps(form_data, ensure_ascii=False)
-            temp_result.project_name = form_data.get('projectName', '')
-            temp_result.project_description = form_data.get('projectDescription', '')
-            temp_result.team_size = len(form_data.get('keyPersons', []))
-            temp_result.analysis_type = 'pending'  # 标记为待处理
-            temp_result.result_data = json.dumps({}, ensure_ascii=False)  # 空结果
-            db.session.add(temp_result)
+            # 使用专门的FormSubmission表存储表单数据
+            submission_id = str(uuid.uuid4())
+            form_submission = FormSubmission()
+            form_submission.id = submission_id
+            form_submission.user_id = current_user.id
+            form_submission.project_name = form_data.get('projectName', '')
+            form_submission.project_description = form_data.get('projectDescription', '')
+            form_submission.key_persons_data = json.dumps(form_data.get('keyPersons', []), ensure_ascii=False)
+            form_submission.form_data_complete = json.dumps(form_data, ensure_ascii=False)
+            form_submission.status = 'submitted'  # 初始状态
+            db.session.add(form_submission)
             db.session.commit()
             
-            # Session中只保存ID和项目名称
-            session['analysis_form_id'] = temp_id
+            # Session中只保存submission ID和项目名称
+            session['form_submission_id'] = submission_id
             session['analysis_project_name'] = project_name
-            app.logger.info(f"Stored form data in database with temp ID: {temp_id}")
+            app.logger.info(f"✅ 表单数据保存到FormSubmission表，ID: {submission_id}")
             
         except Exception as e:
-            app.logger.error(f"Failed to store form data in database: {str(e)}")
+            app.logger.error(f"❌ FormSubmission表存储失败: {str(e)}")
             # 如果数据库失败，至少保存项目名称
             session['analysis_project_name'] = project_name
 

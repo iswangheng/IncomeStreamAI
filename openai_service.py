@@ -1,6 +1,8 @@
 import os
 import json
 import logging
+import ssl
+import time
 from openai import OpenAI
 from typing import Dict, List, Any, Optional
 
@@ -8,7 +10,6 @@ from typing import Dict, List, Any, Optional
 # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
 # do not change this unless explicitly requested by the user
 import httpx
-import time
 
 # 创建带优化连接配置的客户端
 client = OpenAI(
@@ -52,26 +53,31 @@ class AngelaAI:
         logger.info(
             f"传入参数: model={kwargs.get('model')}, timeout={kwargs.get('timeout')}"
         )
-        max_retries = 2  # 减少重试次数，避免长时间阻塞
+        max_retries = 3  # 增加重试次数提高成功率
         for attempt in range(max_retries):
             try:
                 logger.info(
                     f"正在调用OpenAI API (尝试 {attempt + 1}/{max_retries})...")
 
-                # 为每次重试创建新的客户端连接，避免连接复用问题
+                # 为每次重试创建新的客户端连接，提升SSL连接稳定性
                 if attempt > 0:
+                    # 使用更保守的超时设置
                     fresh_client = OpenAI(
                         api_key=os.environ.get("OPENAI_API_KEY"),
-                        timeout=httpx.Timeout(45.0, connect=15.0)  # 缩短超时时间
+                        timeout=httpx.Timeout(60.0, connect=20.0, read=60.0)  # 增加超时时间，提升稳定性
                     )
-                    return fresh_client.chat.completions.create(**kwargs)
+                    response = fresh_client.chat.completions.create(**kwargs)
+                    logger.info("✅ OpenAI API调用成功")
+                    return response
                 else:
-                    return client.chat.completions.create(**kwargs)
+                    response = client.chat.completions.create(**kwargs)
+                    logger.info("✅ OpenAI API调用成功")
+                    return response
 
             except (httpx.TimeoutException, httpx.ConnectError,
                     ConnectionError, httpx.ReadTimeout, httpx.ConnectTimeout,
                     TimeoutError, OSError, ConnectionResetError,
-                    BrokenPipeError) as e:
+                    BrokenPipeError, ssl.SSLError, ssl.SSLEOFError) as e:
                 if attempt < max_retries - 1:
                     wait_time = 2 * (attempt + 1)  # 缩短等待时间: 2s, 4s
                     logger.warning(
@@ -81,13 +87,8 @@ class AngelaAI:
                     continue
                 else:
                     logger.error(f"OpenAI API网络超时，最终失败: {str(e)}")
-                    # 对于网络问题，抛出连接错误而不是返回None
-                    if "read timed out" in str(e).lower() or "timeout" in str(
-                            e).lower():
-                        time.sleep(2)
-                        continue
-                    else:
-                        raise ConnectionError("网络连接不稳定")
+                    # 网络连接问题，抛出友好的错误信息
+                    raise ConnectionError("OpenAI API网络连接超时，请稍后重试")
             except Exception as e:
                 import traceback
                 logger.error(f"💥 OpenAI API调用遇到其他错误: {str(e)}")

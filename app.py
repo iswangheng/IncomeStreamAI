@@ -1375,9 +1375,11 @@ def generate_ai_suggestions(form_data, session=None):
             save_session_in_ajax()  # 保存session确保前端能看到进度更新
 
         start_time = time.time()
+        app.logger.info("=== 开始调用OpenAI API ===")
         # 调用AI生成服务，添加SSL错误处理
         try:
             ai_result = angela_ai.generate_income_paths(converted_data, db.session)
+            app.logger.info("=== OpenAI API调用成功 ===")
         except Exception as network_error:
             # 检查是否是SSL/网络相关错误
             error_str = str(network_error).lower()

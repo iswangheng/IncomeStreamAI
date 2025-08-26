@@ -50,6 +50,8 @@ class AngelaAI:
 
     def _call_openai_with_retry(self, **kwargs):
         """调用OpenAI API，带强化重试机制"""
+        logger.info("=== _call_openai_with_retry方法被调用 ===")
+        logger.info(f"传入参数: model={kwargs.get('model')}, timeout={kwargs.get('timeout')}")
         max_retries = 2  # 减少重试次数，避免长时间阻塞
         for attempt in range(max_retries):
             try:
@@ -276,6 +278,8 @@ class AngelaAI:
     def generate_income_paths(self, form_data: Dict[str, Any],
                               db_session) -> Dict[str, Any]:
         """生成非劳务收入路径"""
+        logger.info("=== Angela AI generate_income_paths方法开始 ===")
+        logger.info(f"输入数据: {json.dumps(form_data, ensure_ascii=False)}")
         try:
             # 提取表单数据
             project_name = form_data.get('projectName', '未命名项目')
@@ -601,6 +605,7 @@ class AngelaAI:
 
             # 获取模型配置
             model_config = self.get_model_config('main_analysis')
+            logger.info(f"模型配置: {model_config}")
 
             # 打印prompt长度信息
             total_prompt = system_prompt + user_content + assistant_prompt
@@ -622,6 +627,7 @@ class AngelaAI:
             logger.info(f"================================")
 
             # 调用OpenAI API，带重试机制和错误处理
+            logger.info("=== 即将调用_call_openai_with_retry ===")
             try:
                 response = self._call_openai_with_retry(
                     model=model_config['model'],

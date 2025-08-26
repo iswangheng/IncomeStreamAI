@@ -84,7 +84,11 @@ class AngelaAI:
                     else:
                         raise ConnectionError("网络连接不稳定")
             except Exception as e:
-                logger.error(f"OpenAI API调用遇到其他错误: {str(e)}")
+                import traceback
+                logger.error(f"💥 OpenAI API调用遇到其他错误: {str(e)}")
+                logger.error(f"💥 错误类型: {type(e).__name__}")
+                logger.error(f"💥 完整堆栈: {traceback.format_exc()}")
+                logger.error(f"💥 传入的参数: {kwargs}")
                 raise e
 
     def format_role_to_chinese(self, role_identifier: str) -> str:

@@ -51,22 +51,22 @@ class AngelaAI:
                 return client.chat.completions.create(**kwargs)
             except (httpx.TimeoutException, httpx.ConnectError,
                     ConnectionError, httpx.ReadTimeout,
-                    httpx.ConnectTimeout) as e:
+                    httpx.ConnectTimeout, TimeoutError) as e:
                 if attempt < max_retries - 1:
                     wait_time = 3 * (attempt + 1)  # 线性退避: 3s, 6s, 9s
                     logger.warning(
-                        f"OpenAI API调用失败 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试..."
+                        f"OpenAI API网络超时 (尝试 {attempt + 1}): {str(e)}, {wait_time}秒后重试..."
                     )
                     time.sleep(wait_time)
                     continue
                 else:
-                    logger.error(f"OpenAI API调用失败，已重试{max_retries}次: {str(e)}")
-                    # 不要raise，返回None让调用方处理
-                    return None
+                    logger.error(f"OpenAI API网络连接失败，已重试{max_retries}次: {str(e)}")
+                    # 抛出一个明确的网络错误，让调用方知道是网络问题
+                    raise ConnectionError(f"网络连接超时，无法访问OpenAI服务: {str(e)}")
             except Exception as e:
-                logger.error(f"OpenAI API调用遇到非网络错误: {str(e)}")
-                # 对于其他错误也返回None
-                return None
+                logger.error(f"OpenAI API调用遇到其他错误: {str(e)}")
+                # 对于其他错误，抛出原始异常
+                raise e
 
     def format_role_to_chinese(self, role_identifier: str) -> str:
         """将英文角色标识符转换为中文显示"""

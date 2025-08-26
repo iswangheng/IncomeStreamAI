@@ -1140,18 +1140,23 @@ def generate_ai_suggestions(form_data, session=None):
         # 调用AI生成服务，添加SSL错误处理
         try:
             ai_result = angela_ai.generate_income_paths(converted_data, db)
-        except (ConnectionError, OSError, TimeoutError) as network_error:
-            # SSL、网络连接或超时错误
-            app.logger.error(f"Network/Timeout error during AI call: {str(network_error)}")
-            # 取消超时
-            signal.alarm(0)
-            # 更新session状态为timeout
-            if session:
-                session['analysis_status'] = 'timeout'
-                session['analysis_error'] = f'网络连接问题: {str(network_error)}'
-                save_session_in_ajax()
-            # 返回网络错误的备用方案
-            return generate_fallback_result(form_data, "网络连接问题，为您提供基础建议")
+        except (ConnectionError, OSError, TimeoutError, Exception) as network_error:
+            # 检查是否是SSL/网络相关错误
+            if any(keyword in str(network_error).lower() for keyword in ['ssl', 'timeout', 'connection', 'network', 'recv', 'read']):
+                # 网络/SSL/超时错误
+                app.logger.error(f"Network/SSL/Timeout error during AI call: {str(network_error)}")
+                # 取消超时
+                signal.alarm(0)
+                # 更新session状态为timeout
+                if session:
+                    session['analysis_status'] = 'timeout'
+                    session['analysis_error'] = f'网络连接问题: {str(network_error)}'
+                    save_session_in_ajax()
+                # 返回网络错误的备用方案
+                return generate_fallback_result(form_data, "网络连接问题，为您提供基础建议")
+            else:
+                # 重新抛出其他类型的异常
+                raise network_error
         except Exception as general_error:
             # 其他所有错误
             app.logger.error(f"General error during AI call: {str(general_error)}")

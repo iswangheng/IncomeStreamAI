@@ -558,10 +558,23 @@
         let genericThinkingSteps = []; // 将在页面加载时根据真实数据生成
         
         function addThinkingLine(text, type) {
+            // 防止添加空行或重复内容
+            if (!text || text.trim() === '') {
+                console.log('跳过空行或空内容');
+                return;
+            }
+            
+            // 防止短时间内重复添加相同内容
+            if (window.lastThinkingLine === text.trim()) {
+                console.log('跳过重复内容:', text.trim());
+                return;
+            }
+            window.lastThinkingLine = text.trim();
+            
             const content = document.getElementById('thinkingContent');
             const line = document.createElement('div');
             line.className = `thinking-line ${type}`;
-            line.textContent = text;
+            line.textContent = text.trim(); // 确保清除多余空格
             content.appendChild(line);
             
             // Auto scroll to bottom
@@ -700,35 +713,36 @@
                             }
                         } else {
                             console.log('AI思考流暂无内容，继续等待');
-                            // 如果没有可用内容，显示智能等待内容并继续尝试
+                            // 如果没有可用内容，减少等待消息频率，避免刷屏
                             if (!realAnalysisCompleted) {
-                                const waitingMessages = [
-                                    '🧠 AI正在深度思考项目可行性...',
-                                    '⚡ 分析市场机会与风险评估...',
-                                    '💡 构建创新收入管道模型...',
-                                    '🔍 挖掘隐藏的盈利机会...',
-                                    '📊 计算投资回报率预期...',
-                                    '🎯 优化资源配置策略...'
-                                ];
-                                const randomMessage = waitingMessages[Math.floor(Math.random() * waitingMessages.length)];
-                                addThinkingLine(randomMessage, 'ai-stream');
-                                setTimeout(fetchAIThinking, 3500);
+                                // 只在偶尔显示等待消息，避免过多内容
+                                if (Math.random() < 0.3) { // 30%概率显示等待消息
+                                    const waitingMessages = [
+                                        '🧠 AI正在深度思考项目可行性...',
+                                        '⚡ 分析市场机会与风险评估...',
+                                        '💡 构建创新收入管道模型...',
+                                        '🔍 挖掘隐藏的盈利机会...'
+                                    ];
+                                    const randomMessage = waitingMessages[Math.floor(Math.random() * waitingMessages.length)];
+                                    addThinkingLine(randomMessage, 'ai-stream');
+                                }
+                                setTimeout(fetchAIThinking, 4500); // 增加间隔时间
                             }
                         }
                     })
                     .catch(error => {
                         console.error('获取AI思考流失败:', error);
                         if (!realAnalysisCompleted) {
-                            // 错误时显示智能备用内容并继续尝试
-                            const errorMessages = [
-                                '🌟 AI正在探索最佳解决方案...',
-                                '🚀 深度学习算法运行中...',
-                                '💎 挖掘独特商业机会...',
-                                '🔮 预测未来收入趋势...'
-                            ];
-                            const randomErrorMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
-                            addThinkingLine(randomErrorMessage, 'ai-stream');
-                            setTimeout(fetchAIThinking, 4000);
+                            // 错误时减少显示频率，避免刷屏
+                            if (Math.random() < 0.25) { // 25%概率显示错误恢复消息
+                                const errorMessages = [
+                                    '🌟 AI正在探索最佳解决方案...',
+                                    '🚀 深度学习算法运行中...'
+                                ];
+                                const randomErrorMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                                addThinkingLine(randomErrorMessage, 'ai-stream');
+                            }
+                            setTimeout(fetchAIThinking, 5000); // 增加错误后的等待时间
                         }
                     });
             }
@@ -928,10 +942,9 @@
                         showGenericThinking();
                     }, 100);
                     
-                    // 提早启动AI思考流，在页面加载3秒后开始展示
+                    // 提早启动AI思考流，但减少初始消息
                     setTimeout(() => {
                         console.log('Starting AI thinking stream early...');
-                        addThinkingLine('>>> 🚀 Angela AI分析引擎正在启动...', 'system');
                         if (!window.aiThinkingStreamActive) {
                             startAIThinkingStream();
                         }

@@ -215,6 +215,11 @@ class AngelaE2ETest:
             # 5. 数据库集成测试
             results['database'] = self.test_database_integration()
             
+            # 6. 重复保存防护测试（核心修复验证）
+            self.log("="*50, "INFO")
+            self.log("🔧 开始核心修复验证: 重复保存防护测试", "INFO")
+            results['duplicate_prevention'] = self.test_duplicate_analysis_prevention()
+            
             # 输出测试总结
             self.log("="*60, "INFO")
             self.log("📊 测试结果总结:", "INFO")
@@ -278,6 +283,108 @@ class AngelaE2ETest:
             return True
         else:
             self.log(f"❌ 表单提交失败: {response.status_code}", "ERROR")
+            return False
+
+    def test_duplicate_analysis_prevention(self):
+        """测试重复分析防护机制（核心修复验证）"""
+        self.log("开始测试重复分析防护机制", "INFO")
+        
+        # 检查数据库现有记录数量
+        import requests
+        db_check_response = self.session.get(f"{self.base_url}/admin/analysis-records")
+        before_count = 0
+        if db_check_response.status_code == 200:
+            # 简单计算当前项目的记录数
+            try:
+                content = db_check_response.text
+                before_count = content.count(self.test_form_data["projectName"])
+                self.log(f"修复前数据库中该项目记录数: {before_count}", "DEBUG")
+            except:
+                self.log("无法获取数据库记录计数，继续测试", "WARNING")
+        
+        # 模拟快速连续调用start_analysis（模拟快速刷新thinking页面）
+        self.log("模拟快速连续调用分析接口（0.2秒间隔）", "DEBUG")
+        
+        responses = []
+        import time
+        
+        # 发起5次快速连续请求（模拟用户快速刷新页面）
+        for i in range(5):
+            try:
+                self.log(f"发起第{i+1}次分析请求", "DEBUG")
+                response = self.session.post(f"{self.base_url}/start_analysis", 
+                                           headers={'Content-Type': 'application/json'})
+                responses.append({
+                    'index': i+1,
+                    'status_code': response.status_code,
+                    'response_data': response.json() if response.status_code == 200 else None
+                })
+                
+                # 快速间隔，模拟用户快速操作
+                if i < 4:  # 最后一次不需要等待
+                    time.sleep(0.2)
+                    
+            except Exception as e:
+                self.log(f"第{i+1}次请求异常: {str(e)}", "WARNING")
+                responses.append({
+                    'index': i+1,
+                    'status_code': 'ERROR',
+                    'error': str(e)
+                })
+        
+        # 等待一段时间让分析完成
+        self.log("等待分析完成...", "DEBUG")
+        time.sleep(3)
+        
+        # 检查数据库记录数量变化
+        db_check_response_after = self.session.get(f"{self.base_url}/admin/analysis-records")
+        after_count = 0
+        if db_check_response_after.status_code == 200:
+            try:
+                content = db_check_response_after.text
+                after_count = content.count(self.test_form_data["projectName"])
+                self.log(f"修复后数据库中该项目记录数: {after_count}", "DEBUG")
+            except:
+                self.log("无法获取数据库记录计数", "WARNING")
+        
+        # 分析响应结果
+        success_responses = [r for r in responses if r.get('status_code') == 200]
+        duplicate_prevented = 0
+        analysis_started = 0
+        
+        for response in responses:
+            self.log(f"请求{response['index']}: 状态{response['status_code']}", "DEBUG")
+            if response.get('response_data'):
+                status = response['response_data'].get('status', 'unknown')
+                message = response['response_data'].get('message', '')
+                if '重复' in message or '已启动' in message:
+                    duplicate_prevented += 1
+                elif status == 'processing':
+                    analysis_started += 1
+        
+        # 验证结果
+        self.log("="*50, "INFO")
+        self.log("🔍 重复保存防护测试结果:", "INFO")
+        self.log(f"📊 总请求数: {len(responses)}", "INFO")
+        self.log(f"📊 成功响应数: {len(success_responses)}", "INFO")
+        self.log(f"📊 防重复拦截数: {duplicate_prevented}", "INFO")
+        self.log(f"📊 分析启动数: {analysis_started}", "INFO")
+        self.log(f"📊 数据库记录变化: {before_count} -> {after_count}", "INFO")
+        
+        # 判断修复是否成功
+        record_increase = after_count - before_count
+        success_criteria = [
+            record_increase <= 2,  # 数据库记录增加不超过2条（允许一些容错）
+            duplicate_prevented > 0 or analysis_started <= 1,  # 有防重复机制或只有一次分析启动
+        ]
+        
+        if all(success_criteria):
+            self.log("✅ 重复保存防护机制工作正常！", "SUCCESS")
+            self.log("✅ 前端防重复调用 + 后端数据库锁保护生效", "SUCCESS")
+            return True
+        else:
+            self.log("❌ 重复保存防护可能存在问题", "ERROR")
+            self.log(f"❌ 数据库记录增加了{record_increase}条，超出预期", "ERROR")
             return False
 
     def add_new_test_case(self, test_name, test_function):

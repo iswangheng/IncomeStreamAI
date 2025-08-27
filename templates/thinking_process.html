@@ -202,10 +202,10 @@
         }
         
         .thinking-line {
-            margin-bottom: 1px; /* 最小行间距 */
+            margin-bottom: 6px; /* 增加行间距 */
             opacity: 0;
             animation: type-in 0.5s ease-out forwards;
-            line-height: 1.2; /* 紧凑行高 */
+            line-height: 1.6; /* 增加行高 */
             white-space: pre-line; /* 保持必要的换行但去除多余空白 */
             word-wrap: break-word; /* 长单词自动换行 */
         }
@@ -249,7 +249,7 @@
         .thinking-line.ai-stream {
             color: #80ff80 !important;  /* 使用与analysis相同的绿色 */
             margin-left: 40px; /* 与analysis相同的缩进 */
-            margin-bottom: 3px !important; /* 确保有足够间距 */
+            margin-bottom: 6px !important; /* 与其他行间距保持一致 */
             font-weight: 400 !important;
             padding-left: 0px; /* 移除额外padding */
             background: none !important; /* 移除背景色 */
@@ -259,8 +259,8 @@
             display: block !important; /* 强制显示 */
             visibility: visible !important; /* 强制可见 */
             opacity: 1 !important; /* 强制不透明 */
-            min-height: 20px !important; /* 确保最小高度 */
-            line-height: 1.4 !important;
+            min-height: 22px !important; /* 稍微增加最小高度 */
+            line-height: 1.6 !important; /* 与其他行保持一致 */
         }
         
         /* 移除AI思考流的特殊动画效果，保持简洁 */

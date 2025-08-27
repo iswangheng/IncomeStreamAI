@@ -212,6 +212,11 @@
             color: white;
         }
 
+        .role-type-badge.delivery {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
         .role-script {
             background: rgba(102, 126, 234, 0.05);
             padding: var(--space-3);
@@ -878,7 +883,7 @@
                 <div class="role-card">
                     <div class="role-header">
                         <span class="role-name">{{ role.role }}</span>
-                        <span class="role-type-badge">{{ role.role_type }}</span>
+                        <span class="role-type-badge {% if role.role_type == '交付方' %}delivery{% endif %}">{{ role.role_type }}</span>
                     </div>
                     <div style="margin-bottom: var(--space-2);">
                         <strong>为什么需要：</strong>{{ role.why }}

@@ -25,44 +25,13 @@ db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key_change_in_production")
 
-# Environment detection and database configuration
-def get_environment():
-    """检测当前运行环境"""
-    # 检查环境变量
-    if os.environ.get("FLASK_ENV") == "development":
-        return "development"
-    elif os.environ.get("NODE_ENV") == "development":
-        return "development"
-    elif os.environ.get("REPLIT_ENVIRONMENT") == "production":
-        return "production"
-    else:
-        # 默认为开发环境
-        return "development"
-
-# 获取当前环境
-current_env = get_environment()
-app.logger.info(f"🌍 当前运行环境: {current_env}")
-
-# 根据环境配置数据库
-if current_env == "development":
-    # 开发环境：使用独立的开发数据库
-    dev_database_url = os.environ.get("DEV_DATABASE_URL")
-    if dev_database_url:
-        database_url = dev_database_url
-        app.logger.info("📊 使用开发环境专用数据库")
-    else:
-        # 如果没有配置开发数据库，使用SQLite作为本地开发数据库
-        database_url = "sqlite:///angela_dev.db"
-        app.logger.info("📊 使用SQLite作为开发数据库")
-else:
-    # 生产环境：使用正式数据库
-    database_url = os.environ.get("DATABASE_URL")
-    if not database_url:
-        raise ValueError("生产环境必须配置DATABASE_URL")
-    app.logger.info("🚀 使用生产环境数据库")
+# Database configuration
+database_url = os.environ.get("DATABASE_URL")
+if not database_url:
+    # 开发环境回退配置
+    database_url = "sqlite:///angela.db"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-app.logger.info(f"🔗 数据库连接: {database_url.split('@')[0] if '@' in database_url else database_url}")
 
 # Enhanced PostgreSQL SSL configuration for Replit
 if database_url and database_url.startswith('postgresql'):

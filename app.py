@@ -200,33 +200,16 @@ def logout():
 
 
 def get_form_data_from_db(session):
-    """从FormSubmission表获取表单数据，避免session过大"""
+    """从FormSubmission表获取表单数据，优先获取用户最新提交的数据"""
     try:
         app.logger.info(f"📍 get_form_data_from_db调用 - Session内容: {dict(session)}")
         
-        # 优先从session获取form_submission_id
-        submission_id = session.get('form_submission_id')
-        app.logger.info(f"📍 Session中的submission_id: {submission_id}")
-        
-        if submission_id:
-            from models import FormSubmission
-            import json
-            form_submission = FormSubmission.query.get(submission_id)
-            app.logger.info(f"📍 FormSubmission查询结果: {form_submission is not None}")
-            
-            if form_submission and form_submission.form_data_complete:
-                form_data = json.loads(form_submission.form_data_complete)
-                app.logger.info(f"✅ 通过submission_id找到表单数据: {form_data.get('projectName', 'Unknown')}")
-                return form_data
-            else:
-                app.logger.warning(f"⚠️ submission_id {submission_id} 对应的FormSubmission记录不存在或无数据")
-        
-        # 如果没有submission_id，尝试查找当前用户最新的表单提交记录
+        # 总是优先查找当前用户最新的表单提交记录，而不是依赖session
         if current_user and current_user.is_authenticated:
             from models import FormSubmission
             import json
             
-            # 查找当前用户最新的表单提交记录
+            # 直接查找当前用户最新的表单提交记录
             recent_submission = FormSubmission.query.filter_by(
                 user_id=current_user.id,
                 status='submitted'
@@ -236,14 +219,28 @@ def get_form_data_from_db(session):
             
             if recent_submission and recent_submission.form_data_complete:
                 form_data = json.loads(recent_submission.form_data_complete)
-                app.logger.info(f"✅ 通过最新FormSubmission找到表单数据: {form_data.get('projectName', 'Unknown')}")
-                # 更新session中的submission_id，建立关联
+                app.logger.info(f"✅ 获取到最新表单数据: {form_data.get('projectName', 'Unknown')} (ID: {recent_submission.id})")
+                
+                # 确保session与最新数据同步
                 session['form_submission_id'] = recent_submission.id
                 session['analysis_project_name'] = form_data.get('projectName', '')
                 session.modified = True
                 return form_data
             else:
                 app.logger.warning("⚠️ 没有找到有效的FormSubmission记录")
+        
+        # 备用方案：从session获取submission_id（仅在用户未登录时使用）
+        submission_id = session.get('form_submission_id')
+        if submission_id:
+            from models import FormSubmission
+            import json
+            form_submission = FormSubmission.query.get(submission_id)
+            app.logger.info(f"📍 备用方案：通过submission_id查询: {form_submission is not None}")
+            
+            if form_submission and form_submission.form_data_complete:
+                form_data = json.loads(form_submission.form_data_complete)
+                app.logger.info(f"✅ 通过submission_id找到表单数据: {form_data.get('projectName', 'Unknown')}")
+                return form_data
         
         # 最后尝试从session获取（向后兼容）
         legacy_data = session.get('analysis_form_data')
@@ -317,6 +314,38 @@ def thinking_demo():
     
     app.logger.info("Thinking demo page loaded - standalone demo mode")
     return render_template('thinking_process.html')
+
+@app.route('/debug_session_reset')
+@login_required
+def debug_session_reset():
+    """临时调试工具：重置session并显示用户的所有表单提交记录"""
+    from models import FormSubmission
+    import json
+    
+    # 清理所有session数据
+    keys_to_clear = ['form_submission_id', 'analysis_project_name', 'analysis_status', 
+                     'analysis_result_id', 'analysis_started', 'analysis_progress']
+    for key in keys_to_clear:
+        session.pop(key, None)
+    
+    # 获取用户所有表单提交记录
+    submissions = FormSubmission.query.filter_by(user_id=current_user.id).order_by(
+        FormSubmission.created_at.desc()).all()
+    
+    result = {
+        'session_cleared': True,
+        'user_submissions': []
+    }
+    
+    for sub in submissions:
+        result['user_submissions'].append({
+            'id': sub.id,
+            'project_name': sub.project_name,
+            'created_at': sub.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'description': sub.project_description[:100] + '...' if len(sub.project_description or '') > 100 else sub.project_description
+        })
+    
+    return jsonify(result)
 
 @app.route('/start_analysis', methods=['POST'])
 @login_required

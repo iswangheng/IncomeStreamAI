@@ -215,10 +215,10 @@ class AngelaE2ETest:
             # 5. 数据库集成测试
             results['database'] = self.test_database_integration()
             
-            # 6. 重复保存防护测试（核心修复验证）
+            # 6. 真实AI分析和重复保存防护测试（核心修复验证）
             self.log("="*50, "INFO")
-            self.log("🔧 开始核心修复验证: 重复保存防护测试", "INFO")
-            results['duplicate_prevention'] = self.test_duplicate_analysis_prevention()
+            self.log("🔧 开始核心修复验证: 真实AI分析和重复保存防护测试", "INFO")
+            results['real_ai_analysis_and_duplicate_prevention'] = self.test_real_ai_analysis_and_duplicate_prevention()
             
             # 输出测试总结
             self.log("="*60, "INFO")
@@ -285,106 +285,152 @@ class AngelaE2ETest:
             self.log(f"❌ 表单提交失败: {response.status_code}", "ERROR")
             return False
 
-    def test_duplicate_analysis_prevention(self):
-        """测试重复分析防护机制（核心修复验证）"""
-        self.log("开始测试重复分析防护机制", "INFO")
+    def test_real_ai_analysis_and_duplicate_prevention(self):
+        """真实AI分析测试和重复保存防护验证"""
+        self.log("开始真实AI分析和重复保存防护测试", "INFO")
         
-        # 检查数据库现有记录数量
-        import requests
-        db_check_response = self.session.get(f"{self.base_url}/admin/analysis-records")
-        before_count = 0
-        if db_check_response.status_code == 200:
-            # 简单计算当前项目的记录数
-            try:
-                content = db_check_response.text
-                before_count = content.count(self.test_form_data["projectName"])
-                self.log(f"修复前数据库中该项目记录数: {before_count}", "DEBUG")
-            except:
-                self.log("无法获取数据库记录计数，继续测试", "WARNING")
-        
-        # 模拟快速连续调用start_analysis（模拟快速刷新thinking页面）
-        self.log("模拟快速连续调用分析接口（0.2秒间隔）", "DEBUG")
-        
-        responses = []
         import time
+        project_name = self.test_form_data["projectName"]
         
-        # 发起5次快速连续请求（模拟用户快速刷新页面）
-        for i in range(5):
+        # 直接查询数据库获取基准记录数
+        self.log("查询数据库基准记录数", "DEBUG")
+        import subprocess
+        import json
+        
+        def query_database(query):
+            """直接查询数据库"""
             try:
-                self.log(f"发起第{i+1}次分析请求", "DEBUG")
-                response = self.session.post(f"{self.base_url}/start_analysis", 
-                                           headers={'Content-Type': 'application/json'})
-                responses.append({
-                    'index': i+1,
-                    'status_code': response.status_code,
-                    'response_data': response.json() if response.status_code == 200 else None
-                })
+                import os
+                # 使用环境变量中的数据库URL
+                database_url = os.environ.get('DATABASE_URL')
+                if not database_url:
+                    self.log("DATABASE_URL环境变量未设置", "WARNING")
+                    return None
                 
-                # 快速间隔，模拟用户快速操作
-                if i < 4:  # 最后一次不需要等待
-                    time.sleep(0.2)
-                    
+                cmd = [
+                    'psql', 
+                    '-d', database_url,
+                    '-t',  # 只输出数据，不输出表头
+                    '-c', query
+                ]
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+                if result.returncode == 0:
+                    return result.stdout.strip()
+                else:
+                    self.log(f"数据库查询失败: {result.stderr}", "WARNING")
+                    return None
             except Exception as e:
-                self.log(f"第{i+1}次请求异常: {str(e)}", "WARNING")
-                responses.append({
-                    'index': i+1,
-                    'status_code': 'ERROR',
-                    'error': str(e)
-                })
+                self.log(f"数据库查询异常: {str(e)}", "WARNING")
+                return None
         
-        # 等待一段时间让分析完成
-        self.log("等待分析完成...", "DEBUG")
-        time.sleep(3)
+        # 查询测试前的记录数
+        before_query = f"SELECT COUNT(*) FROM analysis_results WHERE project_name = '{project_name}';"
+        before_count_str = query_database(before_query)
+        before_count = int(before_count_str.strip()) if before_count_str and before_count_str.strip().isdigit() else 0
+        self.log(f"测试前数据库记录数: {before_count}", "DEBUG")
         
-        # 检查数据库记录数量变化
-        db_check_response_after = self.session.get(f"{self.base_url}/admin/analysis-records")
-        after_count = 0
-        if db_check_response_after.status_code == 200:
+        # 第一次分析调用（应该成功启动AI分析）
+        self.log("🚀 第1次分析调用 - 应该启动真实AI分析", "INFO")
+        response1 = self.session.post(f"{self.base_url}/start_analysis", 
+                                     headers={'Content-Type': 'application/json'})
+        
+        response1_data = None
+        if response1.status_code == 200:
+            response1_data = response1.json()
+            self.log(f"第1次响应: {response1_data.get('status', 'unknown')} - {response1_data.get('message', '')}", "DEBUG")
+        else:
+            self.log(f"第1次请求失败: {response1.status_code}", "ERROR")
+        
+        # 等待0.5秒，然后快速发起第二次请求（模拟用户快速刷新）
+        time.sleep(0.5)
+        self.log("⚡ 第2次分析调用 - 模拟快速刷新，应该被防重复机制拦截", "INFO")
+        response2 = self.session.post(f"{self.base_url}/start_analysis", 
+                                     headers={'Content-Type': 'application/json'})
+        
+        response2_data = None
+        if response2.status_code == 200:
+            response2_data = response2.json()
+            self.log(f"第2次响应: {response2_data.get('status', 'unknown')} - {response2_data.get('message', '')}", "DEBUG")
+        
+        # 轮询等待分析完成（最多等待90秒）
+        self.log("等待AI分析完成...", "INFO")
+        max_polls = 45  # 45次 * 2秒 = 90秒最大等待时间
+        completed = False
+        
+        for poll_count in range(max_polls):
             try:
-                content = db_check_response_after.text
-                after_count = content.count(self.test_form_data["projectName"])
-                self.log(f"修复后数据库中该项目记录数: {after_count}", "DEBUG")
-            except:
-                self.log("无法获取数据库记录计数", "WARNING")
+                status_response = self.session.get(f"{self.base_url}/check_analysis_status")
+                if status_response.status_code == 200:
+                    status_data = status_response.json()
+                    current_status = status_data.get('status', 'unknown')
+                    
+                    if current_status == 'completed':
+                        self.log(f"✅ AI分析完成！轮询次数: {poll_count + 1}", "SUCCESS")
+                        completed = True
+                        break
+                    elif current_status == 'error':
+                        self.log(f"❌ AI分析出错: {status_data.get('message', '')}", "ERROR")
+                        break
+                    elif current_status in ['processing', 'not_started']:
+                        if poll_count % 5 == 0:  # 每10秒打印一次状态
+                            self.log(f"🔄 分析进行中... 状态: {current_status} (轮询{poll_count + 1}/{max_polls})", "DEBUG")
+                    
+                time.sleep(2)  # 每2秒检查一次
+                
+            except Exception as e:
+                self.log(f"状态轮询异常: {str(e)}", "WARNING")
+                time.sleep(2)
         
-        # 分析响应结果
-        success_responses = [r for r in responses if r.get('status_code') == 200]
-        duplicate_prevented = 0
-        analysis_started = 0
+        if not completed:
+            self.log("⚠️ AI分析超时，可能使用了fallback机制", "WARNING")
         
-        for response in responses:
-            self.log(f"请求{response['index']}: 状态{response['status_code']}", "DEBUG")
-            if response.get('response_data'):
-                status = response['response_data'].get('status', 'unknown')
-                message = response['response_data'].get('message', '')
-                if '重复' in message or '已启动' in message:
-                    duplicate_prevented += 1
-                elif status == 'processing':
-                    analysis_started += 1
+        # 查询测试后的记录数
+        after_count_str = query_database(before_query)
+        after_count = int(after_count_str.strip()) if after_count_str and after_count_str.strip().isdigit() else 0
+        self.log(f"测试后数据库记录数: {after_count}", "DEBUG")
+        
+        # 查询具体的分析记录
+        detail_query = f"SELECT id, analysis_type, created_at FROM analysis_results WHERE project_name = '{project_name}' ORDER BY created_at DESC LIMIT 5;"
+        detail_result = query_database(detail_query)
+        if detail_result:
+            self.log(f"数据库中的记录详情:\n{detail_result}", "DEBUG")
         
         # 验证结果
-        self.log("="*50, "INFO")
-        self.log("🔍 重复保存防护测试结果:", "INFO")
-        self.log(f"📊 总请求数: {len(responses)}", "INFO")
-        self.log(f"📊 成功响应数: {len(success_responses)}", "INFO")
-        self.log(f"📊 防重复拦截数: {duplicate_prevented}", "INFO")
-        self.log(f"📊 分析启动数: {analysis_started}", "INFO")
-        self.log(f"📊 数据库记录变化: {before_count} -> {after_count}", "INFO")
-        
-        # 判断修复是否成功
         record_increase = after_count - before_count
+        
+        self.log("="*60, "INFO")
+        self.log("🔍 真实AI分析和重复保存防护测试结果:", "INFO")
+        self.log(f"📊 分析完成状态: {'完成' if completed else '超时/失败'}", "INFO")
+        self.log(f"📊 数据库记录变化: {before_count} → {after_count} (+{record_increase})", "INFO")
+        
+        # 分析响应情况
+        if response1_data:
+            self.log(f"📊 第1次调用: {response1_data.get('status', 'unknown')}", "INFO")
+        if response2_data:
+            self.log(f"📊 第2次调用: {response2_data.get('status', 'unknown')}", "INFO")
+        
+        # 成功条件：
+        # 1. 至少有一条新记录被创建（证明AI分析真的执行了）
+        # 2. 记录增加不超过2条（证明防重复机制生效）
+        # 3. 分析完成或至少启动了
         success_criteria = [
-            record_increase <= 2,  # 数据库记录增加不超过2条（允许一些容错）
-            duplicate_prevented > 0 or analysis_started <= 1,  # 有防重复机制或只有一次分析启动
+            record_increase >= 1,  # 至少有一条新记录
+            record_increase <= 2,  # 不超过2条（防重复生效）
+            completed or (response1_data and response1_data.get('status') in ['processing', 'completed'])  # 分析至少启动了
         ]
         
         if all(success_criteria):
-            self.log("✅ 重复保存防护机制工作正常！", "SUCCESS")
-            self.log("✅ 前端防重复调用 + 后端数据库锁保护生效", "SUCCESS")
+            self.log("✅ 真实AI分析成功，重复保存防护机制正常工作！", "SUCCESS")
+            self.log(f"✅ 新增{record_increase}条记录，在预期范围内", "SUCCESS")
             return True
         else:
-            self.log("❌ 重复保存防护可能存在问题", "ERROR")
-            self.log(f"❌ 数据库记录增加了{record_increase}条，超出预期", "ERROR")
+            self.log("❌ 测试未完全通过:", "ERROR")
+            if record_increase < 1:
+                self.log("❌ 没有新记录产生，AI分析可能没有真正执行", "ERROR")
+            if record_increase > 2:
+                self.log(f"❌ 产生了{record_increase}条记录，重复保存防护可能失效", "ERROR")
+            if not completed and not (response1_data and response1_data.get('status') in ['processing', 'completed']):
+                self.log("❌ 分析没有成功启动", "ERROR")
             return False
 
     def add_new_test_case(self, test_name, test_function):

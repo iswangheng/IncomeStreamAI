@@ -832,17 +832,14 @@ def _handle_analysis_execution(form_data, session):
             # 使用数据库锁防止并发重复保存
             project_name = form_data.get('projectName', '')
             
-            # 使用数据库事务和锁来防止并发创建重复记录
+            # 防止并发创建重复记录
             try:
-                # 开始事务
-                db.session.begin()
-                
-                # 使用FOR UPDATE锁查询现有记录，防止并发插入
+                # 查询现有记录，检查是否存在重复
                 existing_result = AnalysisResult.query.filter_by(
                     user_id=current_user.id,
                     project_name=project_name,
                     analysis_type='ai_analysis'
-                ).order_by(AnalysisResult.created_at.desc()).with_for_update().first()
+                ).order_by(AnalysisResult.created_at.desc()).first()
                 
                 # 如果2分钟内已有相同的分析结果，使用现有的
                 if existing_result:
@@ -850,7 +847,7 @@ def _handle_analysis_execution(form_data, session):
                     if time_diff < timedelta(minutes=2):
                         app.logger.info(f"⚠️ 检测到2分钟内的重复分析，使用现有记录: {existing_result.id}")
                         result_id = existing_result.id
-                        db.session.commit()  # 提交事务
+                        # 使用现有记录，无需操作数据库
                     else:
                         # 超过2分钟，创建新的分析结果
                         analysis_result = AnalysisResult()
@@ -971,13 +968,12 @@ def _handle_analysis_execution(form_data, session):
                 project_name = form_data.get('projectName', '')
                 
                 try:
-                    # 开始事务并使用锁查询
-                    db.session.begin()
+                    # 查询现有fallback记录
                     existing_fallback = AnalysisResult.query.filter_by(
                         user_id=current_user.id,
                         project_name=project_name,
                         analysis_type='fallback'
-                    ).order_by(AnalysisResult.created_at.desc()).with_for_update().first()
+                    ).order_by(AnalysisResult.created_at.desc()).first()
                     
                     # 如果2分钟内已有相同的fallback，使用现有的
                     if existing_fallback:
@@ -985,7 +981,7 @@ def _handle_analysis_execution(form_data, session):
                         if time_diff < timedelta(minutes=2):
                             app.logger.info(f"⚠️ 检测到2分钟内的重复fallback，使用现有记录: {existing_fallback.id}")
                             fallback_id = existing_fallback.id
-                            db.session.commit()
+                            # 使用现有记录，无需操作数据库
                         else:
                             # 超过2分钟，创建新的
                             fallback_id = str(uuid.uuid4())

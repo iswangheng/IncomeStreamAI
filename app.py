@@ -1602,110 +1602,164 @@ def generate_ai_suggestions(form_data, session=None):
         return generate_fallback_result(form_data, f"分析遇到问题，为您提供基础建议")
 
 def generate_fallback_result(form_data, reason="AI服务暂时不可用"):
-    """生成备用分析结果 - 统一的备用方案生成函数"""
+    """生成备用分析结果 - 统一的【默认】fallback方案生成函数
+    当AI分析服务不可用时，提供基础的非劳务收入管道建议
+    """
     project_name = form_data.get('projectName', form_data.get('project_name', '您的项目'))
     key_persons = form_data.get('keyPersons', form_data.get('key_persons', []))
 
-    # 生成符合新模板格式的备用结果
-    return {
-        "overview": {
-            "situation": f"根据您提交的项目信息「{project_name}」和团队配置，我们为您准备了以下基础收入路径建议。{reason if reason and reason != 'AI服务暂时不可用' else '虽然当前AI深度分析服务暂时不可用，但基于常见的非劳务收入模式，为您提供这些可行的起步方案。'}",
-            "gaps": [
-                "需要明确各方动机标签",
-                "缺少具体的市场渠道",
-                "需要补充财务规划角色",
-                "缺少风险评估机制"
+    # 构建参与方结构 - 包含设计者和所有关键人物
+    parties_structure = [
+        {
+            "party": "设计者（您）",
+            "role_type": "统筹方",
+            "resources": [
+                "【默认】整合协调权",
+                "【默认】规则制定权", 
+                "【默认】结算管理权"
             ],
-            "suggested_roles_to_hunt": [
-                {
-                    "role": "市场推广专员",
-                    "why": "需要专业的推广渠道和营销策略支持",
-                    "where_to_find": "LinkedIn、行业社群、营销公司",
-                    "outreach_script": "您好，我们有个资源整合项目，需要市场推广方面的专业建议，可否简单交流？"
-                },
-                {
-                    "role": "财务顾问",
-                    "why": "需要专业的收益分配和风险评估建议",
-                    "where_to_find": "会计师事务所、商业顾问公司、创业孵化器",
-                    "outreach_script": "您好，我们在设计一个合作收益模式，希望获得财务结构方面的专业意见。"
-                }
-            ]
-        },
-        "paths": [
+            "role_value": "【默认】作为统筹方负责整合各方资源，制定合作规则，管理收益分配",
+            "make_them_happy": "【默认】通过统筹位置获得稳定的非劳务收入分成，确保不被绕过"
+        }
+    ]
+
+    # 添加用户提供的关键人物
+    for i, person in enumerate(key_persons):
+        party_name = person.get("name", f"关键人物{i+1}")
+        parties_structure.append({
+            "party": party_name,
+            "role_type": "交付方",  # 默认角色类型
+            "resources": person.get("resources", ["待明确的专业资源"]),
+            "role_value": f"【默认】{party_name}在合作框架中提供专业支持和资源对接",
+            "make_them_happy": f"【默认】通过合作获得相应的收益分成或价值交换"
+        })
+
+    # 如果关键人物不足，添加待补齐角色
+    suggested_roles = []
+    gaps = []
+    
+    if len(key_persons) < 2:
+        gaps.extend([
+            "【默认】缺少足够的核心合作伙伴",
+            "【默认】需要补充市场推广角色",
+            "【默认】需要补充资金管理角色"
+        ])
+        suggested_roles.extend([
             {
-                "id": "path_1",
-                "name": "资源互换合作模式",
-                "scene": "基于现有人脉网络的资源交换平台",
-                "who_moves_first": "您先梳理各方资源清单",
-                "action_steps": [
-                    {
-                        "owner": "您",
-                        "step": "详细梳理每位关键人物的具体资源和可提供的支持类型",
-                        "why_it_works": "明确资源价值是建立公平交换机制的基础"
-                    },
-                    {
-                        "owner": "您",
-                        "step": "设计资源价值评估标准和交换规则",
-                        "why_it_works": "标准化流程降低合作摩擦，提高效率"
-                    },
-                    {
-                        "owner": "关键人物",
-                        "step": "根据各自优势承担相应的资源提供和协调角色",
-                        "why_it_works": "充分发挥各自专长，实现资源最优配置"
-                    }
-                ],
-                "use_key_person_resources": [person.get("name", f"关键人物{i+1}") for i, person in enumerate(key_persons[:3])],
-                "use_external_resources": [],
-                "revenue_trigger": "通过资源交换产生的价值差获得收益分成",
-                "mvp": "组织一次小型资源对接会，验证交换模式可行性，成功标准为至少达成2个资源对接意向",
-                "risks": [
-                    "资源价值评估困难",
-                    "各方参与积极性不均"
-                ],
-                "plan_b": "如果资源交换困难，改为按服务付费的简单合作模式",
-                "kpis": [
-                    "资源对接成功率（目标≥30%）",
-                    "参与方满意度评分（目标≥7分）"
-                ]
+                "role": "【待补齐】市场推广专员",
+                "role_type": "交付方",
+                "why": "【默认】需要专业的市场推广和客户获取能力来扩大业务规模",
+                "where_to_find": "行业社群、营销公司、商业协会",
+                "outreach_script": "您好，我们有个资源整合项目，需要市场推广方面的专业支持，希望能与您探讨合作可能。"
             },
             {
-                "id": "path_2", 
-                "name": "联合服务收费模式",
-                "scene": "整合各方专业能力对外提供付费服务",
-                "who_moves_first": "您先调研市场需求",
-                "action_steps": [
+                "role": "【待补齐】财务管理方",
+                "role_type": "资金方",
+                "why": "【默认】需要专业的财务管理和风险控制能力来确保项目稳健发展",
+                "where_to_find": "会计师事务所、金融机构、投资公司",
+                "outreach_script": "您好，我们在设计一个多方合作的收益模式，希望获得财务管理方面的专业建议。"
+            }
+        ])
+        
+        # 添加待补齐角色到参与方结构
+        parties_structure.extend([
+            {
+                "party": "【待补齐】市场推广专员",
+                "role_type": "交付方",
+                "resources": ["【默认】市场推广渠道", "【默认】客户获取能力"],
+                "role_value": "【默认】负责市场开拓和客户获取，扩大业务规模",
+                "make_them_happy": "【默认】通过业绩提成获得收益激励"
+            },
+            {
+                "party": "【待补齐】财务管理方", 
+                "role_type": "资金方",
+                "resources": ["【默认】资金管理能力", "【默认】风险控制经验"],
+                "role_value": "【默认】提供财务管理和风险控制支持",
+                "make_them_happy": "【默认】通过管理费或投资收益获得回报"
+            }
+        ])
+
+    # 生成符合新assistant_prompt格式的【默认】备用结果
+    return {
+        "overview": {
+            "situation": f"【默认方案】由于{reason}，基于您的项目「{project_name}」和现有{len(key_persons)}位关键人物，设计者处于统筹位置，通过整合各方资源形成非劳务收入管道。当前局势下需要明确各方动机匹配度并补齐关键角色。",
+            "income_type": "【默认】居间收益 + 团队收益组合",
+            "core_insight": "【默认】通过设计者的统筹位置，将各方资源串联形成闭环，设计者获得居间撮合费用和团队协作分成，避免纯劳务付出。",
+            "gaps": gaps,
+            "suggested_roles_to_hunt": suggested_roles
+        },
+        "pipelines": [
+            {
+                "id": "pipeline_1",
+                "name": "【默认】资源整合居间模式",
+                "income_mechanism": {
+                    "type": "居间收益",
+                    "trigger": "【默认】每次成功撮合资源对接时产生居间费",
+                    "settlement": "【默认】按对接成功单数结算，每单收取5-10%居间费"
+                },
+                "parties_structure": parties_structure,
+                "framework_logic": {
+                    "resource_chain": "【默认】设计者统筹 → 梳理各方资源 → 建立对接规则 → 撮合资源交换 → 收取居间费用 → 持续循环",
+                    "motivation_match": "【默认】各方通过资源互换获得所需价值，设计者通过统筹获得居间收益，形成多赢局面",
+                    "designer_position": "【默认】设计者掌控对接规则和结算口径，所有交易必须通过设计者确认，防止被绕过",
+                    "designer_income": "【默认】居间收益类型，通过撮合服务获得非劳务收入"
+                },
+                "mvp": "【默认】组织一次小型资源对接会，验证撮合模式可行性，成功撮合2-3个资源对接即为有效验证。",
+                "weak_link": "【默认】各方参与积极性可能不均，需要明确激励机制确保持续参与",
+                "revenue_trigger": "【默认】资源对接成功时的居间费收入（居间收益类型）",
+                "risks_and_planB": [
                     {
-                        "owner": "您",
-                        "step": "调研目标市场对类似服务的需求和付费意愿",
-                        "why_it_works": "市场验证降低项目风险，确保服务有市场价值"
+                        "risk": "【默认】参与方积极性不足，资源对接效率低",
+                        "mitigation": "【默认】建立激励机制，成功对接方获得优先推荐权，提升参与动力"
                     },
                     {
-                        "owner": "您",
-                        "step": "设计标准化的服务流程和定价策略",
-                        "why_it_works": "标准化提高服务效率和客户信任度"
-                    },
-                    {
-                        "owner": "关键人物",
-                        "step": "根据专业领域承担相应的服务交付责任",
-                        "why_it_works": "专业分工保证服务质量，提升客户满意度"
+                        "risk": "【默认】被各方绕过，失去统筹地位",
+                        "mitigation": "【默认】掌控关键资源信息和结算环节，建立制度化依赖"
                     }
                 ],
-                "use_key_person_resources": [person.get("name", f"关键人物{i+1}") for i, person in enumerate(key_persons)],
-                "use_external_resources": [],
-                "revenue_trigger": "服务费收入按贡献比例分成",
-                "mvp": "设计一个简化版服务包，找1-2个潜在客户试点，成功标准为获得正面反馈和付费意向",
-                "risks": [
-                    "服务质量难以标准化",
-                    "客户获取成本过高"
+                "first_step": "【默认】召集所有关键人物开一次资源盘点会，明确各方可提供和需要的资源，建立初步对接规则。",
+                "labor_load_estimate": {
+                    "hours_per_week": "【默认】3-5小时",
+                    "level": "轻度(<5小时)",
+                    "alternative": "【默认】建立标准化对接流程和在线撮合平台，减少人工协调工作量"
+                }
+            },
+            {
+                "id": "pipeline_2",
+                "name": "【默认】联合服务团队模式", 
+                "income_mechanism": {
+                    "type": "团队收益",
+                    "trigger": "【默认】对外提供联合服务时的团队分成收入",
+                    "settlement": "【默认】按项目收入分成，设计者获得15-25%统筹分成"
+                },
+                "parties_structure": parties_structure,
+                "framework_logic": {
+                    "resource_chain": "【默认】设计者统筹 → 整合各方专业能力 → 包装联合服务 → 对外承接项目 → 按贡献分成 → 持续扩展",
+                    "motivation_match": "【默认】各方发挥专业优势获得项目分成，设计者通过统筹获得固定比例收益",
+                    "designer_position": "【默认】设计者负责项目获取和整体协调，掌控客户关系和分成规则",
+                    "designer_income": "【默认】团队收益类型，通过统筹团队服务获得分成"
+                },
+                "mvp": "【默认】设计一个简化服务包，寻找1-2个试点客户，验证团队协作和分成模式的可行性。",
+                "weak_link": "【默认】服务质量标准化困难，需要建立统一的交付标准",
+                "revenue_trigger": "【默认】联合服务项目收入的团队分成（团队收益类型）",
+                "risks_and_planB": [
+                    {
+                        "risk": "【默认】服务质量不一致，影响客户满意度",
+                        "mitigation": "【默认】建立标准作业流程和质量检查机制，确保服务标准化"
+                    },
+                    {
+                        "risk": "【默认】团队成员直接接单，绕过设计者",
+                        "mitigation": "【默认】设计者掌控客户资源和品牌，建立长期合作协议"
+                    }
                 ],
-                "plan_b": "如果对外服务困难，先为内部项目提供增值服务，积累经验和案例",
-                "kpis": [
-                    "客户试点转化率（目标≥20%）",
-                    "服务交付及时率（目标≥90%）"
-                ]
+                "first_step": "【默认】调研市场需求，设计标准化服务包，明确各方分工和分成比例。",
+                "labor_load_estimate": {
+                    "hours_per_week": "【默认】5-8小时", 
+                    "level": "中度(5-10小时)",
+                    "alternative": "【默认】建立项目管理模板和自动化流程，减少协调成本"
+                }
             }
-        ],
-        "notes": f"由于{reason}，以上为基础建议。建议您完善关键人物的动机信息后重新分析，可获得更精准的个性化方案。"
+        ]
     }
 
 # Knowledge Base Management Routes

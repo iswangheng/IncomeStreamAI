@@ -1422,16 +1422,12 @@ def generate():
         # Store form data in session - 保存到数据库而不是session
         from flask import session
         
-        # 保存表单数据到FormSubmission表，避免session过大
-        submission_id = None
+        # 保存表单数据到FormSubmission表
         try:
             from models import FormSubmission
-            import traceback
+            from datetime import datetime
             
-            # 使用专门的FormSubmission表存储表单数据
             submission_id = str(uuid.uuid4())
-            app.logger.info(f"📝 开始创建FormSubmission记录，ID: {submission_id}")
-            
             form_submission = FormSubmission()
             form_submission.id = submission_id
             form_submission.user_id = current_user.id
@@ -1439,40 +1435,23 @@ def generate():
             form_submission.project_description = form_data.get('projectDescription', '')
             form_submission.key_persons_data = json.dumps(form_data.get('keyPersons', []), ensure_ascii=False)
             form_submission.form_data_complete = json.dumps(form_data, ensure_ascii=False)
-            form_submission.status = 'submitted'  # 初始状态
+            form_submission.status = 'submitted'
+            form_submission.created_at = datetime.utcnow()
+            form_submission.updated_at = datetime.utcnow()
             
-            app.logger.info(f"📝 FormSubmission对象创建完成，准备保存到数据库")
             db.session.add(form_submission)
-            app.logger.info(f"📝 已添加到session，准备提交")
             db.session.commit()
-            app.logger.info(f"✅ 数据库事务提交成功，ID: {submission_id}")
             
-            # 验证保存是否成功
-            verification = FormSubmission.query.get(submission_id)
-            if verification:
-                app.logger.info(f"✅ 验证成功：记录已保存到数据库，项目名: {verification.project_name}")
-                # Session中只保存submission ID和项目名称
-                session['form_submission_id'] = submission_id
-                session['analysis_project_name'] = project_name
-            else:
-                app.logger.error(f"❌ 验证失败：数据库中找不到刚保存的记录 {submission_id}")
-                raise Exception("数据保存验证失败")
+            # Session中保存submission ID和项目名称
+            session['form_submission_id'] = submission_id
+            session['analysis_project_name'] = project_name
+            app.logger.info(f"✅ 表单数据保存成功，ID: {submission_id}")
             
         except Exception as e:
             app.logger.error(f"❌ FormSubmission表存储失败: {str(e)}")
-            app.logger.error(f"❌ 完整错误信息: {traceback.format_exc()}")
-            
-            # 回滚事务
-            try:
-                db.session.rollback()
-                app.logger.info("🔄 数据库事务已回滚")
-            except:
-                pass
-            
-            # 如果数据库失败，使用session作为备用存储
-            session['analysis_form_data'] = form_data
-            session['analysis_project_name'] = project_name
-            app.logger.info("💾 已使用session作为备用存储")
+            # 回滚事务并重新抛出异常
+            db.session.rollback()
+            raise
 
         # 清理所有旧的分析相关数据，确保新项目不会使用旧的result_id
         session['analysis_status'] = 'not_started'

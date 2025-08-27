@@ -1426,6 +1426,7 @@ def generate():
         try:
             from models import FormSubmission
             from datetime import datetime
+            import json
             
             submission_id = str(uuid.uuid4())
             form_submission = FormSubmission()

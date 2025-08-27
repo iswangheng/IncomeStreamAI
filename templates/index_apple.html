@@ -1155,47 +1155,11 @@
             });
 
 
-            // 提交表单并处理重定向
+            // 直接使用传统表单提交，避免fetch的session问题
             document.body.appendChild(form);
             
-            // 使用fetch提交表单，确保包含session cookie
-            const submitFormData = new FormData(form);
-            fetch('/generate', {
-                method: 'POST',
-                body: submitFormData,
-                credentials: 'same-origin', // 确保携带session cookie
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest' // 标记为AJAX请求
-                }
-            })
-            .then(response => {
-                if (response.redirected) {
-                    // 处理重定向
-                    window.location.href = response.url;
-                } else if (response.ok) {
-                    // 检查是否是登录页面重定向
-                    return response.text().then(text => {
-                        if (text.includes('Redirecting') && text.includes('/login')) {
-                            // 重定向到登录页面
-                            window.location.href = '/login';
-                        } else {
-                            // 正常提交，跳转到thinking页面
-                            window.location.href = '/thinking';
-                        }
-                    });
-                } else {
-                    throw new Error('表单提交失败');
-                }
-            })
-            .catch(error => {
-                console.error('提交错误:', error);
-                alert('提交失败，请重试');
-                // 恢复按钮状态
-                submitBtn.innerHTML = '<i class="fas fa-brain me-2"></i>开始AI分析';
-                submitBtn.disabled = false;
-            });
-            
-            // 移除动态创建的表单
+            // 直接提交表单，让浏览器处理重定向
+            form.submit();
             document.body.removeChild(form);
         });
 

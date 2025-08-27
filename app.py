@@ -1334,6 +1334,7 @@ def generate():
         app.logger.info(f"Generate route accessed - Request method: {request.method}")
         app.logger.info(f"Generate route - Form data keys: {list(request.form.keys())}")
         app.logger.info(f"Generate route - Content type: {request.content_type}")
+        app.logger.info(f"Generate route - All form data: {dict(request.form)}")
         
         # 初始化变量
         project_name = ''

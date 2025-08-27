@@ -925,12 +925,59 @@ def _handle_analysis_execution(form_data, session):
 def results():
     """Display AI analysis result page with dynamic loading"""
     try:
-        from flask import session
+        from flask import session, request
 
-        # 详细记录session状态
+        # 检查URL参数中的result_id
+        url_result_id = request.args.get('result_id')
+        
+        # 详细记录session状态和URL参数
         app.logger.info(f"Results page accessed - Full session: {dict(session)}")
         app.logger.info(f"Results page - Session ID: {request.cookies.get('session', 'No session cookie')}")
+        app.logger.info(f"Results page - URL result_id parameter: {url_result_id}")
 
+        # 如果URL中有result_id参数，优先使用它
+        if url_result_id:
+            app.logger.info(f"Using result_id from URL parameter: {url_result_id}")
+            try:
+                from models import AnalysisResult
+                import json
+                
+                # 直接通过URL参数中的ID获取分析记录
+                analysis_record = AnalysisResult.query.filter_by(id=url_result_id).first()
+                
+                if analysis_record:
+                    # 权限检查：普通用户只能查看自己的记录，管理员可以查看所有记录
+                    if not current_user.is_admin and analysis_record.user_id != current_user.id:
+                        flash('您没有权限查看此分析记录', 'error')
+                        return redirect(url_for('analysis_history'))
+                    
+                    # 解析数据并直接显示
+                    form_data = json.loads(analysis_record.form_data) if analysis_record.form_data else {}
+                    result_data = json.loads(analysis_record.result_data) if analysis_record.result_data else {}
+                    
+                    app.logger.info(f"Successfully loaded analysis record from URL parameter: {url_result_id}")
+                    
+                    return render_template('result_pipeline_redesigned.html',
+                                         form_data=form_data,
+                                         result=result_data,
+                                         status='completed',
+                                         history_mode=True,
+                                         record_info={
+                                             'id': analysis_record.id,
+                                             'created_at': analysis_record.created_at_display,
+                                             'analysis_type': analysis_record.analysis_type_display
+                                         })
+                else:
+                    app.logger.warning(f"Analysis record not found for URL result_id: {url_result_id}")
+                    flash('找不到指定的分析记录', 'error')
+                    return redirect(url_for('analysis_history'))
+                    
+            except Exception as e:
+                app.logger.error(f"Error loading analysis record from URL parameter {url_result_id}: {str(e)}")
+                flash('加载分析记录时发生错误', 'error')
+                return redirect(url_for('analysis_history'))
+
+        # 如果没有URL参数，继续使用原有的session逻辑
         # Get form data and analysis status from session
         form_data = get_form_data_from_db(session)
         status = session.get('analysis_status', 'not_started')

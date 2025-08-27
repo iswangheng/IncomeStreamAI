@@ -4,6 +4,7 @@ import logging
 import traceback
 import uuid
 import time
+import signal
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -125,13 +126,13 @@ with app.app_context():
         default_user.is_admin = True
         db.session.add(default_user)
         db.session.commit()
-        print("已创建默认管理员账号: 18302196515 / aibenzong9264")
+        logger.info("已创建默认管理员账号: 18302196515 / aibenzong9264")
     elif not default_user.is_admin:
         # 确保18302196515用户是管理员
         default_user.is_admin = True
         default_user.name = '系统管理员'
         db.session.commit()
-        print("已将18302196515用户设置为管理员")
+        logger.info("已将18302196515用户设置为管理员")
 
     # 初始化默认模型配置
     default_configs = [
@@ -144,7 +145,7 @@ with app.app_context():
         existing_config = ModelConfig.query.filter_by(config_name=config_name).first()
         if not existing_config:
             ModelConfig.set_config(config_name, model_name, temperature, max_tokens, timeout)
-            print(f"已创建默认模型配置: {config_name} -> {model_name}")
+            logger.info(f"已创建默认模型配置: {config_name} -> {model_name}")
 
 @app.route('/')
 @login_required
@@ -385,18 +386,13 @@ def start_analysis():
                 # 获取表单数据用于备用方案
                 local_form_data = get_form_data_from_db(session)
                 if not local_form_data:
-                    # 尝试从当前作用域获取form_data，如果不存在则使用空字典
-                    try:
-                        local_form_data = form_data if 'form_data' in locals() and form_data else {}
-                    except NameError:
-                        local_form_data = {}
+                    # 如果数据库中没有表单数据，使用空字典
+                    local_form_data = {}
                 
                 # 直接生成备用方案并设置为completed状态
                 fallback_result = generate_fallback_result(local_form_data)
                 
                 # 保存到数据库
-                import uuid
-                import json
                 from models import AnalysisResult
                 fallback_id = str(uuid.uuid4())
                 analysis_result = AnalysisResult()
@@ -433,22 +429,6 @@ def start_analysis():
             'message': f'启动分析失败: {str(e)[:100]}',
             'error_code': 'START_FAILED'
         })
-    except Exception as fatal_error:
-        # 终极错误捕获 - 确保永远返回JSON
-        app.logger.error(f"FATAL error in start_analysis: {str(fatal_error)}")
-        try:
-            return jsonify({
-                'status': 'error',
-                'message': '系统遇到严重错误，请刷新重试',
-                'error_code': 'FATAL_START_ERROR'
-            })
-        except:
-            # 如果连jsonify都失败了
-            from flask import Response
-            return Response(
-                '{"status": "error", "message": "系统严重错误", "error_code": "JSON_FAILED"}',
-                mimetype='application/json'
-            )
 
 @app.route('/get_session_data')
 @login_required
@@ -1335,7 +1315,6 @@ def generate():
         form_data_json = request.form.get('form_data', '')
         if form_data_json:
             try:
-                import json
                 parsed_form_data = json.loads(form_data_json)
                 app.logger.info(f"🎯 解析JSON格式的form_data成功: {parsed_form_data.get('projectName', '未知项目')}")
                 
@@ -1376,7 +1355,6 @@ def generate():
             key_persons_json = request.form.get('keyPersons', '')
             if key_persons_json:
                 try:
-                    import json
                     key_persons = json.loads(key_persons_json)
                     app.logger.info(f"Parsed key persons from JSON: {len(key_persons)} persons")
                 except json.JSONDecodeError as e:
@@ -1416,8 +1394,6 @@ def generate():
         
         # 保存表单数据到FormSubmission表，避免session过大
         try:
-            import uuid
-            import json
             from models import FormSubmission
             
             # 使用专门的FormSubmission表存储表单数据
@@ -1481,7 +1457,6 @@ def generate():
 
 def generate_ai_suggestions(form_data, session=None):
     """Generate AI suggestions using OpenAI API with enhanced error handling"""
-    import signal
     import time
 
     def timeout_handler(signum, frame):
@@ -1871,7 +1846,7 @@ def api_users():
             'stats': stats
         })
     except Exception as e:
-        print(f"获取用户数据失败: {e}")
+        app.logger.error(f"获取用户数据失败: {e}")
         return jsonify({
             'success': False,
             'message': '获取用户数据失败'
@@ -2468,7 +2443,3 @@ def update_user_profile():
         flash('更新失败，请重试', 'error')
         return redirect(url_for('user_profile'))
 
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)

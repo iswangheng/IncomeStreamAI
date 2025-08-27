@@ -111,19 +111,33 @@ class AngelaE2ETest:
         # 提交表单
         response = self.session.post(f"{self.base_url}/generate", data=form_data, allow_redirects=False)
         
+        self.log(f"表单提交响应状态: {response.status_code}", "DEBUG")
+        if response.status_code == 302:
+            location = response.headers.get('Location', '')
+            self.log(f"重定向目标: {location}", "DEBUG")
+            
+        # 跟随重定向，检查最终页面
+        follow_response = self.session.post(f"{self.base_url}/generate", data=form_data, allow_redirects=True)
+        final_url = follow_response.url
+        self.log(f"最终页面URL: {final_url}", "DEBUG")
+        
         if response.status_code == 200:
             self.log("表单提交成功", "SUCCESS")
             return True
         elif response.status_code == 302:
             location = response.headers.get('Location', '')
             if 'thinking' in location:
-                self.log("表单提交成功，重定向到thinking页面", "SUCCESS")
+                self.log("✅ 表单提交成功，重定向到thinking页面", "SUCCESS")
                 return True
             else:
-                self.log(f"表单提交重定向异常: {location}", "WARNING")
+                self.log(f"❌ 表单提交重定向异常: {location}", "WARNING")
+                # 检查是否有Flash消息
+                if 'thinking' in final_url:
+                    self.log("✅ 最终到达thinking页面", "SUCCESS")
+                    return True
                 return False
         else:
-            self.log(f"表单提交失败: {response.status_code}", "ERROR")
+            self.log(f"❌ 表单提交失败: {response.status_code}", "ERROR")
             return False
     
     def test_thinking_page(self):

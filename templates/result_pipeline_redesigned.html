@@ -175,6 +175,84 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        /* 项目信息卡片 */
+        .project-info-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.1);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--pipeline-primary), var(--pipeline-secondary), var(--framework-accent));
+        }
+
+        .project-info-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+            padding-bottom: var(--space-3);
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .project-info-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--pipeline-primary), var(--pipeline-secondary));
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .project-info-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--pipeline-primary);
+            margin: 0;
+        }
+
+        .project-info-subtitle {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .project-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-2);
+            line-height: 1.3;
+        }
+
+        .project-description {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--color-text-secondary);
+            background: rgba(102, 126, 234, 0.05);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border-left: 4px solid var(--pipeline-primary);
+            margin: 0;
+        }
+
         /* 角色建议 */
         .roles-suggestion {
             background: linear-gradient(135deg, #E3F2FD, #F3E5F5);
@@ -839,6 +917,31 @@
                 <span>结果</span>
             </div>
         </div>
+
+        <!-- 项目信息 -->
+        {% if form_data and (form_data.projectName or form_data.projectDescription) %}
+        <div class="project-info-card fade-in-up">
+            <div class="project-info-header">
+                <div class="project-info-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div>
+                    <h3 class="project-info-title">项目概述</h3>
+                    <p class="project-info-subtitle">您提交的项目基本信息</p>
+                </div>
+            </div>
+            
+            {% if form_data.projectName %}
+            <h2 class="project-name">{{ form_data.projectName }}</h2>
+            {% endif %}
+            
+            {% if form_data.projectDescription %}
+            <div class="project-description">
+                {{ form_data.projectDescription }}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
 
         <!-- 整体分析概览 -->
         {% if result and result.overview %}

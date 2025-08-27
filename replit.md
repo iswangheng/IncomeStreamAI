@@ -19,6 +19,15 @@ Angela is a Flask-based web application designed to help users generate non-labo
     - 每段代码需附中文简短注释说明作用。
     - 编写逻辑前优先生成单元测试，且测试不可跳过。
     - 使用`edit_file`方式局部修补，不得使用`write_file`重写整个文件，除非有充分说明。
+- **TDD测试驱动开发模式（强制执行）**:
+    - **所有测试文件必须放在 `tests/` 文件夹中**，严格禁止在根目录创建test_*.py文件
+    - **新业务流程开发流程**：Red → Green → Refactor
+        1. **Red阶段**：先编写测试用例（会失败），放在tests/文件夹
+        2. **Green阶段**：编写最少代码让测试通过
+        3. **Refactor阶段**：重构代码提高质量，确保测试依然通过
+    - **Agent必须自己测试**：实现新功能前，必须先写测试用例并验证功能正确性
+    - **测试覆盖要求**：每个新的业务流程都必须有对应的测试文件
+    - **测试命名规范**：tests/test_[功能名称].py
 
 ## System Architecture
 
@@ -52,6 +61,7 @@ Angela is a Flask-based web application designed to help users generate non-labo
 - **Static Assets**: Separate CSS and JavaScript files.
 - **Templates**: Modular HTML templates (index, result, etc.).
 - **Application Logic**: Clear separation between main application logic and execution entry point.
+- **Testing**: All test files organized in `tests/` directory following TDD practices.
 
 ### AI Thinking Process Visualization
 - A dedicated page to display Angela AI's analytical steps (5 stages: Project Info, Person Resources, Income Model, Execution Plan, Full Report) with progressive activation, progress bars, and estimated time.

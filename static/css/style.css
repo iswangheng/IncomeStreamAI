@@ -584,17 +584,17 @@ body {
     body {
         background: white !important;
     }
-    
+
     .btn, .card-header button {
         display: none !important;
     }
-    
+
     .card {
         border: 1px solid #ddd !important;
         break-inside: avoid;
         box-shadow: none !important;
     }
-    
+
     .card-header {
         background: #f8f9fa !important;
         color: #333 !important;
@@ -607,16 +607,16 @@ body {
         padding-left: 15px;
         padding-right: 15px;
     }
-    
+
     .display-4, .display-5 {
         font-size: 2rem;
     }
-    
+
     .person-card .position-absolute {
         position: relative !important;
         margin: 0 0 10px 0 !important;
     }
-    
+
     .card-body {
         padding: 1.5rem;
     }
@@ -683,4 +683,78 @@ template {
 /* Text muted override */
 .text-muted {
     color: var(--text-light) !important;
+}
+
+/* Terminal styling */
+.terminal-container {
+    font-family: 'Monaco', 'Menlo', 'Consolas', 'Courier New', monospace;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.terminal-title {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.terminal-body {
+    height: 400px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.4;
+    position: relative;
+    z-index: 5;
+}
+
+.terminal-line {
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.5;
+}
+
+.terminal-line .prompt {
+    color: #00bfa5;
+    margin-right: 8px;
+}
+
+.terminal-line .command {
+    color: #9cdcfe;
+}
+
+.terminal-line .output {
+    color: #cccccc;
+}
+
+.terminal-line .error {
+    color: #f44336;
+}
+
+.terminal-input {
+    display: flex;
+    align-items: center;
+}
+
+.terminal-input .prompt {
+    color: #00bfa5;
+    margin-right: 8px;
+}
+
+.terminal-input input {
+    background: transparent;
+    border: none;
+    color: #d4d4d4;
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    flex-grow: 1;
+}
+
+.terminal-input input::placeholder {
+    color: #888888;
 }

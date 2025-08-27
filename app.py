@@ -135,7 +135,7 @@ with app.app_context():
 
     # 初始化默认模型配置
     default_configs = [
-        ('main_analysis', 'gpt-4o-mini', 0.7, 2500, 45),
+        ('main_analysis', 'gpt-4o', 0.7, 2500, 45),
         ('chat', 'gpt-4o', 0.7, 1500, 30),
         ('fallback', 'gpt-4o-mini', 0.5, 2000, 60)
     ]
@@ -1620,7 +1620,7 @@ def generate_fallback_result(form_data, reason=""):
                 {
                     "role": "市场推广专员",
                     "why": "需要专业的推广渠道和营销策略支持",
-                    "where_to_find": "LinkedIn、行业社群、营销公司",
+                    "where_to_find": "行业社群、营销公司",
                     "outreach_script": "您好，我们有个资源整合项目，需要市场推广方面的专业建议，可否简单交流？"
                 },
                 {
@@ -1634,7 +1634,7 @@ def generate_fallback_result(form_data, reason=""):
         "paths": [
             {
                 "id": "path_1",
-                "name": "资源互换合作模式",
+                "name": "【默认】资源互换合作模式",
                 "scene": "基于现有人脉网络的资源交换平台",
                 "who_moves_first": "您先梳理各方资源清单",
                 "action_steps": [

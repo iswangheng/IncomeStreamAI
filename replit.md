@@ -103,6 +103,23 @@ Angela is a Flask-based web application designed to help users generate non-labo
 
 ## Recent Critical Fixes
 
+### Database Duplicate Saving Root Cause Analysis & Fix (August 27, 2025) - COMPLETE RESOLUTION
+- **Root Cause Identified**: thinking页面JavaScript自动触发机制导致重复调用 `/start_analysis` 端点
+- **具体问题**: 
+  - 用户访问thinking页面时自动调用分析接口
+  - 用户刷新页面或重新访问导致第二次调用
+  - 两次调用间隔极短（0.5秒），造成并发重复保存
+- **解决方案**:
+  - 前端防重复逻辑：使用localStorage记录分析启动时间
+  - 30秒内防重复调用保护机制
+  - 分析完成或错误时清理防重复标记
+  - 保留后端数据库锁和重复检查作为双重保护
+- **技术实现**:
+  - JavaScript防重复调用逻辑（localStorage时间戳检查）
+  - 数据库层面的FOR UPDATE锁和时间窗口检查
+  - 多层异常处理和事务管理
+- **验证结果**: 彻底解决了重复保存问题的根本原因
+
 ### Database Architecture & Form Processing Resolution (August 26, 2025) - COMPLETE RESOLUTION
 - **Problem Solved**: 彻底解决了数据存储架构混乱和表单数据处理问题
 - **Root Cause Analysis**: 

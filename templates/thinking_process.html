@@ -974,6 +974,24 @@
         // 首先启动分析的函数
         function startAnalysisFirst() {
             console.log('Starting analysis first before polling...');
+            
+            // 检查是否已经有分析在进行，防止重复调用
+            const analysisKey = 'analysis_started_' + Date.now().toString().slice(0, -4); // 精确到十秒
+            const lastAnalysisTime = localStorage.getItem('last_analysis_time');
+            const currentTime = Date.now();
+            
+            // 如果30秒内已经启动过分析，跳过重复调用
+            if (lastAnalysisTime && (currentTime - parseInt(lastAnalysisTime)) < 30000) {
+                console.log('⚠️ 检测到30秒内已启动过分析，跳过重复调用');
+                addThinkingLine('>>> 🔍 检测到正在进行的分析...', 'system');
+                // 直接开始轮询检查状态
+                poll();
+                return;
+            }
+            
+            // 记录本次启动时间
+            localStorage.setItem('last_analysis_time', currentTime.toString());
+            
             fetch('/start_analysis', {method: 'POST'})
                 .then(response => response.json())
                 .then(data => {
@@ -987,6 +1005,8 @@
                         realAnalysisCompleted = true;
                         window.aiThinkingStreamActive = false; // 立即停止AI思考流
                         updateStatusDisplay(100, '分析完成！');
+                        // 清除防重复标记
+                        localStorage.removeItem('last_analysis_time');
                         // 立即跳转，无延迟
                         console.log('立即执行跳转...');
                         window.location.href = '/results';
@@ -999,6 +1019,8 @@
                 .catch(error => {
                     console.error('Failed to start analysis:', error);
                     addThinkingLine('>>> ⚠️ 启动分析遇到网络问题，立即开始轮询检查结果...', 'system');
+                    // 网络错误时清除防重复标记，允许重试
+                    localStorage.removeItem('last_analysis_time');
                     // 网络错误时立即开始轮询，可能备用方案已经生成
                     poll();
                 });

@@ -317,9 +317,8 @@ class AngelaAI:
             import traceback
             logger.error(f"💥 JSON parsing error: {e}")
             logger.error(f"💥 Full traceback: {traceback.format_exc()}")
-            logger.error(
-                f"💥 AI response text that failed to parse: {result_text[:1000] if 'result_text' in locals() else 'No response text available'}"
-            )
+            # 尝试记录响应文本
+            logger.error("💥 AI response parsing failed - checking for response content")
             return self._get_fallback_result(form_data)
         except Exception as e:
             import traceback
@@ -498,8 +497,7 @@ class AngelaAI:
             for missing_type in missing_types:
                 role_name_mapping = {
                     "需求方": "渠道客户源",
-                    "交付方": "专业服务方",
-                    "资金方": "投资合作方"
+                    "交付方": "专业服务方"
                 }
                 role_name = role_name_mapping.get(missing_type, "合作伙伴")
 

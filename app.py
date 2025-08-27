@@ -829,22 +829,44 @@ def _handle_analysis_execution(form_data, session):
             # 创建AnalysisResult实例（添加重复性检查）
             from datetime import datetime, timedelta
             
-            # 检查是否已存在相同项目的分析结果（防止重复保存）
+            # 使用数据库锁防止并发重复保存
             project_name = form_data.get('projectName', '')
-            existing_result = AnalysisResult.query.filter_by(
-                user_id=current_user.id,
-                project_name=project_name,
-                analysis_type='ai_analysis'
-            ).order_by(AnalysisResult.created_at.desc()).first()
             
-            # 如果2分钟内已有相同的分析结果，使用现有的
-            if existing_result:
-                time_diff = datetime.utcnow() - existing_result.created_at
-                if time_diff < timedelta(minutes=2):
-                    app.logger.info(f"⚠️ 检测到2分钟内的重复分析，使用现有记录: {existing_result.id}")
-                    result_id = existing_result.id
+            # 使用数据库事务和锁来防止并发创建重复记录
+            try:
+                # 开始事务
+                db.session.begin()
+                
+                # 使用FOR UPDATE锁查询现有记录，防止并发插入
+                existing_result = AnalysisResult.query.filter_by(
+                    user_id=current_user.id,
+                    project_name=project_name,
+                    analysis_type='ai_analysis'
+                ).order_by(AnalysisResult.created_at.desc()).with_for_update().first()
+                
+                # 如果2分钟内已有相同的分析结果，使用现有的
+                if existing_result:
+                    time_diff = datetime.utcnow() - existing_result.created_at
+                    if time_diff < timedelta(minutes=2):
+                        app.logger.info(f"⚠️ 检测到2分钟内的重复分析，使用现有记录: {existing_result.id}")
+                        result_id = existing_result.id
+                        db.session.commit()  # 提交事务
+                    else:
+                        # 超过2分钟，创建新的分析结果
+                        analysis_result = AnalysisResult()
+                        analysis_result.id = result_id
+                        analysis_result.user_id = current_user.id  # 关联当前用户
+                        analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                        analysis_result.result_data = json.dumps(suggestions, ensure_ascii=False)
+                        analysis_result.project_name = project_name
+                        analysis_result.project_description = form_data.get('projectDescription', '')
+                        analysis_result.team_size = len(form_data.get('keyPersons', []))
+                        analysis_result.analysis_type = 'ai_analysis'
+                        db.session.add(analysis_result)
+                        db.session.commit()
+                        app.logger.info(f"✅ 创建新的分析记录: {result_id}")
                 else:
-                    # 超过2分钟，创建新的分析结果
+                    # 没有现有分析结果，创建新的
                     analysis_result = AnalysisResult()
                     analysis_result.id = result_id
                     analysis_result.user_id = current_user.id  # 关联当前用户
@@ -856,19 +878,24 @@ def _handle_analysis_execution(form_data, session):
                     analysis_result.analysis_type = 'ai_analysis'
                     db.session.add(analysis_result)
                     db.session.commit()
-            else:
-                # 没有现有分析结果，创建新的
-                analysis_result = AnalysisResult()
-                analysis_result.id = result_id
-                analysis_result.user_id = current_user.id  # 关联当前用户
-                analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
-                analysis_result.result_data = json.dumps(suggestions, ensure_ascii=False)
-                analysis_result.project_name = project_name
-                analysis_result.project_description = form_data.get('projectDescription', '')
-                analysis_result.team_size = len(form_data.get('keyPersons', []))
-                analysis_result.analysis_type = 'ai_analysis'
-                db.session.add(analysis_result)
-                db.session.commit()
+                    app.logger.info(f"✅ 创建首个分析记录: {result_id}")
+                    
+            except Exception as db_error:
+                app.logger.error(f"❌ 数据库操作失败: {str(db_error)}")
+                db.session.rollback()
+                # 如果数据库操作失败，重新检查是否有其他并发请求已经创建了记录
+                existing_result = AnalysisResult.query.filter_by(
+                    user_id=current_user.id,
+                    project_name=project_name,
+                    analysis_type='ai_analysis'
+                ).order_by(AnalysisResult.created_at.desc()).first()
+                
+                if existing_result:
+                    app.logger.info(f"⚠️ 并发冲突，使用已存在的记录: {existing_result.id}")
+                    result_id = existing_result.id
+                else:
+                    # 重新抛出异常，因为确实有问题
+                    raise db_error
 
             # 在session中只存储最小必要数据，避免cookie过大
             # 只保存项目名称用于显示，完整数据从数据库读取
@@ -936,21 +963,76 @@ def _handle_analysis_execution(form_data, session):
             try:
                 fallback_result = generate_fallback_result(form_data)
 
-                # 保存备用方案到数据库
+                # 保存备用方案到数据库（添加重复性检查）
+                from datetime import datetime, timedelta
                 import uuid
 
-                fallback_id = str(uuid.uuid4())
-                analysis_result = AnalysisResult()
-                analysis_result.id = fallback_id
-                analysis_result.user_id = current_user.id  # 关联当前用户
-                analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
-                analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
-                analysis_result.project_name = form_data.get('projectName', '')
-                analysis_result.project_description = form_data.get('projectDescription', '')
-                analysis_result.team_size = len(form_data.get('keyPersons', []))
-                analysis_result.analysis_type = 'fallback'
-                db.session.add(analysis_result)
-                db.session.commit()
+                # 使用数据库锁防止并发重复保存fallback
+                project_name = form_data.get('projectName', '')
+                
+                try:
+                    # 开始事务并使用锁查询
+                    db.session.begin()
+                    existing_fallback = AnalysisResult.query.filter_by(
+                        user_id=current_user.id,
+                        project_name=project_name,
+                        analysis_type='fallback'
+                    ).order_by(AnalysisResult.created_at.desc()).with_for_update().first()
+                    
+                    # 如果2分钟内已有相同的fallback，使用现有的
+                    if existing_fallback:
+                        time_diff = datetime.utcnow() - existing_fallback.created_at
+                        if time_diff < timedelta(minutes=2):
+                            app.logger.info(f"⚠️ 检测到2分钟内的重复fallback，使用现有记录: {existing_fallback.id}")
+                            fallback_id = existing_fallback.id
+                            db.session.commit()
+                        else:
+                            # 超过2分钟，创建新的
+                            fallback_id = str(uuid.uuid4())
+                            analysis_result = AnalysisResult()
+                            analysis_result.id = fallback_id
+                            analysis_result.user_id = current_user.id  # 关联当前用户
+                            analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                            analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
+                            analysis_result.project_name = project_name
+                            analysis_result.project_description = form_data.get('projectDescription', '')
+                            analysis_result.team_size = len(form_data.get('keyPersons', []))
+                            analysis_result.analysis_type = 'fallback'
+                            db.session.add(analysis_result)
+                            db.session.commit()
+                            app.logger.info(f"✅ 创建新的fallback记录: {fallback_id}")
+                    else:
+                        # 没有现有fallback，创建新的
+                        fallback_id = str(uuid.uuid4())
+                        analysis_result = AnalysisResult()
+                        analysis_result.id = fallback_id
+                        analysis_result.user_id = current_user.id  # 关联当前用户
+                        analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                        analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
+                        analysis_result.project_name = project_name
+                        analysis_result.project_description = form_data.get('projectDescription', '')
+                        analysis_result.team_size = len(form_data.get('keyPersons', []))
+                        analysis_result.analysis_type = 'fallback'
+                        db.session.add(analysis_result)
+                        db.session.commit()
+                        app.logger.info(f"✅ 创建首个fallback记录: {fallback_id}")
+                        
+                except Exception as db_error:
+                    app.logger.error(f"❌ Fallback数据库操作失败: {str(db_error)}")
+                    db.session.rollback()
+                    # 查找是否有其他并发请求已经创建了记录
+                    existing_fallback = AnalysisResult.query.filter_by(
+                        user_id=current_user.id,
+                        project_name=project_name,
+                        analysis_type='fallback'
+                    ).order_by(AnalysisResult.created_at.desc()).first()
+                    
+                    if existing_fallback:
+                        app.logger.info(f"⚠️ Fallback并发冲突，使用已存在的记录: {existing_fallback.id}")
+                        fallback_id = existing_fallback.id
+                    else:
+                        # 重新抛出异常
+                        raise db_error
 
                 # 更新session状态为完成，只保存必要数据
                 session['analysis_project_name'] = form_data.get('projectName', '')

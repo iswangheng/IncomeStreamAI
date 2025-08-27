@@ -43,7 +43,6 @@ class AngelaE2ETest:
         
         # 测试账号
         self.test_accounts = [
-            {"phone": "18302196515", "password": "aibenzong9264", "desc": "默认管理员"},
             {"phone": "13800138000", "password": "123456", "desc": "测试用户"},
         ]
     

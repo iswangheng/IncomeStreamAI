@@ -214,7 +214,7 @@ def get_form_data_from_db(session):
         # 总是优先查找当前用户最新的表单提交记录，而不是依赖session
         if current_user and current_user.is_authenticated:
             from models import FormSubmission
-            import json
+
             
             # 直接查找当前用户最新的表单提交记录
             recent_submission = FormSubmission.query.filter_by(
@@ -240,7 +240,7 @@ def get_form_data_from_db(session):
         submission_id = session.get('form_submission_id')
         if submission_id:
             from models import FormSubmission
-            import json
+
             form_submission = FormSubmission.query.get(submission_id)
             app.logger.info(f"📍 备用方案：通过submission_id查询: {form_submission is not None}")
             
@@ -265,7 +265,7 @@ def get_form_data_from_db(session):
 def save_session_in_ajax():
     """辅助函数：确保AJAX请求中session被正确保存，监控session大小"""
     from flask import session
-    import json
+
     
     # 计算session大小
     session_size = len(json.dumps(dict(session), ensure_ascii=False))
@@ -327,7 +327,7 @@ def thinking_demo():
 def debug_session_reset():
     """临时调试工具：重置session并显示用户的所有表单提交记录"""
     from models import FormSubmission
-    import json
+
     
     # 清理所有session数据
     keys_to_clear = ['form_submission_id', 'analysis_project_name', 'analysis_status', 
@@ -428,20 +428,52 @@ def start_analysis():
                 # 直接生成备用方案并设置为completed状态
                 fallback_result = generate_fallback_result(local_form_data)
                 
-                # 保存到数据库
+                # 保存到数据库（添加重复性检查）
                 from models import AnalysisResult
-                fallback_id = str(uuid.uuid4())
-                analysis_result = AnalysisResult()
-                analysis_result.id = fallback_id
-                analysis_result.user_id = current_user.id
-                analysis_result.form_data = json.dumps(local_form_data, ensure_ascii=False)
-                analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
-                analysis_result.project_name = local_form_data.get('projectName', '') if local_form_data else ''
-                analysis_result.project_description = local_form_data.get('projectDescription', '') if local_form_data else ''
-                analysis_result.team_size = len(local_form_data.get('keyPersons', [])) if local_form_data else 0
-                analysis_result.analysis_type = 'fallback_network'
-                db.session.add(analysis_result)
-                db.session.commit()
+                from datetime import datetime, timedelta
+                
+                # 检查是否已存在相同项目的fallback结果（防止重复保存）
+                project_name = local_form_data.get('projectName', '') if local_form_data else ''
+                existing_fallback = AnalysisResult.query.filter_by(
+                    user_id=current_user.id,
+                    project_name=project_name,
+                    analysis_type='fallback_network'
+                ).order_by(AnalysisResult.created_at.desc()).first()
+                
+                # 如果2分钟内已有相同的fallback，使用现有的
+                if existing_fallback:
+                    time_diff = datetime.utcnow() - existing_fallback.created_at
+                    if time_diff < timedelta(minutes=2):
+                        app.logger.info(f"⚠️ 检测到2分钟内的重复fallback，使用现有记录: {existing_fallback.id}")
+                        fallback_id = existing_fallback.id
+                    else:
+                        # 超过2分钟，创建新的
+                        fallback_id = str(uuid.uuid4())
+                        analysis_result = AnalysisResult()
+                        analysis_result.id = fallback_id
+                        analysis_result.user_id = current_user.id
+                        analysis_result.form_data = json.dumps(local_form_data, ensure_ascii=False)
+                        analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
+                        analysis_result.project_name = project_name
+                        analysis_result.project_description = local_form_data.get('projectDescription', '') if local_form_data else ''
+                        analysis_result.team_size = len(local_form_data.get('keyPersons', [])) if local_form_data else 0
+                        analysis_result.analysis_type = 'fallback_network'
+                        db.session.add(analysis_result)
+                        db.session.commit()
+                else:
+                    # 没有现有fallback，创建新的
+                    fallback_id = str(uuid.uuid4())
+                    analysis_result = AnalysisResult()
+                    analysis_result.id = fallback_id
+                    analysis_result.user_id = current_user.id
+                    analysis_result.form_data = json.dumps(local_form_data, ensure_ascii=False)
+                    analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
+                    analysis_result.project_name = project_name
+                    analysis_result.project_description = local_form_data.get('projectDescription', '') if local_form_data else ''
+                    analysis_result.team_size = len(local_form_data.get('keyPersons', [])) if local_form_data else 0
+                    analysis_result.analysis_type = 'fallback_network'
+                    db.session.add(analysis_result)
+                    db.session.commit()
                 
                 # 设置session为completed状态
                 session['analysis_status'] = 'completed'
@@ -649,7 +681,7 @@ def _internal_check_analysis_status():
 
             # 保存备用方案到数据库
             import uuid
-            import json
+
             from models import AnalysisResult
             fallback_id = str(uuid.uuid4())
             analysis_result = AnalysisResult()
@@ -731,7 +763,7 @@ def _internal_check_analysis_status():
 def _handle_analysis_execution(form_data, session):
     """处理AI分析执行"""
     import traceback
-    import json
+
     import uuid
 
     try:
@@ -794,18 +826,49 @@ def _handle_analysis_execution(form_data, session):
             import uuid
             result_id = str(uuid.uuid4())
 
-            # 创建AnalysisResult实例
-            analysis_result = AnalysisResult()
-            analysis_result.id = result_id
-            analysis_result.user_id = current_user.id  # 关联当前用户
-            analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
-            analysis_result.result_data = json.dumps(suggestions, ensure_ascii=False)
-            analysis_result.project_name = form_data.get('projectName', '')
-            analysis_result.project_description = form_data.get('projectDescription', '')
-            analysis_result.team_size = len(form_data.get('keyPersons', []))
-            analysis_result.analysis_type = 'ai_analysis'
-            db.session.add(analysis_result)
-            db.session.commit()
+            # 创建AnalysisResult实例（添加重复性检查）
+            from datetime import datetime, timedelta
+            
+            # 检查是否已存在相同项目的分析结果（防止重复保存）
+            project_name = form_data.get('projectName', '')
+            existing_result = AnalysisResult.query.filter_by(
+                user_id=current_user.id,
+                project_name=project_name,
+                analysis_type='ai_analysis'
+            ).order_by(AnalysisResult.created_at.desc()).first()
+            
+            # 如果2分钟内已有相同的分析结果，使用现有的
+            if existing_result:
+                time_diff = datetime.utcnow() - existing_result.created_at
+                if time_diff < timedelta(minutes=2):
+                    app.logger.info(f"⚠️ 检测到2分钟内的重复分析，使用现有记录: {existing_result.id}")
+                    result_id = existing_result.id
+                else:
+                    # 超过2分钟，创建新的分析结果
+                    analysis_result = AnalysisResult()
+                    analysis_result.id = result_id
+                    analysis_result.user_id = current_user.id  # 关联当前用户
+                    analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                    analysis_result.result_data = json.dumps(suggestions, ensure_ascii=False)
+                    analysis_result.project_name = project_name
+                    analysis_result.project_description = form_data.get('projectDescription', '')
+                    analysis_result.team_size = len(form_data.get('keyPersons', []))
+                    analysis_result.analysis_type = 'ai_analysis'
+                    db.session.add(analysis_result)
+                    db.session.commit()
+            else:
+                # 没有现有分析结果，创建新的
+                analysis_result = AnalysisResult()
+                analysis_result.id = result_id
+                analysis_result.user_id = current_user.id  # 关联当前用户
+                analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
+                analysis_result.result_data = json.dumps(suggestions, ensure_ascii=False)
+                analysis_result.project_name = project_name
+                analysis_result.project_description = form_data.get('projectDescription', '')
+                analysis_result.team_size = len(form_data.get('keyPersons', []))
+                analysis_result.analysis_type = 'ai_analysis'
+                db.session.add(analysis_result)
+                db.session.commit()
 
             # 在session中只存储最小必要数据，避免cookie过大
             # 只保存项目名称用于显示，完整数据从数据库读取
@@ -956,7 +1019,7 @@ def results():
             app.logger.info(f"Using result_id from URL parameter: {url_result_id}")
             try:
                 from models import AnalysisResult
-                import json
+    
                 
                 # 直接通过URL参数中的ID获取分析记录
                 analysis_record = AnalysisResult.query.filter_by(id=url_result_id).first()
@@ -1007,7 +1070,7 @@ def results():
             app.logger.warning(f"Found result_id {result_id} but status is {status}, attempting recovery")
             try:
                 from models import AnalysisResult
-                import json
+    
 
                 analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
                 if analysis_record:
@@ -1036,7 +1099,7 @@ def results():
         if form_data and not result_id:
             try:
                 from models import AnalysisResult
-                import json
+    
 
                 project_name = form_data.get('projectName', '')
                 if project_name:
@@ -1064,7 +1127,7 @@ def results():
         if form_data and result_id:
             try:
                 from models import AnalysisResult
-                import json
+    
 
                 # 检查当前result_id对应的记录类型
                 current_record = AnalysisResult.query.filter_by(id=result_id).first()
@@ -1130,7 +1193,7 @@ def results():
             if result_id:
                 try:
                     from models import AnalysisResult
-                    import json
+        
 
                     analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
 
@@ -1213,7 +1276,7 @@ def results():
                     # 将备用方案也保存到数据库
                     try:
                         import uuid
-                        import json
+            
                         from models import AnalysisResult
                         fallback_id = str(uuid.uuid4())
 
@@ -1264,7 +1327,7 @@ def results():
             if result_id:
                 try:
 
-                    import json
+        
                     from models import AnalysisResult
                     analysis_record = AnalysisResult.query.filter_by(id=result_id).first()
                     if analysis_record and analysis_record.result_data:
@@ -1286,7 +1349,7 @@ def results():
                 # 保存到数据库
                 try:
                     import uuid
-                    import json
+        
                     from models import AnalysisResult
 
                     emergency_id = str(uuid.uuid4())
@@ -1429,26 +1492,57 @@ def generate():
         # Store form data in session - 保存到数据库而不是session
         from flask import session
         
-        # 保存表单数据到FormSubmission表
+        # 保存表单数据到FormSubmission表（添加重复性检查）
         try:
             from models import FormSubmission
             from datetime import datetime
-            import json
             
-            submission_id = str(uuid.uuid4())
-            form_submission = FormSubmission()
-            form_submission.id = submission_id
-            form_submission.user_id = current_user.id
-            form_submission.project_name = form_data.get('projectName', '')
-            form_submission.project_description = form_data.get('projectDescription', '')
-            form_submission.key_persons_data = json.dumps(form_data.get('keyPersons', []), ensure_ascii=False)
-            form_submission.form_data_complete = json.dumps(form_data, ensure_ascii=False)
-            form_submission.status = 'submitted'
-            form_submission.created_at = datetime.utcnow()
-            form_submission.updated_at = datetime.utcnow()
+            # 检查是否已存在相同的表单提交（防止重复提交）
+            existing_submission = FormSubmission.query.filter_by(
+                user_id=current_user.id,
+                project_name=form_data.get('projectName', ''),
+                status='submitted'
+            ).order_by(FormSubmission.created_at.desc()).first()
             
-            db.session.add(form_submission)
-            db.session.commit()
+            # 如果5分钟内有相同项目的提交，使用现有的而不是创建新的
+            if existing_submission:
+                from datetime import datetime, timedelta
+                time_diff = datetime.utcnow() - existing_submission.created_at
+                if time_diff < timedelta(minutes=5):
+                    app.logger.info(f"⚠️ 检测到5分钟内的重复提交，使用现有记录: {existing_submission.id}")
+                    submission_id = existing_submission.id
+                else:
+                    # 超过5分钟，创建新的提交
+                    submission_id = str(uuid.uuid4())
+                    form_submission = FormSubmission()
+                    form_submission.id = submission_id
+                    form_submission.user_id = current_user.id
+                    form_submission.project_name = form_data.get('projectName', '')
+                    form_submission.project_description = form_data.get('projectDescription', '')
+                    form_submission.key_persons_data = json.dumps(form_data.get('keyPersons', []), ensure_ascii=False)
+                    form_submission.form_data_complete = json.dumps(form_data, ensure_ascii=False)
+                    form_submission.status = 'submitted'
+                    form_submission.created_at = datetime.utcnow()
+                    form_submission.updated_at = datetime.utcnow()
+                    
+                    db.session.add(form_submission)
+                    db.session.commit()
+            else:
+                # 没有现有提交，创建新的
+                submission_id = str(uuid.uuid4())
+                form_submission = FormSubmission()
+                form_submission.id = submission_id
+                form_submission.user_id = current_user.id
+                form_submission.project_name = form_data.get('projectName', '')
+                form_submission.project_description = form_data.get('projectDescription', '')
+                form_submission.key_persons_data = json.dumps(form_data.get('keyPersons', []), ensure_ascii=False)
+                form_submission.form_data_complete = json.dumps(form_data, ensure_ascii=False)
+                form_submission.status = 'submitted'
+                form_submission.created_at = datetime.utcnow()
+                form_submission.updated_at = datetime.utcnow()
+                
+                db.session.add(form_submission)
+                db.session.commit()
             
             # Session中保存submission ID和项目名称
             session['form_submission_id'] = submission_id
@@ -1478,7 +1572,6 @@ def generate():
         app.logger.info(f"Generate route - Session permanent: {session.permanent}, Modified: {session.modified}")
 
         # Log the received data
-        import json
         app.logger.info(f"Received form data: {json.dumps(form_data, ensure_ascii=False, indent=2)}")
         app.logger.info(f"Session data stored successfully - Temp ID: {session.get('analysis_form_id')}, Project: {session.get('analysis_project_name')}")
         
@@ -1810,7 +1903,6 @@ def view_analysis_record(record_id):
     """查看特定的分析记录详情"""
     try:
         from models import AnalysisResult
-        import json
 
         # 获取指定的分析记录
         record = AnalysisResult.query.filter_by(id=record_id).first()

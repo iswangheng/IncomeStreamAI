@@ -6,6 +6,7 @@ import uuid
 import time
 import signal
 from datetime import datetime
+from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory, Response, session
@@ -183,7 +184,13 @@ def login():
             # 重定向到用户原本要访问的页面，或首页
             next_page = request.args.get('next')
             if next_page:
-                return redirect(next_page)
+                # 验证重定向URL以防止开放重定向攻击
+                parsed_url = urlparse(next_page)
+                # 只允许相对URL或同域名URL
+                if not parsed_url.netloc or parsed_url.netloc == request.host:
+                    return redirect(next_page)
+                # 如果是外部URL，重定向到首页
+                flash('无效的重定向URL，已重定向到首页', 'warning')
             return redirect(url_for('index'))
         else:
             flash('手机号或密码错误，请重试', 'error')

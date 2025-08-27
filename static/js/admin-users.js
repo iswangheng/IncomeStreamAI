@@ -386,13 +386,25 @@ function showToast(message, type = 'info') {
     // 创建toast元素
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; margin-left: auto;">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
+    
+    // 安全地构建DOM结构，避免XSS
+    const icon = document.createElement('i');
+    icon.className = `fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}`;
+    
+    const messageSpan = document.createElement('span');
+    messageSpan.textContent = message; // 使用textContent而不是innerHTML确保安全
+    
+    const closeButton = document.createElement('button');
+    closeButton.style.cssText = 'background: none; border: none; color: inherit; cursor: pointer; margin-left: auto;';
+    closeButton.onclick = function() { this.parentElement.remove(); };
+    
+    const closeIcon = document.createElement('i');
+    closeIcon.className = 'fas fa-times';
+    closeButton.appendChild(closeIcon);
+    
+    toast.appendChild(icon);
+    toast.appendChild(messageSpan);
+    toast.appendChild(closeButton);
 
     // 添加到页面
     document.body.appendChild(toast);

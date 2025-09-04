@@ -1034,33 +1034,7 @@
                 {% endif %}
             </div>
 
-            <!-- 框架逻辑 -->
-            {% if pipeline.framework_logic %}
-            <div class="framework-logic">
-                <div class="framework-title">
-                    <i class="fas fa-project-diagram"></i>
-                    框架逻辑设计
-                </div>
-                <div class="framework-grid">
-                    <div class="framework-item">
-                        <h5><i class="fas fa-link"></i> 资源串联链条</h5>
-                        <p>{{ pipeline.framework_logic.resource_chain }}</p>
-                    </div>
-                    <div class="framework-item">
-                        <h5><i class="fas fa-heart"></i> 动机匹配</h5>
-                        <p>{{ pipeline.framework_logic.motivation_match }}</p>
-                    </div>
-                    <div class="framework-item">
-                        <h5><i class="fas fa-shield-alt"></i> 设计者地位</h5>
-                        <p>{{ pipeline.framework_logic.designer_position }}</p>
-                    </div>
-                    <div class="framework-item">
-                        <h5><i class="fas fa-piggy-bank"></i> 设计者收益</h5>
-                        <p>{{ pipeline.framework_logic.designer_income }}</p>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+            
 
             <!-- 参与方结构 -->
             {% if pipeline.parties_structure %}

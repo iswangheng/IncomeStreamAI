@@ -80,15 +80,9 @@
         //   "make_them_happy": "如何吸引和激励该角色加入"
         // }
       ],
-      "framework_logic": {
-        "resource_chain": "资源如何串联形成闭环（框架描述，不写平台与频次）",
-        "motivation_match": "各方动机如何被满足（框架描述）",
-        "designer_position": "设计者在框架中的统筹/防绕行机制（如共管入口、合同/结算口径）",
-        "designer_income": "设计者通过哪一类非劳务方式获得收益（须属于七大类之一或组合）"
-      },
       "mvp": "最小闭环：用1-3句话说明方案如何自洽（不写执行细节）",
       "weak_link": "闭环中最脆弱的一环及原因（框架层面）",
-      "revenue_trigger": "再次明确钱从哪来，并指明对应的非劳务类型（七大类之一或组合）",
+      "revenue_trigger": "需要标注清楚在这个闭环中到底是谁来掏钱",
       "risks_and_planB": [
         { "risk": "具体风险1（框架层面）", "mitigation": "对应的应对方案（框架层面）" },
         { "risk": "具体风险2", "mitigation": "对应的应对方案" }

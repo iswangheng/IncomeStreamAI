@@ -26,6 +26,9 @@ db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key_change_in_production")
 
+# 启用调试模式以显示详细错误信息
+app.config['DEBUG'] = True
+
 # Database configuration
 database_url = os.environ.get("DATABASE_URL")
 if not database_url:

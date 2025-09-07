@@ -1118,13 +1118,12 @@
             const projectDescription = document.getElementById('project_description').value.trim();
 
             if (!projectName || !projectDescription) {
-                alert('请填写项目名称和背景描述');
+                showNotification('⚠️ 请填写项目名称和背景描述', 'warning');
                 return;
             }
 
-            // Add submission animation
+            // 禁用按钮防止重复提交，加载动画由统一的页面加载系统处理
             const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在分析...';
             submitBtn.disabled = true;
 
             // Collect form data

@@ -360,6 +360,20 @@ def start_analysis():
     """专门用于启动AI分析的接口 - 增强错误处理，确保始终返回JSON"""
     # 最外层错误捕获 - 防止任何错误导致前端收到空响应
     try:
+        # 检查用户AI分析额度
+        if not current_user.has_quota():
+            app.logger.warning(f"User {current_user.id} has no quota left: {current_user.quota_display}")
+            return jsonify({
+                'status': 'error',
+                'message': f'您的AI分析额度已用完（{current_user.quota_display}），请联系管理员增加额度',
+                'error_code': 'NO_QUOTA',
+                'quota_info': {
+                    'used': current_user.used_quota,
+                    'total': current_user.ai_quota,
+                    'remaining': current_user.remaining_quota
+                }
+            })
+        
         form_data = get_form_data_from_db(session)
         if not form_data:
             return jsonify({
@@ -861,7 +875,12 @@ def _handle_analysis_execution(form_data, session):
                         analysis_result.analysis_type = 'ai_analysis'
                         db.session.add(analysis_result)
                         db.session.commit()
-                        app.logger.info(f"✅ 创建新的分析记录: {result_id}")
+                        # 成功创建新记录后，消耗用户AI分析额度
+                        if current_user.consume_quota():
+                            db.session.commit()  # 保存额度变更
+                            app.logger.info(f"✅ 创建新的分析记录: {result_id}，消耗额度1次，剩余: {current_user.remaining_quota}")
+                        else:
+                            app.logger.warning(f"⚠️ 额度消耗失败，用户当前额度: {current_user.quota_display}")
                 else:
                     # 没有现有分析结果，创建新的
                     analysis_result = AnalysisResult()
@@ -875,7 +894,12 @@ def _handle_analysis_execution(form_data, session):
                     analysis_result.analysis_type = 'ai_analysis'
                     db.session.add(analysis_result)
                     db.session.commit()
-                    app.logger.info(f"✅ 创建首个分析记录: {result_id}")
+                    # 成功创建新记录后，消耗用户AI分析额度
+                    if current_user.consume_quota():
+                        db.session.commit()  # 保存额度变更
+                        app.logger.info(f"✅ 创建首个分析记录: {result_id}，消耗额度1次，剩余: {current_user.remaining_quota}")
+                    else:
+                        app.logger.warning(f"⚠️ 额度消耗失败，用户当前额度: {current_user.quota_display}")
                     
             except Exception as db_error:
                 app.logger.error(f"❌ 数据库操作失败: {str(db_error)}")

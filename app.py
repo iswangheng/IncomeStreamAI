@@ -1908,7 +1908,6 @@ def generate_fallback_result(form_data, reason="AI服务暂时不可用"):
     return {
         "overview": {
             "situation": f"【默认方案】由于{reason}，基于您的项目「{project_name}」和现有{len(key_persons)}位关键人物，设计者处于统筹位置，通过整合各方资源形成非劳务收入管道。当前局势下需要明确各方动机匹配度并补齐关键角色。",
-            "income_type": "【默认】居间收益 + 团队收益组合",
             "core_insight": "【默认】通过设计者的统筹位置，将各方资源串联形成闭环，设计者获得居间撮合费用和团队协作分成，避免纯劳务付出。",
             "gaps": gaps,
             "suggested_roles_to_hunt": suggested_roles

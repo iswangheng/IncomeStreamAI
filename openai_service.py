@@ -343,7 +343,7 @@ class AngelaAI:
         # 验证overview结构
         overview = result.get('overview', {})
         required_overview_keys = [
-            'situation', 'income_type', 'core_insight', 'gaps',
+            'situation', 'core_insight', 'gaps',
             'suggested_roles_to_hunt'
         ]
         if not all(key in overview for key in required_overview_keys):
@@ -508,8 +508,6 @@ class AngelaAI:
             "overview": {
                 "situation":
                 f"基于【意识+能量+能力=结果】公式分析：{project_name}具备初步资源基础，设计者作为统筹方整合现有关键人物资源，构建撮合型非劳务收入管道。意识来自设计者的规则设计，能量来自关键人物的积极参与，能力借用各方专业资源。",
-                "income_type":
-                "居间（撮合费/中介费）",
                 "core_insight":
                 "利用现有关键人物的专业能力和客户基础，设计者作为统筹方制定合作规则和质量标准，通过撮合服务建立持续的非劳务收入管道，关键在于防绕过机制和共管结算。",
                 "gaps": ["明确合作细则", "建立防绕过机制"]

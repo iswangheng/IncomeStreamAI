@@ -310,7 +310,7 @@
     /* 导航栏移动端优化 */
     .navigation-bar .nav-content {
         padding: 0 16px !important;
-        overflow: hidden;
+        overflow: visible;
     }
 
     /* 隐藏桌面端按钮 */

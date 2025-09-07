@@ -1,0 +1,12 @@
+DEBUG:openai._base_client:HTTP Response: POST https://api.openai.com/v1/chat/completions "200 OK" Headers([('date', 'Sun, 07 Sep 2025 01:12:42 GMT'), ('content-type', 'application/json'), ('transfer-encoding', 'chunked'), ('connection', 'keep-alive'), ('access-control-expose-headers', 'X-Request-ID'), ('openai-organization', 'user-fsjlevyvpkbu78znu40fydd6'), ('openai-processing-ms', '18784'), ('openai-project', 'proj_ZYJojUT27fMEXvOCbZCxkZ53'), ('openai-version', '2020-10-01'), ('x-envoy-upstream-service-time', '18787'), ('x-ratelimit-limit-requests', '500'), ('x-ratelimit-limit-tokens', '30000'), ('x-ratelimit-remaining-requests', '499'), ('x-ratelimit-remaining-tokens', '26374'), ('x-ratelimit-reset-requests', '120ms'), ('x-ratelimit-reset-tokens', '7.252s'), ('x-request-id', 'req_ff165249efef45998e0612ffc5a97e49'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=nLZHIZWsxYAagsMtan3buZVYm9..uR3UZtw1xPJ9c3g-1757207562-1.0.1.1-s4csvqYvTCtqnOteGpFoYBl5mShfZ1b_rLXvsL3OfhQIQvR6Cbjy5AtFvAN2SoSiSOPoVC3UZIiMHJlDaxWYwyc_Tre7M18IcDJ5QV_ctUk; path=/; expires=Sun, 07-Sep-25 01:42:42 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('x-content-type-options', 'nosniff'), ('set-cookie', '_cfuvid=ecaVzBSjTDg8_HrwCfu2qMT.7svdFdpkrtKZU8oNtTY-1757207562588-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), ('server', 'cloudflare'), ('cf-ray', '97b25668afee113b-ORD'), ('content-encoding', 'gzip'), ('alt-svc', 'h3=":443"; ma=86400')])
+DEBUG:openai._base_client:request_id: req_ff165249efef45998e0612ffc5a97e49
+INFO:openai_service:✅ OpenAI API调用成功
+WARNING:openai_service:Pipeline 0 missing required keys. Has: ['id', 'name', 'income_mechanism', 'parties_structure', 'mvp', 'weak_link', 'revenue_trigger', 'risks_and_planB', 'first_step', 'labor_load_estimate'], Required: ['id', 'name', 'income_mechanism', 'parties_structure', 'framework_logic', 'mvp', 'weak_link', 'revenue_trigger', 'risks_and_planB', 'first_step', 'labor_load_estimate']
+ERROR:openai_service:💥 AI generation error: AI返回结构不完整
+ERROR:openai_service:💥 Error type: ValueError
+ERROR:openai_service:💥 Full traceback: Traceback (most recent call last):
+  File "/home/runner/workspace/openai_service.py", line 312, in generate_income_paths
+    raise ValueError("AI返回结构不完整")
+ValueError: AI返回结构不完整
+
+ERROR:openai_service:💥 This error caused fallback result to be used instead of real OpenAI analysis

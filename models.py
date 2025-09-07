@@ -129,20 +129,22 @@ class AnalysisResult(db.Model):
 
     @property
     def created_at_display(self):
-        """格式化显示创建时间"""
+        """格式化创建时间显示（UTC+8北京时间）"""
         if self.created_at:
-            return self.created_at.strftime('%Y-%m-%d %H:%M')
+            # 将UTC时间转换为UTC+8（北京时间）
+            from datetime import timedelta
+            beijing_time = self.created_at + timedelta(hours=8)
+            return beijing_time.strftime('%Y年%m月%d日 %H:%M')
         return '未知时间'
 
     @property
     def analysis_type_display(self):
-        """格式化显示分析类型"""
-        type_map = {
-            'ai_analysis': 'AI深度分析',
-            'fallback': '备用方案',
-            'emergency_fallback': '应急方案'
-        }
-        return type_map.get(self.analysis_type, '未知类型')
+        """格式化分析类型显示"""
+        if self.analysis_type == 'ai_analysis':
+            return 'AI深度分析'
+        elif self.analysis_type == 'fallback':
+            return '基础建议方案'
+        return '未知类型'
 
     def __repr__(self):
         return f'<AnalysisResult {self.id}>'
@@ -183,7 +185,7 @@ class ModelConfig(db.Model):
                 timeout=timeout
             )
             db.session.add(config)
-        
+
         db.session.commit()
         return config
 
@@ -225,4 +227,3 @@ class FormSubmission(db.Model):
 
     def __repr__(self):
         return f'<FormSubmission {self.id}: {self.project_name}>'
-

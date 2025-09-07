@@ -34,6 +34,12 @@
     --elegant-bg-primary: #FFFFFF;
     --elegant-bg-secondary: #F2F2F7;
     --elegant-bg-tertiary: #FFFFFF;
+    
+    /* AI额度相关色彩 */
+    --quota-progress-bg: #E5E7EB;
+    --quota-progress-fill: #10B981;
+    --quota-warning: #F59E0B;
+    --quota-danger: #EF4444;
 
     /* 阴影系统 */
     --elegant-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -452,6 +458,47 @@
 .status-badge.inactive {
     background: rgba(255, 59, 48, 0.1);
     color: var(--elegant-error);
+}
+
+/* AI分析额度显示 */
+.quota-display {
+    display: flex;
+    flex-direction: column;
+    gap: var(--elegant-space-1);
+}
+
+.quota-text {
+    font-size: var(--elegant-text-sm);
+    font-weight: 600;
+    color: var(--elegant-text-primary);
+}
+
+.quota-progress {
+    width: 100%;
+    height: 4px;
+    background: var(--quota-progress-bg);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.quota-progress-bar {
+    height: 100%;
+    background: var(--quota-progress-fill);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.quota-progress-bar[style*="100%"] {
+    background: var(--quota-danger);
+}
+
+.quota-progress-bar[style*="8"]:not([style*="80%"]):not([style*="81%"]):not([style*="82%"]):not([style*="83%"]):not([style*="84%"]):not([style*="85%"]):not([style*="86%"]):not([style*="87%"]):not([style*="88%"]):not([style*="89%"]) {
+    background: var(--quota-warning);
+}
+
+.quota-remaining {
+    font-size: var(--elegant-text-xs);
+    color: var(--elegant-text-secondary);
 }
 
 /* 用户卡片底部 */

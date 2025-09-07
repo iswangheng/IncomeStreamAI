@@ -132,6 +132,16 @@ function renderUsersTable(users) {
                             <span class="detail-label">最后登录</span>
                             <span class="detail-value">${user.last_login_display}</span>
                         </div>
+                        <div class="detail-item">
+                            <span class="detail-label">AI分析额度</span>
+                            <div class="quota-display">
+                                <span class="quota-text">${user.quota_display}</span>
+                                <div class="quota-progress">
+                                    <div class="quota-progress-bar" style="width: ${user.quota_usage_percentage}%"></div>
+                                </div>
+                                <small class="quota-remaining">${user.remaining_quota}次剩余</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

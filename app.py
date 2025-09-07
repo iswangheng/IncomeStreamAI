@@ -2065,7 +2065,13 @@ def api_users():
                 'last_login': user.last_login.isoformat() if user.last_login else None,
                 'created_at_display': created_at_display,
                 'last_login_display': last_login_display,
-                'current_user_id': current_user.id
+                'current_user_id': current_user.id,
+                # AI分析额度信息
+                'ai_quota': user.ai_quota,
+                'used_quota': user.used_quota,
+                'remaining_quota': user.remaining_quota,
+                'quota_display': user.quota_display,
+                'quota_usage_percentage': user.quota_usage_percentage
             })
 
         # 统计数据
@@ -2183,6 +2189,9 @@ def admin_edit_user(user_id):
         phone = request.form.get('phone', '').strip()
         password = request.form.get('password', '').strip()
         is_admin = request.form.get('is_admin') == 'on'
+        # AI分析额度调整
+        ai_quota = request.form.get('ai_quota', '')
+        used_quota = request.form.get('used_quota', '')
         redirect_to = request.args.get('redirect_to') # Get redirect_to parameter
 
         # 验证输入
@@ -2205,6 +2214,26 @@ def admin_edit_user(user_id):
             user.name = name
             user.phone = phone
             user.is_admin = is_admin
+            
+            # 处理AI分析额度调整
+            if ai_quota.isdigit():
+                new_ai_quota = int(ai_quota)
+                if 0 <= new_ai_quota <= 100000:
+                    user.ai_quota = new_ai_quota
+                    app.logger.info(f"管理员调整用户 {user.id} 的AI总额度为: {new_ai_quota}")
+                else:
+                    flash('AI分析总额度必须在0-100000范围内', 'error')
+                    return render_template('admin/edit_user.html', user=user)
+            
+            if used_quota.isdigit():
+                new_used_quota = int(used_quota)
+                if 0 <= new_used_quota <= 100000:
+                    user.used_quota = new_used_quota
+                    app.logger.info(f"管理员调整用户 {user.id} 的已使用额度为: {new_used_quota}")
+                else:
+                    flash('已使用额度必须在0-100000范围内', 'error')
+                    return render_template('admin/edit_user.html', user=user)
+            
             db.session.commit()
 
             # 如果提供了新密码，则更新密码

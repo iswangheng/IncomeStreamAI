@@ -186,6 +186,92 @@
                 </div>
             </div>
 
+            <!-- AI分析额度设置区域 -->
+            <div class="quota-section">
+                <div class="section-header">
+                    <h4 class="section-title">
+                        <i class="fas fa-brain"></i>
+                        AI分析额度管理
+                    </h4>
+                </div>
+                
+                <div class="quota-info-card">
+                    <div class="quota-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">总额度</div>
+                            <div class="stat-value">{{ user.ai_quota }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">已使用</div>
+                            <div class="stat-value used">{{ user.used_quota }}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">剩余</div>
+                            <div class="stat-value remaining">{{ user.remaining_quota }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quota-progress-section">
+                        <div class="progress-label">使用进度</div>
+                        <div class="quota-progress">
+                            <div class="quota-progress-bar" style="width: {{ user.quota_usage_percentage }}%"></div>
+                        </div>
+                        <div class="progress-text">{{ user.quota_display }} ({{ "%.1f"|format(user.quota_usage_percentage) }}%)</div>
+                    </div>
+                </div>
+
+                <div class="quota-controls">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ai_quota" class="form-label">设置总额度</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-chart-line input-icon"></i>
+                                <input type="number"
+                                       id="ai_quota"
+                                       name="ai_quota"
+                                       class="form-control"
+                                       placeholder="请输入AI分析总额度"
+                                       min="0"
+                                       max="100000"
+                                       value="{{ user.ai_quota }}">
+                            </div>
+                            <div class="form-help">用户可以使用的AI分析总次数</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="used_quota" class="form-label">已使用额度</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-chart-bar input-icon"></i>
+                                <input type="number"
+                                       id="used_quota"
+                                       name="used_quota"
+                                       class="form-control"
+                                       placeholder="请输入已使用次数"
+                                       min="0"
+                                       max="100000"
+                                       value="{{ user.used_quota }}">
+                            </div>
+                            <div class="form-help">用户已经使用的AI分析次数</div>
+                        </div>
+                    </div>
+
+                    <div class="quota-actions">
+                        <button type="button" class="btn btn-outline" onclick="resetQuota()">
+                            <i class="fas fa-undo"></i>
+                            重置使用记录
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="addQuota(10)">
+                            <i class="fas fa-plus"></i>
+                            增加10次
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="addQuota(50)">
+                            <i class="fas fa-plus-circle"></i>
+                            增加50次
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-actions">
                 <a href="{{ url_for('admin_dashboard') }}?tab=users" class="btn btn-secondary">
                     <i class="fas fa-times me-2"></i>
@@ -318,6 +404,54 @@ document.getElementById('confirm_password').addEventListener('input', function(e
         e.target.classList.remove('is-valid', 'is-invalid');
     }
 });
+
+// AI分析额度管理函数
+function resetQuota() {
+    if (confirm('确定要重置该用户的使用记录吗？这将把已使用次数重置为0。')) {
+        document.getElementById('used_quota').value = '0';
+        updateQuotaDisplay();
+    }
+}
+
+function addQuota(amount) {
+    const currentQuota = parseInt(document.getElementById('ai_quota').value) || 0;
+    const newQuota = currentQuota + amount;
+    document.getElementById('ai_quota').value = newQuota;
+    updateQuotaDisplay();
+}
+
+function updateQuotaDisplay() {
+    const totalQuota = parseInt(document.getElementById('ai_quota').value) || 0;
+    const usedQuota = parseInt(document.getElementById('used_quota').value) || 0;
+    const remainingQuota = Math.max(0, totalQuota - usedQuota);
+    const usagePercentage = totalQuota > 0 ? (usedQuota / totalQuota * 100) : 0;
+
+    // 更新显示的统计数据
+    document.querySelector('.stat-value').textContent = totalQuota;
+    document.querySelector('.stat-value.used').textContent = usedQuota;
+    document.querySelector('.stat-value.remaining').textContent = remainingQuota;
+    
+    // 更新进度条
+    const progressBar = document.querySelector('.quota-progress-bar');
+    progressBar.style.width = usagePercentage + '%';
+    
+    // 更新进度条颜色
+    if (usagePercentage >= 100) {
+        progressBar.style.background = 'var(--quota-danger)';
+    } else if (usagePercentage >= 80) {
+        progressBar.style.background = 'var(--quota-warning)';
+    } else {
+        progressBar.style.background = 'var(--quota-progress-fill)';
+    }
+    
+    // 更新进度文本
+    document.querySelector('.progress-text').textContent = 
+        `${usedQuota}/${totalQuota} (${usagePercentage.toFixed(1)}%)`;
+}
+
+// 监听额度输入变化
+document.getElementById('ai_quota').addEventListener('input', updateQuotaDisplay);
+document.getElementById('used_quota').addEventListener('input', updateQuotaDisplay);
 
 // 自动消失的消息提示功能
 document.addEventListener('DOMContentLoaded', function() {
@@ -865,6 +999,149 @@ document.addEventListener('DOMContentLoaded', function() {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--space-3);
+    }
+}
+
+/* AI分析额度设置样式 */
+.quota-section {
+    margin-bottom: var(--space-8);
+    padding: var(--space-6);
+    background: var(--color-gray-50);
+    border-radius: var(--radius-lg);
+}
+
+.quota-info-card {
+    background: var(--color-bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+    border: 1px solid var(--color-gray-200);
+}
+
+.quota-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.stat-item {
+    text-align: center;
+    padding: var(--space-4);
+    background: var(--color-gray-50);
+    border-radius: var(--radius-md);
+}
+
+.stat-label {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--color-text-primary);
+}
+
+.stat-value.used {
+    color: var(--quota-warning);
+}
+
+.stat-value.remaining {
+    color: var(--quota-progress-fill);
+}
+
+.quota-progress-section {
+    border-top: 1px solid var(--color-gray-200);
+    padding-top: var(--space-4);
+}
+
+.progress-label {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-2);
+    font-weight: 500;
+}
+
+.quota-progress {
+    width: 100%;
+    height: 8px;
+    background: var(--quota-progress-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: var(--space-2);
+}
+
+.quota-progress-bar {
+    height: 100%;
+    background: var(--quota-progress-fill);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.progress-text {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    text-align: center;
+}
+
+.quota-controls {
+    margin-top: var(--space-4);
+}
+
+.quota-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--color-gray-300);
+    color: var(--color-text-primary);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.btn-outline:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.1);
+}
+
+/* 额度相关颜色变量 */
+:root {
+    --quota-progress-bg: #E5E7EB;
+    --quota-progress-fill: #10B981;
+    --quota-warning: #F59E0B;
+    --quota-danger: #EF4444;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .quota-stats {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+    
+    .quota-actions {
+        flex-direction: column;
+    }
+    
+    .btn-outline {
+        justify-content: center;
     }
 }
 </style>

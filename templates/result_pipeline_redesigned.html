@@ -502,7 +502,7 @@
             gap: var(--space-6);
             position: relative;
         }
-        
+
         /* 彻底隐藏所有编号圆圈和连接线 */
         .party-card::before,
         .party-card::after,
@@ -510,14 +510,14 @@
         .party-card *::after {
             display: none !important;
         }
-        
+
         .business-flow-grid::before,
         .business-flow-grid::after,
         .business-flow-section::before,
         .business-flow-section::after {
             display: none !important;
         }
-        
+
         /* 恢复待补齐标签 */
         .party-card.pending::before {
             content: '待补齐' !important;
@@ -825,56 +825,56 @@
             .main-container {
                 padding: var(--space-4) var(--space-2);
             }
-            
+
             .page-title {
                 font-size: 1.5rem;
             }
-            
+
             .page-header {
                 margin-bottom: var(--space-2);
                 padding: var(--space-2) var(--space-2);
             }
-            
+
             .main-container {
                 margin-top: 0;
                 padding: var(--space-1) var(--space-2);
             }
-            
+
             .formula-display {
                 font-size: 0.8rem;
                 padding: var(--space-1) var(--space-2);
             }
-            
+
             .pipeline-name {
                 font-size: 1.5rem;
             }
-            
+
             .framework-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .pipeline-header {
                 flex-direction: column;
                 align-items: stretch;
                 gap: var(--space-4);
             }
-            
+
             .business-flow-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .designer-details {
                 grid-template-columns: 1fr;
             }
-            
+
             .designer-card {
                 padding: var(--space-3);
             }
-            
+
             .designer-title {
                 font-size: 1.2rem;
             }
-            
+
             .designer-section {
                 margin-bottom: var(--space-4);
             }
@@ -932,11 +932,11 @@
                     <p class="project-info-subtitle">您提交的项目基本信息</p>
                 </div>
             </div>
-            
+
             {% if form_data.projectName %}
             <h2 class="project-name">{{ form_data.projectName }}</h2>
             {% endif %}
-            
+
             {% if form_data.projectDescription %}
             <div class="project-description">
                 {{ form_data.projectDescription }}
@@ -952,7 +952,7 @@
                 <i class="fas fa-eye"></i>
                 整体局势分析
             </div>
-            
+
             <div class="insight-grid">
                 <div class="insight-item">
                     <h4><i class="fas fa-chess-board"></i> 当前局势</h4>
@@ -1034,7 +1034,7 @@
                 {% endif %}
             </div>
 
-            
+
 
             <!-- 参与方结构 -->
             {% if pipeline.parties_structure %}
@@ -1043,7 +1043,7 @@
                     <i class="fas fa-users"></i>
                     关键参与方结构
                 </div>
-                
+
                 <!-- 设计者统筹区域 -->
                 {% for party in pipeline.parties_structure %}
                 {% if party.role_type == '统筹方' %}
@@ -1052,7 +1052,7 @@
                         <div class="designer-crown">👑</div>
                         <div class="designer-title">{{ party.party }}</div>
                         <div class="designer-subtitle">项目统筹设计者 • 全局掌控者</div>
-                        
+
                         <div class="designer-details">
                             <div class="designer-detail-item">
                                 <div class="designer-detail-title">🎯 核心资源</div>
@@ -1081,10 +1081,10 @@
                     <div class="flow-title">
                         <i class="fas fa-arrow-right"></i> 业务价值流程 <i class="fas fa-arrow-left"></i>
                     </div>
-                    
+
                     <div class="business-flow-grid">
                         {% set role_order = ['需求方', '交付方', '资金方'] %}
-                        
+
                         {% for role_type in role_order %}
                         {% for party in pipeline.parties_structure %}
                         {% if party.role_type == role_type %}
@@ -1229,22 +1229,22 @@
             try {
                 // 创建Word文档内容
                 const wordContent = createWordContent();
-                
+
                 // 获取项目名称作为文件名
                 const projectNameElement = document.querySelector('.project-name');
                 const projectName = projectNameElement?.textContent || 
                                  document.querySelector('[data-project-name]')?.getAttribute('data-project-name') ||
                                  '非劳务收入管道设计方案';
-                
+
                 const fileName = `${projectName.replace(/[<>:"/\\|?*]/g, '')}.docx`;
-                
+
                 // 创建并下载Word文档
                 downloadWordDocument(wordContent, fileName);
-                
+
                 // 恢复按钮状态
                 exportBtn.innerHTML = originalText;
                 exportBtn.disabled = false;
-                
+
             } catch (error) {
                 console.error('Word导出失败:', error);
                 alert('Word导出失败，请重试');
@@ -1256,7 +1256,7 @@
         // 创建Word文档内容
         function createWordContent() {
             const content = [];
-            
+
             // 标题
             content.push('<h1>Angela AI - 非劳务收入管道设计方案</h1>');
             content.push(`<p>生成时间：${new Date().toLocaleString('zh-CN')}</p>`);
@@ -1265,7 +1265,7 @@
             // 项目概述
             const projectName = document.querySelector('.project-name')?.textContent;
             const projectDescription = document.querySelector('.project-description')?.textContent;
-            
+
             if (projectName) {
                 content.push('<h2>1. 项目概述</h2>');
                 content.push(`<h3>项目名称：${projectName}</h3>`);
@@ -1276,9 +1276,10 @@
             }
 
             // 整体分析概览
-            const insights = document.querySelectorAll('.insight-item');
-            if (insights.length > 0) {
+            const overviewCard = document.querySelector('.overview-card');
+            if (overviewCard) {
                 content.push('<h2>2. 整体局势分析</h2>');
+                const insights = overviewCard.querySelectorAll('.insight-item');
                 insights.forEach((insight, index) => {
                     const title = insight.querySelector('h4')?.textContent;
                     const text = insight.querySelector('p')?.textContent;
@@ -1287,72 +1288,122 @@
                         content.push(`<p>${text}</p>`);
                     }
                 });
-                content.push('<br>');
-            }
 
-            // 需要完善的环节
-            const gapTags = document.querySelectorAll('.gap-tag');
-            if (gapTags.length > 0) {
-                content.push('<h2>3. 需要完善的环节</h2>');
-                content.push('<ul>');
-                gapTags.forEach(tag => {
-                    content.push(`<li>${tag.textContent}</li>`);
-                });
-                content.push('</ul>');
-                content.push('<br>');
-            }
+                const gapTags = overviewCard.querySelectorAll('.gap-tag');
+                if (gapTags.length > 0) {
+                    content.push('<h3>3. 需要完善的环节</h3>');
+                    content.push('<ul>');
+                    gapTags.forEach(tag => {
+                        content.push(`<li>${tag.textContent}</li>`);
+                    });
+                    content.push('</ul>');
+                }
 
-            // 建议寻找的关键角色
-            const roleCards = document.querySelectorAll('.role-card');
-            if (roleCards.length > 0) {
-                content.push('<h2>4. 建议寻找的关键角色</h2>');
-                roleCards.forEach((card, index) => {
-                    const roleName = card.querySelector('.role-name')?.textContent;
-                    const roleContent = Array.from(card.querySelectorAll('div')).map(div => div.textContent).join(' ');
-                    
-                    if (roleName) {
-                        content.push(`<h3>4.${index + 1} ${roleName}</h3>`);
-                        content.push(`<p>${roleContent}</p>`);
-                        content.push('<br>');
-                    }
-                });
+                // 建议寻找的关键角色
+                const suggestedRolesElement = overviewCard.querySelector('.roles-suggestion');
+                if (suggestedRolesElement) {
+                    content.push('<h3>4. 建议寻找的关键角色</h3>');
+                    const roleItems = suggestedRolesElement.querySelectorAll('.role-card');
+                    roleItems.forEach((card, index) => {
+                        const roleName = card.querySelector('.role-name')?.textContent;
+                        const roleWhy = card.querySelector('.role-card div:nth-of-type(2) strong') ? card.querySelector('.role-card div:nth-of-type(2)').textContent : '';
+                        const roleWhere = card.querySelector('.role-card div:nth-of-type(3) strong') ? card.querySelector('.role-card div:nth-of-type(3)').textContent : '';
+                        const roleScript = card.querySelector('.role-script')?.textContent;
+
+                        if (roleName) {
+                            content.push(`<h4>4.${index + 1} ${roleName}</h4>`);
+                            if (roleWhy && roleWhy.includes('为什么需要：')) {
+                                content.push(`<p><strong>为什么需要：</strong></p>`);
+                                content.push(`<p>${roleWhy.replace('为什么需要：', '').trim()}</p>`);
+                            }
+                            if (roleWhere && roleWhere.includes('去哪里找：')) {
+                                content.push(`<p><strong>去哪里找：</strong></p>`);
+                                content.push(`<p>${roleWhere.replace('去哪里找：', '').trim()}</p>`);
+                            }
+                            if (roleScript && roleScript.includes('开场话术：')) {
+                                content.push(`<p><strong>开场话术：</strong></p>`);
+                                content.push(`<p>"${roleScript.replace('开场话术：', '').trim()}"</p>`);
+                            }
+                        }
+                    });
+                }
+                content.push('<br>');
             }
 
             // 管道方案
             const pipelineCards = document.querySelectorAll('.pipeline-card');
             if (pipelineCards.length > 0) {
                 content.push('<h2>5. 管道设计方案</h2>');
-                
+
                 pipelineCards.forEach((card, index) => {
                     const pipelineName = card.querySelector('.pipeline-name')?.textContent || `管道方案 ${index + 1}`;
                     content.push(`<h3>5.${index + 1} ${pipelineName}</h3>`);
 
                     // 收入机制
-                    const incomeType = card.querySelector('.income-type')?.textContent;
-                    const incomeTrigger = card.querySelector('.income-trigger')?.textContent;
-                    if (incomeType) {
-                        content.push(`<h4>收入机制</h4>`);
-                        content.push(`<p><strong>类型：</strong>${incomeType}</p>`);
-                        if (incomeTrigger) content.push(`<p><strong>触发：</strong>${incomeTrigger}</p>`);
+                    const incomeTypeElement = card.querySelector('.income-type');
+                    const incomeTriggerElement = card.querySelector('.income-trigger');
+                    const incomeSettlementElement = card.querySelector('.income-settlement');
+
+                    if (incomeTypeElement || incomeTriggerElement || incomeSettlementElement) {
+                        content.push('<h4>收入机制</h4>');
+                        if (incomeTypeElement) {
+                            content.push(`<p><strong>类型：</strong>${incomeTypeElement.textContent.trim()}</p>`);
+                        }
+                        if (incomeTriggerElement) {
+                            content.push(`<p><strong>触发：</strong>${incomeTriggerElement.textContent.trim()}</p>`);
+                        }
+                        if (incomeSettlementElement) {
+                            content.push(`<p><strong>结算：</strong>${incomeSettlementElement.textContent.trim()}</p>`);
+                        }
                     }
 
                     // 参与方结构
-                    const partyCards = card.querySelectorAll('.party-card');
-                    if (partyCards.length > 0) {
+                    const partiesSection = card.querySelector('.parties-section');
+                    if (partiesSection) {
                         content.push('<h4>参与方结构</h4>');
-                        content.push('<ol>');
-                        partyCards.forEach(party => {
-                            const partyName = party.querySelector('.party-name')?.textContent;
-                            const partyRole = party.querySelector('.party-role-badge')?.textContent;
-                            const resources = Array.from(party.querySelectorAll('.resource-tag')).map(tag => tag.textContent).join('、');
-                            
-                            if (partyName) {
-                                content.push(`<li><strong>${partyName}</strong> (${partyRole || ''})`);
-                                if (resources) content.push(`<br>资源：${resources}`);
-                                content.push('</li>');
+                        const designerSection = partiesSection.querySelector('.designer-section');
+                        if (designerSection) {
+                            const designerTitle = designerSection.querySelector('.designer-title')?.textContent;
+                            const designerSubtitle = designerSection.querySelector('.designer-subtitle')?.textContent;
+                            const designerDetailItems = designerSection.querySelectorAll('.designer-detail-item');
+
+                            if (designerTitle) {
+                                content.push(`<p><strong>${designerTitle}</strong> (${designerSubtitle || ''})</p>`);
+                                designerDetailItems.forEach(item => {
+                                    const detailTitle = item.querySelector('.designer-detail-title')?.textContent?.trim();
+                                    const detailContent = item.querySelector('div:last-child')?.textContent?.trim();
+                                    if (detailTitle && detailContent) {
+                                        content.push(`<p>• ${detailTitle.replace(/🎯|💎|🚀/g, '').trim()}：${detailContent}</p>`);
+                                    }
+                                });
                             }
-                        });
-                        content.push('</ol>');
+                        }
+
+                        const businessFlowGrid = partiesSection.querySelector('.business-flow-grid');
+                        if (businessFlowGrid) {
+                            const partyCards = businessFlowGrid.querySelectorAll('.party-card');
+                            partyCards.forEach(party => {
+                                const partyName = party.querySelector('.party-name')?.textContent;
+                                const partyRoleBadge = party.querySelector('.party-role-badge')?.textContent;
+                                const resources = Array.from(party.querySelectorAll('.resource-tag')).map(tag => tag.textContent).join('、');
+                                const roleValue = party.querySelector('.party-section-title:contains("在闭环中的价值") + div')?.textContent;
+                                const makeHappy = party.querySelector('.party-section-title:contains("如何让TA高兴") + div')?.textContent;
+
+                                if (partyName) {
+                                    content.push(`<p><strong>${partyName}</strong> (${partyRoleBadge || ''})</p>`);
+                                    if (resources) content.push(`<p>• 资源：${resources}</p>`);
+                                    if (roleValue) {
+                                        content.push(`<p>• 在闭环中的价值：</p>`);
+                                        content.push(`<p>${roleValue.trim()}</p>`);
+                                    }
+                                    if (makeHappy) {
+                                        content.push(`<p>• 如何让TA高兴：</p>`);
+                                        content.push(`<p>${makeHappy.trim()}</p>`);
+                                    }
+                                    content.push('<p></p>'); // 添加空行分隔
+                                }
+                            });
+                        }
                     }
 
                     // 关键信息
@@ -1362,15 +1413,16 @@
                         const text = info.querySelector('p')?.textContent;
                         if (title && text) {
                             content.push(`<h4>${title}</h4>`);
-                            content.push(`<p>${text}</p>`);
+                            content.push(`<p>${text.trim()}</p>`);
                         }
                     });
 
                     // 风险分析
-                    const riskItems = card.querySelectorAll('.risk-item');
-                    if (riskItems.length > 0) {
+                    const risksSection = card.querySelector('.risks-section');
+                    if (risksSection) {
                         content.push('<h4>风险分析与应对</h4>');
                         content.push('<ul>');
+                        const riskItems = risksSection.querySelectorAll('.risk-item');
                         riskItems.forEach(item => {
                             const riskHeader = item.querySelector('.risk-header')?.textContent?.replace(/⚠️/g, '').trim();
                             const riskMitigation = item.querySelector('.risk-mitigation')?.textContent?.replace(/🛡️/g, '').trim();
@@ -1384,11 +1436,20 @@
                     }
 
                     // 劳动量估算
-                    const laborEstimate = card.querySelector('.labor-estimate');
-                    if (laborEstimate) {
+                    const laborEstimateElement = card.querySelector('.labor-estimate');
+                    if (laborEstimateElement) {
                         content.push('<h4>劳动量估算</h4>');
-                        const laborText = laborEstimate.textContent.replace(/🕐|⚡/g, '').trim();
-                        content.push(`<p>${laborText}</p>`);
+                        const hoursText = laborEstimateElement.querySelector('div:first-of-type')?.textContent;
+                        const levelText = laborEstimateElement.querySelector('.labor-level')?.textContent;
+                        const alternativeText = laborEstimateElement.querySelector('div:last-of-type')?.textContent;
+
+                        if (hoursText) content.push(`<p>${hoursText.trim()}</p>`);
+                        if (levelText) content.push(`<p>${levelText.trim()}</p>`);
+                        if (alternativeText) {
+                            const alternativeContent = alternativeText.replace('降低劳动量方案：', '').trim();
+                            content.push(`<p><strong>降低劳动量方案：</strong></p>`);
+                            content.push(`<p>${alternativeContent}</p>`);
+                        }
                     }
 
                     content.push('<br>');
@@ -1495,9 +1556,9 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(link.href);
         }
-        
-        
-        
+
+
+
         // 页面加载动画
         document.addEventListener('DOMContentLoaded', function() {
             const elements = document.querySelectorAll('.fade-in-up');
@@ -1508,7 +1569,7 @@
                     }
                 });
             });
-            
+
             elements.forEach(el => {
                 observer.observe(el);
                 el.style.animationPlayState = 'paused';

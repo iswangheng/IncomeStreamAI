@@ -8,8 +8,8 @@ class PageLoadingManager {
         this.loadingOverlay = null;
         this.isLoading = false;
         this.loadingTimeout = null;
-        this.minLoadingTime = 300; // 最小显示时间，避免闪烁
-        this.maxLoadingTime = 10000; // 最大加载时间，防止卡住
+        this.maxLoadingTime = 8000; // 最大加载时间，防止卡住
+        this.loadingStartTime = 0;
         
         this.init();
     }
@@ -22,15 +22,21 @@ class PageLoadingManager {
             this.setupEventListeners();
         }
 
-        // 监听页面加载完成事件
-        window.addEventListener('load', () => this.hideLoading());
-        
-        // 监听浏览器前进后退
-        window.addEventListener('pageshow', (event) => {
-            if (event.persisted) {
-                this.hideLoading();
-            }
+        // 监听页面完全加载完成事件
+        window.addEventListener('load', () => {
+            // 延迟一点确保页面完全渲染
+            setTimeout(() => this.hideLoading(), 50);
         });
+        
+        // 监听页面显示事件（包括从缓存恢复）
+        window.addEventListener('pageshow', (event) => {
+            setTimeout(() => this.hideLoading(), 50);
+        });
+
+        // 监听DOM内容加载完成
+        if (document.readyState === 'complete') {
+            setTimeout(() => this.hideLoading(), 50);
+        }
     }
 
     setupEventListeners() {
@@ -113,17 +119,19 @@ class PageLoadingManager {
         if (this.isLoading || !this.loadingOverlay) return;
         
         this.isLoading = true;
+        this.loadingStartTime = Date.now();
         
         // 清除之前的定时器
         if (this.loadingTimeout) {
             clearTimeout(this.loadingTimeout);
         }
         
-        // 显示加载覆盖层
+        // 立即显示加载覆盖层
         this.loadingOverlay.classList.add('show');
         
         // 设置最大加载时间保护
         this.loadingTimeout = setTimeout(() => {
+            console.warn('页面加载超时，强制隐藏加载动画');
             this.hideLoading();
         }, this.maxLoadingTime);
         
@@ -134,18 +142,20 @@ class PageLoadingManager {
     hideLoading() {
         if (!this.isLoading || !this.loadingOverlay) return;
         
-        // 确保最小显示时间
-        setTimeout(() => {
-            this.isLoading = false;
-            this.loadingOverlay.classList.remove('show');
-            document.body.classList.remove('page-loading');
-            
-            // 清除定时器
-            if (this.loadingTimeout) {
-                clearTimeout(this.loadingTimeout);
-                this.loadingTimeout = null;
-            }
-        }, this.minLoadingTime);
+        const loadingDuration = Date.now() - this.loadingStartTime;
+        
+        // 立即隐藏，不需要最小时间延迟
+        this.isLoading = false;
+        this.loadingOverlay.classList.remove('show');
+        document.body.classList.remove('page-loading');
+        
+        // 清除定时器
+        if (this.loadingTimeout) {
+            clearTimeout(this.loadingTimeout);
+            this.loadingTimeout = null;
+        }
+        
+        console.log(`页面加载完成，耗时: ${loadingDuration}ms`);
     }
 
     // 手动控制加载状态的方法

@@ -108,7 +108,7 @@
         transform: translateY(-8px) scale(0.95) !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
         overflow: hidden !important;
-        z-index: 10000 !important;
+        z-index: 2147483647 !important;
         padding: 8px 0 !important;
     }
     
@@ -253,7 +253,7 @@
         height: 48px !important;
         width: 48px !important;
         position: relative !important;
-        z-index: 1000 !important;
+        z-index: 2147483647 !important;
     }
     
     .navigation-bar .mobile-menu-toggle:hover {
@@ -286,7 +286,7 @@
         visibility: hidden !important;
         transform: translateY(-10px) scale(0.95) !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        z-index: 999 !important;
+        z-index: 2147483647 !important;
         max-height: 0 !important;
         overflow: hidden !important;
         padding: 0 !important;

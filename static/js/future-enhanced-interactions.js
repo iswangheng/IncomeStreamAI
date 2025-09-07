@@ -314,7 +314,7 @@ function showToast(message, type = 'info', duration = 5000) {
             </button>
         </div>
     `;
-    
+
     toast.style.cssText = `
         position: fixed;
         top: 20px;
@@ -331,15 +331,15 @@ function showToast(message, type = 'info', duration = 5000) {
         transform: translateX(100%);
         transition: all 0.3s ease;
     `;
-    
+
     document.body.appendChild(toast);
-    
+
     // 触发入场动画
     setTimeout(() => {
         toast.style.opacity = '1';
         toast.style.transform = 'translateX(0)';
     }, 10);
-    
+
     // 自动消失
     setTimeout(() => {
         removeToastElement(toast);
@@ -460,10 +460,10 @@ handleResize(); // 初始调用
  */
 function initializeInteractions() {
     console.log('交互功能已初始化');
-    
+
     // 确保所有交互元素都已初始化
     initEnhancedEffects();
-    
+
     // 添加点击反馈效果
     const interactiveElements = document.querySelectorAll('.interactive, .btn');
     interactiveElements.forEach(element => {

@@ -334,7 +334,7 @@
 
         // 资源输入随机提示语
         const resourcePlaceholders = [
-            "微信社群5个、视频号10万粉、年度广告预算50万、产品试用码100个、活动场地一天、品牌对接人：XX",
+            "微信社群5个、社群2个、视频号10万粉、年度广告预算50万、产品试用码100个、活动场地一天、品牌对接人：XX",
             "电商渠道位3个、线下门店2家、KOL合作位2期、媒体采访资源、API授权、课程版权",
             "企业客户名单200条、招商会场地、投委会路演名额、供应链工厂档期、施工队2组"
         ];
@@ -515,7 +515,7 @@
 
         // 编辑人物姓名（内联编辑）
         function editPersonName(personId) {
-            
+
             const person = personnelData.find(p => p.id === personId);
             if (!person) {
                 console.warn('未找到人物数据:', personId);
@@ -524,16 +524,16 @@
 
             // 检测当前是否为移动端
             const isMobile = window.innerWidth <= 768;
-            
+
             // 根据屏幕大小选择合适的元素
             let nameCell;
             const personRow = document.querySelector(`[data-person-id="${personId}"]`);
-            
+
             if (!personRow) {
                 console.warn('未找到人物行元素:', personId);
                 return;
             }
-            
+
             if (isMobile) {
                 // 移动端：选择移动端布局中的姓名元素
                 nameCell = personRow.querySelector('.mobile-card-layout .row-name');
@@ -555,13 +555,13 @@
             if (nameCell.querySelector('input')) {
                 return;
             }
-            
+
             const currentName = person.name;
             const input = document.createElement('input');
             input.type = 'text';
             input.value = currentName;
             input.className = 'form-control form-control-sm name-edit-input';
-            
+
             // 移动端优化的样式
             if (isMobile) {
                 input.style.cssText = `
@@ -593,11 +593,11 @@
             nameCell.style.backgroundColor = '#f0f8ff';
             nameCell.style.borderRadius = '8px';
             nameCell.style.padding = '4px';
-            
+
             // 清空内容并添加输入框
             nameCell.innerHTML = '';
             nameCell.appendChild(input);
-            
+
             // 聚焦并选中文本
             setTimeout(() => {
                 input.focus();
@@ -607,12 +607,12 @@
             const saveName = () => {
                 const newName = input.value.trim() || '未命名';
                 person.name = newName;
-                
+
                 // 恢复视觉状态
                 nameCell.style.backgroundColor = '';
                 nameCell.style.borderRadius = '';
                 nameCell.style.padding = '';
-                
+
                 updatePersonnelTable();
 
                 // 显示保存成功提示
@@ -880,7 +880,7 @@
         function deletePerson(personId) {
             const person = personnelData.find(p => p.id === personId);
             if (!person) return;
-            
+
             showDeleteConfirm(person.name, () => {
                 personnelData = personnelData.filter(p => p.id !== personId);
                 updatePersonnelTable();
@@ -1031,12 +1031,12 @@
             // 组装对话框
             buttonContainer.appendChild(cancelBtn);
             buttonContainer.appendChild(deleteBtn);
-            
+
             dialog.appendChild(icon);
             dialog.appendChild(title);
             dialog.appendChild(message);
             dialog.appendChild(buttonContainer);
-            
+
             overlay.appendChild(dialog);
             document.body.appendChild(overlay);
 
@@ -1133,7 +1133,7 @@
             form.action = '/generate';
             form.style.display = 'none';
 
-            // 添加项目基础信息
+            // 添加Input到form
             const addInput = (name, value) => {
                 const input = document.createElement('input');
                 input.type = 'hidden';
@@ -1157,7 +1157,7 @@
 
             // 直接使用传统表单提交，避免fetch的session问题
             document.body.appendChild(form);
-            
+
             // 直接提交表单，让浏览器处理重定向
             form.submit();
             document.body.removeChild(form);
@@ -1412,7 +1412,7 @@
             const currentValue = textarea.value.trim();
             const newValue = currentValue ? currentValue + '\n' + resource : resource;
             textarea.value = newValue;
-            
+
             // 触发输入事件以更新UI
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
         }
@@ -1425,7 +1425,7 @@
             const currentValue = textarea.value.trim();
             const newValue = currentValue ? currentValue + '\n' + need : need;
             textarea.value = newValue;
-            
+
             // 触发输入事件以更新UI
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
         }
@@ -1444,17 +1444,17 @@
         // 初始化交互功能
         function initializeInteractions() {
             console.log('交互功能已初始化');
-            
+
             // 初始化人物表格
             if (typeof updatePersonnelTable === 'function') {
                 updatePersonnelTable();
             }
-            
+
             // 设置随机提示语
             if (typeof setRandomPlaceholder === 'function') {
                 setRandomPlaceholder();
             }
-            
+
             // 处理测试案例选择
             if (typeof handleDemoCaseSelection === 'function') {
                 handleDemoCaseSelection();
@@ -1465,10 +1465,10 @@
         function generateResourceSuggestionsForModal() {
             // 获取当前编辑的人物信息
             if (!currentEditingPersonId) return;
-            
+
             const person = personnelData.find(p => p.id === currentEditingPersonId);
             if (!person) return;
-            
+
             // 调用现有的更新函数
             if (typeof updateModalResourceSuggestions === 'function') {
                 updateModalResourceSuggestions(person.roles || []);
@@ -1799,7 +1799,8 @@
                                 <p>他想参与，但不能有风险或预损失。</p>
                             </div>
                             <div class="motivation-tags">
-                                <span class="motivation-tag" onclick="addNeedsSuggestion('不出钱不担责')">不出钱不担责</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('不用出钱')">不用出钱</span>
+                                <span class="motivation-tag" onclick="addNeedsSuggestion('不用担责')">不用担责</span>
                                 <span class="motivation-tag" onclick="addNeedsSuggestion('不公开露脸')">不公开露脸</span>
                                 <span class="motivation-tag" onclick="addNeedsSuggestion('不影响已有合作方')">不影响已有合作方</span>
                                 <span class="motivation-tag" onclick="addNeedsSuggestion('保证信息保密')">保证信息保密</span>

@@ -37,6 +37,16 @@
     <!-- 引用公共导航栏组件 -->
     {% include 'components/navigation.html' %}
 
+    <!-- AI分析额度用完警告横幅 -->
+    {% if user_quota_exhausted %}
+        <div class="quota-exhausted-banner">
+            <div class="quota-exhausted-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>您的AI分析额度已用完，请联系客服或前往个人中心充值。</span>
+            </div>
+        </div>
+    {% endif %}
+
     <!-- 主要内容区域 -->
     <main class="main-content">
         <!-- 页面标题区域 -->
@@ -308,55 +318,51 @@
         });
     </script>
     <script>
-        // 初始化功能
+        // Initialization functions
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化交互功能
+            // Initialize interactive features
             initializeInteractions();
-            // 初始化独立人物清单表格
+            // Initialize standalone personnel table
             updatePersonnelTable();
-            // 设置输入框的随机提示语
+            // Set random placeholder text for input fields
             setRandomPlaceholder();
-            // 处理测试案例选择
+            // Handle demo case selection
             handleDemoCaseSelection();
         });
 
-
-
-
-
-        // 角色到资源的映射
+        // Role to resource mapping
         const roleToResourceSuggestions = {
-            // 需求方
+            // Demand side
             "enterprise_owner": ["采购预算", "项目立项权", "签约权限", "内部宣传位", "企业客户名单", "决策权"],
             "store_owner": ["店铺空间", "客流量", "本地资源", "营业执照", "店面展示位", "顾客数据", "采购预算", "签约权限", "决策权"],
             "department_head": ["部门预算", "团队人力", "内部协调权", "KPI指标", "汇报渠道", "资源分配权", "采购预算", "签约权限", "决策权"],
             "brand_manager": ["品牌授权", "营销预算", "品牌露出机会", "用户社群", "品牌合作资源", "市场推广权", "采购预算", "签约权限", "决策权"],
 
-            // 交付方
+            // Delivery side
             "product_provider": ["产品试用名额", "样品/兑换码", "分销价权限", "售后支持", "产品授权", "库存资源"],
             "service_provider": ["专业技能", "执行团队", "服务时间", "工具平台", "交付方案", "质量保证"],
             "traffic_provider": ["用户粉丝", "媒体渠道", "社群资源", "推广位", "流量入口", "曝光机会"],
             "other_provider": ["特殊资质", "关系网络", "平台权限", "独特资源", "专业认证", "行业地位"],
 
-            // 资金方
+            // Funding side
             "funding_provider": ["投资资金", "赞助额度", "现金预算", "投后服务", "背书资源", "融资渠道"]
         };
 
-        // 资源示例模板
+        // Resource examples
         const resourceExamples = [
             ["视频号8万粉", "社群2个", "品牌对接人：本地咖啡连锁"],
             ["SaaS试用名额100个", "API授权（14天）", "实施团队2人/2周"],
             ["赞助额度30万", "项目排期控制权", "合同模板/法务接口"]
         ];
 
-        // 资源输入随机提示语
+        // Random placeholder text for resources
         const resourcePlaceholders = [
             "微信社群5个、社群2个、视频号10万粉、年度广告预算50万、产品试用码100个、活动场地一天、品牌对接人：XX",
             "电商渠道位3个、线下门店2家、KOL合作位2期、媒体采访资源、API授权、课程版权",
             "企业客户名单200条、招商会场地、投委会路演名额、供应链工厂档期、施工队2组"
         ];
 
-        // 随机设置提示语
+        // Set random placeholder text for input fields
         function setRandomPlaceholder() {
             const textareas = document.querySelectorAll('.dynamic-placeholder-textarea');
             textareas.forEach(textarea => {
@@ -364,7 +370,7 @@
                 textarea.placeholder = `还有什么特别的点会让他愿意参与？比如：${randomText}`;
             });
 
-            // 设置资源输入的随机提示语
+            // Set random placeholder text for resource inputs
             const resourceInputs = document.querySelectorAll('.dynamic-placeholder-resource');
             resourceInputs.forEach(input => {
                 const randomPlaceholder = resourcePlaceholders[Math.floor(Math.random() * resourcePlaceholders.length)];
@@ -372,15 +378,13 @@
             });
         }
 
+        // ==== Standalone Personnel Table Management Functions ====
 
-
-        // ==== 独立人物清单表格管理功能 ====
-
-        // 存储人物数据的全局变量
+        // Global variable to store personnel data
         let personnelData = [];
         let currentEditingPersonId = null;
 
-        // 角色映射
+        // Role mapping for display and categorization
         const roleMapping = {
             'enterprise_owner': { text: '企业主', type: 'demand', displayText: '需求方-企业主' },
             'store_owner': { text: '实体店主', type: 'demand', displayText: '需求方-实体店主' },
@@ -393,7 +397,7 @@
             'funding_provider': { text: '资金提供方', type: 'funding', displayText: '资金提供方' }
         };
 
-        // 添加新人物到独立表格
+        // Add a new person to the standalone table
         function addNewPersonnel() {
             const newPerson = {
                 id: Date.now(),
@@ -406,13 +410,13 @@
             personnelData.push(newPerson);
             updatePersonnelTable();
 
-            // 立即编辑姓名
+            // Immediately edit the name
             setTimeout(() => {
                 editPersonName(newPerson.id);
             }, 100);
         }
 
-        // 更新人物清单表格
+        // Update the personnel table display
         function updatePersonnelTable() {
             const tableBody = document.getElementById('personnelTableBody');
 
@@ -435,34 +439,34 @@
                 tableBody.appendChild(row);
             });
 
-            // 更新隐藏表单数据
+            // Update hidden form data
             updateHiddenFormData();
         }
 
-        // 创建人物表格行
+        // Create a personnel table row
         function createPersonnelRow(person, number) {
             const row = document.createElement('div');
             row.className = 'personnel-table-row';
             row.dataset.personId = person.id;
 
-            // 角色标签
+            // Role tags HTML
             const roleTagsHtml = person.roles.map(roleValue => {
                 const roleInfo = roleMapping[roleValue];
                 return roleInfo ? `<span class="role-tag ${roleInfo.type}">${roleInfo.displayText}</span>` : '';
             }).join('');
 
-            // 资源摘要
+            // Resources summary
             const resourcesSummary = person.resources.length > 0 ? 
                 person.resources.slice(0, 2).join('、') + (person.resources.length > 2 ? '...' : '') : 
                 '待添加';
 
-            // 需求摘要
+            // Needs summary
             const needsSummary = person.needs.length > 0 ? 
                 person.needs.slice(0, 2).join('、') + (person.needs.length > 2 ? '...' : '') : 
                 '待补充';
 
             row.innerHTML = `
-                <!-- 桌面端表格布局 -->
+                <!-- Desktop table layout -->
                 <div class="desktop-table-layout">
                     <div class="row-number">${number}</div>
                     <div class="row-name" onclick="editPersonName(${person.id})" style="cursor: pointer;">
@@ -484,7 +488,7 @@
                     </div>
                 </div>
 
-                <!-- 移动端卡片布局 -->
+                <!-- Mobile card layout -->
                 <div class="mobile-card-layout">
                     <div class="mobile-person-header">
                         <div class="mobile-person-title">
@@ -530,7 +534,7 @@
             return row;
         }
 
-        // 编辑人物姓名（内联编辑）
+        // Edit person's name (inline editing)
         function editPersonName(personId) {
 
             const person = personnelData.find(p => p.id === personId);
@@ -539,10 +543,10 @@
                 return;
             }
 
-            // 检测当前是否为移动端
+            // Detect if it's currently a mobile view
             const isMobile = window.innerWidth <= 768;
 
-            // 根据屏幕大小选择合适的元素
+            // Select the appropriate element based on screen size
             let nameCell;
             const personRow = document.querySelector(`[data-person-id="${personId}"]`);
 
@@ -552,10 +556,10 @@
             }
 
             if (isMobile) {
-                // 移动端：选择移动端布局中的姓名元素
+                // Mobile: Select the name element in the mobile card layout
                 nameCell = personRow.querySelector('.mobile-card-layout .row-name');
             } else {
-                // 桌面端：选择桌面端布局中的姓名元素
+                // Desktop: Select the name element in the desktop table layout
                 nameCell = personRow.querySelector('.desktop-table-layout .row-name');
             }
 
@@ -568,7 +572,7 @@
                 return;
             }
 
-            // 防止重复编辑
+            // Prevent duplicate editing
             if (nameCell.querySelector('input')) {
                 return;
             }
@@ -579,7 +583,7 @@
             input.value = currentName;
             input.className = 'form-control form-control-sm name-edit-input';
 
-            // 移动端优化的样式
+            // Mobile-optimized styles
             if (isMobile) {
                 input.style.cssText = `
                     width: 100%;
@@ -606,16 +610,16 @@
                 `;
             }
 
-            // 先显示视觉反馈
+            // Provide visual feedback first
             nameCell.style.backgroundColor = '#f0f8ff';
             nameCell.style.borderRadius = '8px';
             nameCell.style.padding = '4px';
 
-            // 清空内容并添加输入框
+            // Clear content and add the input field
             nameCell.innerHTML = '';
             nameCell.appendChild(input);
 
-            // 聚焦并选中文本
+            // Focus and select the text
             setTimeout(() => {
                 input.focus();
                 input.select();
@@ -625,26 +629,26 @@
                 const newName = input.value.trim() || '未命名';
                 person.name = newName;
 
-                // 恢复视觉状态
+                // Restore visual state
                 nameCell.style.backgroundColor = '';
                 nameCell.style.borderRadius = '';
                 nameCell.style.padding = '';
 
                 updatePersonnelTable();
 
-                // 显示保存成功提示
+                // Show save success notification
                 showQuickToast('姓名已保存');
             };
 
             const cancelEdit = () => {
-                // 恢复视觉状态
+                // Restore visual state
                 nameCell.style.backgroundColor = '';
                 nameCell.style.borderRadius = '';
                 nameCell.style.padding = '';
                 updatePersonnelTable();
             };
 
-            // 事件监听
+            // Event listeners
             input.addEventListener('blur', saveName);
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
@@ -658,7 +662,7 @@
             });
         }
 
-        // 快速提示函数
+        // Quick toast notification function
         function showQuickToast(message) {
             const toast = document.createElement('div');
             toast.className = 'quick-toast';
@@ -681,12 +685,12 @@
 
             document.body.appendChild(toast);
 
-            // 滑入动画
+            // Slide-in animation
             setTimeout(() => {
                 toast.style.transform = 'translateX(0)';
             }, 100);
 
-            // 自动消失
+            // Auto-disappear
             setTimeout(() => {
                 toast.style.transform = 'translateX(100%)';
                 setTimeout(() => {
@@ -697,46 +701,46 @@
             }, 2000);
         }
 
-        // 编辑人物角色
+        // Edit person's roles
         function editPersonRoles(personId) {
             currentEditingPersonId = personId;
             const person = personnelData.find(p => p.id === personId);
             if (!person) return;
 
-            // 清空模态框选择
+            // Clear modal selections
             document.querySelectorAll('#editRolesModal input[name="modal_person_role"]').forEach(checkbox => {
                 checkbox.checked = person.roles.includes(checkbox.value);
             });
 
-            // 显示模态框
+            // Show the modal
             const modal = new bootstrap.Modal(document.getElementById('editRolesModal'));
             modal.show();
         }
 
-        // 编辑人物资源
+        // Edit person's resources
         function editPersonResources(personId) {
             currentEditingPersonId = personId;
             const person = personnelData.find(p => p.id === personId);
             if (!person) return;
 
-            // 填充当前资源
+            // Populate current resources
             const resourcesText = (person.resources || []).join('\n');
             document.getElementById('resourcesTextArea').value = resourcesText;
 
-            // 根据已选择的角色生成智能推荐
+            // Generate smart recommendations based on selected roles
             updateModalResourceSuggestions(person.roles || []);
 
-            // 显示模态框
+            // Show the modal
             const modal = new bootstrap.Modal(document.getElementById('editResourcesModal'));
             modal.show();
         }
 
-        // 为模态框更新资源推荐
+        // Update resource suggestions for the modal
         function updateModalResourceSuggestions(selectedRoles) {
             const suggestionsContainer = document.getElementById('modalResourceSuggestions');
 
             if (!suggestionsContainer) {
-                console.warn('资源推荐容器未找到');
+                console.warn('Resource suggestions container not found');
                 return;
             }
 
@@ -745,7 +749,7 @@
                 return;
             }
 
-            // 获取所有选中角色的候选资源
+            // Get candidate resources for all selected roles
             const allSuggestions = new Set();
             selectedRoles.forEach(role => {
                 if (roleToResourceSuggestions[role]) {
@@ -758,7 +762,7 @@
                 return;
             }
 
-            // 生成推荐标签
+            // Generate recommendation tags
             const tagsHtml = Array.from(allSuggestions).map(resource => 
                 `<span class="suggestion-tag" onclick="addResourceSuggestion('${resource.replace(/'/g, "\\'")}')">${resource}</span>`
             ).join('');
@@ -766,26 +770,26 @@
             suggestionsContainer.innerHTML = `<div class="suggestion-tags">${tagsHtml}</div>`;
         }
 
-        // 编辑人物需求
+        // Edit person's needs
         function editPersonNeeds(personId) {
             currentEditingPersonId = personId;
             const person = personnelData.find(p => p.id === personId);
             if (!person) return;
 
-            // 设置文本框内容
+            // Set textarea content
             document.getElementById('needsTextArea').value = person.needs.join('\n');
 
-            // 显示模态框
+            // Show the modal
             const modal = new bootstrap.Modal(document.getElementById('editNeedsModal'));
             modal.show();
 
-            // 绑定滚动事件
+            // Bind scroll event
             setTimeout(() => {
                 initNeedsStickyScroll();
             }, 300);
         }
 
-        // 初始化粘性滚动效果
+        // Initialize sticky scroll effect
         function initNeedsStickyScroll() {
             const modalBody = document.querySelector('#editNeedsModal .modal-body');
             const stickySection = document.getElementById('needsStickySection');
@@ -801,7 +805,7 @@
             });
         }
 
-        // 保存角色选择
+        // Save role selections
         function saveRoles() {
             if (!currentEditingPersonId) return;
 
@@ -816,15 +820,15 @@
             person.roles = selectedRoles;
             updatePersonnelTable();
 
-            // 关闭模态框
+            // Close the modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('editRolesModal'));
             modal.hide();
 
-            // 显示保存成功提示
+            // Show save success notification
             showQuickToast('角色已保存');
         }
 
-        // 保存资源
+        // Save resources
         function saveResources() {
             if (!currentEditingPersonId) return;
 
@@ -836,15 +840,15 @@
 
             updatePersonnelTable();
 
-            // 关闭模态框
+            // Close the modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('editResourcesModal'));
             modal.hide();
 
-            // 显示保存成功提示
+            // Show save success notification
             showQuickToast('资源已保存');
         }
 
-        // 保存需求
+        // Save needs
         function saveNeeds() {
             if (!currentEditingPersonId) return;
 
@@ -856,15 +860,15 @@
 
             updatePersonnelTable();
 
-            // 关闭模态框
+            // Close the modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('editNeedsModal'));
             modal.hide();
 
-            // 显示保存成功提示
+            // Show save success notification
             showQuickToast('需求已保存');
         }
 
-        // 添加资源建议
+        // Add resource suggestion to textarea
         function addResourceSuggestion(resource) {
             const textarea = document.getElementById('resourcesTextArea');
             const currentValue = textarea.value;
@@ -876,7 +880,7 @@
             textarea.focus();
         }
 
-        // 添加需求建议
+        // Add needs suggestion to textarea
         function addNeedsSuggestion(need) {
             const textarea = document.getElementById('needsTextArea');
             const currentValue = textarea.value;
@@ -886,14 +890,14 @@
                 textarea.value = need;
             }
 
-            // 更新显示区域
+            // Update display area
             const needs = textarea.value.split('\n').map(n => n.trim()).filter(n => n);
             updateNeedsDisplay(needs);
 
             textarea.focus();
         }
 
-        // 删除人物
+        // Delete a person
         function deletePerson(personId) {
             const person = personnelData.find(p => p.id === personId);
             if (!person) return;
@@ -905,9 +909,9 @@
             });
         }
 
-        // 美观的删除确认对话框
+        // Beautiful delete confirmation dialog
         function showDeleteConfirm(personName, onConfirm) {
-            // 创建遮罩层
+            // Create overlay
             const overlay = document.createElement('div');
             overlay.className = 'delete-confirm-overlay';
             overlay.style.cssText = `
@@ -926,7 +930,7 @@
                 transition: opacity 0.3s ease;
             `;
 
-            // 创建对话框
+            // Create dialog
             const dialog = document.createElement('div');
             dialog.className = 'delete-confirm-dialog';
             dialog.style.cssText = `
@@ -941,7 +945,7 @@
                 text-align: center;
             `;
 
-            // 创建内容
+            // Create content
             const icon = document.createElement('div');
             icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
             icon.style.cssText = `
@@ -1003,7 +1007,7 @@
                 transition: all 0.2s ease;
             `;
 
-            // 按钮悬停效果
+            // Button hover effects
             cancelBtn.onmouseenter = () => {
                 cancelBtn.style.background = '#ebebeb';
                 cancelBtn.style.transform = 'translateY(-1px)';
@@ -1022,7 +1026,7 @@
                 deleteBtn.style.transform = 'translateY(0)';
             };
 
-            // 事件处理
+            // Event handling
             const closeDialog = () => {
                 overlay.style.opacity = '0';
                 dialog.style.transform = 'scale(0.9) translateY(20px)';
@@ -1045,7 +1049,7 @@
                 }, 100);
             };
 
-            // 组装对话框
+            // Assemble the dialog
             buttonContainer.appendChild(cancelBtn);
             buttonContainer.appendChild(deleteBtn);
 
@@ -1057,13 +1061,13 @@
             overlay.appendChild(dialog);
             document.body.appendChild(overlay);
 
-            // 显示动画
+            // Display animation
             setTimeout(() => {
                 overlay.style.opacity = '1';
                 dialog.style.transform = 'scale(1) translateY(0)';
             }, 10);
 
-            // ESC键关闭
+            // ESC key to close
             const handleKeyDown = (e) => {
                 if (e.key === 'Escape') {
                     closeDialog();
@@ -1073,13 +1077,13 @@
             document.addEventListener('keydown', handleKeyDown);
         }
 
-        // 更新隐藏表单数据
+        // Update hidden form data
         function updateHiddenFormData() {
             const hiddenContainer = document.getElementById('hiddenPersonnelData');
             hiddenContainer.innerHTML = '';
 
             personnelData.forEach((person, index) => {
-                // 添加隐藏字段以便表单提交
+                // Add hidden fields for form submission
                 const nameInput = document.createElement('input');
                 nameInput.type = 'hidden';
                 nameInput.name = 'person_name[]';
@@ -1106,13 +1110,9 @@
             });
         }
 
-
-
-
-
-        // 表单提交前验证和处理
+        // Form submission validation and processing
         document.getElementById('mainForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // 阻止默认表单提交
+            e.preventDefault(); // Prevent default form submission
 
             const projectName = document.getElementById('project_name').value.trim();
             const projectDescription = document.getElementById('project_description').value.trim();
@@ -1122,19 +1122,19 @@
                 return;
             }
 
-            // 添加提交动画
+            // Add submission animation
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在分析...';
             submitBtn.disabled = true;
 
-            // 收集表单数据
+            // Collect form data
             const formData = {
                 projectName: projectName,
                 projectDescription: projectDescription,
                 keyPersons: []
             };
 
-            // 收集关键人物数据（从独立人物清单）
+            // Collect key person data (from standalone personnel list)
             formData.keyPersons = personnelData.map(person => ({
                 name: person.name,
                 roles: person.roles,
@@ -1143,14 +1143,13 @@
                 notes: ''
             }));
 
-
-            // 发送数据到后端Flask而不是sessionStorage
+            // Send data to Flask backend instead of sessionStorage
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/generate';
             form.style.display = 'none';
 
-            // 添加Input到form
+            // Add input to form
             const addInput = (name, value) => {
                 const input = document.createElement('input');
                 input.type = 'hidden';
@@ -1162,8 +1161,7 @@
             addInput('project_name', formData.projectName);
             addInput('project_description', formData.projectDescription);
 
-
-            // 添加关键人物数据
+            // Add key person data
             formData.keyPersons.forEach((person, index) => {
                 addInput('person_name[]', person.name);
                 addInput('person_role[]', person.roles.join(','));
@@ -1171,16 +1169,15 @@
                 addInput('person_needs[]', person.makeHappy.join(','));
             });
 
-
-            // 直接使用传统表单提交，避免fetch的session问题
+            // Use traditional form submission to avoid session issues with fetch
             document.body.appendChild(form);
 
-            // 直接提交表单，让浏览器处理重定向
+            // Submit the form directly, letting the browser handle redirection
             form.submit();
             document.body.removeChild(form);
         });
 
-        // 测试案例数据
+        // Demo case data
         const demoTestCases = {
             'english-training': {
                 projectName: '在线口语陪练连接平台',
@@ -1303,7 +1300,7 @@
             }
         };
 
-        // 处理测试案例选择
+        // Handle demo case selection
         function handleDemoCaseSelection() {
             const caseCards = document.querySelectorAll('.demo-case-card');
 
@@ -1311,33 +1308,33 @@
                 card.addEventListener('click', function() {
                     const caseType = this.dataset.case;
 
-                    // 移除其他卡片的选中状态
+                    // Remove selected state from other cards
                     caseCards.forEach(c => c.classList.remove('selected'));
 
                     if (caseType === 'custom') {
-                        // 自定义项目 - 清空表单
+                        // Custom project - clear the form
                         this.classList.add('selected');
                         clearForm();
                         scrollToForm();
                     } else if (demoTestCases[caseType]) {
-                        // 选择测试案例 - 填充表单
+                        // Select demo case - populate the form
                         this.classList.add('selected');
                         loadTestCase(demoTestCases[caseType]);
                         scrollToForm();
 
-                        // 显示成功提示
+                        // Show success notification
                         showNotification('✅ 示例案例已加载完成！向下滚动查看表单内容，可直接提交分析或修改参数', 'success');
                     }
                 });
             });
         }
 
-        // 加载测试案例数据到表单
+        // Load demo case data into the form
         function loadTestCase(caseData) {
-            // 强制显示所有表单元素（移除动画类避免时序问题）
+            // Force display of all form elements (remove animation classes to avoid timing issues)
             const mainForm = document.getElementById('mainForm');
             if (mainForm) {
-                // 移除可能影响显示的动画类
+                // Remove potentially display-affecting animation classes
                 const animatedElements = mainForm.querySelectorAll('.fade-in, .slide-up');
                 animatedElements.forEach(el => {
                     el.classList.remove('fade-in', 'slide-up');
@@ -1346,15 +1343,15 @@
                     el.style.visibility = 'visible';
                 });
 
-                // 强制重新布局
+                // Force re-layout
                 mainForm.style.display = 'block';
-                mainForm.offsetHeight; // 触发重绘
+                mainForm.offsetHeight; // Trigger reflow
             }
 
-            // 填充项目基础信息
+            // Populate project basic information
             const projectNameEl = document.getElementById('project_name');
             const projectDescEl = document.getElementById('project_description');
-            // 项目阶段字段已移除
+            // Project stage field has been removed
 
             if (projectNameEl) {
                 projectNameEl.value = caseData.projectName || '';
@@ -1365,41 +1362,38 @@
                 projectDescEl.textContent = caseData.projectDescription || '';
             }
 
-
-            // 清空现有关键人物清单数据
+            // Clear existing key personnel list data
             personnelData = [];
 
-            // 添加测试案例中的人物到关键人物清单
+            // Add persons from the demo case to the key personnel list
             if (caseData.persons && caseData.persons.length > 0) {
                 caseData.persons.forEach((person, index) => {
                     const newPerson = {
-                        id: Date.now() + index, // 确保每个人物有唯一ID
+                        id: Date.now() + index, // Ensure each person has a unique ID
                         name: person.name || '未命名',
                         roles: person.roles || [],
                         resources: person.resources || [],
-                        needs: person.makeHappy || [] // 注意这里是makeHappy字段
+                        needs: person.makeHappy || [] // Note: this maps to the 'makeHappy' field
                     };
                     personnelData.push(newPerson);
                 });
 
-                // 更新关键人物清单表格显示
+                // Update the key personnel table display
                 updatePersonnelTable();
             }
-
-
         }
 
-        // 清空表单
+        // Clear the form
         function clearForm() {
             document.getElementById('project_name').value = '';
             document.getElementById('project_description').value = '';
 
-            // 清空关键人物清单
+            // Clear key personnel list
             personnelData = [];
             updatePersonnelTable();
         }
 
-        // 滚动到表单区域
+        // Scroll to the form area
         function scrollToForm() {
             const formElement = document.getElementById('mainForm');
             if (formElement) {
@@ -1408,9 +1402,9 @@
                         behavior: 'smooth', 
                         block: 'start' 
                     });
-                    // 强制重新渲染表单以确保内容显示
+                    // Force re-rendering of the form to ensure content display
                     setTimeout(() => {
-                        // 触发重绘
+                        // Trigger reflow
                         const inputs = formElement.querySelectorAll('input, textarea, select');
                         inputs.forEach(input => {
                             if (input.value) {
@@ -1422,7 +1416,7 @@
             }
         }
 
-        // 显示通知消息
+        // Show notification message
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `alert alert-${type} slide-up`;
@@ -1440,9 +1434,9 @@
             }, 4000);
         }
 
-        // === 缺失的辅助函数 ===
+        // === Missing Utility Functions ===
 
-        // 添加资源推荐到文本框
+        // Add resource suggestion to textarea
         function addResourceSuggestion(resource) {
             const textarea = document.getElementById('resourcesTextArea');
             if (!textarea) return;
@@ -1451,11 +1445,11 @@
             const newValue = currentValue ? currentValue + '\n' + resource : resource;
             textarea.value = newValue;
 
-            // 触发输入事件以更新UI
+            // Trigger input event to update UI
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // 添加需求推荐到文本框
+        // Add needs suggestion to textarea
         function addNeedsSuggestion(need) {
             const textarea = document.getElementById('needsTextArea');
             if (!textarea) return;
@@ -1464,133 +1458,49 @@
             const newValue = currentValue ? currentValue + '\n' + need : need;
             textarea.value = newValue;
 
-            // 触发输入事件以更新UI
+            // Update display area
+            const needs = textarea.value.split('\n').map(n => n.trim()).filter(n => n);
+            updateNeedsDisplay(needs);
+
+            // Trigger input event to update UI
             textarea.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // 添加人物函数（兼容旧的调用方式）
+        // Add person function (compatible with older call methods)
         function addPerson() {
+            // This function has been replaced by addNewPersonnel in the standalone personnel list system
             addNewPersonnel();
         }
 
-        // 更新需求显示（占位函数，兼容旧代码）
+        // Update needs display (placeholder function, compatible with older code)
         function updateNeedsDisplay() {
-            // 这个函数主要是为了兼容性，实际的更新由updatePersonnelTable处理
+            // This function is mainly for compatibility, actual updates are handled by updatePersonnelTable
             console.log('updateNeedsDisplay called - handled by updatePersonnelTable');
         }
 
-        // 初始化交互功能
+        // Initialize interactive features
         function initializeInteractions() {
             console.log('交互功能已初始化');
-
-            // 初始化人物表格
-            if (typeof updatePersonnelTable === 'function') {
-                updatePersonnelTable();
-            }
-
-            // 设置随机提示语
-            if (typeof setRandomPlaceholder === 'function') {
-                setRandomPlaceholder();
-            }
-
-            // 处理测试案例选择
-            if (typeof handleDemoCaseSelection === 'function') {
-                handleDemoCaseSelection();
-            }
         }
 
-        // 为模态框生成资源推荐
+        // Generate resource suggestions for modal
         function generateResourceSuggestionsForModal() {
-            // 获取当前编辑的人物信息
-            if (!currentEditingPersonId) return;
-
-            const person = personnelData.find(p => p.id === currentEditingPersonId);
-            if (!person) return;
-
-            // 调用现有的更新函数
-            if (typeof updateModalResourceSuggestions === 'function') {
-                updateModalResourceSuggestions(person.roles || []);
-            }
-        }
-
-
-
-
-
-        // 添加平滑滚动
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // 添加输入框焦点动画
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('focused');
-            });
-
-            input.addEventListener('blur', function() {
-                this.parentElement.classList.remove('focused');
-            });
-        });
-
-        // 移动端汉堡菜单功能
-        function toggleMobileMenu() {
-            const dropdown = document.getElementById('mobileDropdown');
-            const toggle = document.querySelector('.mobile-menu-toggle');
-            const icon = toggle.querySelector('i');
-
-            if (dropdown.classList.contains('show')) {
-                dropdown.classList.remove('show');
-                icon.className = 'fas fa-bars';
-            } else {
-                dropdown.classList.add('show');
-                icon.className = 'fas fa-times';
-            }
-        }
-
-        // 修复缺失的JavaScript函数
-        function addPerson() {
-            // 这个函数在独立人物清单系统中已被addNewPersonnel替代
-            addNewPersonnel();
-        }
-
-        function updateNeedsDisplay(needs) {
-            // 在需求编辑模态框中更新显示
-            // 这个函数主要用于模态框内部，现在由其他函数处理
-            console.log('更新需求显示:', needs);
-        }
-
-        function initializeInteractions() {
-            // 初始化所有交互功能
-            console.log('交互功能已初始化');
-        }
-
-        function generateResourceSuggestionsForModal(selectedRoles) {
-            // 兼容旧的函数调用，使用新的函数名
+            // Compatible with older function calls, using the new function name
             updateModalResourceSuggestions(selectedRoles);
         }
 
-        // 修复角色选择后的资源推荐更新
+        // Fix resource recommendation update after role selection
         document.addEventListener('DOMContentLoaded', function() {
-            // 监听角色选择变化
+            // Listen for role selection changes
             const roleModal = document.getElementById('editRolesModal');
             if (roleModal) {
                 roleModal.addEventListener('show.bs.modal', function() {
-                    // 当角色模态框显示时，确保当前编辑人物ID已设置
+                    // Ensure current editing person ID is set when the role modal opens
                     console.log('编辑角色模态框已打开，当前编辑人物ID:', currentEditingPersonId);
                 });
             }
 
-            // 监听资源模态框显示事件
+            // Listen for resource modal show event
             const resourceModal = document.getElementById('editResourcesModal');
             if (resourceModal) {
                 resourceModal.addEventListener('show.bs.modal', function() {
@@ -1602,12 +1512,12 @@
             }
         });
 
-        // 修复移动端编辑功能 - 确保模态框中的资源推荐功能正常
+        // Fix mobile editing functionality - ensure resource recommendations in modal work correctly
         function updateModalResourceSuggestions(selectedRoles) {
             const suggestionsContainer = document.getElementById('modalResourceSuggestions');
 
             if (!suggestionsContainer) {
-                console.warn('资源推荐容器未找到');
+                console.warn('Resource suggestions container not found');
                 return;
             }
 
@@ -1616,7 +1526,7 @@
                 return;
             }
 
-            // 获取所有选中角色的候选资源
+            // Get candidate resources for all selected roles
             const allSuggestions = new Set();
             selectedRoles.forEach(role => {
                 if (roleToResourceSuggestions[role]) {
@@ -1629,7 +1539,7 @@
                 return;
             }
 
-            // 生成推荐标签
+            // Generate recommendation tags
             const tagsHtml = Array.from(allSuggestions).map(resource => 
                 `<span class="suggestion-tag" onclick="addResourceSuggestion('${resource.replace(/'/g, "\\'")}')">${resource}</span>`
             ).join('');
@@ -1637,7 +1547,7 @@
             suggestionsContainer.innerHTML = `<div class="suggestion-tags">${tagsHtml}</div>`;
         }
 
-        // 点击菜单外部关闭菜单
+        // Click outside menu to close menu
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('mobileDropdown');
             const toggle = document.querySelector('.mobile-menu-toggle');
@@ -1649,7 +1559,7 @@
             }
         });
 
-        // 点击菜单项后关闭菜单
+        // Click menu item to close menu
         document.querySelectorAll('.mobile-dropdown .dropdown-item').forEach(item => {
             item.addEventListener('click', function() {
                 const dropdown = document.getElementById('mobileDropdown');
@@ -1660,7 +1570,7 @@
         });
     </script>
 
-    <!-- 模态框：编辑身份角色 -->
+    <!-- Modal: Edit Identity Roles -->
     <div class="modal fade" id="editRolesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -1751,7 +1661,7 @@
         </div>
     </div>
 
-    <!-- 模态框：编辑掌握资源 -->
+    <!-- Modal: Edit Possessed Resources -->
     <div class="modal fade" id="editResourcesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -1772,7 +1682,7 @@
                             基于身份角色的资源推荐
                         </h6>
                         <div id="modalResourceSuggestions" class="modal-resource-suggestions">
-                            <!-- 智能推荐内容将在这里动态生成 -->
+                            <!-- Smart recommendation content will be dynamically generated here -->
                         </div>
                     </div>
                 </div>
@@ -1784,7 +1694,7 @@
         </div>
     </div>
 
-    <!-- 模态框：编辑如何让TA高兴 -->
+    <!-- Modal: Edit How to Make Them Happy -->
     <div class="modal fade" id="editNeedsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -1793,7 +1703,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- 粘性顶部区域：输入区域 -->
+                    <!-- Sticky top section: Input area -->
                     <div class="needs-sticky-section" id="needsStickySection">
                         <div class="mb-3">
                             <label class="form-label">添加让TA高兴的方式（一行一个）</label>
@@ -1859,8 +1769,6 @@
                                 <span class="motivation-tag" onclick="addNeedsSuggestion('像是他发起的局')">像是他发起的局</span>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -244,6 +244,165 @@
             border-top: 1px solid rgba(var(--color-gray-200-rgb), 0.6);
         }
 
+        /* AI分析额度卡片样式 */
+        .quota-overview {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+        }
+
+        .quota-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+        }
+
+        .quota-stat-item {
+            text-align: center;
+            padding: var(--space-4);
+            background: rgba(var(--color-gray-50-rgb), 0.5);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(var(--color-gray-200-rgb), 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .quota-stat-item:hover {
+            background: rgba(var(--color-gray-100-rgb), 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-number {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: var(--space-2);
+            line-height: 1;
+        }
+
+        .stat-number.used {
+            color: #F59E0B;
+        }
+
+        .stat-number.remaining {
+            color: #10B981;
+        }
+
+        .stat-label {
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quota-progress-section {
+            padding: var(--space-4);
+            background: rgba(var(--color-gray-50-rgb), 0.3);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(var(--color-gray-200-rgb), 0.3);
+        }
+
+        .quota-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-3);
+        }
+
+        .progress-label {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+
+        .progress-percentage {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .quota-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(var(--color-gray-200-rgb), 0.6);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: var(--space-3);
+            position: relative;
+        }
+
+        .quota-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10B981, #34D399);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .quota-progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progress-shine 2s infinite;
+        }
+
+        @keyframes progress-shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .quota-progress-bar[style*="80"] {
+            background: linear-gradient(90deg, #F59E0B, #FBBF24);
+        }
+
+        .quota-progress-bar[style*="100%"] {
+            background: linear-gradient(90deg, #EF4444, #F87171);
+        }
+
+        .quota-progress-text {
+            text-align: center;
+            font-size: var(--text-sm);
+            color: var(--color-text-secondary);
+            font-weight: 500;
+        }
+
+        .quota-warning {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-4);
+            background: rgba(255, 59, 48, 0.08);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+            border-radius: var(--radius-lg);
+            color: #DC2626;
+        }
+
+        .quota-warning i {
+            font-size: 18px;
+            color: #EF4444;
+        }
+
+        .quota-notice {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-4);
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: var(--radius-lg);
+            color: #D97706;
+        }
+
+        .quota-notice i {
+            font-size: 18px;
+            color: #F59E0B;
+        }
+
         @media (max-width: 768px) {
             .profile-main {
                 padding: var(--space-6) var(--space-4);
@@ -251,6 +410,17 @@
             
             .profile-card {
                 padding: var(--space-6);
+            }
+
+            .quota-stats-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-3);
+            }
+
+            .quota-progress-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-2);
             }
         }
     </style>
@@ -339,6 +509,54 @@
                         保存姓名
                     </button>
                 </form>
+            </div>
+
+            <!-- AI分析额度卡片 -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI分析额度</h3>
+                </div>
+                
+                <div class="quota-overview">
+                    <div class="quota-stats-grid">
+                        <div class="quota-stat-item">
+                            <div class="stat-number">{{ current_user.ai_quota }}</div>
+                            <div class="stat-label">总额度</div>
+                        </div>
+                        <div class="quota-stat-item">
+                            <div class="stat-number used">{{ current_user.used_quota }}</div>
+                            <div class="stat-label">已使用</div>
+                        </div>
+                        <div class="quota-stat-item">
+                            <div class="stat-number remaining">{{ current_user.remaining_quota }}</div>
+                            <div class="stat-label">剩余次数</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quota-progress-section">
+                        <div class="quota-progress-header">
+                            <span class="progress-label">使用进度</span>
+                            <span class="progress-percentage">{{ "%.1f"|format(current_user.quota_usage_percentage) }}%</span>
+                        </div>
+                        <div class="quota-progress">
+                            <div class="quota-progress-bar" style="width: {{ current_user.quota_usage_percentage }}%"></div>
+                        </div>
+                        <div class="quota-progress-text">{{ current_user.quota_display }}</div>
+                    </div>
+
+                    {% if current_user.remaining_quota <= 0 %}
+                    <div class="quota-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>您的AI分析额度已用完，请联系管理员增加额度</span>
+                    </div>
+                    {% elif current_user.remaining_quota <= 2 %}
+                    <div class="quota-notice">
+                        <i class="fas fa-info-circle"></i>
+                        <span>您的AI分析额度即将用完，还剩 {{ current_user.remaining_quota }} 次</span>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- 密码修改卡片 -->

@@ -60,16 +60,7 @@ function updateUserStats(stats) {
 function renderUsersTable(users) {
     const container = document.getElementById('usersTableContainer');
 
-    // 调试信息：检查用户数据
-    console.log('渲染用户数据:', users);
-    if (users && users.length > 0) {
-        console.log('第一个用户的时间数据:', {
-            created_at: users[0].created_at,
-            created_at_display: users[0].created_at_display,
-            last_login: users[0].last_login,
-            last_login_display: users[0].last_login_display
-        });
-    }
+    // 数据已加载，开始渲染用户列表
 
     if (!users || users.length === 0) {
         container.innerHTML = `
@@ -334,7 +325,7 @@ window.toggleUserStatus = toggleUserStatus;
 
 // 添加refreshUsers函数以处理刷新用户列表按钮
 function refreshUsers() {
-    console.log('刷新用户列表');
+    // 刷新用户列表
     if (typeof loadUsersData === 'function') {
         loadUsersData();
         showToast('用户列表已刷新', 'success');

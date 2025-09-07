@@ -1204,9 +1204,9 @@
 
         <!-- 操作按钮 -->
         <div class="action-buttons fade-in-up">
-            <button class="action-btn primary" onclick="exportToPDF()">
+            <button class="action-btn primary" onclick="exportToWord()">
                 <i class="fas fa-download"></i>
-                导出PDF
+                导出Word文档
             </button>
             <a href="{{ url_for('index') }}" class="action-btn secondary">
                 <i class="fas fa-plus"></i>
@@ -1218,42 +1218,282 @@
     <script src="{{ url_for('static', filename='js/user-menu.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
     <script>
-        // PDF导出功能
-        async function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // 添加中文字体支持
-            doc.setFont("helvetica");
-            doc.setFontSize(16);
-            doc.text("非劳务收入管道设计方案", 20, 20);
-            
-            // 使用html2canvas截图
-            const element = document.querySelector('.main-container');
-            const canvas = await html2canvas(element, {
-                scale: 1,
-                useCORS: true,
-                allowTaint: true
-            });
-            
-            const imgData = canvas.toDataURL('image/png');
-            const imgWidth = 190;
-            const pageHeight = 297;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 30;
-            
-            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight - position;
-            
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight + 30;
-                doc.addPage();
-                doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+        // Word文档导出功能
+        function exportToWord() {
+            // 显示导出进度
+            const exportBtn = document.querySelector('.action-btn.primary');
+            const originalText = exportBtn.innerHTML;
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在生成Word文档...';
+            exportBtn.disabled = true;
+
+            try {
+                // 创建Word文档内容
+                const wordContent = createWordContent();
+                
+                // 获取项目名称作为文件名
+                const projectNameElement = document.querySelector('.project-name');
+                const projectName = projectNameElement?.textContent || 
+                                 document.querySelector('[data-project-name]')?.getAttribute('data-project-name') ||
+                                 '非劳务收入管道设计方案';
+                
+                const fileName = `${projectName.replace(/[<>:"/\\|?*]/g, '')}.docx`;
+                
+                // 创建并下载Word文档
+                downloadWordDocument(wordContent, fileName);
+                
+                // 恢复按钮状态
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Word导出失败:', error);
+                alert('Word导出失败，请重试');
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
             }
+        }
+
+        // 创建Word文档内容
+        function createWordContent() {
+            const content = [];
             
-            doc.save('非劳务收入管道设计方案.pdf');
+            // 标题
+            content.push('<h1>Angela AI - 非劳务收入管道设计方案</h1>');
+            content.push(`<p>生成时间：${new Date().toLocaleString('zh-CN')}</p>`);
+            content.push('<br>');
+
+            // 项目概述
+            const projectName = document.querySelector('.project-name')?.textContent;
+            const projectDescription = document.querySelector('.project-description')?.textContent;
+            
+            if (projectName) {
+                content.push('<h2>1. 项目概述</h2>');
+                content.push(`<h3>项目名称：${projectName}</h3>`);
+                if (projectDescription) {
+                    content.push(`<p>${projectDescription}</p>`);
+                }
+                content.push('<br>');
+            }
+
+            // 整体分析概览
+            const insights = document.querySelectorAll('.insight-item');
+            if (insights.length > 0) {
+                content.push('<h2>2. 整体局势分析</h2>');
+                insights.forEach((insight, index) => {
+                    const title = insight.querySelector('h4')?.textContent;
+                    const text = insight.querySelector('p')?.textContent;
+                    if (title && text) {
+                        content.push(`<h3>2.${index + 1} ${title.replace(/🎯|💰|💡/g, '').trim()}</h3>`);
+                        content.push(`<p>${text}</p>`);
+                    }
+                });
+                content.push('<br>');
+            }
+
+            // 需要完善的环节
+            const gapTags = document.querySelectorAll('.gap-tag');
+            if (gapTags.length > 0) {
+                content.push('<h2>3. 需要完善的环节</h2>');
+                content.push('<ul>');
+                gapTags.forEach(tag => {
+                    content.push(`<li>${tag.textContent}</li>`);
+                });
+                content.push('</ul>');
+                content.push('<br>');
+            }
+
+            // 建议寻找的关键角色
+            const roleCards = document.querySelectorAll('.role-card');
+            if (roleCards.length > 0) {
+                content.push('<h2>4. 建议寻找的关键角色</h2>');
+                roleCards.forEach((card, index) => {
+                    const roleName = card.querySelector('.role-name')?.textContent;
+                    const roleContent = Array.from(card.querySelectorAll('div')).map(div => div.textContent).join(' ');
+                    
+                    if (roleName) {
+                        content.push(`<h3>4.${index + 1} ${roleName}</h3>`);
+                        content.push(`<p>${roleContent}</p>`);
+                        content.push('<br>');
+                    }
+                });
+            }
+
+            // 管道方案
+            const pipelineCards = document.querySelectorAll('.pipeline-card');
+            if (pipelineCards.length > 0) {
+                content.push('<h2>5. 管道设计方案</h2>');
+                
+                pipelineCards.forEach((card, index) => {
+                    const pipelineName = card.querySelector('.pipeline-name')?.textContent || `管道方案 ${index + 1}`;
+                    content.push(`<h3>5.${index + 1} ${pipelineName}</h3>`);
+
+                    // 收入机制
+                    const incomeType = card.querySelector('.income-type')?.textContent;
+                    const incomeTrigger = card.querySelector('.income-trigger')?.textContent;
+                    if (incomeType) {
+                        content.push(`<h4>收入机制</h4>`);
+                        content.push(`<p><strong>类型：</strong>${incomeType}</p>`);
+                        if (incomeTrigger) content.push(`<p><strong>触发：</strong>${incomeTrigger}</p>`);
+                    }
+
+                    // 参与方结构
+                    const partyCards = card.querySelectorAll('.party-card');
+                    if (partyCards.length > 0) {
+                        content.push('<h4>参与方结构</h4>');
+                        content.push('<ol>');
+                        partyCards.forEach(party => {
+                            const partyName = party.querySelector('.party-name')?.textContent;
+                            const partyRole = party.querySelector('.party-role-badge')?.textContent;
+                            const resources = Array.from(party.querySelectorAll('.resource-tag')).map(tag => tag.textContent).join('、');
+                            
+                            if (partyName) {
+                                content.push(`<li><strong>${partyName}</strong> (${partyRole || ''})`);
+                                if (resources) content.push(`<br>资源：${resources}`);
+                                content.push('</li>');
+                            }
+                        });
+                        content.push('</ol>');
+                    }
+
+                    // 关键信息
+                    const infoCards = card.querySelectorAll('.info-card');
+                    infoCards.forEach(info => {
+                        const title = info.querySelector('.info-card-header')?.textContent?.replace(/🚀|🔗|⚡|▶️/g, '').trim();
+                        const text = info.querySelector('p')?.textContent;
+                        if (title && text) {
+                            content.push(`<h4>${title}</h4>`);
+                            content.push(`<p>${text}</p>`);
+                        }
+                    });
+
+                    // 风险分析
+                    const riskItems = card.querySelectorAll('.risk-item');
+                    if (riskItems.length > 0) {
+                        content.push('<h4>风险分析与应对</h4>');
+                        content.push('<ul>');
+                        riskItems.forEach(item => {
+                            const riskHeader = item.querySelector('.risk-header')?.textContent?.replace(/⚠️/g, '').trim();
+                            const riskMitigation = item.querySelector('.risk-mitigation')?.textContent?.replace(/🛡️/g, '').trim();
+                            if (riskHeader) {
+                                content.push(`<li><strong>风险：</strong>${riskHeader}`);
+                                if (riskMitigation) content.push(`<br><strong>应对：</strong>${riskMitigation}`);
+                                content.push('</li>');
+                            }
+                        });
+                        content.push('</ul>');
+                    }
+
+                    // 劳动量估算
+                    const laborEstimate = card.querySelector('.labor-estimate');
+                    if (laborEstimate) {
+                        content.push('<h4>劳动量估算</h4>');
+                        const laborText = laborEstimate.textContent.replace(/🕐|⚡/g, '').trim();
+                        content.push(`<p>${laborText}</p>`);
+                    }
+
+                    content.push('<br>');
+                });
+            }
+
+            return content.join('\n');
+        }
+
+        // 下载Word文档
+        function downloadWordDocument(content, fileName) {
+            // 创建基本的Word文档HTML结构
+            const wordHtml = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+                      xmlns:w="urn:schemas-microsoft-com:office:word" 
+                      xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <title>${fileName}</title>
+                    <!--[if gte mso 9]>
+                    <xml>
+                        <w:WordDocument>
+                            <w:View>Print</w:View>
+                            <w:Zoom>90</w:Zoom>
+                            <w:DoNotPromptForConvert/>
+                            <w:DoNotShowInsertionsAndDeletions/>
+                        </w:WordDocument>
+                    </xml>
+                    <![endif]-->
+                    <style>
+                        @page { 
+                            margin: 2.54cm; 
+                        }
+                        body { 
+                            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif; 
+                            font-size: 12pt; 
+                            line-height: 1.6; 
+                            margin: 0; 
+                        }
+                        h1 { 
+                            font-size: 18pt; 
+                            font-weight: bold; 
+                            text-align: center; 
+                            margin-bottom: 20pt; 
+                            color: #007AFF; 
+                        }
+                        h2 { 
+                            font-size: 16pt; 
+                            font-weight: bold; 
+                            margin-top: 20pt; 
+                            margin-bottom: 12pt; 
+                            color: #333; 
+                        }
+                        h3 { 
+                            font-size: 14pt; 
+                            font-weight: bold; 
+                            margin-top: 16pt; 
+                            margin-bottom: 10pt; 
+                            color: #555; 
+                        }
+                        h4 { 
+                            font-size: 13pt; 
+                            font-weight: bold; 
+                            margin-top: 12pt; 
+                            margin-bottom: 8pt; 
+                            color: #666; 
+                        }
+                        p { 
+                            margin-bottom: 8pt; 
+                            text-align: justify; 
+                        }
+                        ul, ol { 
+                            margin-bottom: 12pt; 
+                            padding-left: 20pt; 
+                        }
+                        li { 
+                            margin-bottom: 4pt; 
+                        }
+                        strong { 
+                            font-weight: bold; 
+                        }
+                        br { 
+                            mso-data-placement: same-cell; 
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `;
+
+            // 创建Blob对象
+            const blob = new Blob(['\ufeff', wordHtml], {
+                type: 'application/msword'
+            });
+
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
         }
         
         

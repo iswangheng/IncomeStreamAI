@@ -362,7 +362,7 @@ class AngelaAI:
             # 验证pipeline的必需字段（基于新的prompt结构）
             required_pipeline_keys = [
                 'id', 'name', 'income_mechanism', 'parties_structure',
-                'framework_logic', 'mvp', 'weak_link', 'revenue_trigger',
+                'mvp', 'weak_link', 'revenue_trigger',
                 'risks_and_planB', 'first_step', 'labor_load_estimate'
             ]
             if not all(key in pipeline for key in required_pipeline_keys):
@@ -404,16 +404,7 @@ class AngelaAI:
                     )
                     return False
 
-            # 验证framework_logic结构
-            framework_logic = pipeline.get('framework_logic', {})
-            required_framework_keys = [
-                'resource_chain', 'motivation_match', 'designer_position',
-                'designer_income'
-            ]
-            if not all(key in framework_logic
-                       for key in required_framework_keys):
-                logger.warning(f"Pipeline {i} framework_logic incomplete")
-                return False
+            # framework_logic is no longer required - removed validation
 
             # 验证labor_load_estimate结构
             labor_load = pipeline.get('labor_load_estimate', {})

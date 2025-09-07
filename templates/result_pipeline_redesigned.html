@@ -1223,188 +1223,274 @@
             // 显示导出进度
             const exportBtn = document.querySelector('.action-btn.primary');
             const originalText = exportBtn.innerHTML;
-            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在生成Word文档...';
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在生成Word文档...';
             exportBtn.disabled = true;
 
-            try {
-                // 创建Word文档内容
-                const wordContent = createWordContent();
+            // 使用异步处理避免UI阻塞
+            setTimeout(() => {
+                try {
+                    // 创建Word文档内容
+                    const wordContent = createWordContent();
 
-                // 获取项目名称作为文件名
-                const projectNameElement = document.querySelector('.project-name');
-                const projectName = projectNameElement?.textContent || 
-                                 document.querySelector('[data-project-name]')?.getAttribute('data-project-name') ||
-                                 '非劳务收入管道设计方案';
+                    // 获取项目名称作为文件名
+                    const projectNameElement = document.querySelector('.project-name');
+                    const projectName = projectNameElement?.textContent?.trim() || 
+                                     document.querySelector('[data-project-name]')?.getAttribute('data-project-name') ||
+                                     '非劳务收入管道设计方案';
 
-                const fileName = `${projectName.replace(/[<>:"/\\|?*]/g, '')}.docx`;
+                    const fileName = `${projectName.replace(/[<>:"/\\|?*]/g, '_')}.docx`;
 
-                // 创建并下载Word文档
-                downloadWordDocument(wordContent, fileName);
+                    // 创建并下载Word文档
+                    downloadWordDocument(wordContent, fileName);
 
-                // 恢复按钮状态
-                exportBtn.innerHTML = originalText;
-                exportBtn.disabled = false;
+                    // 显示成功提示
+                    showNotification('Word文档已成功生成并下载', 'success');
 
-            } catch (error) {
-                console.error('Word导出失败:', error);
-                alert('Word导出失败，请重试');
-                exportBtn.innerHTML = originalText;
-                exportBtn.disabled = false;
-            }
+                    // 恢复按钮状态
+                    exportBtn.innerHTML = originalText;
+                    exportBtn.disabled = false;
+
+                } catch (error) {
+                    console.error('Word导出失败:', error);
+                    showNotification('Word导出失败，请重试', 'error');
+                    exportBtn.innerHTML = originalText;
+                    exportBtn.disabled = false;
+                }
+            }, 100);
         }
 
         // 创建Word文档内容
         function createWordContent() {
             const content = [];
 
-            // 标题
-            content.push('<h1>Angela AI - 非劳务收入管道设计方案</h1>');
-            content.push(`<p>生成时间：${new Date().toLocaleString('zh-CN')}</p>`);
-            content.push('<br>');
-
-            // 项目概述
-            const projectName = document.querySelector('.project-name')?.textContent;
-            const projectDescription = document.querySelector('.project-description')?.textContent;
-
-            if (projectName) {
-                content.push('<h2>1. 项目概述</h2>');
-                content.push(`<h3>项目名称：${projectName}</h3>`);
-                if (projectDescription) {
-                    content.push(`<p>${projectDescription}</p>`);
-                }
+            try {
+                // 标题
+                content.push('<h1>Angela AI - 非劳务收入管道设计方案</h1>');
+                content.push(`<p>生成时间：${new Date().toLocaleString('zh-CN')}</p>`);
                 content.push('<br>');
-            }
 
-            // 整体分析概览
-            const overviewCard = document.querySelector('.overview-card');
-            if (overviewCard) {
-                content.push('<h2>2. 整体局势分析</h2>');
-                const insights = overviewCard.querySelectorAll('.insight-item');
-                insights.forEach((insight, index) => {
-                    const title = insight.querySelector('h4')?.textContent;
-                    const text = insight.querySelector('p')?.textContent;
-                    if (title && text) {
-                        content.push(`<h3>2.${index + 1} ${title.replace(/🎯|💰|💡/g, '').trim()}</h3>`);
-                        content.push(`<p>${text}</p>`);
+                // 项目概述
+                const projectName = document.querySelector('.project-name')?.textContent?.trim();
+                const projectDescription = document.querySelector('.project-description')?.textContent?.trim();
+
+                if (projectName) {
+                    content.push('<h2>1. 项目概述</h2>');
+                    content.push(`<h3>项目名称：${escapeHtml(projectName)}</h3>`);
+                    if (projectDescription) {
+                        content.push(`<p>${escapeHtml(projectDescription)}</p>`);
                     }
-                });
-
-                const gapTags = overviewCard.querySelectorAll('.gap-tag');
-                if (gapTags.length > 0) {
-                    content.push('<h3>3. 需要完善的环节</h3>');
-                    content.push('<ul>');
-                    gapTags.forEach(tag => {
-                        content.push(`<li>${tag.textContent}</li>`);
-                    });
-                    content.push('</ul>');
+                    content.push('<br>');
                 }
 
-                // 建议寻找的关键角色
-                const suggestedRolesElement = overviewCard.querySelector('.roles-suggestion');
-                if (suggestedRolesElement) {
-                    content.push('<h3>4. 建议寻找的关键角色</h3>');
-                    const roleItems = suggestedRolesElement.querySelectorAll('.role-card');
-                    roleItems.forEach((card, index) => {
-                        const roleName = card.querySelector('.role-name')?.textContent;
-                        const roleWhy = card.querySelector('.role-card div:nth-of-type(2) strong') ? card.querySelector('.role-card div:nth-of-type(2)').textContent : '';
-                        const roleWhere = card.querySelector('.role-card div:nth-of-type(3) strong') ? card.querySelector('.role-card div:nth-of-type(3)').textContent : '';
-                        const roleScript = card.querySelector('.role-script')?.textContent;
-
-                        if (roleName) {
-                            content.push(`<h4>4.${index + 1} ${roleName}</h4>`);
-                            if (roleWhy && roleWhy.includes('为什么需要：')) {
-                                content.push(`<p><strong>为什么需要：</strong></p>`);
-                                content.push(`<p>${roleWhy.replace('为什么需要：', '').trim()}</p>`);
+                // 整体分析概览
+                const overviewCard = document.querySelector('.overview-card');
+                if (overviewCard) {
+                    content.push('<h2>2. 整体局势分析</h2>');
+                    
+                    try {
+                        const insights = overviewCard.querySelectorAll('.insight-item');
+                        insights.forEach((insight, index) => {
+                            const titleElement = insight.querySelector('h4');
+                            const textElement = insight.querySelector('p');
+                            
+                            if (titleElement && textElement) {
+                                const title = titleElement.textContent?.trim();
+                                const text = textElement.textContent?.trim();
+                                
+                                if (title && text) {
+                                    const cleanTitle = title.replace(/[🎯💰💡⚡🔍🌟]/g, '').trim();
+                                    content.push(`<h3>2.${index + 1} ${escapeHtml(cleanTitle)}</h3>`);
+                                    content.push(`<p>${escapeHtml(text)}</p>`);
+                                }
                             }
-                            if (roleWhere && roleWhere.includes('去哪里找：')) {
-                                content.push(`<p><strong>去哪里找：</strong></p>`);
-                                content.push(`<p>${roleWhere.replace('去哪里找：', '').trim()}</p>`);
-                            }
-                            if (roleScript && roleScript.includes('开场话术：')) {
-                                content.push(`<p><strong>开场话术：</strong></p>`);
-                                content.push(`<p>"${roleScript.replace('开场话术：', '').trim()}"</p>`);
-                            }
-                        }
-                    });
-                }
-                content.push('<br>');
-            }
-
-            // 管道方案
-            const pipelineCards = document.querySelectorAll('.pipeline-card');
-            if (pipelineCards.length > 0) {
-                content.push('<h2>5. 管道设计方案</h2>');
-
-                pipelineCards.forEach((card, index) => {
-                    const pipelineName = card.querySelector('.pipeline-name')?.textContent || `管道方案 ${index + 1}`;
-                    content.push(`<h3>5.${index + 1} ${pipelineName}</h3>`);
-
-                    // 收入机制
-                    const incomeTypeElement = card.querySelector('.income-type');
-                    const incomeTriggerElement = card.querySelector('.income-trigger');
-                    const incomeSettlementElement = card.querySelector('.income-settlement');
-
-                    if (incomeTypeElement || incomeTriggerElement || incomeSettlementElement) {
-                        content.push('<h4>收入机制</h4>');
-                        if (incomeTypeElement) {
-                            content.push(`<p><strong>类型：</strong>${incomeTypeElement.textContent.trim()}</p>`);
-                        }
-                        if (incomeTriggerElement) {
-                            content.push(`<p><strong>触发：</strong>${incomeTriggerElement.textContent.trim()}</p>`);
-                        }
-                        if (incomeSettlementElement) {
-                            content.push(`<p><strong>结算：</strong>${incomeSettlementElement.textContent.trim()}</p>`);
-                        }
+                        });
+                    } catch (insightError) {
+                        console.warn('处理洞察信息时出错:', insightError);
                     }
 
-                    // 参与方结构
-                    const partiesSection = card.querySelector('.parties-section');
-                    if (partiesSection) {
-                        content.push('<h4>参与方结构</h4>');
-                        const designerSection = partiesSection.querySelector('.designer-section');
-                        if (designerSection) {
-                            const designerTitle = designerSection.querySelector('.designer-title')?.textContent;
-                            const designerSubtitle = designerSection.querySelector('.designer-subtitle')?.textContent;
-                            const designerDetailItems = designerSection.querySelectorAll('.designer-detail-item');
-
-                            if (designerTitle) {
-                                content.push(`<p><strong>${designerTitle}</strong> (${designerSubtitle || ''})</p>`);
-                                designerDetailItems.forEach(item => {
-                                    const detailTitle = item.querySelector('.designer-detail-title')?.textContent?.trim();
-                                    const detailContent = item.querySelector('div:last-child')?.textContent?.trim();
-                                    if (detailTitle && detailContent) {
-                                        content.push(`<p>• ${detailTitle.replace(/🎯|💎|🚀/g, '').trim()}：${detailContent}</p>`);
-                                    }
-                                });
-                            }
+                    try {
+                        const gapTags = overviewCard.querySelectorAll('.gap-tag');
+                        if (gapTags.length > 0) {
+                            content.push('<h3>3. 需要完善的环节</h3>');
+                            content.push('<ul>');
+                            gapTags.forEach(tag => {
+                                const tagText = tag.textContent?.trim();
+                                if (tagText) {
+                                    content.push(`<li>${escapeHtml(tagText)}</li>`);
+                                }
+                            });
+                            content.push('</ul>');
                         }
+                    } catch (gapError) {
+                        console.warn('处理缺口信息时出错:', gapError);
+                    }
 
-                        const businessFlowGrid = partiesSection.querySelector('.business-flow-grid');
-                        if (businessFlowGrid) {
-                            const partyCards = businessFlowGrid.querySelectorAll('.party-card');
-                            partyCards.forEach(party => {
-                                const partyName = party.querySelector('.party-name')?.textContent;
-                                const partyRoleBadge = party.querySelector('.party-role-badge')?.textContent;
-                                const resources = Array.from(party.querySelectorAll('.resource-tag')).map(tag => tag.textContent).join('、');
-                                const roleValue = party.querySelector('.party-section-title:contains("在闭环中的价值") + div')?.textContent;
-                                const makeHappy = party.querySelector('.party-section-title:contains("如何让TA高兴") + div')?.textContent;
-
-                                if (partyName) {
-                                    content.push(`<p><strong>${partyName}</strong> (${partyRoleBadge || ''})</p>`);
-                                    if (resources) content.push(`<p>• 资源：${resources}</p>`);
-                                    if (roleValue) {
-                                        content.push(`<p>• 在闭环中的价值：</p>`);
-                                        content.push(`<p>${roleValue.trim()}</p>`);
+                    // 建议寻找的关键角色
+                    try {
+                        const suggestedRolesElement = overviewCard.querySelector('.roles-suggestion');
+                        if (suggestedRolesElement) {
+                            content.push('<h3>4. 建议寻找的关键角色</h3>');
+                            const roleItems = suggestedRolesElement.querySelectorAll('.role-card');
+                            roleItems.forEach((card, index) => {
+                                const roleName = card.querySelector('.role-name')?.textContent?.trim();
+                                
+                                if (roleName) {
+                                    content.push(`<h4>4.${index + 1} ${escapeHtml(roleName)}</h4>`);
+                                    
+                                    // 查找各个部分的内容
+                                    const cardDivs = card.querySelectorAll('div');
+                                    cardDivs.forEach(div => {
+                                        const divText = div.textContent?.trim();
+                                        if (divText) {
+                                            if (divText.includes('为什么需要：')) {
+                                                const whyContent = divText.replace('为什么需要：', '').trim();
+                                                if (whyContent) {
+                                                    content.push(`<p><strong>为什么需要：</strong></p>`);
+                                                    content.push(`<p>${escapeHtml(whyContent)}</p>`);
+                                                }
+                                            } else if (divText.includes('去哪里找：')) {
+                                                const whereContent = divText.replace('去哪里找：', '').trim();
+                                                if (whereContent) {
+                                                    content.push(`<p><strong>去哪里找：</strong></p>`);
+                                                    content.push(`<p>${escapeHtml(whereContent)}</p>`);
+                                                }
+                                            }
+                                        }
+                                    });
+                                    
+                                    const roleScript = card.querySelector('.role-script')?.textContent?.trim();
+                                    if (roleScript) {
+                                        const scriptContent = roleScript.replace(/开场话术：|"/g, '').trim();
+                                        if (scriptContent) {
+                                            content.push(`<p><strong>开场话术：</strong></p>`);
+                                            content.push(`<p>"${escapeHtml(scriptContent)}"</p>`);
+                                        }
                                     }
-                                    if (makeHappy) {
-                                        content.push(`<p>• 如何让TA高兴：</p>`);
-                                        content.push(`<p>${makeHappy.trim()}</p>`);
-                                    }
-                                    content.push('<p></p>'); // 添加空行分隔
                                 }
                             });
                         }
+                    } catch (roleError) {
+                        console.warn('处理角色建议时出错:', roleError);
                     }
+                    
+                    content.push('<br>');
+                }
+
+            // 管道方案
+                const pipelineCards = document.querySelectorAll('.pipeline-card');
+                if (pipelineCards.length > 0) {
+                    content.push('<h2>5. 管道设计方案</h2>');
+
+                    pipelineCards.forEach((card, index) => {
+                        try {
+                            const pipelineName = card.querySelector('.pipeline-name')?.textContent?.trim() || `管道方案 ${index + 1}`;
+                            content.push(`<h3>5.${index + 1} ${escapeHtml(pipelineName)}</h3>`);
+
+                            // 收入机制
+                            const incomeTypeElement = card.querySelector('.income-type');
+                            const incomeTriggerElement = card.querySelector('.income-trigger');
+                            const incomeSettlementElement = card.querySelector('.income-settlement');
+
+                            if (incomeTypeElement || incomeTriggerElement || incomeSettlementElement) {
+                                content.push('<h4>收入机制</h4>');
+                                if (incomeTypeElement) {
+                                    const incomeType = incomeTypeElement.textContent?.trim();
+                                    if (incomeType) {
+                                        content.push(`<p><strong>类型：</strong>${escapeHtml(incomeType.replace(/💰|🪙/g, '').trim())}</p>`);
+                                    }
+                                }
+                                if (incomeTriggerElement) {
+                                    const incomeTrigger = incomeTriggerElement.textContent?.trim();
+                                    if (incomeTrigger) {
+                                        content.push(`<p><strong>触发：</strong>${escapeHtml(incomeTrigger)}</p>`);
+                                    }
+                                }
+                                if (incomeSettlementElement) {
+                                    const incomeSettlement = incomeSettlementElement.textContent?.trim();
+                                    if (incomeSettlement) {
+                                        content.push(`<p><strong>结算：</strong>${escapeHtml(incomeSettlement)}</p>`);
+                                    }
+                                }
+                            }
+
+                            // 参与方结构
+                            const partiesSection = card.querySelector('.parties-section');
+                            if (partiesSection) {
+                                content.push('<h4>参与方结构</h4>');
+                                
+                                try {
+                                    const designerSection = partiesSection.querySelector('.designer-section');
+                                    if (designerSection) {
+                                        const designerTitle = designerSection.querySelector('.designer-title')?.textContent?.trim();
+                                        const designerSubtitle = designerSection.querySelector('.designer-subtitle')?.textContent?.trim();
+                                        const designerDetailItems = designerSection.querySelectorAll('.designer-detail-item');
+
+                                        if (designerTitle) {
+                                            content.push(`<p><strong>${escapeHtml(designerTitle)}</strong> (${escapeHtml(designerSubtitle || '')})</p>`);
+                                            designerDetailItems.forEach(item => {
+                                                const detailTitle = item.querySelector('.designer-detail-title')?.textContent?.trim();
+                                                const detailContentEl = item.querySelector('div:last-child');
+                                                const detailContent = detailContentEl?.textContent?.trim();
+                                                
+                                                if (detailTitle && detailContent) {
+                                                    const cleanTitle = detailTitle.replace(/[🎯💎🚀]/g, '').trim();
+                                                    content.push(`<p>• ${escapeHtml(cleanTitle)}：${escapeHtml(detailContent)}</p>`);
+                                                }
+                                            });
+                                        }
+                                    }
+                                } catch (designerError) {
+                                    console.warn('处理设计者信息时出错:', designerError);
+                                }
+
+                                try {
+                                    const businessFlowGrid = partiesSection.querySelector('.business-flow-grid');
+                                    if (businessFlowGrid) {
+                                        const partyCards = businessFlowGrid.querySelectorAll('.party-card');
+                                        partyCards.forEach(party => {
+                                            const partyName = party.querySelector('.party-name')?.textContent?.trim();
+                                            const partyRoleBadge = party.querySelector('.party-role-badge')?.textContent?.trim();
+                                            
+                                            if (partyName) {
+                                                content.push(`<p><strong>${escapeHtml(partyName)}</strong> (${escapeHtml(partyRoleBadge || '')})</p>`);
+                                                
+                                                // 资源
+                                                const resourceTags = party.querySelectorAll('.resource-tag');
+                                                if (resourceTags.length > 0) {
+                                                    const resources = Array.from(resourceTags)
+                                                        .map(tag => tag.textContent?.trim())
+                                                        .filter(Boolean)
+                                                        .join('、');
+                                                    if (resources) {
+                                                        content.push(`<p>• 资源：${escapeHtml(resources)}</p>`);
+                                                    }
+                                                }
+                                                
+                                                // 查找各个部分
+                                                const partySections = party.querySelectorAll('.party-section');
+                                                partySections.forEach(section => {
+                                                    const sectionTitle = section.querySelector('.party-section-title')?.textContent?.trim();
+                                                    const sectionContent = section.querySelector('div:not(.party-section-title)')?.textContent?.trim();
+                                                    
+                                                    if (sectionTitle && sectionContent) {
+                                                        if (sectionTitle.includes('在闭环中的价值')) {
+                                                            content.push(`<p>• 在闭环中的价值：</p>`);
+                                                            content.push(`<p>${escapeHtml(sectionContent)}</p>`);
+                                                        } else if (sectionTitle.includes('如何让TA高兴')) {
+                                                            content.push(`<p>• 如何让TA高兴：</p>`);
+                                                            content.push(`<p>${escapeHtml(sectionContent)}</p>`);
+                                                        }
+                                                    }
+                                                });
+                                                
+                                                content.push('<p></p>'); // 添加空行分隔
+                                            }
+                                        });
+                                    }
+                                } catch (partyError) {
+                                    console.warn('处理参与方信息时出错:', partyError);
+                                }
+                            }
 
                     // 关键信息
                     const infoCards = card.querySelectorAll('.info-card');
@@ -1456,105 +1542,201 @@
                 });
             }
 
+            } catch (error) {
+                console.error('Word内容创建出错:', error);
+                throw new Error('内容创建失败: ' + error.message);
+            }
+
             return content.join('\n');
+        }
+
+        // HTML转义函数
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 优雅的通知系统
+        function showNotification(message, type = 'info') {
+            // 移除已存在的通知
+            const existingNotifications = document.querySelectorAll('.custom-notification');
+            existingNotifications.forEach(n => n.remove());
+
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `custom-notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            // 添加样式
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+                font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                font-size: 14px;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                backdrop-filter: blur(10px);
+            `;
+
+            const content = notification.querySelector('.notification-content');
+            content.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            `;
+
+            // 添加到页面
+            document.body.appendChild(notification);
+
+            // 动画显示
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            // 自动隐藏
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
         // 下载Word文档
         function downloadWordDocument(content, fileName) {
-            // 创建基本的Word文档HTML结构
-            const wordHtml = `
-                <html xmlns:o="urn:schemas-microsoft-com:office:office" 
-                      xmlns:w="urn:schemas-microsoft-com:office:word" 
-                      xmlns="http://www.w3.org/TR/REC-html40">
-                <head>
-                    <meta charset="utf-8">
-                    <title>${fileName}</title>
-                    <!--[if gte mso 9]>
-                    <xml>
-                        <w:WordDocument>
-                            <w:View>Print</w:View>
-                            <w:Zoom>90</w:Zoom>
-                            <w:DoNotPromptForConvert/>
-                            <w:DoNotShowInsertionsAndDeletions/>
-                        </w:WordDocument>
-                    </xml>
-                    <![endif]-->
-                    <style>
-                        @page { 
-                            margin: 2.54cm; 
-                        }
-                        body { 
-                            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif; 
-                            font-size: 12pt; 
-                            line-height: 1.6; 
-                            margin: 0; 
-                        }
-                        h1 { 
-                            font-size: 18pt; 
-                            font-weight: bold; 
-                            text-align: center; 
-                            margin-bottom: 20pt; 
-                            color: #007AFF; 
-                        }
-                        h2 { 
-                            font-size: 16pt; 
-                            font-weight: bold; 
-                            margin-top: 20pt; 
-                            margin-bottom: 12pt; 
-                            color: #333; 
-                        }
-                        h3 { 
-                            font-size: 14pt; 
-                            font-weight: bold; 
-                            margin-top: 16pt; 
-                            margin-bottom: 10pt; 
-                            color: #555; 
-                        }
-                        h4 { 
-                            font-size: 13pt; 
-                            font-weight: bold; 
-                            margin-top: 12pt; 
-                            margin-bottom: 8pt; 
-                            color: #666; 
-                        }
-                        p { 
-                            margin-bottom: 8pt; 
-                            text-align: justify; 
-                        }
-                        ul, ol { 
-                            margin-bottom: 12pt; 
-                            padding-left: 20pt; 
-                        }
-                        li { 
-                            margin-bottom: 4pt; 
-                        }
-                        strong { 
-                            font-weight: bold; 
-                        }
-                        br { 
-                            mso-data-placement: same-cell; 
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${content}
-                </body>
-                </html>
-            `;
+            try {
+                if (!content || typeof content !== 'string') {
+                    throw new Error('文档内容为空或格式不正确');
+                }
 
-            // 创建Blob对象
-            const blob = new Blob(['\ufeff', wordHtml], {
-                type: 'application/msword'
-            });
+                if (!fileName || typeof fileName !== 'string') {
+                    fileName = '非劳务收入管道设计方案.docx';
+                }
 
-            // 创建下载链接
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
+                // 创建基本的Word文档HTML结构
+                const wordHtml = `
+                    <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+                          xmlns:w="urn:schemas-microsoft-com:office:word" 
+                          xmlns="http://www.w3.org/TR/REC-html40">
+                    <head>
+                        <meta charset="utf-8">
+                        <title>${escapeHtml(fileName)}</title>
+                        <!--[if gte mso 9]>
+                        <xml>
+                            <w:WordDocument>
+                                <w:View>Print</w:View>
+                                <w:Zoom>90</w:Zoom>
+                                <w:DoNotPromptForConvert/>
+                                <w:DoNotShowInsertionsAndDeletions/>
+                            </w:WordDocument>
+                        </xml>
+                        <![endif]-->
+                        <style>
+                            @page { 
+                                margin: 2.54cm; 
+                            }
+                            body { 
+                                font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif; 
+                                font-size: 12pt; 
+                                line-height: 1.6; 
+                                margin: 0; 
+                            }
+                            h1 { 
+                                font-size: 18pt; 
+                                font-weight: bold; 
+                                text-align: center; 
+                                margin-bottom: 20pt; 
+                                color: #007AFF; 
+                            }
+                            h2 { 
+                                font-size: 16pt; 
+                                font-weight: bold; 
+                                margin-top: 20pt; 
+                                margin-bottom: 12pt; 
+                                color: #333; 
+                            }
+                            h3 { 
+                                font-size: 14pt; 
+                                font-weight: bold; 
+                                margin-top: 16pt; 
+                                margin-bottom: 10pt; 
+                                color: #555; 
+                            }
+                            h4 { 
+                                font-size: 13pt; 
+                                font-weight: bold; 
+                                margin-top: 12pt; 
+                                margin-bottom: 8pt; 
+                                color: #666; 
+                            }
+                            p { 
+                                margin-bottom: 8pt; 
+                                text-align: justify; 
+                            }
+                            ul, ol { 
+                                margin-bottom: 12pt; 
+                                padding-left: 20pt; 
+                            }
+                            li { 
+                                margin-bottom: 4pt; 
+                            }
+                            strong { 
+                                font-weight: bold; 
+                            }
+                            br { 
+                                mso-data-placement: same-cell; 
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${content}
+                    </body>
+                    </html>
+                `;
+
+                // 创建Blob对象
+                const blob = new Blob(['\ufeff', wordHtml], {
+                    type: 'application/msword'
+                });
+
+                // 检查浏览器支持
+                if (!window.URL || !window.URL.createObjectURL) {
+                    throw new Error('浏览器不支持文件下载功能');
+                }
+
+                // 创建下载链接
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.href = url;
+                link.download = fileName;
+                link.style.display = 'none';
+                
+                document.body.appendChild(link);
+                link.click();
+                
+                // 清理
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+
+            } catch (error) {
+                console.error('Word文档下载失败:', error);
+                throw new Error('文档下载失败: ' + error.message);
+            }
         }
 
 

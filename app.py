@@ -155,7 +155,17 @@ with app.app_context():
 @login_required
 def index():
     """Main form page for user input - Apple design"""
-    return render_template('index_apple.html')
+    # 检查用户AI分析额度
+    has_quota = current_user.has_quota()
+    remaining_quota = current_user.remaining_quota
+    quota_info = {
+        'has_quota': has_quota,
+        'remaining': remaining_quota,
+        'total': current_user.ai_quota,
+        'used': current_user.used_quota,
+        'quota_display': current_user.quota_display
+    }
+    return render_template('index_apple.html', quota_info=quota_info)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

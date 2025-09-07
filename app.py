@@ -2539,7 +2539,24 @@ def delete_knowledge(item_id):
 @login_required  
 def user_profile():
     """普通用户的个人信息页面"""
-    return render_template('user_profile_apple.html')
+    try:
+        # 检查并修复用户配额数据
+        if current_user.ai_quota is None:
+            current_user.ai_quota = User.get_default_quota_for_role(current_user.is_admin)
+            app.logger.warning(f"用户 {current_user.phone} 的ai_quota为空，已设置默认值: {current_user.ai_quota}")
+        
+        if current_user.used_quota is None:
+            current_user.used_quota = 0
+            app.logger.warning(f"用户 {current_user.phone} 的used_quota为空，已设置为0")
+        
+        # 提交修复
+        db.session.commit()
+        
+        return render_template('user_profile_apple.html')
+    except Exception as e:
+        app.logger.error(f"Profile页面错误 - 用户: {current_user.phone if current_user else 'Unknown'}, 错误: {str(e)}")
+        flash('个人信息页面加载失败，请稍后重试', 'error')
+        return redirect(url_for('index'))
 
 @app.route('/admin/models/test', methods=['POST'])
 @login_required

@@ -434,7 +434,7 @@
         <!-- 个人信息头部 -->
         <div class="profile-header">
             <div class="profile-avatar">
-                {{ (current_user.name or current_user.phone)[0] | upper }}
+                {{ ((current_user.name or current_user.phone or '用')[:1]) | upper }}
             </div>
             <div class="profile-info">{{ current_user.name or '未设置姓名' }}</div>
             <div class="profile-phone">{{ current_user.phone }}</div>

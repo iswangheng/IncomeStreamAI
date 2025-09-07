@@ -28,6 +28,8 @@
     <link href="{{ url_for('static', filename='css/navigation-clean.css') }}" rel="stylesheet">
     <!-- 页面加载状态样式 -->
     <link href="{{ url_for('static', filename='css/page-loading.css') }}" rel="stylesheet">
+    <!-- AI额度不足提示样式 -->
+    <link href="{{ url_for('static', filename='css/quota-insufficient.css') }}" rel="stylesheet">
 
     <!-- SEO优化 -->
     <meta name="description" content="Angela - Apple级别AI驱动的非劳务收入管道设计工具，世界一流的用户体验">
@@ -150,6 +152,26 @@
             {% endif %}
         {% endwith %}
 
+        <!-- AI分析额度状态横幅 -->
+        {% if quota_info and not quota_info.has_quota %}
+        <div class="quota-insufficient-banner slide-up">
+            <div class="quota-banner-content">
+                <div class="quota-banner-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="quota-banner-text">
+                    <h4>AI分析额度不足</h4>
+                    <p>您的AI分析额度已用完 ({{ quota_info.quota_display }})，请联系管理员增加额度后继续使用</p>
+                </div>
+                <div class="quota-banner-action">
+                    <a href="{{ url_for('user_profile') }}" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-user"></i> 查看个人资料
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- 主要表单 -->
         <form method="POST" action="{{ url_for('generate') }}" id="mainForm" class="no-loading-overlay">
 
@@ -229,12 +251,29 @@
 
             <!-- 提交按钮 -->
             <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(0, 0, 0, 0.1);">
+                {% if quota_info and not quota_info.has_quota %}
+                <!-- 额度不足时的禁用按钮 -->
+                <div class="submit-button-container" data-bs-toggle="tooltip" 
+                     data-bs-placement="top" 
+                     title="AI分析额度不足 ({{ quota_info.quota_display }})，请联系管理员增加额度">
+                    <button type="button" class="btn btn-primary btn-large interactive gpu-accelerated disabled-quota" disabled>
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        额度不足，无法分析
+                    </button>
+                </div>
+                {% else %}
+                <!-- 正常状态的提交按钮 -->
                 <button type="submit" class="btn btn-primary btn-large interactive gpu-accelerated">
                     <i class="fas fa-magic me-2"></i>
                     开始AI智能分析
                 </button>
+                {% endif %}
                 <p style="margin-top: 16px; color: #667680; font-size: 14px;">
+                    {% if quota_info and not quota_info.has_quota %}
+                    您的AI分析额度已用完，请联系管理员增加额度后继续使用
+                    {% else %}
                     基于您提供的信息，AI将在几秒内生成专业的收入管道设计方案
+                    {% endif %}
                 </p>
             </div>
         </form>
@@ -328,7 +367,38 @@
             setRandomPlaceholder();
             // Handle demo case selection
             handleDemoCaseSelection();
+            // Initialize Bootstrap tooltips for quota warnings
+            initializeQuotaTooltips();
         });
+
+        // Initialize quota-related tooltips
+        function initializeQuotaTooltips() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    trigger: 'hover focus',
+                    placement: 'top',
+                    animation: true,
+                    html: false
+                });
+            });
+
+            // Add click handler for disabled quota button
+            const disabledButton = document.querySelector('.disabled-quota');
+            if (disabledButton) {
+                disabledButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Show a more prominent message using the existing toast function
+                    if (typeof showToast !== 'undefined') {
+                        showToast('AI分析额度不足，请联系管理员增加额度', 'error', 5000);
+                    }
+                    
+                    return false;
+                });
+            }
+        }
 
         // Role to resource mapping
         const roleToResourceSuggestions = {

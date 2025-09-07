@@ -1,0 +1,217 @@
+/* ===== AI分析额度不足提示样式 ===== */
+
+/* 额度不足横幅 */
+.quota-insufficient-banner {
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--space-6);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.2);
+}
+
+.quota-insufficient-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.quota-banner-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-6);
+    position: relative;
+    z-index: 1;
+}
+
+.quota-banner-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.quota-banner-icon i {
+    font-size: 20px;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.quota-banner-text {
+    flex: 1;
+    color: white;
+}
+
+.quota-banner-text h4 {
+    margin: 0 0 var(--space-1) 0;
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+    color: white;
+}
+
+.quota-banner-text p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: rgba(255, 255, 255, 0.9);
+    line-height: var(--leading-relaxed);
+}
+
+.quota-banner-action {
+    flex-shrink: 0;
+}
+
+.quota-banner-action .btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-size: var(--text-sm);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+}
+
+.quota-banner-action .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 额度不足时的禁用按钮样式 */
+.btn.disabled-quota {
+    background: var(--color-gray-400) !important;
+    color: var(--color-gray-600) !important;
+    cursor: not-allowed !important;
+    border-color: var(--color-gray-400) !important;
+    opacity: 0.6;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn.disabled-quota:hover,
+.btn.disabled-quota:focus,
+.btn.disabled-quota:active {
+    background: var(--color-gray-400) !important;
+    color: var(--color-gray-600) !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border-color: var(--color-gray-400) !important;
+}
+
+.btn.disabled-quota::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Tooltip 样式增强 */
+.tooltip {
+    font-size: var(--text-sm);
+}
+
+.tooltip-inner {
+    background: var(--color-gray-900);
+    color: white;
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-width: 250px;
+}
+
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: var(--color-gray-900);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .quota-banner-content {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-3);
+        padding: var(--space-4);
+    }
+    
+    .quota-banner-text {
+        order: -1;
+    }
+    
+    .quota-banner-action {
+        order: 1;
+        width: 100%;
+    }
+    
+    .quota-banner-action .btn {
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+    }
+}
+
+@media (max-width: 480px) {
+    .quota-banner-content {
+        padding: var(--space-3);
+    }
+    
+    .quota-banner-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .quota-banner-icon i {
+        font-size: 18px;
+    }
+    
+    .quota-banner-text h4 {
+        font-size: var(--text-base);
+    }
+    
+    .quota-banner-text p {
+        font-size: var(--text-xs);
+    }
+}
+
+/* 入场动画增强 */
+.slide-up {
+    animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

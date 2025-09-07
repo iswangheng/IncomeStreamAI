@@ -8,6 +8,11 @@ Angela is a Flask-based web application designed to help users generate non-labo
 
 - **Communication Style**: 使用中文交流，简单易懂的日常用语
 - **UI Design Style**: Apple级别设计系统。遵循Apple Human Interface Guidelines，采用系统级设计令牌体系。主色调为iOS蓝(#007AFF)配合中性灰色系，实现简洁、优雅、功能性和高可访问性的完美平衡。设计哲学注重内容优先、直观交互和视觉层次，为用户提供世界顶级的使用体验。
+- **UI/UX交互规范（强制执行）**:
+    - **禁用原生弹窗**: 严格禁止使用 `alert()`、`confirm()`、`prompt()` 等原生JavaScript弹窗，必须使用符合Apple设计系统的优雅弹窗组件
+    - **统一弹窗设计**: 所有用户提示、确认对话框、错误信息都必须采用项目现有的Apple风格弹窗设计，包括毛玻璃效果、圆角卡片、优雅动画等视觉元素
+    - **统一加载状态**: 所有页面跳转、数据加载、异步操作都必须使用项目现有的统一加载动画系统（`static/js/page-loading.js` 和 `static/css/page-loading.css`），确保视觉体验一致性
+    - **优雅用户反馈**: 使用Toast通知、模态卡片、内联提示等现代UI组件替代原生弹窗，保持界面美观性和用户体验的连贯性
 - **Agent Workflow**:
     - 严格禁止修改未明确要求的代码，删除、重命名、重构现有功能，引入/移除/更换依赖包，或改动数据库结构。
     - 仅对用户明确要求的部分进行代码补全、修复或添加新功能。

@@ -137,7 +137,7 @@ function renderUsersTable(users) {
                 </div>
 
                 <div class="user-card-footer">
-                    <div class="action-buttons hover-reveal">
+                    <div class="action-buttons">
                         <button class="action-btn edit" onclick="editUser(${user.id})" title="编辑用户">
                             <i class="fas fa-edit"></i>
                             <span>编辑</span>

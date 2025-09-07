@@ -34,7 +34,7 @@
     --elegant-bg-primary: #FFFFFF;
     --elegant-bg-secondary: #F2F2F7;
     --elegant-bg-tertiary: #FFFFFF;
-
+    
     /* AI额度相关色彩 */
     --quota-progress-bg: #E5E7EB;
     --quota-progress-fill: #10B981;
@@ -281,8 +281,6 @@
     overflow: hidden;
     transition: var(--elegant-transition);
     box-shadow: var(--elegant-shadow-sm);
-    position: relative;
-    overflow: visible;
 }
 
 .user-card:hover {
@@ -508,77 +506,69 @@
     padding: var(--elegant-space-4) var(--elegant-space-5) var(--elegant-space-5);
     background: var(--elegant-gray-50);
     border-top: 0.5px solid var(--elegant-gray-200);
-    position: relative;
-    z-index: 1;
 }
 
 .action-buttons {
     display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-}
-
-/* 悬停显示效果 */
-.hover-reveal {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(4px);
-    transition: all 0.3s ease;
-}
-
-.user-card:hover .hover-reveal {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    gap: var(--elegant-space-2);
+    align-items: center;
 }
 
 .action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid var(--color-gray-300);
-    border-radius: 8px;
-    color: var(--color-text-secondary);
-    font-size: 12px;
+    flex: 1;
+    padding: var(--elegant-space-2) var(--elegant-space-3);
+    border: none;
+    border-radius: var(--elegant-radius-md);
+    font-size: var(--elegant-text-xs);
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: var(--elegant-transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--elegant-space-1);
+    text-decoration: none;
+    color: inherit;
 }
 
-.action-btn:hover {
-    background: rgba(255, 255, 255, 0.95);
-    border-color: var(--color-gray-400);
-    color: var(--color-text-primary);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.action-btn.edit {
+    background: var(--elegant-primary);
+    color: var(--elegant-text-inverse);
 }
 
 .action-btn.edit:hover {
-    background: rgba(0, 122, 255, 0.1);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    background: var(--elegant-primary-dark);
+    transform: translateY(-1px);
+}
+
+.action-btn.disable {
+    background: var(--elegant-warning);
+    color: var(--elegant-text-inverse);
 }
 
 .action-btn.disable:hover {
-    background: rgba(255, 149, 0, 0.1);
-    border-color: var(--color-warning);
-    color: var(--color-warning);
+    background: #E67E22;
+    transform: translateY(-1px);
+}
+
+.action-btn.enable {
+    background: var(--elegant-success);
+    color: var(--elegant-text-inverse);
 }
 
 .action-btn.enable:hover {
-    background: rgba(52, 199, 89, 0.1);
-    border-color: var(--color-success);
-    color: var(--color-success);
+    background: #27AE60;
+    transform: translateY(-1px);
+}
+
+.action-btn.delete {
+    background: var(--elegant-error);
+    color: var(--elegant-text-inverse);
 }
 
 .action-btn.delete:hover {
-    background: rgba(255, 59, 48, 0.1);
-    border-color: var(--color-error);
-    color: var(--color-error);
+    background: #DC2626;
+    transform: translateY(-1px);
 }
 
 .current-user-label {

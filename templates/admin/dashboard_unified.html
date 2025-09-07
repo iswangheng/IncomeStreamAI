@@ -909,7 +909,7 @@
             const statusElement = document.getElementById('model-status');
             
             testResults.style.display = 'block';
-            testOutput.innerHTML = '<i class="fas fa-plug me-2"></i>正在测试连接...';
+            testOutput.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在测试连接...';
             
             try {
                 const response = await fetch('/admin/models/test', {

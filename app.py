@@ -155,17 +155,7 @@ with app.app_context():
 @login_required
 def index():
     """Main form page for user input - Apple design"""
-    # 检查用户AI分析额度
-    has_quota = current_user.has_quota()
-    remaining_quota = current_user.remaining_quota
-    quota_info = {
-        'has_quota': has_quota,
-        'remaining': remaining_quota,
-        'total': current_user.ai_quota,
-        'used': current_user.used_quota,
-        'quota_display': current_user.quota_display
-    }
-    return render_template('index_apple.html', quota_info=quota_info)
+    return render_template('index_apple.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -2740,106 +2730,4 @@ def update_user_profile():
         app.logger.error(f"Update profile error: {str(e)}")
         flash('更新失败，请重试', 'error')
         return redirect(url_for('user_profile'))
-
-
-@app.route('/update_income_mechanism', methods=['POST'])
-@login_required
-def update_income_mechanism():
-    """更新收入类型配置"""
-    try:
-        # 获取请求数据
-        data = request.get_json()
-        if not data:
-            return jsonify({'success': False, 'error': '无效的请求数据'}), 400
-        
-        pipeline_id = data.get('pipeline_id')
-        income_mechanism = data.get('income_mechanism')
-        
-        # 验证输入
-        if not pipeline_id or not income_mechanism:
-            return jsonify({'success': False, 'error': '缺少必要参数'}), 400
-        
-        if not all(key in income_mechanism for key in ['type', 'trigger', 'settlement']):
-            return jsonify({'success': False, 'error': '收入机制数据不完整'}), 400
-        
-        # 从session或URL获取当前的分析记录ID
-        analysis_id = None
-        
-        # 尝试从session获取
-        if 'analysis_result_id' in session:
-            analysis_id = session['analysis_result_id']
-        
-        # 如果session中没有，尝试从request args获取
-        if not analysis_id:
-            analysis_id = request.args.get('result_id')
-        
-        # 如果还是没有，从referer URL中解析
-        if not analysis_id:
-            referer = request.headers.get('Referer', '')
-            if '/history/' in referer:
-                analysis_id = referer.split('/history/')[-1].split('?')[0]
-            elif 'result_id=' in referer:
-                analysis_id = referer.split('result_id=')[-1].split('&')[0]
-        
-        if not analysis_id:
-            return jsonify({'success': False, 'error': '无法确定当前分析记录'}), 400
-        
-        app.logger.info(f"更新收入机制 - 分析ID: {analysis_id}, 管道ID: {pipeline_id}")
-        
-        # 查找分析记录
-        from models import AnalysisResult
-        analysis_record = AnalysisResult.query.filter_by(id=analysis_id).first()
-        
-        if not analysis_record:
-            return jsonify({'success': False, 'error': '找不到分析记录'}), 404
-        
-        # 权限检查
-        if not current_user.is_admin and analysis_record.user_id != current_user.id:
-            return jsonify({'success': False, 'error': '无权限修改此记录'}), 403
-        
-        # 解析现有的result_data
-        try:
-            result_data = json.loads(analysis_record.result_data) if analysis_record.result_data else {}
-        except json.JSONDecodeError:
-            return jsonify({'success': False, 'error': '分析数据格式错误'}), 500
-        
-        # 更新收入机制
-        if 'pipelines' in result_data:
-            for i, pipeline in enumerate(result_data['pipelines']):
-                # 匹配管道ID（支持多种ID格式）
-                current_pipeline_id = pipeline.get('id', f'pipeline_{i+1}')
-                if pipeline_id.endswith(str(i+1)) or current_pipeline_id == pipeline_id or pipeline_id == f'pipeline_{i+1}':
-                    if 'income_mechanism' not in pipeline:
-                        pipeline['income_mechanism'] = {}
-                    
-                    # 更新收入机制数据
-                    pipeline['income_mechanism']['type'] = income_mechanism['type']
-                    pipeline['income_mechanism']['trigger'] = income_mechanism['trigger']
-                    pipeline['income_mechanism']['settlement'] = income_mechanism['settlement']
-                    
-                    app.logger.info(f"已更新管道 {i+1} 的收入机制")
-                    break
-            else:
-                return jsonify({'success': False, 'error': '找不到指定的管道'}), 404
-        else:
-            return jsonify({'success': False, 'error': '分析结果中没有管道数据'}), 404
-        
-        # 保存更新后的数据
-        analysis_record.result_data = json.dumps(result_data, ensure_ascii=False)
-        analysis_record.updated_at = datetime.utcnow()
-        
-        db.session.commit()
-        
-        app.logger.info(f"收入机制更新成功 - 用户: {current_user.phone}, 分析ID: {analysis_id}")
-        
-        return jsonify({
-            'success': True,
-            'message': '收入类型更新成功',
-            'updated_mechanism': income_mechanism
-        })
-        
-    except Exception as e:
-        app.logger.error(f"更新收入机制失败: {str(e)}")
-        app.logger.error(f"错误详情: {traceback.format_exc()}")
-        return jsonify({'success': False, 'error': f'服务器错误: {str(e)}'}), 500
 

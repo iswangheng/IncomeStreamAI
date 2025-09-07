@@ -1156,6 +1156,7 @@ def results():
                                          result=result_data,
                                          status='completed',
                                          history_mode=True,
+                                         analysis_id=analysis_record.id,
                                          record_info={
                                              'id': analysis_record.id,
                                              'created_at': analysis_record.created_at_display,
@@ -1366,16 +1367,20 @@ def results():
 
             # 如果有任何结果数据，显示结果页面
             if suggestions:
+                # 尝试获取analysis_id
+                analysis_id = session.get('analysis_result_id', None)
                 return render_template('result_pipeline_redesigned.html', 
                                      form_data=form_data, 
                                      result=suggestions,
-                                     status='completed')
+                                     status='completed',
+                                     analysis_id=analysis_id)
             else:
                 # 分析标记为完成但没有结果数据，显示错误状态
                 app.logger.error("Analysis completed but no result data available")
                 return render_template('result_pipeline_redesigned.html',
                                      form_data=form_data,
                                      status='error',
+                                     analysis_id=None,
                                      error_message='分析完成但结果数据丢失，请重新分析')
 
         elif status == 'error' or status == 'timeout':
@@ -1415,6 +1420,7 @@ def results():
                                          form_data=form_data,
                                          result=fallback_result,
                                          status='completed',
+                                         analysis_id=fallback_id if 'fallback_id' in locals() else None,
                                          fallback_mode=True)
                 except Exception as e:
                     app.logger.error(f"Fallback generation failed: {str(e)}")
@@ -1497,6 +1503,7 @@ def results():
                                      form_data=form_data,
                                      result=fallback_result,
                                      status='completed',
+                                     analysis_id=emergency_id if 'emergency_id' in locals() else None,
                                      fallback_mode=True)
 
             except Exception as fallback_error:
@@ -1504,6 +1511,7 @@ def results():
                 return render_template('result_pipeline_redesigned.html',
                                      form_data=form_data,
                                      status='error',
+                                     analysis_id=None,
                                      error_message='系统无法生成分析结果，请重新尝试')
 
     except Exception as e:
@@ -2041,6 +2049,7 @@ def view_analysis_record(record_id):
                              result=result_data,
                              status='completed',
                              history_mode=True,
+                             analysis_id=record.id,
                              record_info={
                                  'id': record.id,
                                  'created_at': record.created_at_display,

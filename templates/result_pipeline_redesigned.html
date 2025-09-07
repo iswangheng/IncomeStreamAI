@@ -382,9 +382,26 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.8);
+        }
+        
+        /* 悬停时显示编辑按钮 */
+        .income-mechanism:hover .income-edit-btn {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        /* 激活状态下也显示编辑按钮 */
+        .income-mechanism.edit-active .income-edit-btn {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
         }
         
         .income-edit-btn:hover {
@@ -1890,6 +1907,9 @@
             displayMode.style.display = 'none';
             editMode.style.display = 'block';
             button.style.display = 'none';
+            
+            // 添加激活状态，保持编辑按钮可见
+            mechanismCard.classList.add('edit-active');
         }
 
         function cancelIncomeEdit(button) {
@@ -1902,6 +1922,9 @@
             displayMode.style.display = 'block';
             editMode.style.display = 'none';
             editBtn.style.display = 'flex';
+            
+            // 移除激活状态
+            mechanismCard.classList.remove('edit-active');
         }
 
         async function saveIncomeEdit(button) {

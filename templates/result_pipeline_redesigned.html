@@ -11,6 +11,8 @@
     <link href="{{ url_for('static', filename='css/navigation-spacing-fix.css') }}" rel="stylesheet">
     <!-- 导航栏干净样式 - 最后加载 -->
     <link href="{{ url_for('static', filename='css/navigation-clean.css') }}" rel="stylesheet">
+    <!-- 页面加载状态样式 -->
+    <link href="{{ url_for('static', filename='css/page-loading.css') }}" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -1217,6 +1219,7 @@
 
     <script src="{{ url_for('static', filename='js/user-menu.js') }}"></script>
     <script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/page-loading.js') }}"></script>
     <script>
         // Word文档导出功能
         function exportToWord() {

@@ -1,0 +1,174 @@
+/**
+ * 页面跳转加载状态样式
+ * Apple风格的全页面加载效果
+ */
+
+/* 全页面加载覆盖层 */
+.page-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    
+    /* 防止选择文本 */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+/* 显示状态 */
+.page-loading-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 加载内容容器 */
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Apple风格加载圆环 */
+.apple-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(0, 122, 255, 0.1);
+    border-left: 3px solid #007AFF;
+    border-radius: 50%;
+    animation: apple-spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    margin-bottom: 16px;
+}
+
+/* 加载动画 */
+@keyframes apple-spin {
+    0% {
+        transform: rotate(0deg);
+        border-left-color: #007AFF;
+    }
+    50% {
+        transform: rotate(180deg);
+        border-left-color: #34C759;
+    }
+    100% {
+        transform: rotate(360deg);
+        border-left-color: #007AFF;
+    }
+}
+
+/* 加载文本 */
+.loading-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1D1D1F;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    letter-spacing: -0.022em;
+    opacity: 0.8;
+    animation: pulse-text 2s ease-in-out infinite;
+}
+
+/* 文本脉搏动画 */
+@keyframes pulse-text {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* 防止页面滚动 */
+body.page-loading {
+    overflow: hidden;
+    height: 100%;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+    .page-loading-overlay {
+        background: rgba(28, 28, 30, 0.95);
+    }
+    
+    .loading-text {
+        color: #F2F2F7;
+    }
+    
+    .apple-loading-spinner {
+        border-color: rgba(10, 132, 255, 0.1);
+        border-left-color: #0A84FF;
+    }
+    
+    @keyframes apple-spin {
+        0% {
+            transform: rotate(0deg);
+            border-left-color: #0A84FF;
+        }
+        50% {
+            transform: rotate(180deg);
+            border-left-color: #30D158;
+        }
+        100% {
+            transform: rotate(360deg);
+            border-left-color: #0A84FF;
+        }
+    }
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .apple-loading-spinner {
+        width: 36px;
+        height: 36px;
+        border-width: 2.5px;
+        margin-bottom: 14px;
+    }
+    
+    .loading-text {
+        font-size: 15px;
+    }
+}
+
+/* 高性能动画优化 */
+.apple-loading-spinner {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 减少动画的用户偏好支持 */
+@media (prefers-reduced-motion: reduce) {
+    .apple-loading-spinner {
+        animation: none;
+        border-left-color: #007AFF;
+    }
+    
+    .loading-text {
+        animation: none;
+        opacity: 0.8;
+    }
+    
+    .page-loading-overlay {
+        transition: opacity 0.15s ease;
+    }
+}
+
+/* iOS Safari优化 */
+@supports (-webkit-touch-callout: none) {
+    .page-loading-overlay {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+}

@@ -17,6 +17,10 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean, default=False, comment='是否为管理员用户')
     created_at = db.Column(db.DateTime, default=datetime.utcnow, comment='创建时间')
     last_login = db.Column(db.DateTime, comment='最后登录时间')
+    
+    # AI分析额度管理
+    ai_quota = db.Column(db.Integer, default=10, nullable=False, comment='AI分析总额度')
+    used_quota = db.Column(db.Integer, default=0, nullable=False, comment='已使用的AI分析次数')
 
     def set_password(self, password):
         """设置密码"""
@@ -50,6 +54,54 @@ class User(UserMixin, db.Model):
     def user_type_display(self):
         """用户类型显示文本"""
         return '管理员' if self.is_admin else '普通用户'
+    
+    # AI分析额度相关方法
+    @property
+    def remaining_quota(self):
+        """剩余的AI分析额度"""
+        return max(0, self.ai_quota - self.used_quota)
+    
+    @property
+    def quota_usage_percentage(self):
+        """额度使用百分比"""
+        if self.ai_quota <= 0:
+            return 100
+        return min(100, (self.used_quota / self.ai_quota) * 100)
+    
+    @property
+    def quota_display(self):
+        """额度显示文本"""
+        return f"{self.used_quota}/{self.ai_quota}"
+    
+    def has_quota(self):
+        """检查是否还有可用额度"""
+        return self.remaining_quota > 0
+    
+    def consume_quota(self):
+        """消耗一次AI分析额度"""
+        if self.has_quota():
+            self.used_quota += 1
+            return True
+        return False
+    
+    def set_quota(self, new_quota):
+        """设置新的总额度（保持已使用额度不变）"""
+        self.ai_quota = max(0, new_quota)
+    
+    def reset_quota(self, new_quota=None):
+        """重置额度使用情况"""
+        if new_quota is not None:
+            self.ai_quota = max(0, new_quota)
+        self.used_quota = 0
+    
+    def adjust_quota(self, amount):
+        """调整总额度（增加或减少）"""
+        self.ai_quota = max(0, self.ai_quota + amount)
+    
+    @classmethod
+    def get_default_quota_for_role(cls, is_admin=False):
+        """获取角色对应的默认额度"""
+        return 10000 if is_admin else 10
 
     def __repr__(self):
         return f'<User {self.phone}>'

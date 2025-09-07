@@ -2129,6 +2129,9 @@ def admin_add_user():
             user.set_password(password)
             user.active = True
             user.is_admin = is_admin
+            # 根据用户角色设置默认AI分析额度
+            user.ai_quota = User.get_default_quota_for_role(is_admin)
+            user.used_quota = 0
 
             db.session.add(user)
             db.session.commit()

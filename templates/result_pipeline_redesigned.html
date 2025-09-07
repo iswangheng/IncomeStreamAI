@@ -1880,6 +1880,161 @@
 
 
 
+        // 收入类型编辑功能
+        function toggleIncomeEdit(button) {
+            const mechanismCard = button.closest('.income-mechanism');
+            const displayMode = mechanismCard.querySelector('.income-display-mode');
+            const editMode = mechanismCard.querySelector('.income-edit-mode');
+            
+            // 切换到编辑模式
+            displayMode.style.display = 'none';
+            editMode.style.display = 'block';
+            button.style.display = 'none';
+        }
+
+        function cancelIncomeEdit(button) {
+            const mechanismCard = button.closest('.income-mechanism');
+            const displayMode = mechanismCard.querySelector('.income-display-mode');
+            const editMode = mechanismCard.querySelector('.income-edit-mode');
+            const editBtn = mechanismCard.querySelector('.income-edit-btn');
+            
+            // 切换回显示模式
+            displayMode.style.display = 'block';
+            editMode.style.display = 'none';
+            editBtn.style.display = 'flex';
+        }
+
+        async function saveIncomeEdit(button) {
+            const mechanismCard = button.closest('.income-mechanism');
+            const pipelineId = mechanismCard.getAttribute('data-pipeline-id');
+            
+            // 获取编辑的值
+            const typeInput = mechanismCard.querySelector('.income-type-input');
+            const triggerInput = mechanismCard.querySelector('.income-trigger-input');
+            const settlementInput = mechanismCard.querySelector('.income-settlement-input');
+            
+            const newData = {
+                type: typeInput.value.trim(),
+                trigger: triggerInput.value.trim(),
+                settlement: settlementInput.value.trim()
+            };
+            
+            // 验证输入
+            if (!newData.type || !newData.trigger || !newData.settlement) {
+                alert('请填写所有字段');
+                return;
+            }
+            
+            try {
+                // 发送更新请求到后端
+                const response = await fetch('/update_income_mechanism', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        pipeline_id: pipelineId,
+                        income_mechanism: newData
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // 更新显示的文本
+                    const typeText = mechanismCard.querySelector('.income-type-text');
+                    const triggerText = mechanismCard.querySelector('.income-trigger-text');
+                    const settlementText = mechanismCard.querySelector('.income-settlement-text');
+                    
+                    typeText.textContent = newData.type;
+                    triggerText.textContent = newData.trigger;
+                    settlementText.textContent = newData.settlement;
+                    
+                    // 切换回显示模式
+                    cancelIncomeEdit(button);
+                    
+                    // 显示成功提示
+                    showSuccessMessage('收入类型已更新成功');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || '保存失败');
+                }
+            } catch (error) {
+                console.error('保存收入类型失败:', error);
+                showErrorMessage('保存失败: ' + error.message);
+            }
+        }
+
+        // 显示成功消息
+        function showSuccessMessage(message) {
+            // 创建并显示成功提示（Apple风格的Toast）
+            const toast = document.createElement('div');
+            toast.className = 'success-toast';
+            toast.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+            `;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 10000;
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // 显示错误消息
+        function showErrorMessage(message) {
+            const toast = document.createElement('div');
+            toast.className = 'error-toast';
+            toast.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${message}</span>
+            `;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 10000;
+                box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
         // 页面加载动画
         document.addEventListener('DOMContentLoaded', function() {
             const elements = document.querySelectorAll('.fade-in-up');

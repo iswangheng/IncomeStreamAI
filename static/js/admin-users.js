@@ -78,7 +78,7 @@ function renderUsersTable(users) {
     // 确保容器可见
     container.style.display = 'block';
     container.style.visibility = 'visible';
-    
+
     let cardsHTML = '<div class="users-grid">';
 
     users.forEach((user, index) => {
@@ -264,7 +264,7 @@ function editUser(userId) {
 }
 
 function deleteUser(userId) {
-    if (confirm('确定要删除这个用户吗？此操作不可撤销！')) {
+    if (showElegantConfirm('确定要删除这个用户吗？此操作不可撤销！', () => {
         fetch(`/admin/users/${userId}/delete`, {
             method: 'POST',
             headers: {
@@ -285,12 +285,12 @@ function deleteUser(userId) {
             console.error('删除用户失败:', error);
             showToast('删除失败，请稍后重试', 'error');
         });
-    }
+    })) {}
 }
 
 function toggleUserStatus(userId, newStatus) {
     const action = newStatus ? '启用' : '禁用';
-    if (confirm(`确定要${action}这个用户吗？`)) {
+    if (showElegantConfirm(`确定要${action}这个用户吗？`, () => {
         fetch(`/admin/users/${userId}/toggle-status`, {
             method: 'POST',
             headers: {
@@ -312,7 +312,7 @@ function toggleUserStatus(userId, newStatus) {
             console.error(`${action}用户失败:`, error);
             showToast(`${action}失败，请稍后重试`, 'error');
         });
-    }
+    })) {}
 }
 
 // 确保函数全局可访问
@@ -343,21 +343,21 @@ function searchUsers() {
     console.log('搜索用户被调用');
     const searchInput = document.getElementById('user-search') || document.getElementById('userSearch');
     const roleSelect = document.getElementById('user-role-filter') || document.getElementById('userStatusFilter');
-    
+
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
     const roleFilter = roleSelect ? roleSelect.value : '';
-    
+
     console.log('搜索条件:', { searchTerm, roleFilter });
-    
+
     if (!currentUsersData || currentUsersData.length === 0) {
         console.log('没有用户数据可搜索');
         return;
     }
-    
+
     let filteredUsers = currentUsersData.filter(user => {
         const matchesSearch = (user.name && user.name.toLowerCase().includes(searchTerm)) || 
                              (user.phone && user.phone.includes(searchTerm));
-        
+
         let matchesRole = true;
         if (roleFilter === 'admin') {
             matchesRole = user.is_admin;
@@ -368,10 +368,10 @@ function searchUsers() {
         } else if (roleFilter === 'inactive') {
             matchesRole = !user.active;
         }
-        
+
         return matchesSearch && matchesRole;
     });
-    
+
     console.log('筛选后的用户:', filteredUsers);
     renderUsersTable(filteredUsers);
 }
@@ -387,22 +387,22 @@ function showToast(message, type = 'info') {
     // 创建toast元素
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    
+
     // 安全地构建DOM结构，避免XSS
     const icon = document.createElement('i');
     icon.className = `fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}`;
-    
+
     const messageSpan = document.createElement('span');
     messageSpan.textContent = message; // 使用textContent而不是innerHTML确保安全
-    
+
     const closeButton = document.createElement('button');
     closeButton.style.cssText = 'background: none; border: none; color: inherit; cursor: pointer; margin-left: auto;';
     closeButton.onclick = function() { this.parentElement.remove(); };
-    
+
     const closeIcon = document.createElement('i');
     closeIcon.className = 'fas fa-times';
     closeButton.appendChild(closeIcon);
-    
+
     toast.appendChild(icon);
     toast.appendChild(messageSpan);
     toast.appendChild(closeButton);
@@ -421,4 +421,45 @@ function showToast(message, type = 'info') {
             }, 300);
         }
     }, 5000);
+}
+
+// 优雅的确认弹窗函数 (示例实现，可根据实际UI库调整)
+function showElegantConfirm(message, onConfirm, onCancel) {
+    const existingConfirm = document.querySelector('.elegant-confirm-overlay');
+    if (existingConfirm) {
+        return false; // 避免重复创建
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'elegant-confirm-overlay';
+    overlay.innerHTML = `
+        <div class="elegant-confirm-box">
+            <div class="elegant-confirm-header">
+                <i class="fas fa-question-circle"></i> 确认操作
+            </div>
+            <div class="elegant-confirm-body">
+                ${message}
+            </div>
+            <div class="elegant-confirm-footer">
+                <button class="btn btn-secondary cancel" onclick="hideElegantConfirm()">取消</button>
+                <button class="btn btn-primary confirm" onclick="handleConfirm(${onConfirm.toString()})">确定</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // 绑定事件处理函数
+    window.handleConfirm = function(callback) {
+        callback();
+        hideElegantConfirm();
+    };
+    window.hideElegantConfirm = function() {
+        const overlayToRemove = document.querySelector('.elegant-confirm-overlay');
+        if (overlayToRemove) {
+            overlayToRemove.remove();
+        }
+    };
+
+    return true; // 表示弹窗已被显示
 }

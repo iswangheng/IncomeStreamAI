@@ -504,3 +504,331 @@ function initializeInteractions() {
                 }, 300);
             }
         }
+
+// 优雅的确认弹窗函数 - 全局使用
+function showElegantConfirm(message, onConfirm, onCancel = null) {
+    // 创建遮罩层
+    const overlay = document.createElement('div');
+    overlay.className = 'elegant-confirm-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+
+    // 创建确认框
+    const confirmBox = document.createElement('div');
+    confirmBox.className = 'elegant-confirm-box';
+    confirmBox.style.cssText = `
+        background: white;
+        border-radius: 20px;
+        padding: 32px;
+        max-width: 420px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        transform: scale(0.9) translateY(20px);
+        transition: all 0.3s ease;
+        text-align: center;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+
+    // 创建图标
+    const icon = document.createElement('div');
+    icon.innerHTML = '<i class="fas fa-question-circle"></i>';
+    icon.style.cssText = `
+        font-size: 48px;
+        color: #FF9500;
+        margin-bottom: 20px;
+        animation: bounceIn 0.6s ease;
+    `;
+
+    // 创建消息
+    const messageEl = document.createElement('div');
+    messageEl.textContent = message;
+    messageEl.style.cssText = `
+        font-size: 18px;
+        color: #1d1d1f;
+        line-height: 1.4;
+        margin-bottom: 28px;
+        font-weight: 500;
+    `;
+
+    // 创建按钮容器
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    `;
+
+    // 取消按钮
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = '取消';
+    cancelBtn.style.cssText = `
+        background: #f5f5f5;
+        color: #666;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 80px;
+    `;
+
+    // 确定按钮
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = '确定';
+    confirmBtn.style.cssText = `
+        background: #FF3B30;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 80px;
+    `;
+
+    // 按钮悬停效果
+    cancelBtn.onmouseenter = () => {
+        cancelBtn.style.background = '#ebebeb';
+        cancelBtn.style.transform = 'translateY(-1px)';
+    };
+    cancelBtn.onmouseleave = () => {
+        cancelBtn.style.background = '#f5f5f5';
+        cancelBtn.style.transform = 'translateY(0)';
+    };
+
+    confirmBtn.onmouseenter = () => {
+        confirmBtn.style.background = '#ff2d20';
+        confirmBtn.style.transform = 'translateY(-1px)';
+        confirmBtn.style.boxShadow = '0 8px 25px rgba(255, 59, 48, 0.4)';
+    };
+    confirmBtn.onmouseleave = () => {
+        confirmBtn.style.background = '#FF3B30';
+        confirmBtn.style.transform = 'translateY(0)';
+        confirmBtn.style.boxShadow = 'none';
+    };
+
+    // 关闭弹窗函数
+    const closeConfirm = () => {
+        overlay.style.opacity = '0';
+        confirmBox.style.transform = 'scale(0.9) translateY(20px)';
+        setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.remove();
+            }
+        }, 300);
+    };
+
+    // 事件监听
+    cancelBtn.onclick = () => {
+        closeConfirm();
+        if (onCancel) onCancel();
+    };
+
+    confirmBtn.onclick = () => {
+        closeConfirm();
+        setTimeout(() => {
+            if (onConfirm) onConfirm();
+        }, 100);
+    };
+
+    overlay.onclick = (e) => {
+        if (e.target === overlay) {
+            closeConfirm();
+            if (onCancel) onCancel();
+        }
+    };
+
+    // 添加动画样式
+    if (!document.getElementById('elegant-global-styles')) {
+        const style = document.createElement('style');
+        style.id = 'elegant-global-styles';
+        style.textContent = `
+            @keyframes bounceIn {
+                0% { transform: scale(0.3); opacity: 0; }
+                50% { transform: scale(1.05); }
+                70% { transform: scale(0.9); }
+                100% { transform: scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 组装确认框
+    buttonContainer.appendChild(cancelBtn);
+    buttonContainer.appendChild(confirmBtn);
+
+    confirmBox.appendChild(icon);
+    confirmBox.appendChild(messageEl);
+    confirmBox.appendChild(buttonContainer);
+    overlay.appendChild(confirmBox);
+    document.body.appendChild(overlay);
+
+    // 显示动画
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        confirmBox.style.transform = 'scale(1) translateY(0)';
+    }, 10);
+
+    // ESC键关闭
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+            closeConfirm();
+            if (onCancel) onCancel();
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+}
+
+// 优雅的提示弹窗函数 - 全局使用
+function showElegantAlert(message, type = 'info') {
+    // 创建遮罩层
+    const overlay = document.createElement('div');
+    overlay.className = 'elegant-alert-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+
+    // 创建弹窗
+    const alertBox = document.createElement('div');
+    alertBox.className = 'elegant-alert-box';
+    alertBox.style.cssText = `
+        background: white;
+        border-radius: 20px;
+        padding: 32px;
+        max-width: 420px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        transform: scale(0.9) translateY(20px);
+        transition: all 0.3s ease;
+        text-align: center;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+
+    // 图标配置
+    const iconConfig = {
+        success: { icon: 'check-circle', color: '#34C759' },
+        error: { icon: 'exclamation-triangle', color: '#FF3B30' },
+        warning: { icon: 'exclamation-circle', color: '#FF9500' },
+        info: { icon: 'info-circle', color: '#007AFF' }
+    };
+
+    const config = iconConfig[type] || iconConfig.info;
+
+    // 创建内容
+    const icon = document.createElement('div');
+    icon.innerHTML = `<i class="fas fa-${config.icon}"></i>`;
+    icon.style.cssText = `
+        font-size: 48px;
+        color: ${config.color};
+        margin-bottom: 20px;
+        animation: bounceIn 0.6s ease;
+    `;
+
+    const messageEl = document.createElement('div');
+    messageEl.textContent = message;
+    messageEl.style.cssText = `
+        font-size: 18px;
+        color: #1d1d1f;
+        line-height: 1.4;
+        margin-bottom: 28px;
+        font-weight: 500;
+    `;
+
+    const button = document.createElement('button');
+    button.textContent = '确定';
+    button.style.cssText = `
+        background: ${config.color};
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 100px;
+    `;
+
+    // 按钮悬停效果
+    button.onmouseenter = () => {
+        button.style.transform = 'translateY(-2px)';
+        button.style.boxShadow = `0 8px 25px ${config.color}40`;
+    };
+    button.onmouseleave = () => {
+        button.style.transform = 'translateY(0)';
+        button.style.boxShadow = 'none';
+    };
+
+    // 关闭弹窗函数
+    const closeAlert = () => {
+        overlay.style.opacity = '0';
+        alertBox.style.transform = 'scale(0.9) translateY(20px)';
+        setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.remove();
+            }
+        }, 300);
+    };
+
+    // 事件监听
+    button.onclick = closeAlert;
+    overlay.onclick = (e) => {
+        if (e.target === overlay) closeAlert();
+    };
+
+    // 组装弹窗
+    alertBox.appendChild(icon);
+    alertBox.appendChild(messageEl);
+    alertBox.appendChild(button);
+    overlay.appendChild(alertBox);
+    document.body.appendChild(overlay);
+
+    // 显示动画
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        alertBox.style.transform = 'scale(1) translateY(0)';
+    }, 10);
+
+    // ESC键关闭
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+            closeAlert();
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+}
+
+// 确保所有函数全局可访问
+window.showElegantConfirm = showElegantConfirm;
+window.showElegantAlert = showElegantAlert;

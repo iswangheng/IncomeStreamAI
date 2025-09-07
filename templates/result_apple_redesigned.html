@@ -14,8 +14,7 @@
     <link href="{{ url_for('static', filename='css/navigation-spacing-fix.css') }}" rel="stylesheet">
     <!-- 导航栏干净样式 - 最后加载 -->
     <link href="{{ url_for('static', filename='css/navigation-clean.css') }}" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
     <style>
         /* Apple级别结果展示页面样式 */
         :root {
@@ -1539,7 +1538,7 @@
                 AI智能分析完成
                 {% endif %}
             </div>
-            <h1 class="hero-title">非劳务收入路径设计方案</h1>
+            <h1 class="hero-title" {% if form_data %}data-project-name="{{ form_data.projectName }}"{% endif %}>非劳务收入路径设计方案</h1>
             <p class="hero-subtitle">
                 {% if history_mode %}
                 历史分析记录 - {{ record_info.analysis_type if record_info else '查看以往设计方案' }}
@@ -2195,9 +2194,9 @@
 
         <!-- 操作按钮 -->
         <div class="action-buttons fade-in-up animate-delay-4">
-            <button class="action-btn btn-primary-custom" onclick="exportToPDF()">
+            <button class="action-btn btn-primary-custom" onclick="exportToWord()">
                 <i class="fas fa-download"></i>
-                导出PDF报告
+                导出Word文档
             </button>
         </div>
     </div>
@@ -2213,192 +2212,322 @@
         // 轮询代码已移除 - 结果页面不再需要加载状态
 
 
-        function exportToPDF() {
+        function exportToWord() {
             // 显示导出进度
             const exportBtn = document.querySelector('.action-btn.btn-primary-custom');
             const originalText = exportBtn.innerHTML;
-            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在生成PDF...';
+            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>正在生成Word文档...';
             exportBtn.disabled = true;
 
             try {
-                // 创建一个专门用于PDF导出的容器
-                const exportContainer = createPDFExportContainer();
-                document.body.appendChild(exportContainer);
-
-                // 使用html2canvas截图，然后转为PDF
-                html2canvas(exportContainer, {
-                    scale: 2, // 提高清晰度
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    width: 800,
-                    height: exportContainer.scrollHeight
-                }).then(canvas => {
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF('p', 'mm', 'a4');
-                    
-                    const imgData = canvas.toDataURL('image/png');
-                    const imgWidth = 210; // A4宽度
-                    const pageHeight = 295; // A4高度
-                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                    let heightLeft = imgHeight;
-                    let position = 0;
-
-                    // 添加第一页
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-
-                    // 如果内容超过一页，添加更多页面
-                    while (heightLeft >= 0) {
-                        position = heightLeft - imgHeight;
-                        pdf.addPage();
-                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                        heightLeft -= pageHeight;
-                    }
-
-                    // 保存PDF
-                    const currentDate = new Date().toISOString().slice(0, 10);
-                    pdf.save(`Angela-AI收入路径设计方案-${currentDate}.pdf`);
-                    
-                    // 清理临时容器
-                    document.body.removeChild(exportContainer);
-                    
-                    // 恢复按钮状态
-                    exportBtn.innerHTML = originalText;
-                    exportBtn.disabled = false;
-                }).catch(error => {
-                    console.error('PDF生成失败:', error);
-                    alert('PDF生成失败，请重试');
-                    
-                    // 清理和恢复
-                    if (document.body.contains(exportContainer)) {
-                        document.body.removeChild(exportContainer);
-                    }
-                    exportBtn.innerHTML = originalText;
-                    exportBtn.disabled = false;
-                });
+                // 创建Word文档内容
+                const wordContent = createWordContent();
+                
+                // 获取项目名称作为文件名
+                const projectNameElement = document.querySelector('.hero-title');
+                const projectName = document.querySelector('[data-project-name]')?.getAttribute('data-project-name') || 
+                                 document.querySelector('.analysis-project-name')?.textContent ||
+                                 (window.form_data && window.form_data.projectName) ||
+                                 '非劳务收入路径设计方案';
+                
+                const fileName = `${projectName.replace(/[<>:"/\\|?*]/g, '')}.docx`;
+                
+                // 创建并下载Word文档
+                downloadWordDocument(wordContent, fileName);
+                
+                // 恢复按钮状态
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
                 
             } catch (error) {
-                console.error('PDF导出失败:', error);
-                alert('PDF导出失败，请重试');
+                console.error('Word导出失败:', error);
+                alert('Word导出失败，请重试');
                 exportBtn.innerHTML = originalText;
                 exportBtn.disabled = false;
             }
         }
 
-        // 创建用于PDF导出的简洁容器
-        function createPDFExportContainer() {
-            const container = document.createElement('div');
-            container.style.cssText = `
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-                width: 800px;
-                background: white;
-                padding: 40px;
-                font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-                color: #333;
-                line-height: 1.6;
-            `;
+        // 创建Word文档内容
+        function createWordContent() {
+            const content = [];
+            
+            // 标题
+            content.push('<h1>Angela AI - 非劳务收入路径设计方案</h1>');
+            content.push(`<p>生成时间：${new Date().toLocaleString('zh-CN')}</p>`);
+            content.push('<br>');
 
-            // 添加标题
-            const title = document.createElement('div');
-            title.style.cssText = `
-                text-align: center;
-                margin-bottom: 40px;
-                border-bottom: 2px solid #007AFF;
-                padding-bottom: 20px;
-            `;
-            title.innerHTML = `
-                <h1 style="color: #007AFF; font-size: 28px; margin: 0 0 10px 0;">Angela AI</h1>
-                <h2 style="color: #666; font-size: 18px; margin: 0 0 10px 0;">非劳务收入路径设计方案</h2>
-                <p style="color: #999; font-size: 14px; margin: 0;">生成时间: ${new Date().toLocaleString('zh-CN')}</p>
-            `;
-            container.appendChild(title);
-
-            // 添加项目概览
-            const overview = document.querySelector('.situation-text');
-            if (overview) {
-                const overviewSection = document.createElement('div');
-                overviewSection.style.cssText = 'margin-bottom: 30px;';
-                overviewSection.innerHTML = `
-                    <h3 style="color: #007AFF; font-size: 20px; margin-bottom: 15px;">项目概览与分析</h3>
-                    <p style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 0;">${overview.textContent}</p>
-                `;
-                container.appendChild(overviewSection);
+            // 项目概览
+            const overviewSituation = document.querySelector('.situation-text');
+            if (overviewSituation) {
+                content.push('<h2>1. 项目概览与分析</h2>');
+                content.push(`<p>${overviewSituation.textContent}</p>`);
+                content.push('<br>');
             }
 
-            // 添加需要补齐的关键环节
+            // 收入类型
+            const incomeTypeBadge = document.querySelector('.income-type-badge');
+            if (incomeTypeBadge) {
+                content.push('<h3>1.1 收入类型</h3>');
+                content.push(`<p>${incomeTypeBadge.textContent}</p>`);
+                content.push('<br>');
+            }
+
+            // 核心洞察
+            const coreInsightSection = document.querySelector('.overview-section h4');
+            if (coreInsightSection && coreInsightSection.textContent.includes('核心洞察')) {
+                content.push('<h3>1.2 核心洞察</h3>');
+                const coreInsightContent = coreInsightSection.parentElement.querySelector('p');
+                if (coreInsightContent) {
+                    content.push(`<p>${coreInsightContent.textContent}</p>`);
+                }
+                content.push('<br>');
+            }
+
+            // 需要补齐的关键环节
             const gapTags = document.querySelectorAll('.gap-tag');
             if (gapTags.length > 0) {
-                const gapsSection = document.createElement('div');
-                gapsSection.style.cssText = 'margin-bottom: 30px;';
-                let gapsHtml = `<h3 style="color: #FF3B30; font-size: 18px; margin-bottom: 15px;">需要补齐的关键环节</h3><ul style="margin: 0; padding-left: 20px;">`;
+                content.push('<h2>2. 需要补齐的关键环节</h2>');
+                content.push('<ul>');
                 gapTags.forEach(tag => {
-                    gapsHtml += `<li style="margin-bottom: 8px; color: #666;">${tag.textContent}</li>`;
+                    content.push(`<li>${tag.textContent}</li>`);
                 });
-                gapsHtml += '</ul>';
-                gapsSection.innerHTML = gapsHtml;
-                container.appendChild(gapsSection);
+                content.push('</ul>');
+                content.push('<br>');
             }
 
-            // 添加收入路径方案
+            // 建议寻找的关键角色
+            const roleCards = document.querySelectorAll('.role-card');
+            if (roleCards.length > 0) {
+                content.push('<h2>3. 建议寻找的关键角色</h2>');
+                roleCards.forEach((card, index) => {
+                    const roleName = card.querySelector('.role-name')?.textContent;
+                    const roleWhy = card.querySelector('.role-why')?.textContent;
+                    const roleWhere = card.querySelector('.role-where')?.textContent;
+                    const roleScript = card.querySelector('.role-script')?.textContent;
+                    
+                    if (roleName) {
+                        content.push(`<h3>3.${index + 1} ${roleName}</h3>`);
+                        if (roleWhy) content.push(`<p><strong>需要原因：</strong>${roleWhy}</p>`);
+                        if (roleWhere) content.push(`<p><strong>寻找渠道：</strong>${roleWhere}</p>`);
+                        if (roleScript) content.push(`<p><strong>开场话术：</strong>${roleScript}</p>`);
+                        content.push('<br>');
+                    }
+                });
+            }
+
+            // 收入路径方案
             const pathCards = document.querySelectorAll('.path-card');
-            pathCards.forEach((card, index) => {
-                const pathSection = document.createElement('div');
-                pathSection.style.cssText = `
-                    margin-bottom: 40px; 
-                    padding: 25px; 
-                    border: 1px solid #e0e0e0; 
-                    border-radius: 12px;
-                    background: #fafafa;
-                `;
-
-                let pathHtml = '';
+            if (pathCards.length > 0) {
+                content.push('<h2>4. 收入路径方案</h2>');
                 
-                // 路径标题
-                const pathTitle = card.querySelector('.path-title')?.textContent || `路径方案 ${index + 1}`;
-                pathHtml += `<h3 style="color: #007AFF; font-size: 20px; margin: 0 0 15px 0;">${index + 1}. ${pathTitle}</h3>`;
+                pathCards.forEach((card, index) => {
+                    const pathTitle = card.querySelector('.path-name')?.textContent || `路径方案 ${index + 1}`;
+                    content.push(`<h3>4.${index + 1} ${pathTitle}</h3>`);
 
-                // 场景描述
-                const pathScene = card.querySelector('.path-scene')?.textContent;
-                if (pathScene) {
-                    pathHtml += `<p style="color: #666; font-style: italic; margin-bottom: 15px;"><strong>场景:</strong> ${pathScene}</p>`;
-                }
+                    // 收入机制
+                    const incomeType = card.querySelector('.income-mechanism')?.textContent;
+                    if (incomeType) {
+                        content.push(`<p><strong>收入机制：</strong>${incomeType}</p>`);
+                    }
 
-                // 启动策略
-                const whoMovesFirst = card.querySelector('div[style*="color: var(--color-text-secondary)"]')?.textContent;
-                if (whoMovesFirst) {
-                    pathHtml += `<p style="color: #333; margin-bottom: 15px;"><strong>启动策略:</strong> ${whoMovesFirst}</p>`;
-                }
+                    // 参与方结构
+                    const partyNodes = card.querySelectorAll('.party-node, .party-card');
+                    if (partyNodes.length > 0) {
+                        content.push('<h4>4.' + (index + 1) + '.1 参与方结构</h4>');
+                        content.push('<ol>');
+                        partyNodes.forEach(node => {
+                            const partyName = node.querySelector('h6, .party-name')?.textContent || 
+                                            node.querySelector('.party-header h6')?.textContent;
+                            const partyResources = Array.from(node.querySelectorAll('.resource-tag, .party-resources span'))
+                                .map(tag => tag.textContent).join('、');
+                            const partyHappiness = node.querySelector('.party-happiness div, .party-happiness')?.textContent;
+                            
+                            if (partyName) {
+                                content.push(`<li><strong>${partyName}</strong>`);
+                                if (partyResources) content.push(`<br>资源：${partyResources}`);
+                                if (partyHappiness && !partyHappiness.includes('如何让TA高兴')) {
+                                    const cleanHappiness = partyHappiness.replace(/如何让TA高兴：?/g, '').trim();
+                                    if (cleanHappiness) content.push(`<br>激励方式：${cleanHappiness}`);
+                                }
+                                content.push('</li>');
+                            }
+                        });
+                        content.push('</ol>');
+                    }
 
-                // 执行步骤
-                const stepItems = card.querySelectorAll('.step-item');
-                if (stepItems.length > 0) {
-                    pathHtml += '<h4 style="color: #333; margin: 20px 0 10px 0;">执行步骤:</h4><ol style="margin: 0; padding-left: 20px;">';
-                    stepItems.forEach(step => {
-                        const owner = step.querySelector('.step-owner')?.textContent || '';
-                        const action = step.querySelector('.step-action')?.textContent || '';
-                        pathHtml += `<li style="margin-bottom: 12px;"><strong style="color: #007AFF;">${owner}:</strong><br><span style="color: #666;">${action}</span></li>`;
-                    });
-                    pathHtml += '</ol>';
-                }
+                    // 最小可验证原型 (MVP)
+                    const mvpCard = card.querySelector('.detail-card.mvp-highlight .detail-content, .mvp-section');
+                    if (mvpCard) {
+                        content.push('<h4>4.' + (index + 1) + '.2 最小可验证原型 (MVP)</h4>');
+                        const mvpText = mvpCard.textContent.replace('最小可验证原型 (MVP)', '').trim();
+                        content.push(`<p>${mvpText}</p>`);
+                    }
 
-                // MVP验证
-                const mvpSection = card.querySelector('.mvp-section');
-                if (mvpSection) {
-                    const mvpText = mvpSection.textContent.replace('最小可验证原型 (MVP)', '').trim();
-                    pathHtml += `<div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-top: 20px;">
-                        <h4 style="color: #34C759; margin: 0 0 10px 0;">最小可验证原型 (MVP)</h4>
-                        <p style="margin: 0; color: #333;">${mvpText}</p>
-                    </div>`;
-                }
+                    // 启动动作
+                    const firstStep = card.querySelector('[style*="border-left: 4px solid var(--color-primary)"] div:last-child, .detail-content');
+                    if (firstStep && firstStep.closest('[style*="border-left: 4px solid var(--color-primary)"]')) {
+                        content.push('<h4>4.' + (index + 1) + '.3 启动动作</h4>');
+                        content.push(`<p>${firstStep.textContent}</p>`);
+                    }
 
-                pathSection.innerHTML = pathHtml;
-                container.appendChild(pathSection);
+                    // 收益触发机制
+                    const revenueCard = card.querySelector('.detail-card.revenue-highlight .detail-content');
+                    if (revenueCard) {
+                        content.push('<h4>4.' + (index + 1) + '.4 收益触发机制</h4>');
+                        content.push(`<p>${revenueCard.textContent}</p>`);
+                    }
+
+                    // 时间投入估算
+                    const laborCard = card.querySelector('.detail-card.labor-load-highlight');
+                    if (laborCard) {
+                        content.push('<h4>4.' + (index + 1) + '.5 时间投入估算</h4>');
+                        const hoursNumber = laborCard.querySelector('.hours-number')?.textContent;
+                        const hoursUnit = laborCard.querySelector('.hours-unit')?.textContent;
+                        const loadLevel = laborCard.querySelector('.load-level')?.textContent;
+                        const alternative = laborCard.querySelector('.labor-alternative')?.textContent;
+                        
+                        if (hoursNumber && hoursUnit) {
+                            content.push(`<p><strong>预计投入：</strong>${hoursNumber}${hoursUnit}</p>`);
+                        }
+                        if (loadLevel) {
+                            content.push(`<p><strong>投入程度：</strong>${loadLevel}</p>`);
+                        }
+                        if (alternative) {
+                            const cleanAlternative = alternative.replace('降低方案：', '').trim();
+                            content.push(`<p><strong>降低方案：</strong>${cleanAlternative}</p>`);
+                        }
+                    }
+
+                    // 最薄弱环节
+                    const weakLinkCard = card.querySelector('.detail-card.weak-link-highlight .detail-content');
+                    if (weakLinkCard) {
+                        content.push('<h4>4.' + (index + 1) + '.6 最薄弱环节</h4>');
+                        content.push(`<p>${weakLinkCard.textContent}</p>`);
+                    }
+
+                    // 风险与应对
+                    const risksCard = card.querySelector('.detail-card:has(.fa-exclamation-triangle)');
+                    if (risksCard) {
+                        content.push('<h4>4.' + (index + 1) + '.7 风险与应对</h4>');
+                        const riskItems = risksCard.querySelectorAll('.risk-item');
+                        if (riskItems.length > 0) {
+                            content.push('<ul>');
+                            riskItems.forEach(item => {
+                                const riskDesc = item.querySelector('.risk-description')?.textContent.replace('风险：', '').trim();
+                                const riskMitigation = item.querySelector('.risk-mitigation')?.textContent.replace('应对：', '').trim();
+                                if (riskDesc) {
+                                    content.push(`<li><strong>风险：</strong>${riskDesc}`);
+                                    if (riskMitigation) content.push(`<br><strong>应对：</strong>${riskMitigation}`);
+                                    content.push('</li>');
+                                }
+                            });
+                            content.push('</ul>');
+                        }
+                    }
+
+                    content.push('<br>');
+                });
+            }
+
+            return content.join('\n');
+        }
+
+        // 下载Word文档
+        function downloadWordDocument(content, fileName) {
+            // 创建基本的Word文档HTML结构
+            const wordHtml = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+                      xmlns:w="urn:schemas-microsoft-com:office:word" 
+                      xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <title>${fileName}</title>
+                    <!--[if gte mso 9]>
+                    <xml>
+                        <w:WordDocument>
+                            <w:View>Print</w:View>
+                            <w:Zoom>90</w:Zoom>
+                            <w:DoNotPromptForConvert/>
+                            <w:DoNotShowInsertionsAndDeletions/>
+                        </w:WordDocument>
+                    </xml>
+                    <![endif]-->
+                    <style>
+                        @page { 
+                            margin: 2.54cm; 
+                        }
+                        body { 
+                            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif; 
+                            font-size: 12pt; 
+                            line-height: 1.6; 
+                            margin: 0; 
+                        }
+                        h1 { 
+                            font-size: 18pt; 
+                            font-weight: bold; 
+                            text-align: center; 
+                            margin-bottom: 20pt; 
+                            color: #007AFF; 
+                        }
+                        h2 { 
+                            font-size: 16pt; 
+                            font-weight: bold; 
+                            margin-top: 20pt; 
+                            margin-bottom: 12pt; 
+                            color: #333; 
+                        }
+                        h3 { 
+                            font-size: 14pt; 
+                            font-weight: bold; 
+                            margin-top: 16pt; 
+                            margin-bottom: 10pt; 
+                            color: #555; 
+                        }
+                        h4 { 
+                            font-size: 13pt; 
+                            font-weight: bold; 
+                            margin-top: 12pt; 
+                            margin-bottom: 8pt; 
+                            color: #666; 
+                        }
+                        p { 
+                            margin-bottom: 8pt; 
+                            text-align: justify; 
+                        }
+                        ul, ol { 
+                            margin-bottom: 12pt; 
+                            padding-left: 20pt; 
+                        }
+                        li { 
+                            margin-bottom: 4pt; 
+                        }
+                        strong { 
+                            font-weight: bold; 
+                        }
+                        br { 
+                            mso-data-placement: same-cell; 
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `;
+
+            // 创建Blob对象
+            const blob = new Blob(['\ufeff', wordHtml], {
+                type: 'application/msword'
             });
 
-            return container;
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
         }
 
         

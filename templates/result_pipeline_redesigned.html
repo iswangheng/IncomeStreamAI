@@ -405,7 +405,7 @@
         }
 
         .designer-card {
-            background: linear-gradient(135deg, #F8F9FA, #E8F5F0);
+            background: linear-gradient(135deg, #F8F9FA, #E8F5E0);
             border-radius: var(--radius-xl);
             padding: var(--space-4);
             color: var(--color-text-primary);
@@ -1286,17 +1286,17 @@
                 const overviewCard = document.querySelector('.overview-card');
                 if (overviewCard) {
                     content.push('<h2>2. 整体局势分析</h2>');
-                    
+
                     try {
                         const insights = overviewCard.querySelectorAll('.insight-item');
                         insights.forEach((insight, index) => {
                             const titleElement = insight.querySelector('h4');
                             const textElement = insight.querySelector('p');
-                            
+
                             if (titleElement && textElement) {
                                 const title = titleElement.textContent?.trim();
                                 const text = textElement.textContent?.trim();
-                                
+
                                 if (title && text) {
                                     const cleanTitle = title.replace(/[🎯💰💡⚡🔍🌟]/g, '').trim();
                                     content.push(`<h3>2.${index + 1} ${escapeHtml(cleanTitle)}</h3>`);
@@ -1333,10 +1333,10 @@
                             const roleItems = suggestedRolesElement.querySelectorAll('.role-card');
                             roleItems.forEach((card, index) => {
                                 const roleName = card.querySelector('.role-name')?.textContent?.trim();
-                                
+
                                 if (roleName) {
                                     content.push(`<h4>4.${index + 1} ${escapeHtml(roleName)}</h4>`);
-                                    
+
                                     // 查找各个部分的内容
                                     const cardDivs = card.querySelectorAll('div');
                                     cardDivs.forEach(div => {
@@ -1357,7 +1357,7 @@
                                             }
                                         }
                                     });
-                                    
+
                                     const roleScript = card.querySelector('.role-script')?.textContent?.trim();
                                     if (roleScript) {
                                         const scriptContent = roleScript.replace(/开场话术：|"/g, '').trim();
@@ -1372,7 +1372,7 @@
                     } catch (roleError) {
                         console.warn('处理角色建议时出错:', roleError);
                     }
-                    
+
                     content.push('<br>');
                 }
 
@@ -1417,7 +1417,7 @@
                             const partiesSection = card.querySelector('.parties-section');
                             if (partiesSection) {
                                 content.push('<h4>参与方结构</h4>');
-                                
+
                                 try {
                                     const designerSection = partiesSection.querySelector('.designer-section');
                                     if (designerSection) {
@@ -1431,7 +1431,7 @@
                                                 const detailTitle = item.querySelector('.designer-detail-title')?.textContent?.trim();
                                                 const detailContentEl = item.querySelector('div:last-child');
                                                 const detailContent = detailContentEl?.textContent?.trim();
-                                                
+
                                                 if (detailTitle && detailContent) {
                                                     const cleanTitle = detailTitle.replace(/[🎯💎🚀]/g, '').trim();
                                                     content.push(`<p>• ${escapeHtml(cleanTitle)}：${escapeHtml(detailContent)}</p>`);
@@ -1450,10 +1450,10 @@
                                         partyCards.forEach(party => {
                                             const partyName = party.querySelector('.party-name')?.textContent?.trim();
                                             const partyRoleBadge = party.querySelector('.party-role-badge')?.textContent?.trim();
-                                            
+
                                             if (partyName) {
                                                 content.push(`<p><strong>${escapeHtml(partyName)}</strong> (${escapeHtml(partyRoleBadge || '')})</p>`);
-                                                
+
                                                 // 资源
                                                 const resourceTags = party.querySelectorAll('.resource-tag');
                                                 if (resourceTags.length > 0) {
@@ -1465,13 +1465,13 @@
                                                         content.push(`<p>• 资源：${escapeHtml(resources)}</p>`);
                                                     }
                                                 }
-                                                
+
                                                 // 查找各个部分
                                                 const partySections = party.querySelectorAll('.party-section');
                                                 partySections.forEach(section => {
                                                     const sectionTitle = section.querySelector('.party-section-title')?.textContent?.trim();
                                                     const sectionContent = section.querySelector('div:not(.party-section-title)')?.textContent?.trim();
-                                                    
+
                                                     if (sectionTitle && sectionContent) {
                                                         if (sectionTitle.includes('在闭环中的价值')) {
                                                             content.push(`<p>• 在闭环中的价值：</p>`);
@@ -1482,7 +1482,7 @@
                                                         }
                                                     }
                                                 });
-                                                
+
                                                 content.push('<p></p>'); // 添加空行分隔
                                             }
                                         });
@@ -1539,15 +1539,18 @@
                     }
 
                     content.push('<br>');
-                });
-            }
+                } catch (pipelineError) {
+                    console.warn('处理管道信息时出错:', pipelineError);
+                }
+            });
+        }
 
-            } catch (error) {
-                console.error('Word内容创建出错:', error);
-                throw new Error('内容创建失败: ' + error.message);
-            }
+        } catch (error) {
+            console.error('Word内容创建出错:', error);
+            throw new Error('内容创建失败: ' + error.message);
+        }
 
-            return content.join('\n');
+        return content.join('\n');
         }
 
         // HTML转义函数
@@ -1719,14 +1722,14 @@
                 // 创建下载链接
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
-                
+
                 link.href = url;
                 link.download = fileName;
                 link.style.display = 'none';
-                
+
                 document.body.appendChild(link);
                 link.click();
-                
+
                 // 清理
                 setTimeout(() => {
                     document.body.removeChild(link);

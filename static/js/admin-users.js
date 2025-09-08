@@ -143,10 +143,6 @@ function renderUsersTable(users) {
                             <span>编辑</span>
                         </button>
                         ${!isCurrentUser ? `
-                            <button class="action-btn ${user.active ? 'disable' : 'enable'}" onclick="toggleUserStatus(${user.id}, ${!user.active})" title="${user.active ? '禁用用户' : '启用用户'}">
-                                <i class="fas fa-${user.active ? 'ban' : 'check'}"></i>
-                                <span>${user.active ? '禁用' : '启用'}</span>
-                            </button>
                             <button class="action-btn delete" onclick="deleteUser(${user.id})" title="删除用户">
                                 <i class="fas fa-trash"></i>
                                 <span>删除</span>

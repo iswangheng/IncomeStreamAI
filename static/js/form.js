@@ -149,18 +149,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!projectName || !projectDescription) {
             e.preventDefault();
-            alert('请填写项目名称和项目背景描述');
+            showElegantConfirm('请填写项目名称和项目背景描述', () => {});
             return false;
         }
         
         // Check if at least one person is added
         const personCards = personsContainer.querySelectorAll('.person-card');
         if (personCards.length === 0) {
-            const result = confirm('您尚未添加任何关键人物，这可能影响分析结果的准确性。是否继续提交？');
-            if (!result) {
+            showElegantConfirm('您尚未添加任何关键人物，这可能影响分析结果的准确性。是否继续提交？', () => {
+                // 用户确认继续，表单将自动提交
+            }, () => {
                 e.preventDefault();
                 return false;
-            }
+            });
         }
         
         // Validate person cards
@@ -199,13 +200,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (hasInvalidPerson) {
             e.preventDefault();
-            alert('请为所有关键人物填写姓名/代号');
+            showElegantConfirm('请为所有关键人物填写姓名/代号', () => {});
             return false;
         }
         
         if (hasRoleValidationError) {
             e.preventDefault();
-            alert(roleErrorMessage);
+            showElegantConfirm(roleErrorMessage, () => {});
             return false;
         }
         

@@ -961,7 +961,7 @@
 
         // 恢复默认配置
         function resetToDefaults() {
-            if (confirm('确定要恢复到默认配置吗？')) {
+            showElegantConfirm('确定要恢复到默认配置吗？', () => {
                 const modelSelect = document.getElementById('modelSelection');
                 const tempRange = document.getElementById('temperatureRange');
                 const tempValue = document.getElementById('temperatureValue');
@@ -971,7 +971,7 @@
                 if (tempValue) tempValue.textContent = '0.7';
                 
                 showToast('已恢复默认配置，请点击保存生效', 'info');
-            }
+            });
         }
     </script>
 </body>

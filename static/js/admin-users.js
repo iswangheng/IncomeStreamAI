@@ -419,43 +419,5 @@ function showToast(message, type = 'info') {
     }, 5000);
 }
 
-// 优雅的确认弹窗函数 (示例实现，可根据实际UI库调整)
-function showElegantConfirm(message, onConfirm, onCancel) {
-    const existingConfirm = document.querySelector('.elegant-confirm-overlay');
-    if (existingConfirm) {
-        return false; // 避免重复创建
-    }
-
-    const overlay = document.createElement('div');
-    overlay.className = 'elegant-confirm-overlay';
-    overlay.innerHTML = `
-        <div class="elegant-confirm-box">
-            <div class="elegant-confirm-header">
-                <i class="fas fa-question-circle"></i> 确认操作
-            </div>
-            <div class="elegant-confirm-body">
-                ${message}
-            </div>
-            <div class="elegant-confirm-footer">
-                <button class="btn btn-secondary cancel" onclick="hideElegantConfirm()">取消</button>
-                <button class="btn btn-primary confirm" onclick="handleConfirm(${onConfirm.toString()})">确定</button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(overlay);
-
-    // 绑定事件处理函数
-    window.handleConfirm = function(callback) {
-        callback();
-        hideElegantConfirm();
-    };
-    window.hideElegantConfirm = function() {
-        const overlayToRemove = document.querySelector('.elegant-confirm-overlay');
-        if (overlayToRemove) {
-            overlayToRemove.remove();
-        }
-    };
-
-    return true; // 表示弹窗已被显示
-}
+// 注意：showElegantConfirm 函数已在 future-enhanced-interactions.js 中定义
+// 这里不再重复定义，使用全局的Apple风格弹窗实现

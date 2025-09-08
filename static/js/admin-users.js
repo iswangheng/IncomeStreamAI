@@ -268,7 +268,27 @@ function deleteUser(userId) {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            // 检查响应状态
+            if (response.ok) {
+                // 检查响应是否是JSON格式
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    return response.json();
+                } else {
+                    // 如果不是JSON响应，假设操作成功（可能是重定向）
+                    return { success: true, message: '用户删除成功' };
+                }
+            } else {
+                // 响应不成功，尝试解析错误信息
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    return response.json();
+                } else {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            }
+        })
         .then(data => {
             if (data.success) {
                 showToast('用户删除成功', 'success');

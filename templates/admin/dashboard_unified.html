@@ -658,48 +658,50 @@
 
         // 切换用户状态
         async function toggleUserStatus(userId, active) {
-            if (!confirm(`确定要${active ? '启用' : '禁用'}该用户吗？`)) return;
+            showElegantConfirm(`确定要${active ? '启用' : '禁用'}该用户吗？`, async () => {
 
-            try {
-                const response = await fetch(`/admin/users/${userId}/toggle`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ active: active })
-                });
+                try {
+                    const response = await fetch(`/admin/users/${userId}/toggle`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ active: active })
+                    });
 
-                const result = await response.json();
-                if (result.success) {
-                    loadUserData(); // 重新加载数据
-                    showToast(`用户状态${active ? '启用' : '禁用'}成功`, 'success');
-                } else {
-                    showToast(result.message, 'error');
+                    const result = await response.json();
+                    if (result.success) {
+                        loadUserData(); // 重新加载数据
+                        showToast(`用户状态${active ? '启用' : '禁用'}成功`, 'success');
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                } catch (error) {
+                    showToast('操作失败，请重试', 'error');
                 }
-            } catch (error) {
-                showToast('操作失败，请重试', 'error');
-            }
+            });
         }
 
         // 删除用户
         async function deleteUser(userId) {
-            if (!confirm('确定要删除该用户吗？此操作不可恢复！')) return;
+            showElegantConfirm('确定要删除该用户吗？此操作不可恢复！', async () => {
 
-            try {
-                const response = await fetch(`/admin/users/${userId}/delete`, {
-                    method: 'POST'
-                });
+                try {
+                    const response = await fetch(`/admin/users/${userId}/delete`, {
+                        method: 'POST'
+                    });
 
-                const result = await response.json();
-                if (result.success) {
-                    loadUserData(); // 重新加载数据
-                    showToast('用户删除成功', 'success');
-                } else {
-                    showToast(result.message, 'error');
+                    const result = await response.json();
+                    if (result.success) {
+                        loadUserData(); // 重新加载数据
+                        showToast('用户删除成功', 'success');
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                } catch (error) {
+                    showToast('删除失败，请重试', 'error');
                 }
-            } catch (error) {
-                showToast('删除失败，请重试', 'error');
-            }
+            });
         }
 
         // 知识库管理功能
@@ -725,22 +727,22 @@
         }
 
         async function deleteKnowledge(itemId) {
-            if (!confirm('确定要删除该知识库文件吗？')) return;
+            showElegantConfirm('确定要删除该知识库文件吗？', async () => {
+                try {
+                    const response = await fetch(`/admin/knowledge/${itemId}/delete`, {
+                        method: 'POST'
+                    });
 
-            try {
-                const response = await fetch(`/admin/knowledge/${itemId}/delete`, {
-                    method: 'POST'
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    location.reload(); // 刷新页面
-                } else {
-                    showToast(result.message, 'error');
+                    const result = await response.json();
+                    if (result.success) {
+                        location.reload(); // 刷新页面
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                } catch (error) {
+                    showToast('删除失败，请重试', 'error');
                 }
-            } catch (error) {
-                showToast('删除失败，请重试', 'error');
-            }
+            });
         }
 
         // 文件上传处理

@@ -2278,10 +2278,14 @@ def admin_edit_user(user_id):
 def admin_delete_user(user_id):
     """删除用户"""
     user = User.query.get_or_404(user_id)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     # 防止删除当前登录用户
     if user.id == current_user.id:
-        flash('不能删除当前登录的用户', 'error')
+        error_msg = '不能删除当前登录的用户'
+        if is_ajax:
+            return jsonify({'success': False, 'message': error_msg})
+        flash(error_msg, 'error')
         return redirect(url_for('admin_dashboard') + '?tab=users')
 
     try:
@@ -2289,10 +2293,16 @@ def admin_delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
 
-        flash(f'用户 "{username}" 已删除', 'success')
+        success_msg = f'用户 "{username}" 已删除'
+        if is_ajax:
+            return jsonify({'success': True, 'message': success_msg})
+        flash(success_msg, 'success')
 
     except Exception as e:
-        flash(f'删除用户失败: {str(e)}', 'error')
+        error_msg = f'删除用户失败: {str(e)}'
+        if is_ajax:
+            return jsonify({'success': False, 'message': error_msg})
+        flash(error_msg, 'error')
 
     return redirect(url_for('admin_dashboard') + '?tab=users')
 

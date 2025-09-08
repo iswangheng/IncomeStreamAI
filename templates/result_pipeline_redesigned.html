@@ -1404,7 +1404,7 @@
             <div class="labor-estimate">
                 <h4><i class="fas fa-clock"></i> 管道维护的劳动量预估</h4>
                 <div>
-                    <strong>每周投入：</strong>{{ pipeline.labor_load_estimate.hours_per_week }}
+                    <strong>每周投入：</strong>{% if '小时' in pipeline.labor_load_estimate.hours_per_week %}{{ pipeline.labor_load_estimate.hours_per_week }}{% else %}{{ pipeline.labor_load_estimate.hours_per_week }}小时{% endif %}
                 </div>
                 <div class="labor-level">
                     <i class="fas fa-gauge-high"></i>

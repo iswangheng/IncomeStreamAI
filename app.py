@@ -2995,3 +2995,75 @@ def update_current_situation():
         app.logger.error(f"错误详情: {traceback.format_exc()}")
         return jsonify({'success': False, 'error': f'服务器错误: {str(e)}'}), 500
 
+
+@app.route('/update_core_resources', methods=['POST'])
+@login_required
+def update_core_resources():
+    """更新核心资源内容"""
+    try:
+        # 获取请求数据
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': '无效的请求数据'}), 400
+        
+        analysis_id = data.get('analysis_id')
+        content = data.get('content')
+        
+        # 验证输入
+        if not analysis_id or not content:
+            return jsonify({'success': False, 'error': '缺少必要参数'}), 400
+        
+        if len(content.strip()) == 0:
+            return jsonify({'success': False, 'error': '核心资源内容不能为空'}), 400
+        
+        app.logger.info(f"更新核心资源 - 分析ID: {analysis_id}")
+        
+        # 查找分析记录
+        from models import AnalysisResult
+        analysis_record = AnalysisResult.query.filter_by(id=analysis_id).first()
+        
+        if not analysis_record:
+            return jsonify({'success': False, 'error': '找不到分析记录'}), 404
+        
+        # 权限检查
+        if not current_user.is_admin and analysis_record.user_id != current_user.id:
+            return jsonify({'success': False, 'error': '无权限修改此记录'}), 403
+        
+        # 解析现有的result_data
+        try:
+            result_data = json.loads(analysis_record.result_data) if analysis_record.result_data else {}
+        except json.JSONDecodeError:
+            return jsonify({'success': False, 'error': '分析数据格式错误'}), 500
+        
+        # 解析新的资源列表
+        resources_list = [r.strip() for r in content.split(',') if r.strip()]
+        
+        # 更新核心资源（在统筹方的resources字段中）
+        if 'pipelines' in result_data and result_data['pipelines']:
+            for pipeline in result_data['pipelines']:
+                if 'parties_structure' in pipeline:
+                    for party in pipeline['parties_structure']:
+                        if party.get('role_type') == '统筹方':
+                            party['resources'] = resources_list
+                            app.logger.info(f"已更新统筹方核心资源: {resources_list}")
+                            break
+        
+        # 保存更新后的数据
+        analysis_record.result_data = json.dumps(result_data, ensure_ascii=False)
+        analysis_record.updated_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        app.logger.info(f"核心资源更新成功 - 用户: {current_user.phone}, 分析ID: {analysis_id}")
+        
+        return jsonify({
+            'success': True,
+            'message': '核心资源更新成功',
+            'updated_resources': resources_list
+        })
+        
+    except Exception as e:
+        app.logger.error(f"更新核心资源失败: {str(e)}")
+        app.logger.error(f"错误详情: {traceback.format_exc()}")
+        return jsonify({'success': False, 'error': f'服务器错误: {str(e)}'}), 500
+

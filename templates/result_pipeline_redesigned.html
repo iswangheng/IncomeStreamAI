@@ -462,6 +462,53 @@
             color: var(--framework-accent);
         }
 
+        /* 核心资源编辑按钮样式 */
+        .core-resources-edit-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.8);
+        }
+        
+        /* 悬停时显示核心资源编辑按钮 */
+        .core-resources-item:hover .core-resources-edit-btn {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        /* 激活状态下也显示核心资源编辑按钮 */
+        .core-resources-item.edit-active .core-resources-edit-btn {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        .core-resources-edit-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .core-resources-edit-btn i {
+            font-size: 12px;
+            color: var(--framework-accent);
+        }
+
         /* 核心洞察编辑按钮样式 */
         .core-insight-edit-btn {
             position: absolute;
@@ -1418,13 +1465,35 @@
                         <div class="designer-subtitle">项目统筹设计者 • 全局掌控者</div>
 
                         <div class="designer-details">
-                            <div class="designer-detail-item">
+                            <div class="designer-detail-item core-resources-item" style="position: relative;">
                                 <div class="designer-detail-title">🎯 核心资源</div>
-                                <div class="resources-list">
-                                    {% for resource in party.resources %}
-                                    <span class="resource-tag" style="background: rgba(102, 126, 234, 0.15); color: var(--pipeline-primary); border: 1px solid rgba(102, 126, 234, 0.2);">{{ resource }}</span>
-                                    {% endfor %}
+                                
+                                <!-- 显示模式 -->
+                                <div class="core-resources-display-mode">
+                                    <div class="resources-list">
+                                        {% for resource in party.resources %}
+                                        <span class="resource-tag" style="background: rgba(102, 126, 234, 0.15); color: var(--pipeline-primary); border: 1px solid rgba(102, 126, 234, 0.2);">{{ resource }}</span>
+                                        {% endfor %}
+                                    </div>
                                 </div>
+                                
+                                <!-- 编辑模式 -->
+                                <div class="core-resources-edit-mode" style="display: none;">
+                                    <textarea class="form-control core-resources-textarea" rows="3" placeholder="请输入资源，用逗号分隔，如：资金渠道, 场地资源, 人脉网络" style="width: 100%; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; padding: 12px; font-size: 14px; line-height: 1.5;">{{ party.resources | join(', ') }}</textarea>
+                                    <div class="edit-buttons">
+                                        <button class="btn btn-primary btn-sm" onclick="saveCoreResourcesEdit(this)" style="margin-right: 8px;">
+                                            <i class="fas fa-save"></i> 保存
+                                        </button>
+                                        <button class="btn btn-secondary btn-sm" onclick="cancelCoreResourcesEdit(this)">
+                                            <i class="fas fa-times"></i> 取消
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- 编辑按钮 -->
+                                <button class="core-resources-edit-btn" onclick="toggleCoreResourcesEdit(this)" title="编辑核心资源">
+                                    <i class="fas fa-edit"></i>
+                                </button>
                             </div>
                             <div class="designer-detail-item">
                                 <div class="designer-detail-title">💎 闭环价值</div>
@@ -2383,6 +2452,94 @@
                 }
             } catch (error) {
                 console.error('保存当前现状时出错:', error);
+                showErrorMessage('网络错误，请重试');
+            }
+        }
+
+        // 核心资源编辑功能
+        function toggleCoreResourcesEdit(button) {
+            const resourcesItem = button.closest('.core-resources-item');
+            const displayMode = resourcesItem.querySelector('.core-resources-display-mode');
+            const editMode = resourcesItem.querySelector('.core-resources-edit-mode');
+            
+            // 切换到编辑模式
+            displayMode.style.display = 'none';
+            editMode.style.display = 'block';
+            button.style.display = 'none';
+            
+            // 添加激活状态，保持编辑按钮可见
+            resourcesItem.classList.add('edit-active');
+            
+            // 聚焦到文本域
+            const textarea = resourcesItem.querySelector('.core-resources-textarea');
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+        
+        function cancelCoreResourcesEdit(button) {
+            const resourcesItem = button.closest('.core-resources-item');
+            const displayMode = resourcesItem.querySelector('.core-resources-display-mode');
+            const editMode = resourcesItem.querySelector('.core-resources-edit-mode');
+            const editBtn = resourcesItem.querySelector('.core-resources-edit-btn');
+            
+            // 切换回显示模式
+            displayMode.style.display = 'block';
+            editMode.style.display = 'none';
+            editBtn.style.display = 'flex';
+            
+            // 移除激活状态
+            resourcesItem.classList.remove('edit-active');
+            
+            // 重置文本域内容
+            const textarea = resourcesItem.querySelector('.core-resources-textarea');
+            const originalTags = displayMode.querySelectorAll('.resource-tag');
+            const originalContent = Array.from(originalTags).map(tag => tag.textContent.trim()).join(', ');
+            textarea.value = originalContent;
+        }
+        
+        async function saveCoreResourcesEdit(button) {
+            const resourcesItem = button.closest('.core-resources-item');
+            const textarea = resourcesItem.querySelector('.core-resources-textarea');
+            const newContent = textarea.value.trim();
+            
+            if (!newContent) {
+                showErrorMessage('核心资源内容不能为空');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/update_core_resources', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        analysis_id: '{{ analysis_id }}',
+                        content: newContent
+                    })
+                });
+                
+                if (response.ok) {
+                    // 更新显示内容
+                    const resourcesList = resourcesItem.querySelector('.resources-list');
+                    const resources = newContent.split(',').map(r => r.trim()).filter(r => r);
+                    
+                    // 重新生成资源标签
+                    resourcesList.innerHTML = resources.map(resource => 
+                        `<span class="resource-tag" style="background: rgba(102, 126, 234, 0.15); color: var(--pipeline-primary); border: 1px solid rgba(102, 126, 234, 0.2);">${resource}</span>`
+                    ).join('');
+                    
+                    // 切换回显示模式
+                    cancelCoreResourcesEdit(button);
+                    
+                    // 显示成功提示
+                    showSuccessMessage('核心资源已更新成功');
+                } else {
+                    const error = await response.json();
+                    showErrorMessage(error.message || '保存失败，请重试');
+                }
+            } catch (error) {
+                console.error('保存核心资源时出错:', error);
                 showErrorMessage('网络错误，请重试');
             }
         }

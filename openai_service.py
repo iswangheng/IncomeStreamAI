@@ -363,7 +363,7 @@ class AngelaAI:
             required_pipeline_keys = [
                 'id', 'name', 'income_mechanism', 'parties_structure',
                 'mvp', 'weak_link', 'revenue_trigger',
-                'risks_and_planB', 'first_step', 'labor_load_estimate'
+                'anti_bypass_strategies', 'risks_and_planB', 'first_step', 'labor_load_estimate'
             ]
             if not all(key in pipeline for key in required_pipeline_keys):
                 logger.warning(

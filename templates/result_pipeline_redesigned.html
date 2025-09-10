@@ -415,6 +415,53 @@
             color: var(--framework-accent);
         }
         
+        /* 当前现状编辑按钮样式 */
+        .current-situation-edit-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.8);
+        }
+        
+        /* 悬停时显示当前现状编辑按钮 */
+        .current-situation-item:hover .current-situation-edit-btn {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        /* 激活状态下也显示当前现状编辑按钮 */
+        .current-situation-item.edit-active .current-situation-edit-btn {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+        
+        .current-situation-edit-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .current-situation-edit-btn i {
+            font-size: 12px;
+            color: var(--framework-accent);
+        }
+
         /* 核心洞察编辑按钮样式 */
         .core-insight-edit-btn {
             position: absolute;
@@ -1195,9 +1242,31 @@
             </div>
 
             <div class="insight-grid">
-                <div class="insight-item">
+                <div class="insight-item current-situation-item" style="position: relative;">
                     <h4><i class="fas fa-chess-board"></i> 当前现状</h4>
-                    <p>{{ result.overview.situation }}</p>
+                    
+                    <!-- 显示模式 -->
+                    <div class="current-situation-display-mode">
+                        <p>{{ result.overview.situation }}</p>
+                    </div>
+                    
+                    <!-- 编辑模式 -->
+                    <div class="current-situation-edit-mode" style="display: none;">
+                        <textarea class="form-control current-situation-textarea" rows="4" style="width: 100%; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; padding: 12px; font-size: 14px; line-height: 1.5;">{{ result.overview.situation }}</textarea>
+                        <div class="edit-buttons">
+                            <button class="btn btn-primary btn-sm" onclick="saveCurrentSituationEdit(this)" style="margin-right: 8px;">
+                                <i class="fas fa-save"></i> 保存
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="cancelCurrentSituationEdit(this)">
+                                <i class="fas fa-times"></i> 取消
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 编辑按钮 -->
+                    <button class="current-situation-edit-btn" onclick="toggleCurrentSituationEdit(this)" title="编辑当前现状">
+                        <i class="fas fa-edit"></i>
+                    </button>
                 </div>
                 <div class="insight-item core-insight-item" style="position: relative;">
                     <h4><i class="fas fa-lightbulb"></i> 核心洞察</h4>
@@ -2234,6 +2303,88 @@
                 toast.style.animation = 'slideOutRight 0.3s ease';
                 setTimeout(() => document.body.removeChild(toast), 300);
             }, 3000);
+        }
+
+        // 当前现状编辑功能
+        function toggleCurrentSituationEdit(button) {
+            const situationItem = button.closest('.current-situation-item');
+            const displayMode = situationItem.querySelector('.current-situation-display-mode');
+            const editMode = situationItem.querySelector('.current-situation-edit-mode');
+            
+            // 切换到编辑模式
+            displayMode.style.display = 'none';
+            editMode.style.display = 'block';
+            button.style.display = 'none';
+            
+            // 添加激活状态，保持编辑按钮可见
+            situationItem.classList.add('edit-active');
+            
+            // 聚焦到文本域
+            const textarea = situationItem.querySelector('.current-situation-textarea');
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+        
+        function cancelCurrentSituationEdit(button) {
+            const situationItem = button.closest('.current-situation-item');
+            const displayMode = situationItem.querySelector('.current-situation-display-mode');
+            const editMode = situationItem.querySelector('.current-situation-edit-mode');
+            const editBtn = situationItem.querySelector('.current-situation-edit-btn');
+            
+            // 切换回显示模式
+            displayMode.style.display = 'block';
+            editMode.style.display = 'none';
+            editBtn.style.display = 'flex';
+            
+            // 移除激活状态
+            situationItem.classList.remove('edit-active');
+            
+            // 重置文本域内容
+            const textarea = situationItem.querySelector('.current-situation-textarea');
+            const originalContent = displayMode.querySelector('p').textContent;
+            textarea.value = originalContent;
+        }
+        
+        async function saveCurrentSituationEdit(button) {
+            const situationItem = button.closest('.current-situation-item');
+            const textarea = situationItem.querySelector('.current-situation-textarea');
+            const newContent = textarea.value.trim();
+            
+            if (!newContent) {
+                showErrorMessage('当前现状内容不能为空');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/update_current_situation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        analysis_id: '{{ analysis_id }}',
+                        content: newContent
+                    })
+                });
+                
+                if (response.ok) {
+                    // 更新显示内容
+                    const displayP = situationItem.querySelector('.current-situation-display-mode p');
+                    displayP.textContent = newContent;
+                    
+                    // 切换回显示模式
+                    cancelCurrentSituationEdit(button);
+                    
+                    // 显示成功提示
+                    showSuccessMessage('当前现状已更新成功');
+                } else {
+                    const error = await response.json();
+                    showErrorMessage(error.message || '保存失败，请重试');
+                }
+            } catch (error) {
+                console.error('保存当前现状时出错:', error);
+                showErrorMessage('网络错误，请重试');
+            }
         }
 
         // 核心洞察编辑功能

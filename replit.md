@@ -103,10 +103,26 @@ Angela is a Flask-based web application designed to help users generate non-labo
 
 ### AI Integration Points
 - **OpenAI API**: For real-time AI conversation and income pathway generation (supports models like `gpt-4o-2024-11-20`).
+  - **API配置**: 使用laozhang.ai中转API (`https://api.laozhang.ai/v1`)，替代官方OpenAI API
+  - **API Key**: 存储在环境变量 `OPENAI_API_KEY` 中，通过Replit Secrets管理
+  - **配置位置**: `openai_service.py` 文件中的client初始化部分
+  - **关键说明**: 全局替换 `https://api.openai.com` 为 `https://api.laozhang.ai/v1`，其他调用方式与官方OpenAI完全一致
 - **Enhanced Knowledge Base System**: Intelligent knowledge retrieval with priority for non-labor income content, supports 800-character detailed snippets for richer context. Integrates core non-labor income formula (意识+能量+能力=结果), seven income types, and proven success methodologies.
 - **Knowledge Base Management System**: Admin interface at `/admin` for managing knowledge files (upload, enable/disable, search/filter).
 
 ## Recent Critical Fixes
+
+### OpenAI API中转配置 (November 15, 2025)
+- **变更原因**: 使用laozhang.ai中转API替代官方OpenAI API
+- **变更内容**: 
+  - 修改 `openai_service.py` 中的client初始化，添加 `base_url="https://api.laozhang.ai/v1"`
+  - 主客户端和重试客户端均已更新配置
+  - API Key: `sk-FoJ2aYppJRFtdsUDC92e0f907c784a6d939d0eAd33104a3e`（通过Secrets配置）
+- **重要提醒**: 
+  - 所有OpenAI API调用均通过中转API进行
+  - 线上部署和开发环境使用相同配置
+  - API Key通过Replit Secrets管理，自动应用到所有环境
+  - **Agent必须记住**: 不要将base_url改回官方API地址，除非用户明确要求
 
 ### Database Duplicate Saving Root Cause Analysis & Fix (August 27, 2025) - COMPLETE RESOLUTION
 - **Root Cause Identified**: thinking页面JavaScript自动触发机制导致重复调用 `/start_analysis` 端点

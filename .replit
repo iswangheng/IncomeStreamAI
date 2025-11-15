@@ -50,5 +50,9 @@ args = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 43377
+externalPort = 3000
+
 [agent]
 integrations = ["python_database==1.0.0", "python_log_in_with_replit==1.0.0"]

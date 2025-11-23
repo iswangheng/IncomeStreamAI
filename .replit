@@ -2,7 +2,7 @@ modules = ["python-3.11", "postgresql-16"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["openssl", "postgresql"]
+packages = ["openssl", "postgresql", "vim-full"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -49,10 +49,6 @@ args = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 36485
-externalPort = 3001
 
 [[ports]]
 localPort = 43377

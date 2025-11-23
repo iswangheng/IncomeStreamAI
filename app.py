@@ -1,3 +1,7 @@
+# 首先加载环境变量
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 import json
 import logging
@@ -46,9 +50,9 @@ if database_url and database_url.startswith('postgresql'):
         "pool_size": 5,
         "max_overflow": 0,
         "connect_args": {
-            "sslmode": "require",
+            "sslmode": "disable",
             "connect_timeout": 10,
-            "application_name": "replit_flask_app"
+            "application_name": "incomestreamai_app"
         }
     }
 else:
@@ -1716,14 +1720,10 @@ def generate():
 def generate_ai_suggestions(form_data, session=None):
     """Generate AI suggestions using OpenAI API with enhanced error handling"""
     import time
-
-    def timeout_handler(signum, frame):
-        raise TimeoutError("AI分析超时")
+    import threading
+    import concurrent.futures
 
     try:
-        # 设置45秒超时，与OpenAI客户端超时保持一致
-        signal.signal(signal.SIGALRM, timeout_handler) 
-        signal.alarm(45)
 
         from openai_service import AngelaAI
 
@@ -1803,17 +1803,12 @@ def generate_ai_suggestions(form_data, session=None):
             save_session_in_ajax()  # 保存session确保前端能看到进度更新
         elapsed_time = time.time() - start_time
 
-        # 取消超时
-        signal.alarm(0)
-
         app.logger.info(f"AI analysis completed in {elapsed_time:.2f} seconds")
         app.logger.info(f"AI generated result: {json.dumps(ai_result, ensure_ascii=False)}")
 
         return ai_result
 
     except TimeoutError as e:
-        # 取消超时
-        signal.alarm(0)
         app.logger.error(f"AI analysis timeout: {str(e)}")
         # 设置超时状态到session，让前端显示
         from flask import session
@@ -1822,8 +1817,6 @@ def generate_ai_suggestions(form_data, session=None):
         return generate_fallback_result(form_data, "分析超时，为您提供基础建议")
 
     except Exception as e:
-        # 取消超时
-        signal.alarm(0)
         app.logger.error(f"Error generating AI suggestions: {str(e)}")
         app.logger.error(f"Error type: {type(e).__name__}")
         import traceback

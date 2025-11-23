@@ -48,3 +48,19 @@ replit.nix
 
 # Lock files (optional, depending on preference)
 # uv.lock
+
+# SSH密钥和敏感文件
+*.pem
+*.key
+*.crt
+*.tar.gz
+
+# 测试和临时文件
+test_*.py
+test_*.sh
+*_test_*.html
+*_test.json
+
+# 部署文档（可选）
+# DEPLOYMENT_*.md
+# deploy_*.sh

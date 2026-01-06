@@ -166,7 +166,21 @@ class AnalysisResult(db.Model):
     __tablename__ = 'analysis_results'
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    sequence_id = db.Column(db.Integer, nullable=False, index=True, server_default=db.text("nextval('analysis_results_sequence_id_seq')"), comment='自增数字ID，用于排序和索引')
+    sequence_id = db.Column(db.Integer, nullable=False, index=True, comment='自增数字ID，用于排序和索引')
+
+    @staticmethod
+    def get_next_sequence_id():
+        """获取下一个sequence_id，兼容SQLite和PostgreSQL"""
+        try:
+            # 尝试使用数据库查询获取最大值
+            from sqlalchemy import text
+            max_result = db.session.execute(text("SELECT MAX(COALESCE(sequence_id, 0)) FROM analysis_results")).scalar()
+            return (max_result or 0) + 1
+        except Exception:
+            # 如果查询失败，使用时间戳作为fallback
+            import time
+            return int(time.time())
+
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # 允许null以支持历史数据
     form_data = db.Column(db.Text, nullable=False)  # JSON格式的表单数据
     result_data = db.Column(db.Text, nullable=False)  # JSON格式的分析结果

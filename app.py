@@ -130,7 +130,14 @@ with app.app_context():
         default_user = User()
         default_user.phone = '18302196515'
         default_user.name = '系统管理员'
-        default_user.set_password('aibenzong9264')
+        # 兼容性修复：使用 pbkdf2_sha256 而不是 scrypt，避免 Python 3.9.6 兼容性问题
+        try:
+            default_user.set_password('aibenzong9264')
+        except Exception as e:
+            logger.warning(f"默认密码哈希失败，使用兼容模式: {e}")
+            # 手动设置密码哈希，使用更兼容的方法
+            from werkzeug.security import generate_password_hash
+            default_user.password_hash = generate_password_hash('aibenzong9264', method='pbkdf2:sha256')
         default_user.is_admin = True
         db.session.add(default_user)
         db.session.commit()
@@ -482,6 +489,7 @@ def start_analysis():
                         fallback_id = str(uuid.uuid4())
                         analysis_result = AnalysisResult()
                         analysis_result.id = fallback_id
+                        analysis_result.sequence_id = AnalysisResult.get_next_sequence_id()
                         analysis_result.user_id = current_user.id
                         analysis_result.form_data = json.dumps(local_form_data, ensure_ascii=False)
                         analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
@@ -496,6 +504,7 @@ def start_analysis():
                     fallback_id = str(uuid.uuid4())
                     analysis_result = AnalysisResult()
                     analysis_result.id = fallback_id
+                    analysis_result.sequence_id = AnalysisResult.get_next_sequence_id()
                     analysis_result.user_id = current_user.id
                     analysis_result.form_data = json.dumps(local_form_data, ensure_ascii=False)
                     analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
@@ -717,6 +726,7 @@ def _internal_check_analysis_status():
             fallback_id = str(uuid.uuid4())
             analysis_result = AnalysisResult()
             analysis_result.id = fallback_id
+            analysis_result.sequence_id = AnalysisResult.get_next_sequence_id()
             analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
             analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
             analysis_result.project_name = form_data.get('projectName', '')
@@ -883,6 +893,7 @@ def _handle_analysis_execution(form_data, session):
                         # 超过2分钟，创建新的分析结果
                         analysis_result = AnalysisResult()
                         analysis_result.id = result_id
+                        analysis_result.sequence_id = AnalysisResult.get_next_sequence_id()
                         analysis_result.user_id = current_user.id  # 关联当前用户
                         analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
                         analysis_result.result_data = json.dumps(suggestions, ensure_ascii=False)
@@ -902,6 +913,7 @@ def _handle_analysis_execution(form_data, session):
                     # 没有现有分析结果，创建新的
                     analysis_result = AnalysisResult()
                     analysis_result.id = result_id
+                    analysis_result.sequence_id = AnalysisResult.get_next_sequence_id()
                     analysis_result.user_id = current_user.id  # 关联当前用户
                     analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
                     analysis_result.result_data = json.dumps(suggestions, ensure_ascii=False)
@@ -1028,6 +1040,7 @@ def _handle_analysis_execution(form_data, session):
                             fallback_id = str(uuid.uuid4())
                             analysis_result = AnalysisResult()
                             analysis_result.id = fallback_id
+                            analysis_result.sequence_id = AnalysisResult.get_next_sequence_id()
                             analysis_result.user_id = current_user.id  # 关联当前用户
                             analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
                             analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
@@ -1043,6 +1056,7 @@ def _handle_analysis_execution(form_data, session):
                         fallback_id = str(uuid.uuid4())
                         analysis_result = AnalysisResult()
                         analysis_result.id = fallback_id
+                        analysis_result.sequence_id = AnalysisResult.get_next_sequence_id()
                         analysis_result.user_id = current_user.id  # 关联当前用户
                         analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
                         analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
@@ -1406,6 +1420,7 @@ def results():
 
                         analysis_result = AnalysisResult()
                         analysis_result.id = fallback_id
+                        analysis_result.sequence_id = AnalysisResult.get_next_sequence_id()
                         analysis_result.user_id = current_user.id  # 关联当前用户
                         analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
                         analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
@@ -1480,6 +1495,7 @@ def results():
                     emergency_id = str(uuid.uuid4())
                     analysis_result = AnalysisResult()
                     analysis_result.id = emergency_id
+                    analysis_result.sequence_id = AnalysisResult.get_next_sequence_id()
                     analysis_result.form_data = json.dumps(form_data, ensure_ascii=False)
                     analysis_result.result_data = json.dumps(fallback_result, ensure_ascii=False)
                     analysis_result.project_name = form_data.get('projectName', '')
@@ -1995,14 +2011,20 @@ def analysis_history():
     try:
         from models import AnalysisResult
 
-        # 根据用户身份显示不同的记录
+        # 根据用户身份显示不同的记录，使用 joinedload 预加载用户信息避免 N+1 查询
+        from sqlalchemy.orm import joinedload
+
         if current_user.is_admin:
             # 管理员可以看到所有分析记录
-            analysis_records = AnalysisResult.query.order_by(AnalysisResult.created_at.desc()).all()
+            analysis_records = AnalysisResult.query.options(
+                joinedload(AnalysisResult.user)
+            ).order_by(AnalysisResult.created_at.desc()).all()
             app.logger.info(f"Admin user viewing {len(analysis_records)} analysis records")
         else:
             # 普通用户只能看到自己的分析记录
-            analysis_records = AnalysisResult.query.filter_by(user_id=current_user.id).order_by(AnalysisResult.created_at.desc()).all()
+            analysis_records = AnalysisResult.query.options(
+                joinedload(AnalysisResult.user)
+            ).filter_by(user_id=current_user.id).order_by(AnalysisResult.created_at.desc()).all()
             app.logger.info(f"User {current_user.id} viewing {len(analysis_records)} analysis records")
 
         return render_template('history_apple.html', analysis_records=analysis_records)

@@ -184,6 +184,52 @@
             gap: var(--space-1);
         }
 
+        /* 用户信息样式 */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-1) var(--space-3);
+            background: rgba(0, 122, 255, 0.08);
+            border-radius: var(--radius-2);
+            font-size: 13px;
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            color: var(--color-primary);
+            font-weight: 500;
+        }
+
+        .user-phone {
+            color: var(--color-text-tertiary);
+            font-size: 12px;
+            margin-left: var(--space-1);
+        }
+
+        .user-admin-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-left: var(--space-1);
+        }
+
         .view-btn {
             background: var(--color-primary);
             color: white;
@@ -289,6 +335,20 @@
                 align-items: flex-start;
                 gap: var(--space-3);
             }
+
+            .user-info {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .record-meta {
+                flex-wrap: wrap;
+                width: 100%;
+            }
+
+            .meta-item {
+                font-size: 12px;
+            }
         }
     </style>
     <script src="{{ url_for('static', filename='js/user-menu.js') }}"></script>
@@ -323,10 +383,23 @@
                     <span class="stat-number">{{ analysis_records|selectattr('analysis_type', 'equalto', 'fallback')|list|length }}</span>
                     <p class="stat-label">基础建议方案</p>
                 </div>
+                {% if current_user.is_admin %}
+                <div class="stat-item">
+                    {% set unique_users = [] %}
+                    {% for record in analysis_records %}
+                        {% if record.user and record.user.phone not in unique_users %}
+                            {% set _ = unique_users.append(record.user.phone) %}
+                        {% endif %}
+                    {% endfor %}
+                    <span class="stat-number">{{ unique_users|length }}</span>
+                    <p class="stat-label">活跃用户</p>
+                </div>
+                {% else %}
                 <div class="stat-item">
                     <span class="stat-number">{{ (analysis_records|map(attribute='team_size')|sum) // (analysis_records|length) if analysis_records|length > 0 else 0 }}</span>
                     <p class="stat-label">平均团队规模</p>
                 </div>
+                {% endif %}
             </div>
         </div>
         {% endif %}
@@ -348,6 +421,27 @@
 
                 <div class="record-footer">
                     <div class="record-meta">
+                        <!-- 用户信息 -->
+                        {% if record.user %}
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                {{ record.user.name[0] if record.user.name else record.user.phone[-2:] }}
+                            </div>
+                            <span class="user-name">{{ record.user.name or '未设置姓名' }}</span>
+                            {% if current_user.is_admin %}
+                            <span class="user-phone">{{ record.user.phone }}</span>
+                            {% endif %}
+                            {% if record.user.is_admin %}
+                            <span class="user-admin-badge">管理员</span>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="user-info" style="opacity: 0.6;">
+                            <i class="fas fa-user-circle"></i>
+                            <span>未知用户</span>
+                        </div>
+                        {% endif %}
+
                         <div class="meta-item">
                             <i class="fas fa-calendar-alt"></i>
                             <span>{{ record.created_at_display }}</span>

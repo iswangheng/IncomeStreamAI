@@ -48,7 +48,6 @@
         <!-- 页面标题区域 -->
         <header class="page-header">
             <h1 class="page-title">管理中心</h1>
-            <p class="page-subtitle">管理知识库文件和用户账户</p>
         </header>
 
         <div class="admin-container">
@@ -72,13 +71,13 @@
                         <i class="fas fa-users"></i>
                         用户管理
                     </button>
-                    <button class="admin-tab-btn" data-tab="knowledge" onclick="switchTab('knowledge')">
-                        <i class="fas fa-database"></i>
-                        知识库
-                    </button>
                     <button class="admin-tab-btn" data-tab="models" onclick="switchTab('models')">
                         <i class="fas fa-cogs"></i>
                         模型管理
+                    </button>
+                    <button class="admin-tab-btn" data-tab="analytics" onclick="switchTab('analytics')">
+                        <i class="fas fa-chart-line"></i>
+                        用户数据分析
                     </button>
                 </div>
             </div>
@@ -221,145 +220,6 @@
                 </div>
             </div>
 
-            <!-- 知识库 Tab 内容 -->
-            <div class="admin-tab-content" id="knowledge-tab">
-                <!-- 知识库统计卡片 -->
-                <div class="stats-grid">
-                    <div class="stats-card">
-                        <div class="stats-header">
-                            <div class="stats-icon" style="background: var(--color-primary);">
-                                <i class="fas fa-database"></i>
-                            </div>
-                        </div>
-                        <div class="stats-value">{{ knowledge_items|length }}</div>
-                        <div class="stats-label">知识库文件</div>
-                        <div class="stats-change positive">
-                            <i class="fas fa-arrow-up me-1"></i>
-                            活跃状态
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <div class="stats-header">
-                            <div class="stats-icon" style="background: var(--status-active);">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                        </div>
-                        <div class="stats-value">{{ knowledge_items|selectattr("status", "equalto", "active")|list|length }}</div>
-                        <div class="stats-label">活跃文件</div>
-                        <div class="stats-change positive">
-                            <i class="fas fa-arrow-up me-1"></i>
-                            可用于AI处理
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <div class="stats-header">
-                            <div class="stats-icon" style="background: var(--status-paused);">
-                                <i class="fas fa-pause-circle"></i>
-                            </div>
-                        </div>
-                        <div class="stats-value">{{ knowledge_items|selectattr("status", "equalto", "paused")|list|length }}</div>
-                        <div class="stats-label">暂停文件</div>
-                        <div class="stats-change">
-                            <i class="fas fa-minus me-1"></i>
-                            临时停用
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <div class="stats-header">
-                            <div class="stats-icon" style="background: var(--color-accent);">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                        </div>
-                        <div class="stats-value">{{ (knowledge_items|sum(attribute='file_size') / 1024 / 1024)|round(1) }}</div>
-                        <div class="stats-label">总大小 (MB)</div>
-                        <div class="stats-change">
-                            <i class="fas fa-database me-1"></i>
-                            存储空间使用
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 知识库表格 -->
-                <div class="admin-table">
-                    <div class="table-header">
-                        <h3 class="table-title">
-                            <i class="fas fa-database me-2"></i>
-                            知识库文件
-                        </h3>
-                        <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
-                            <i class="fas fa-plus"></i>
-                            上传文件
-                        </button>
-                    </div>
-                    <div class="table-responsive p-4">
-                        {% if knowledge_items %}
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>文件名</th>
-                                        <th>大小</th>
-                                        <th>状态</th>
-                                        <th>上传时间</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in knowledge_items %}
-                                    <tr>
-                                        <td>
-                                            <i class="fas fa-file-alt me-2"></i>
-                                            {{ item.original_filename }}
-                                        </td>
-                                        <td>{{ "%.1f KB"|format(item.file_size / 1024) }}</td>
-                                        <td>
-                                            {% if item.status == 'active' %}
-                                                <span class="badge bg-success">活跃</span>
-                                            {% elif item.status == 'paused' %}
-                                                <span class="badge bg-warning">暂停</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">{{ item.status }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ item.upload_time.strftime('%Y-%m-%d %H:%M') }}</td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                {% if item.status == 'active' %}
-                                                    <button class="btn btn-warning btn-sm" onclick="toggleKnowledgeStatus({{ item.id }}, 'paused')">
-                                                        <i class="fas fa-pause"></i>
-                                                    </button>
-                                                {% else %}
-                                                    <button class="btn btn-success btn-sm" onclick="toggleKnowledgeStatus({{ item.id }}, 'active')">
-                                                        <i class="fas fa-play"></i>
-                                                    </button>
-                                                {% endif %}
-                                                <button class="btn btn-danger btn-sm" onclick="deleteKnowledge({{ item.id }})">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        {% else %}
-                            <div class="text-center py-5">
-                                <i class="fas fa-database fa-3x text-muted mb-3"></i>
-                                <h5>暂无知识库文件</h5>
-                                <p class="text-muted">点击上传文件开始添加知识库内容</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- 隐藏的文件上传表单 -->
-                <form id="uploadForm" action="{{ url_for('upload_knowledge_multiple') }}" method="post" enctype="multipart/form-data" style="display: none;">
-                    <input type="file" id="fileInput" name="files" accept=".txt,.pdf,.doc,.docx,.xlsx,.csv,.md,.json" multiple>
-                </form>
-            </div>
-
             <!-- 模型管理 Tab 内容 -->
             <div class="admin-tab-content" id="models-tab">
                 <!-- 模型配置统计卡片 -->
@@ -489,8 +349,303 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 用户数据分析 Tab 内容 -->
+            <div class="admin-tab-content" id="analytics-tab">
+                <!-- 统计卡片 -->
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stats-card" onclick="filterAnalyticsByCard('high_value')" style="cursor: pointer; transition: all 0.2s ease;" id="card-high-value">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="analytics-high-value">-</div>
+                        <div class="stats-label">高价值用户</div>
+                        <div style="font-size: 11px; color: #86868b; margin-top: 4px;">分析>3 且 30天活跃</div>
+                    </div>
+
+                    <div class="stats-card" onclick="filterAnalyticsByCard('active')" style="cursor: pointer; transition: all 0.2s ease;" id="card-active">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: linear-gradient(135deg, #34c759 0%, #30d158 100%);">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="analytics-active-users">-</div>
+                        <div class="stats-label">活跃用户</div>
+                        <div style="font-size: 11px; color: #86868b; margin-top: 4px;">7天内有登录</div>
+                    </div>
+
+                    <div class="stats-card" onclick="filterAnalyticsByCard('exhausted')" style="cursor: pointer; transition: all 0.2s ease;" id="card-exhausted">
+                        <div class="stats-header">
+                            <div class="stats-icon" style="background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                        <div class="stats-value" id="analytics-exhausted-users">-</div>
+                        <div class="stats-label">已耗尽额度</div>
+                        <div style="font-size: 11px; color: #86868b; margin-top: 4px;">剩余额度 = 0</div>
+                    </div>
+                </div>
+
+                <!-- 筛选工具栏 -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                            <select id="analytics-filter-select" style="padding: 10px 16px; border: 1px solid #E5E5EA; border-radius: 10px; font-size: 15px; color: #1d1d1f; background: white; cursor: pointer; min-width: 150px;">
+                                <option value="all">全部用户</option>
+                                <option value="high_value">高价值用户</option>
+                                <option value="active">活跃用户</option>
+                                <option value="silent">沉默用户</option>
+                                <option value="exhausted">已耗尽额度</option>
+                            </select>
+
+                            <div style="flex: 1; min-width: 200px; position: relative; display: flex; gap: 8px;">
+                                <div style="flex: 1; position: relative;">
+                                    <input type="text" id="analytics-search-input" placeholder="搜索手机号或姓名..." style="width: 100%; padding: 10px 40px 10px 40px; border: 1px solid #E5E5EA; border-radius: 10px; font-size: 15px; color: #1d1d1f; background: white; transition: all 0.2s ease;">
+                                    <i class="fas fa-search" id="search-icon" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #86868b; transition: all 0.2s ease;"></i>
+                                    <button id="clear-search-btn" onclick="clearAnalyticsSearch()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #86868b; cursor: pointer; padding: 4px 8px; display: none; transition: all 0.2s ease;">
+                                        <i class="fas fa-times-circle" style="font-size: 16px;"></i>
+                                    </button>
+                                </div>
+                                <button onclick="performAnalyticsSearch()" style="padding: 10px 20px; background: #007AFF; border: none; border-radius: 10px; color: white; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
+                                    <i class="fas fa-search" style="margin-right: 6px;"></i>
+                                    搜索
+                                </button>
+                            </div>
+
+                            <button onclick="loadAnalyticsData()" style="padding: 10px 20px; background: white; border: 1px solid #E5E5EA; border-radius: 10px; color: #007AFF; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                                <i class="fas fa-sync-alt" style="margin-right: 6px;"></i>
+                                刷新
+                            </button>
+
+                            <button onclick="exportAnalyticsData()" style="padding: 10px 20px; background: #007AFF; border: none; border-radius: 10px; color: white; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                                <i class="fas fa-download" style="margin-right: 6px;"></i>
+                                导出CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户列表表格 -->
+                <div class="card">
+                    <div class="card-body">
+                        <!-- 搜索状态提示 -->
+                        <div id="analytics-search-status" style="display: none; padding: 12px 20px; background: #E8F4FD; border-left: 4px solid #007AFF; border-radius: 8px; margin-bottom: 16px; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <i class="fas fa-search" style="color: #007AFF; font-size: 16px;"></i>
+                                <div>
+                                    <div style="color: #1d1d1f; font-size: 15px; font-weight: 500;">搜索结果: "<span id="search-keyword"></span>"</div>
+                                    <div id="search-result-count" style="color: #6e6e73; font-size: 13px; margin-top: 2px;">找到 0 个用户</div>
+                                </div>
+                            </div>
+                            <button onclick="clearAnalyticsSearch()" style="padding: 6px 12px; background: white; border: 1px solid #E5E5EA; border-radius: 6px; color: #007AFF; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                                <i class="fas fa-times" style="margin-right: 4px;"></i>
+                                清除
+                            </button>
+                        </div>
+
+                        <!-- 加载提示 -->
+                        <div id="analytics-loading" style="padding: 60px; text-align: center; display: none;">
+                            <div style="display: inline-block; width: 40px; height: 40px; border: 3px solid #E5E5EA; border-top-color: #007AFF; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                            <div style="margin-top: 16px; color: #6e6e73; font-size: 15px;">加载中...</div>
+                        </div>
+
+                        <!-- 表格 -->
+                        <div id="analytics-table-container" style="overflow-x: auto;">
+                            <table class="table table-hover" style="width: 100%;">
+                                <thead>
+                                    <tr style="background: #F2F2F7;">
+                                        <th style="padding: 16px 20px; text-align: left; font-weight: 600; font-size: 13px; color: #6e6e73; text-transform: uppercase;">手机号</th>
+                                        <th style="padding: 16px 20px; text-align: left; font-weight: 600; font-size: 13px; color: #6e6e73; text-transform: uppercase;">姓名</th>
+                                        <th style="padding: 16px 20px; text-align: left; font-weight: 600; font-size: 13px; color: #6e6e73; text-transform: uppercase; cursor: pointer;" onclick="toggleAnalyticsSort('analysis_count')">
+                                            分析次数 <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th style="padding: 16px 20px; text-align: left; font-weight: 600; font-size: 13px; color: #6e6e73; text-transform: uppercase; cursor: pointer;" onclick="toggleAnalyticsSort('last_login')">
+                                            最后登录 <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th style="padding: 16px 20px; text-align: left; font-weight: 600; font-size: 13px; color: #6e6e73; text-transform: uppercase;">状态</th>
+                                        <th style="padding: 16px 20px; text-align: right; font-weight: 600; font-size: 13px; color: #6e6e73; text-transform: uppercase;">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-users-table">
+                                    <!-- 数据行将通过JavaScript动态加载 -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 空数据提示 -->
+                        <div id="analytics-empty" style="padding: 60px; text-align: center; display: none;">
+                            <i class="fas fa-inbox" style="font-size: 48px; color: #E5E5EA; margin-bottom: 16px;"></i>
+                            <div style="color: #6e6e73; font-size: 17px;">暂无用户数据</div>
+                        </div>
+
+                        <!-- 分页 -->
+                        <div id="analytics-pagination" style="padding: 16px 20px; border-top: 1px solid #E5E5EA; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="color: #6e6e73; font-size: 14px;">
+                                共 <span id="analytics-total">0</span> 个用户
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <button id="analytics-prev-page" onclick="changeAnalyticsPage(-1)" style="padding: 8px 16px; background: white; border: 1px solid #E5E5EA; border-radius: 8px; color: #007AFF; font-size: 14px; font-weight: 500; cursor: pointer;" disabled>
+                                    <i class="fas fa-chevron-left"></i> 上一页
+                                </button>
+                                <span style="color: #6e6e73; font-size: 14px;">
+                                    第 <span id="analytics-current-page">1</span> / <span id="analytics-total-pages">1</span> 页
+                                </span>
+                                <button id="analytics-next-page" onclick="changeAnalyticsPage(1)" style="padding: 8px 16px; background: white; border: 1px solid #E5E5EA; border-radius: 8px; color: #007AFF; font-size: 14px; font-weight: 500; cursor: pointer;">
+                                    下一页 <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
+
+    <!-- 用户详情弹窗 -->
+    <div id="analytics-user-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="padding: 24px; border-bottom: 1px solid #E5E5EA; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 24px; font-weight: 700; color: #1d1d1f; margin: 0;">用户详情</h2>
+                <button onclick="closeAnalyticsUserModal()" style="background: none; border: none; font-size: 24px; color: #86868b; cursor: pointer; padding: 4px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="analytics-modal-content" style="padding: 24px;">
+                <!-- 基础信息 -->
+                <div style="margin-bottom: 32px;">
+                    <h3 style="font-size: 18px; font-weight: 600; color: #1d1d1f; margin-bottom: 16px;">
+                        <i class="fas fa-user" style="color: #007AFF; margin-right: 8px;"></i>
+                        基础信息
+                    </h3>
+                    <div style="background: #F2F2F7; border-radius: 12px; padding: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                            <div>
+                                <div style="color: #6e6e73; font-size: 13px; margin-bottom: 4px;">姓名</div>
+                                <div id="analytics-detail-name" style="color: #1d1d1f; font-size: 16px; font-weight: 500;">-</div>
+                            </div>
+                            <div>
+                                <div style="color: #6e6e73; font-size: 13px; margin-bottom: 4px;">手机号</div>
+                                <div id="analytics-detail-phone" style="color: #1d1d1f; font-size: 16px; font-weight: 500;">-</div>
+                            </div>
+                            <div>
+                                <div style="color: #6e6e73; font-size: 13px; margin-bottom: 4px;">注册时间</div>
+                                <div id="analytics-detail-created-at" style="color: #1d1d1f; font-size: 16px; font-weight: 500;">-</div>
+                            </div>
+                            <div>
+                                <div style="color: #6e6e73; font-size: 13px; margin-bottom: 4px;">最后登录</div>
+                                <div id="analytics-detail-last-login" style="color: #1d1d1f; font-size: 16px; font-weight: 500;">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 使用数据 -->
+                <div style="margin-bottom: 32px;">
+                    <h3 style="font-size: 18px; font-weight: 600; color: #1d1d1f; margin-bottom: 16px;">
+                        <i class="fas fa-chart-bar" style="color: #007AFF; margin-right: 8px;"></i>
+                        使用数据
+                    </h3>
+                    <div style="background: #F2F2F7; border-radius: 12px; padding: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                            <div>
+                                <div style="color: #6e6e73; font-size: 13px; margin-bottom: 4px;">分析次数</div>
+                                <div id="analytics-detail-analysis-count" style="color: #1d1d1f; font-size: 24px; font-weight: 700;">-</div>
+                            </div>
+                            <div>
+                                <div style="color: #6e6e73; font-size: 13px; margin-bottom: 4px;">剩余额度</div>
+                                <div id="analytics-detail-quota" style="color: #1d1d1f; font-size: 24px; font-weight: 700;">-</div>
+                            </div>
+                            <div>
+                                <div style="color: #6e6e73; font-size: 13px; margin-bottom: 4px;">使用率</div>
+                                <div id="analytics-detail-usage" style="color: #1d1d1f; font-size: 24px; font-weight: 700;">-</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 16px;">
+                            <div style="background: #E5E5EA; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div id="analytics-quota-progress" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最近活动 -->
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 600; color: #1d1d1f; margin-bottom: 16px;">
+                        <i class="fas fa-history" style="color: #007AFF; margin-right: 8px;"></i>
+                        最近活动（最近10条）
+                    </h3>
+                    <div id="analytics-activities-list" style="background: #F2F2F7; border-radius: 12px; padding: 20px;">
+                        <!-- 活动记录将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 状态标签样式 */
+        .analytics-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 4px;
+        }
+
+        .analytics-badge-high-value {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .analytics-badge-active {
+            background: #34c759;
+            color: white;
+        }
+
+        .analytics-badge-silent {
+            background: #8e8e93;
+            color: white;
+        }
+
+        .analytics-badge-exhausted {
+            background: #ff3b30;
+            color: white;
+        }
+
+        /* 活动记录样式 */
+        .analytics-activity-item {
+            padding: 12px;
+            border-bottom: 1px solid #E5E5EA;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .analytics-activity-item:hover {
+            background: rgba(0, 122, 255, 0.05);
+        }
+
+        .analytics-activity-item:last-child {
+            border-bottom: none;
+        }
+
+        /* 搜索清除按钮样式 */
+        #clear-search-btn:hover {
+            background: rgba(0, 122, 255, 0.1) !important;
+        }
+
+        #clear-search-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+    </style>
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -500,6 +655,13 @@
     <script src="{{ url_for('static', filename='js/admin-users.js') }}"></script>
 
     <script>
+        // ==================== 用户数据分析功能 - 全局变量 ====================
+        let analyticsCurrentPage = 1;
+        let analyticsCurrentFilter = 'all';
+        let analyticsCurrentSearch = '';
+        let analyticsCurrentSort = 'analysis_count';
+        let analyticsCurrentOrder = 'desc';
+
         // Tab切换功能
         function switchTab(tabName) {
             console.log('Switching to tab:', tabName);
@@ -538,6 +700,12 @@
             // 如果切换到模型管理，加载模型配置
             if (tabName === 'models') {
                 loadModelConfig();
+            }
+
+            // 如果切换到用户数据分析，加载分析数据
+            if (tabName === 'analytics') {
+                loadAnalyticsStats();
+                loadAnalyticsData();
             }
         }
 
@@ -975,6 +1143,375 @@
                 showToast('已恢复默认配置，请点击保存生效', 'info');
             });
         }
+
+        // 加载统计数据
+        async function loadAnalyticsStats() {
+            try {
+                const response = await fetch('/admin/api/users/analytics/stats');
+                if (!response.ok) throw new Error('获取统计数据失败');
+
+                const stats = await response.json();
+
+                document.getElementById('analytics-high-value').textContent = stats.high_value_users || 0;
+                document.getElementById('analytics-active-users').textContent = stats.active_users || 0;
+                document.getElementById('analytics-exhausted-users').textContent = stats.exhausted_users || 0;
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+            }
+        }
+
+        // 点击卡片筛选
+        function filterAnalyticsByCard(filterType) {
+            // 更新筛选下拉框
+            document.getElementById('analytics-filter-select').value = filterType;
+
+            // 高亮选中的卡片
+            document.querySelectorAll('[id^="card-"]').forEach(card => {
+                card.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+                card.style.transform = 'scale(1)';
+            });
+
+            const selectedCard = document.getElementById('card-' + filterType);
+            if (selectedCard) {
+                selectedCard.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+                selectedCard.style.transform = 'scale(1.02)';
+            }
+
+            // 更新全局筛选变量并加载数据
+            analyticsCurrentFilter = filterType;
+            analyticsCurrentPage = 1;
+            loadAnalyticsData();
+        }
+
+        // 清除搜索
+        function clearAnalyticsSearch() {
+            const searchInput = document.getElementById('analytics-search-input');
+            searchInput.value = '';
+            analyticsCurrentSearch = '';
+            analyticsCurrentPage = 1;
+
+            // 隐藏清除按钮
+            document.getElementById('clear-search-btn').style.display = 'none';
+
+            // 隐藏搜索状态提示
+            document.getElementById('analytics-search-status').style.display = 'none';
+
+            // 恢复搜索框样式
+            searchInput.style.borderColor = '#E5E5EA';
+            document.getElementById('search-icon').style.color = '#86868b';
+
+            // 重新加载数据
+            loadAnalyticsData();
+
+            // 让搜索框保持焦点
+            searchInput.focus();
+        }
+
+        // 执行搜索（按钮点击）
+        function performAnalyticsSearch() {
+            const searchInput = document.getElementById('analytics-search-input');
+            const searchValue = searchInput.value.trim();
+
+            analyticsCurrentSearch = searchValue;
+            analyticsCurrentPage = 1;
+            loadAnalyticsData();
+        }
+
+        // 加载用户列表
+        async function loadAnalyticsData() {
+            const loadingIndicator = document.getElementById('analytics-loading');
+            const tableContainer = document.getElementById('analytics-table-container');
+            const emptyState = document.getElementById('analytics-empty');
+
+            try {
+                loadingIndicator.style.display = 'block';
+                tableContainer.style.display = 'none';
+                emptyState.style.display = 'none';
+
+                const params = new URLSearchParams({
+                    page: analyticsCurrentPage,
+                    filter: analyticsCurrentFilter,
+                    search: analyticsCurrentSearch,
+                    sort: analyticsCurrentSort,
+                    order: analyticsCurrentOrder
+                });
+
+                const response = await fetch(`/admin/api/users/analytics/list?${params}`);
+                if (!response.ok) throw new Error('获取用户列表失败');
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // 渲染数据
+                renderAnalyticsTable(data.users);
+
+                // 更新分页信息
+                document.getElementById('analytics-total').textContent = data.total;
+                document.getElementById('analytics-current-page').textContent = data.page;
+                document.getElementById('analytics-total-pages').textContent = data.pages;
+
+                // 更新分页按钮状态
+                document.getElementById('analytics-prev-page').disabled = data.page <= 1;
+                document.getElementById('analytics-next-page').disabled = data.page >= data.pages;
+
+                // 更新搜索状态显示
+                const searchStatus = document.getElementById('analytics-search-status');
+                const searchInput = document.getElementById('analytics-search-input');
+                const clearBtn = document.getElementById('clear-search-btn');
+                const searchIcon = document.getElementById('search-icon');
+
+                if (analyticsCurrentSearch) {
+                    // 显示搜索状态
+                    searchStatus.style.display = 'flex';
+                    document.getElementById('search-keyword').textContent = analyticsCurrentSearch;
+                    document.getElementById('search-result-count').textContent = `找到 ${data.total} 个用户`;
+
+                    // 显示清除按钮
+                    clearBtn.style.display = 'block';
+
+                    // 搜索框高亮
+                    searchInput.style.borderColor = '#007AFF';
+                    searchIcon.style.color = '#007AFF';
+                } else {
+                    // 隐藏搜索状态
+                    searchStatus.style.display = 'none';
+                    clearBtn.style.display = 'none';
+                    searchInput.style.borderColor = '#E5E5EA';
+                    searchIcon.style.color = '#86868b';
+                }
+
+                // 显示/隐藏空状态
+                if (data.users.length === 0) {
+                    loadingIndicator.style.display = 'none';
+                    emptyState.style.display = 'block';
+                } else {
+                    loadingIndicator.style.display = 'none';
+                    tableContainer.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('加载用户列表失败:', error);
+                loadingIndicator.style.display = 'none';
+                emptyState.innerHTML = `<div style="color: #ff3b30; font-size: 17px;">加载失败: ${error.message}</div>`;
+                emptyState.style.display = 'block';
+            }
+        }
+
+        // 渲染表格
+        function renderAnalyticsTable(users) {
+            const tbody = document.getElementById('analytics-users-table');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+
+                // 构建状态标签HTML
+                const badgesHtml = user.badges.map(badge => {
+                    let badgeClass = '';
+                    switch(badge) {
+                        case '高价值': badgeClass = 'analytics-badge-high-value'; break;
+                        case '活跃': badgeClass = 'analytics-badge-active'; break;
+                        case '沉默': badgeClass = 'analytics-badge-silent'; break;
+                        case '已耗尽': badgeClass = 'analytics-badge-exhausted'; break;
+                    }
+                    return `<span class="analytics-badge ${badgeClass}">${badge}</span>`;
+                }).join('');
+
+                row.innerHTML = `
+                    <td style="padding: 16px 20px; color: #1d1d1f; font-size: 15px; font-weight: 500;">${user.phone}</td>
+                    <td style="padding: 16px 20px; color: #1d1d1f; font-size: 15px;">${user.name}</td>
+                    <td style="padding: 16px 20px; color: #1d1d1f; font-size: 15px; font-weight: 600;">${user.analysis_count}</td>
+                    <td style="padding: 16px 20px; color: #6e6e73; font-size: 15px;">${user.last_login}</td>
+                    <td style="padding: 16px 20px;">${badgesHtml}</td>
+                    <td style="padding: 16px 20px; text-align: right;">
+                        <button onclick="showAnalyticsUserDetail(${user.id})" style="padding: 8px 16px; background: #007AFF; border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 500; cursor: pointer;">
+                            查看详情
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // 翻页
+        function changeAnalyticsPage(delta) {
+            analyticsCurrentPage += delta;
+            loadAnalyticsData();
+        }
+
+        // 切换排序
+        function toggleAnalyticsSort(sortBy) {
+            if (analyticsCurrentSort === sortBy) {
+                analyticsCurrentOrder = analyticsCurrentOrder === 'desc' ? 'asc' : 'desc';
+            } else {
+                analyticsCurrentSort = sortBy;
+                analyticsCurrentOrder = 'desc';
+            }
+            loadAnalyticsData();
+        }
+
+        // 显示用户详情
+        async function showAnalyticsUserDetail(userId) {
+            try {
+                const response = await fetch(`/admin/api/users/${userId}/detail`);
+                if (!response.ok) throw new Error('获取用户详情失败');
+
+                const data = await response.json();
+
+                // 填充基础信息
+                document.getElementById('analytics-detail-name').textContent = data.user.name;
+                document.getElementById('analytics-detail-phone').textContent = data.user.phone;
+                document.getElementById('analytics-detail-created-at').textContent = data.user.created_at;
+                document.getElementById('analytics-detail-last-login').textContent = data.user.last_login;
+
+                // 填充使用数据
+                document.getElementById('analytics-detail-analysis-count').textContent = data.analysis_count;
+                document.getElementById('analytics-detail-quota').textContent = `${data.remaining_quota} / ${data.total_quota}`;
+                document.getElementById('analytics-detail-usage').textContent = `${data.usage_percentage.toFixed(1)}%`;
+                document.getElementById('analytics-quota-progress').style.width = `${data.usage_percentage}%`;
+
+                // 填充最近活动
+                const activitiesList = document.getElementById('analytics-activities-list');
+                if (data.recent_activities.length === 0) {
+                    activitiesList.innerHTML = '<div style="color: #6e6e73; font-size: 15px; text-align: center; padding: 20px;">暂无活动记录</div>';
+                } else {
+                    activitiesList.innerHTML = data.recent_activities.map(activity => `
+                        <div class="analytics-activity-item" onclick="openAnalysisResult('${activity.id}')">
+                            <div style="color: #007AFF; font-size: 15px; font-weight: 500; display: flex; align-items: center; gap: 6px;">
+                                <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
+                                ${activity.project_name}
+                            </div>
+                            <div style="color: #6e6e73; font-size: 13px; margin-top: 4px;">${activity.created_at}</div>
+                        </div>
+                    `).join('');
+                }
+
+                // 显示弹窗
+                document.getElementById('analytics-user-modal').style.display = 'flex';
+            } catch (error) {
+                console.error('加载用户详情失败:', error);
+                alert('加载用户详情失败: ' + error.message);
+            }
+        }
+
+        // 关闭弹窗
+        function closeAnalyticsUserModal() {
+            document.getElementById('analytics-user-modal').style.display = 'none';
+        }
+
+        // 在新标签页打开分析结果
+        function openAnalysisResult(analysisId) {
+            window.open(`/history/${analysisId}`, '_blank');
+        }
+
+        // 导出数据
+        async function exportAnalyticsData() {
+            try {
+                const params = new URLSearchParams({
+                    filter: analyticsCurrentFilter,
+                    search: analyticsCurrentSearch
+                });
+
+                const response = await fetch(`/admin/api/users/export?${params}`);
+
+                if (!response.ok) throw new Error('导出失败');
+
+                // 下载文件
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = response.headers.get('Content-Disposition').match(/filename="(.+)"/)[1];
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } catch (error) {
+                console.error('导出失败:', error);
+                alert('导出失败: ' + error.message);
+            }
+        }
+
+        // 绑定筛选和搜索事件（确保DOM已加载）
+        document.addEventListener('DOMContentLoaded', function() {
+            // 筛选事件
+            const filterSelect = document.getElementById('analytics-filter-select');
+            if (filterSelect) {
+                filterSelect.addEventListener('change', function() {
+                    analyticsCurrentFilter = this.value;
+                    analyticsCurrentPage = 1;
+                    loadAnalyticsData();
+                });
+            }
+
+            // 搜索事件
+            const searchInput = document.getElementById('analytics-search-input');
+            const clearBtn = document.getElementById('clear-search-btn');
+            if (searchInput && clearBtn) {
+                let analyticsSearchTimeout;
+
+                // 输入事件 - 防抖搜索
+                searchInput.addEventListener('input', function() {
+                    const value = this.value.trim();
+
+                    // 立即显示/隐藏清除按钮
+                    clearBtn.style.display = value ? 'block' : 'none';
+
+                    clearTimeout(analyticsSearchTimeout);
+
+                    // 如果输入为空，立即清除搜索状态
+                    if (!value) {
+                        document.getElementById('analytics-search-status').style.display = 'none';
+                        this.style.borderColor = '#E5E5EA';
+                        document.getElementById('search-icon').style.color = '#86868b';
+                    }
+
+                    // 防抖搜索
+                    analyticsSearchTimeout = setTimeout(() => {
+                        analyticsCurrentSearch = value;
+                        analyticsCurrentPage = 1;
+                        loadAnalyticsData();
+                    }, 300); // 缩短到300ms，更快的响应
+                });
+
+                // 焦点事件
+                searchInput.addEventListener('focus', function() {
+                    this.style.borderColor = analyticsCurrentSearch ? '#007AFF' : '#E5E5EA';
+                    if (analyticsCurrentSearch) {
+                        document.getElementById('search-icon').style.color = '#007AFF';
+                    }
+                });
+
+                searchInput.addEventListener('blur', function() {
+                    if (!analyticsCurrentSearch) {
+                        this.style.borderColor = '#E5E5EA';
+                    }
+                });
+
+                // ESC键清除搜索
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && this.value.trim()) {
+                        clearAnalyticsSearch();
+                    } else if (e.key === 'Enter') {
+                        // 回车键立即搜索
+                        performAnalyticsSearch();
+                    }
+                });
+            }
+
+            // 弹窗关闭事件
+            const userModal = document.getElementById('analytics-user-modal');
+            if (userModal) {
+                userModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeAnalyticsUserModal();
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

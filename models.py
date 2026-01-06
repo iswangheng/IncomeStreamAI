@@ -106,6 +106,12 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return f'<User {self.phone}>'
 
+    # 数据库索引定义
+    __table_args__ = (
+        db.Index('idx_users_last_login', 'last_login'),
+        db.Index('idx_users_phone', 'phone'),
+    )
+
 
 class KnowledgeItem(db.Model):
     """AI知识库条目模型"""

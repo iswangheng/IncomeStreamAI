@@ -3082,3 +3082,366 @@ def update_core_resources():
         app.logger.error(f"错误详情: {traceback.format_exc()}")
         return jsonify({'success': False, 'error': f'服务器错误: {str(e)}'}), 500
 
+
+# ==================== 用户数据分析功能 ====================
+
+import csv
+from io import StringIO
+from sqlalchemy import func
+from datetime import timedelta
+
+
+# 注意：用户数据分析功能已集成到 /admin/dashboard 页面中
+# 以下独立页面路由已注释，如需使用独立页面可取消注释
+#
+# @app.route('/admin/users-analytics')
+# @login_required
+# @admin_required
+# def users_analytics():
+#     """用户数据分析页面（已集成到dashboard）"""
+#     return render_template('admin_users_analytics.html')
+
+
+@app.route('/admin/api/users/analytics/stats')
+@login_required
+@admin_required
+def api_users_analytics_stats():
+    """获取用户统计数据"""
+    try:
+        # 计算30天前的日期
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+
+        # 高价值用户：分析次数 > 3 且 30天内有登录
+        # 使用子查询统计每个用户的分析次数
+        user_analysis_count = db.session.query(
+            AnalysisResult.user_id,
+            func.count(AnalysisResult.id).label('analysis_count')
+        ).group_by(AnalysisResult.user_id).subquery()
+
+        high_value_query = db.session.query(User).join(
+            user_analysis_count,
+            User.id == user_analysis_count.c.user_id
+        ).filter(
+            User.last_login >= thirty_days_ago,
+            user_analysis_count.c.analysis_count > 3
+        )
+
+        high_value_users = high_value_query.count()
+
+        # 活跃用户：7天内有登录的用户
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        active_users = User.query.filter(
+            User.last_login >= seven_days_ago
+        ).count()
+
+        # 已耗尽额度：剩余额度 <= 0 的用户
+        exhausted_users = User.query.filter(
+            (User.ai_quota - User.used_quota) <= 0
+        ).count()
+
+        stats = {
+            'high_value_users': high_value_users,
+            'active_users': active_users,
+            'exhausted_users': exhausted_users
+        }
+
+        return jsonify(stats)
+
+    except Exception as e:
+        app.logger.error(f"获取统计数据失败: {str(e)}")
+        return jsonify({'error': '获取统计数据失败'}), 500
+
+
+@app.route('/admin/api/users/analytics/list')
+@login_required
+@admin_required
+def api_users_analytics_list():
+    """获取用户列表（支持分页、筛选、排序、搜索）"""
+    try:
+        # 获取参数
+        page = request.args.get('page', 1, type=int)
+        per_page = 20
+        filter_type = request.args.get('filter', 'all')  # all/high_value/active/silent/exhausted
+        search = request.args.get('search', '').strip()
+        sort_by = request.args.get('sort', 'analysis_count')  # analysis_count/last_login
+        order = request.args.get('order', 'desc')  # asc/desc
+
+        # 计算时间阈值
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+
+        # 构建基础查询 - 统计每个用户的分析次数
+        user_analysis_count = db.session.query(
+            AnalysisResult.user_id,
+            func.count(AnalysisResult.id).label('analysis_count')
+        ).group_by(AnalysisResult.user_id).subquery()
+
+        # 主查询
+        query = db.session.query(
+            User,
+            func.coalesce(user_analysis_count.c.analysis_count, 0).label('analysis_count')
+        ).outerjoin(
+            user_analysis_count,
+            User.id == user_analysis_count.c.user_id
+        )
+
+        # 应用筛选条件
+        if filter_type == 'high_value':
+            # 高价值用户：分析次数 > 3 且 30天内有登录
+            query = query.filter(
+                func.coalesce(user_analysis_count.c.analysis_count, 0) > 3,
+                User.last_login >= thirty_days_ago
+            )
+        elif filter_type == 'active':
+            # 活跃用户：7天内有登录
+            query = query.filter(User.last_login >= seven_days_ago)
+        elif filter_type == 'silent':
+            # 沉默用户：30天未登录
+            query = query.filter(User.last_login < thirty_days_ago)
+        elif filter_type == 'exhausted':
+            # 已耗尽额度：剩余额度 = 0
+            query = query.filter(
+                (User.ai_quota - User.used_quota) <= 0
+            )
+
+        # 应用搜索条件
+        if search:
+            search_pattern = f'%{search}%'
+            query = query.filter(
+                db.or_(
+                    User.phone.like(search_pattern),
+                    User.name.like(search_pattern)
+                )
+            )
+
+        # 应用排序
+        if sort_by == 'analysis_count':
+            order_column = func.coalesce(user_analysis_count.c.analysis_count, 0)
+        elif sort_by == 'last_login':
+            order_column = User.last_login
+        else:
+            order_column = User.id
+
+        if order == 'asc':
+            query = query.order_by(order_column.asc())
+        else:
+            query = query.order_by(order_column.desc())
+
+        # 分页查询
+        total = query.count()
+        users_data = query.offset((page - 1) * per_page).limit(per_page).all()
+
+        # 构建返回数据
+        users_list = []
+        for user, analysis_count in users_data:
+            # 计算用户状态标签
+            badges = []
+
+            # 高价值用户
+            if analysis_count > 3 and user.last_login and user.last_login >= thirty_days_ago:
+                badges.append('高价值')
+
+            # 活跃用户
+            if user.last_login and user.last_login >= seven_days_ago:
+                badges.append('活跃')
+
+            # 沉默用户
+            if not user.last_login or user.last_login < thirty_days_ago:
+                badges.append('沉默')
+
+            # 已耗尽额度
+            if user.remaining_quota <= 0:
+                badges.append('已耗尽')
+
+            # 格式化最后登录时间（相对时间）
+            last_login_display = '从未登录'
+            if user.last_login:
+                time_diff = datetime.utcnow() - user.last_login
+                hours = time_diff.total_seconds() / 3600
+
+                if hours < 1:
+                    last_login_display = '刚刚'
+                elif hours < 24:
+                    last_login_display = f'{int(hours)}小时前'
+                elif hours < 24 * 2:
+                    last_login_display = '昨天'
+                elif hours < 24 * 7:
+                    days = int(hours / 24)
+                    last_login_display = f'{days}天前'
+                else:
+                    last_login_display = user.last_login_display.split(' ')[0]  # 只显示日期部分
+
+            users_list.append({
+                'id': user.id,
+                'phone': user.phone,
+                'name': user.name or '未设置',
+                'analysis_count': analysis_count,
+                'last_login': last_login_display,
+                'badges': badges,
+                'remaining_quota': user.remaining_quota,
+                'ai_quota': user.ai_quota,
+                'used_quota': user.used_quota
+            })
+
+        return jsonify({
+            'users': users_list,
+            'total': total,
+            'page': page,
+            'pages': (total + per_page - 1) // per_page,
+            'per_page': per_page
+        })
+
+    except Exception as e:
+        app.logger.error(f"获取用户列表失败: {str(e)}")
+        app.logger.error(f"错误详情: {traceback.format_exc()}")
+        return jsonify({'error': '获取用户列表失败'}), 500
+
+
+@app.route('/admin/api/users/<int:user_id>/detail')
+@login_required
+@admin_required
+def api_user_detail(user_id):
+    """获取用户详情"""
+    try:
+        user = User.query.get_or_404(user_id)
+
+        # 获取分析次数
+        analysis_count = AnalysisResult.query.filter_by(user_id=user_id).count()
+
+        # 获取最近10条分析记录
+        recent_activities = AnalysisResult.query.filter_by(user_id=user_id)\
+            .order_by(AnalysisResult.created_at.desc())\
+            .limit(10).all()
+
+        activities_data = []
+        for activity in recent_activities:
+            # 直接使用AnalysisResult的project_name字段
+            activities_data.append({
+                'id': activity.id,
+                'project_name': activity.project_name or '未命名项目',
+                'created_at': activity.created_at_display if hasattr(activity, 'created_at_display') else activity.created_at.strftime('%Y-%m-%d %H:%M') if activity.created_at else '未知'
+            })
+
+        # 计算使用率
+        usage_percentage = user.quota_usage_percentage
+
+        return jsonify({
+            'user': {
+                'id': user.id,
+                'name': user.name or '未设置',
+                'phone': user.phone,
+                'created_at': user.created_at_display,
+                'last_login': user.last_login_display,
+                'is_admin': user.is_admin,
+                'active': user.active
+            },
+            'analysis_count': analysis_count,
+            'remaining_quota': user.remaining_quota,
+            'total_quota': user.ai_quota,
+            'used_quota': user.used_quota,
+            'usage_percentage': usage_percentage,
+            'recent_activities': activities_data
+        })
+
+    except Exception as e:
+        app.logger.error(f"获取用户详情失败: {str(e)}")
+        return jsonify({'error': '获取用户详情失败'}), 500
+
+
+@app.route('/admin/api/users/export')
+@login_required
+@admin_required
+def export_users_data():
+    """导出用户数据为CSV"""
+    try:
+        # 获取筛选参数
+        filter_type = request.args.get('filter', 'all')
+        search = request.args.get('search', '').strip()
+
+        # 计算时间阈值
+        seven_days_ago = datetime.utcnow() - timedelta(days=7)
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+
+        # 构建查询
+        user_analysis_count = db.session.query(
+            AnalysisResult.user_id,
+            func.count(AnalysisResult.id).label('analysis_count')
+        ).group_by(AnalysisResult.user_id).subquery()
+
+        query = db.session.query(
+            User,
+            func.coalesce(user_analysis_count.c.analysis_count, 0).label('analysis_count')
+        ).outerjoin(
+            user_analysis_count,
+            User.id == user_analysis_count.c.user_id
+        )
+
+        # 应用筛选
+        if filter_type == 'high_value':
+            query = query.filter(
+                func.coalesce(user_analysis_count.c.analysis_count, 0) > 3,
+                User.last_login >= thirty_days_ago
+            )
+        elif filter_type == 'active':
+            query = query.filter(User.last_login >= seven_days_ago)
+        elif filter_type == 'silent':
+            query = query.filter(User.last_login < thirty_days_ago)
+        elif filter_type == 'exhausted':
+            query = query.filter((User.ai_quota - User.used_quota) <= 0)
+
+        # 应用搜索
+        if search:
+            search_pattern = f'%{search}%'
+            query = query.filter(
+                db.or_(
+                    User.phone.like(search_pattern),
+                    User.name.like(search_pattern)
+                )
+            )
+
+        # 获取所有数据（不分页）
+        users_data = query.all()
+
+        # 创建CSV文件
+        output = StringIO()
+        writer = csv.writer(output)
+
+        # 写入表头（UTF-8 BOM for Excel）
+        output.write('\ufeff')
+        writer.writerow([
+            '手机号', '姓名', '分析次数', '剩余额度', '总额度',
+            '使用率', '注册时间', '最后登录时间'
+        ])
+
+        # 写入数据
+        for user, analysis_count in users_data:
+            usage_percentage = user.quota_usage_percentage
+            writer.writerow([
+                user.phone,
+                user.name or '未设置',
+                analysis_count,
+                user.remaining_quota,
+                user.ai_quota,
+                f'{usage_percentage:.1f}%',
+                user.created_at_display,
+                user.last_login_display
+            ])
+
+        # 生成文件名
+        filename = f'users_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+
+        # 返回CSV文件
+        output.seek(0)
+        return Response(
+            output.getvalue(),
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': f'attachment; filename="{filename}"'
+            }
+        )
+
+    except Exception as e:
+        app.logger.error(f"导出用户数据失败: {str(e)}")
+        return jsonify({'error': '导出用户数据失败'}), 500
+
+

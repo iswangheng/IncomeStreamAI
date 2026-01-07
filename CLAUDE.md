@@ -109,6 +109,122 @@ IncomeStreamAI/
 
 > 本章节记录所有重要功能更新、架构变更和部署信息，按时间倒序排列。
 
+### 📅 2025-01-06 - 用户数据分析功能集成与优化 ⭐
+
+#### ✨ 核心改进：集成到管理中心 + 世界一流搜索体验
+
+**改动文件**:
+- `templates/admin/dashboard_unified.html` - 大幅重构，集成用户数据分析功能
+- `app.py` (line 3105-3152) - 优化统计API，修改用户详情API
+- `models.py` (line 109-113) - 数据库索引优化（已存在）
+
+**新增功能**:
+
+1. **用户数据分析集成到管理中心**
+   - 作为第4个标签页集成到 `/admin/dashboard`
+   - 删除了"知识库"标签页（不再需要）
+   - 删除了页面副标题文字
+
+2. **统计卡片重新设计**
+   - **修改前**：总用户数、高价值用户、今日活跃
+   - **修改后**：高价值用户、活跃用户、已耗尽额度
+   - **高价值用户**：分析次数 > 3 且 30天内有登录
+   - **活跃用户**：7天内有登录的用户
+   - **已耗尽额度**：剩余额度 ≤ 0 的用户
+
+3. **卡片点击筛选功能** ⭐
+   - 点击任意统计卡片，表格自动筛选显示对应用户
+   - 选中的卡片有视觉高亮效果（阴影 + 轻微放大）
+   - 筛选下拉框自动同步更新
+
+4. **用户详情弹窗优化**
+   - ✅ **修复项目名称显示**：直接使用 `project_name` 字段，不再从JSON解析
+   - ✅ **项目跳转功能**：点击项目名称在新标签页打开 `/history/{analysis_id}`
+   - ✅ **视觉反馈**：项目名称显示为蓝色，带外链图标
+
+5. **搜索功能完善（世界一流标准）** 🌟
+   - ✅ **明显的搜索按钮**：蓝色"🔍 搜索"按钮，直观易用
+   - ✅ **多种搜索方式**：
+     - 点击搜索按钮
+     - 按回车键
+     - 自动搜索（300ms防抖）
+   - ✅ **清除搜索**：
+     - 点击 × 按钮
+     - 按ESC键
+   - ✅ **搜索状态提示栏**：显示"搜索结果: '关键词'" 和 "找到 X 个用户"
+   - ✅ **视觉反馈**：搜索时边框和图标变蓝色
+   - ✅ **流畅动画**：所有状态切换都有0.2s过渡效果
+
+**API修改**:
+
+```python
+# 修改前
+GET /admin/api/users/analytics/stats
+返回: {
+    'total_users': int,
+    'high_value_users': int,
+    'active_today': int
+}
+
+# 修改后
+GET /admin/api/users/analytics/stats
+返回: {
+    'high_value_users': int,
+    'active_users': int,      # 7天内有登录
+    'exhausted_users': int    # 剩余额度 ≤ 0
+}
+```
+
+```python
+# 用户详情API优化
+GET /admin/api/users/<user_id>/detail
+修改: recent_activities[].project_name 现在直接使用数据库字段
+```
+
+**技术细节**:
+- 前端防抖优化：从500ms缩短到300ms，响应更快
+- 搜索反馈即时：输入时立即显示/隐藏清除按钮
+- 键盘快捷键：ESC清除、Enter搜索
+- 焦点管理：清除搜索后搜索框自动获得焦点
+
+**UI/UX亮点**:
+- Apple Design System设计风格
+- 搜索框：圆角边框、图标、清除按钮完美对齐
+- 清除按钮：悬停背景变色，点击缩放动画
+- 状态提示栏：淡蓝色背景，清晰提示搜索状态
+- 平滑过渡：所有交互都有流畅的动画
+
+**Git提交**:
+- `1b76328` - feat: 用户数据分析功能集成和搜索优化
+- `5c16ec6` - 自动同步 2026-01-06 21:49:31
+
+**相关文档**:
+- `DEPLOYMENT_2025_01_06.md` - 本次部署详细记录
+- `REMOTE_DEPLOYMENT_GUIDE.md` - 远程部署指南
+- `deploy_remote.sh` - 一键部署脚本
+
+**部署方式**:
+```bash
+# 快速部署（推荐）
+./deploy_remote.sh
+
+# 脚本会自动完成：
+# 1. 同步 app.py, models.py 到服务器
+# 2. 同步 templates/ 目录到服务器
+# 3. 重启应用
+# 4. 验证运行状态
+```
+
+**验收标准**:
+- [x] 访问 /admin/dashboard 看到"用户数据分析"标签页
+- [x] 3个统计卡片显示正确数字
+- [x] 点击卡片可以筛选表格
+- [x] 搜索功能正常（按钮、回车、自动搜索）
+- [x] 用户详情中项目名称正确显示
+- [x] 点击项目名称可以跳转
+
+---
+
 ### 📅 2026-01-06 - 用户数据分析功能
 
 #### ✨ 新增功能：管理员后台用户数据分析
@@ -325,7 +441,39 @@ SSH密钥: 001.pem
 
 ## 🔄 代码更新流程
 
-### 方法一：自动化部署（推荐）⭐
+### 方法一：一键部署脚本（推荐）⭐⭐⭐
+
+**这是最新、最简单、最可靠的部署方式！**
+
+```bash
+# 1. 本地开发完成并测试
+python3 main_local.py
+
+# 2. 提交到Git（保留代码历史）
+git add .
+git commit -m "feat: 新功能描述"
+git push origin main
+
+# 3. 一键部署到线上
+./deploy_remote.sh
+```
+
+**deploy_remote.sh 脚本会自动完成**:
+1. ✅ 同步 `app.py` 到服务器
+2. ✅ 同步 `models.py` 到服务器
+3. ✅ 同步 `templates/` 目录到服务器
+4. ✅ 重启应用
+5. ✅ 验证应用状态
+6. ✅ 显示访问地址和日志命令
+
+**脚本特点**:
+- 使用 `scp` 和 `rsync` 同步文件，可靠快速
+- 自动排除临时文件（._* 等）
+- 自动备份和重启应用
+- 彩色输出，进度清晰
+- 错误处理完善
+
+### 方法二：自动化部署脚本（旧方式）
 
 ```bash
 # 1. 进入项目目录
@@ -335,7 +483,9 @@ cd "/Users/weilingkeji/360安全云盘同步版/000-海外/02-incomestream/Incom
 ./deploy_update.sh
 ```
 
-### 方法二：手动更新
+**注意**: 此脚本会尝试在远程服务器使用git pull，但由于远程服务器不是Git仓库，可能失败。
+
+### 方法三：手动更新（仅用于特殊场景）
 
 ```bash
 # 1. 修改代码并提交
@@ -399,10 +549,16 @@ systemctl status postgresql
 ## 📚 相关文档
 
 ### 部署文档
+- `REMOTE_DEPLOYMENT_GUIDE.md` - **远程服务器部署指南（最新）**
+- `DEPLOYMENT_2025_01_06.md` - **2025-01-06部署详细记录**
 - `DEPLOYMENT_GUIDE.md` - 通用部署指南
-- `REMOTE_DEPLOYMENT_GUIDE.md` - 远程服务器详细部署
 - `DEPLOYMENT_SUMMARY.md` - 最新部署总结
 - `SYNC_GUIDE.md` - 同步指南
+
+### 部署脚本
+- `deploy_remote.sh` - **一键部署脚本（推荐）** ⭐⭐⭐
+- `deploy_update.sh` - 旧版部署脚本
+- `sync_to_remote.sh` - Git同步脚本
 
 ### 功能文档
 - `HISTORY_PAGE_UPGRADE.md` - 历史页面升级说明
@@ -452,5 +608,38 @@ systemctl status postgresql
 ---
 
 **文档维护**: 本文件应在每次重要改动后更新 changelog 板块
-**最后更新**: 2026-01-06
+**最后更新**: 2025-01-06
 **维护人员**: Claude AI Assistant
+
+---
+
+## 📌 快速参考
+
+### 最常用的命令
+
+```bash
+# 本地开发
+python3 main_local.py
+
+# 部署到线上（一键）
+./deploy_remote.sh
+
+# 查看线上日志
+ssh -i 001.pem root@101.34.152.109 'tail -f /opt/incomestreamai/app.log'
+
+# 查看线上状态
+ssh -i 001.pem root@101.34.152.109 'ps aux | grep python'
+```
+
+### 线上环境
+- 访问地址: http://101.34.152.109
+- 管理中心: http://101.34.152.109/admin/dashboard
+- 管理员账号: 18302196515
+
+### Git工作流
+```bash
+git add .
+git commit -m "feat: 功能描述"
+git push origin main
+./deploy_remote.sh
+```
